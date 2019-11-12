@@ -17,16 +17,6 @@ const routes: Routes = [
           .then(mod => mod.DataModule),
       },
       {
-        path: 'identity',
-        loadChildren: () => import('./identity/identity.module')
-          .then(mod => mod.IdentityModule),
-      },
-      {
-        path: 'admin',
-        loadChildren: () => import('./admin/admin.module')
-          .then(mod => mod.AdminModule),
-      },
-      {
         path: 'workflows',
         loadChildren: () => import('./workflows/workflows.module')
           .then(mod => mod.WorkflowsModule),

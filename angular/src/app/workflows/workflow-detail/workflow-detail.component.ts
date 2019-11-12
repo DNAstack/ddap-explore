@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 
-import { JsonEditorDefaults } from '../../admin/dam-repository/shared/jsonEditorDefaults';
+import { JsonEditorDefaults } from '../../shared/jsonEditorDefaults';
 import { WorkflowService } from '../workflows.service';
 
 @Component({

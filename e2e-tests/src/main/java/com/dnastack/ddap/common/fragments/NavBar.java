@@ -1,7 +1,7 @@
 package com.dnastack.ddap.common.fragments;
 
-import com.dnastack.ddap.common.util.DdapBy;
 import com.dnastack.ddap.common.page.*;
+import com.dnastack.ddap.common.util.DdapBy;
 import lombok.Value;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -12,9 +12,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static java.lang.String.format;
 
 public class NavBar {
 
@@ -42,84 +39,8 @@ public class NavBar {
         return new NavLink("Workflows", DdapBy.se("nav-workflows"), null);
     }
 
-    public static NavLink damIdentityLink() {
-        return new NavLink("My Identity", DdapBy.se("nav-identity"), null);
-    }
-
-    public static NavLink icPanelSelectorLink() {
-        return new NavLink("Identity Concentrator", DdapBy.se("nav-ic-panel"), null);
-    }
-
-    public static NavLink icIdentityProvidersLink() {
-        return new NavLink("Identity Providers", DdapBy.se("nav-ic-identity-providers"), icPanelSelectorLink());
-    }
-
-    public static NavLink icClientsLink() {
-        return new NavLink("Clients", DdapBy.se("nav-ic-clients"), icPanelSelectorLink());
-    }
-
-    public static NavLink icOptionsLink() {
-        return new NavLink("Options", DdapBy.se("nav-ic-options"), icPanelSelectorLink());
-    }
-
-    public static NavLink damPanelSelectorLink(String damId) {
-        return new NavLink(null,
-                           By.xpath(format("//*[@data-se = 'nav-dam-panel-%s']", damId)),
-                           icPanelSelectorLink());
-    }
-
-    public static NavLink damOptionsLink(String damId) {
-        return new NavLink("Options", DdapBy.se("nav-options"), damPanelSelectorLink(damId));
-    }
-
-    public static NavLink damResourceLink(String damId) {
-        return new NavLink("Resource", DdapBy.se("nav-resources"), damPanelSelectorLink(damId));
-    }
-
-    public static NavLink damTestPersonaLink(String damId) {
-        return new NavLink("Test Personas", DdapBy.se("nav-test-personas"), damPanelSelectorLink(damId));
-    }
-
-    public static NavLink damClientLink(String damId) {
-        return new NavLink("Client Applications", DdapBy.se("nav-client-applications"), damPanelSelectorLink(damId));
-    }
-
-    public static NavLink damTrustedSourcesLink(String damId) {
-        return new NavLink("Trusted Sources", DdapBy.se("nav-trusted-sources"), damPanelSelectorLink(damId));
-    }
-
-    public static NavLink damClaimDefinitionLink(String damId) {
-        return new NavLink("Claim Definitions", DdapBy.se("nav-claim-definitions"), damPanelSelectorLink(damId));
-    }
-
-    public static NavLink damServiceDefinitionLink(String damId) {
-        return new NavLink("Service Definitions", DdapBy.se("nav-service-definitions"), damPanelSelectorLink(damId));
-    }
-
-    public static NavLink damPoliciesLink(String damId) {
-        return new NavLink("Access Policies", DdapBy.se("nav-access-policies"), damPanelSelectorLink(damId));
-    }
-
-    public static NavLink damPassportsLink(String damId) {
-        return new NavLink("Passport Issuers", DdapBy.se("nav-passport-issuers"), damPanelSelectorLink(damId));
-    }
-
     public NavBar(WebDriver driver) {
         this.driver = driver;
-
-        // We might not be on an admin page. Only assert basic navbar links
-        assertNonAdminNavBar();
-    }
-
-    public void assertAdminNavBar() {
-        Stream.of(icPanelSelectorLink().getSelector(), By.xpath(".//*[contains(@data-se, '" + "nav-dam-panel" + "')]"))
-              .forEach(this.driver::findElement);
-    }
-
-    public void assertNonAdminNavBar() {
-        Stream.of(dataLink())
-              .map(NavLink::getSelector)
-              .forEach(this.driver::findElement);
     }
 
     public boolean existsInNavBar(NavLink item) {
@@ -160,14 +81,6 @@ public class NavBar {
         driver.findElement(workflowLink().getSelector()).click();
 
         return new WorkflowWesServersPage(driver);
-    }
-
-    public AdminListPage goToAdmin(NavLink navItem) {
-        return goTo(navItem, AdminListPage::new);
-    }
-
-    public AdminOptionPage goToAdminOptionPage(NavLink navItem) {
-        return goTo(navItem, AdminOptionPage::new);
     }
 
     private WebElement getRealmInput() {

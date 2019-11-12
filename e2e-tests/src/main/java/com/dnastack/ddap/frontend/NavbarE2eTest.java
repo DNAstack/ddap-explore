@@ -1,28 +1,19 @@
 package com.dnastack.ddap.frontend;
 
 import com.dnastack.ddap.common.TestingPersona;
-import com.dnastack.ddap.common.fragments.NavBar;
 import com.dnastack.ddap.common.page.AdminDdapPage;
-import com.dnastack.ddap.common.page.AdminListPage;
 import com.dnastack.ddap.common.page.ICLoginPage;
-import com.dnastack.ddap.common.util.DdapBy;
-import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.IOException;
 
 import static com.dnastack.ddap.common.TestingPersona.ADMINISTRATOR;
-import static com.dnastack.ddap.common.TestingPersona.USER_WITHOUT_ACCESS;
-import static com.dnastack.ddap.common.fragments.NavBar.*;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("Duplicates")
 public class NavbarE2eTest extends AbstractFrontendE2eTest {
@@ -33,21 +24,6 @@ public class NavbarE2eTest extends AbstractFrontendE2eTest {
     public static void oneTimeSetup() throws IOException {
         final String damConfig = loadTemplate("/com/dnastack/ddap/adminConfig.json");
         setupRealmConfig(TestingPersona.ADMINISTRATOR, damConfig, "1", REALM);
-    }
-
-    @Test
-    public void verifyAdminAccess() {
-        ddapPage = doBrowserLogin(REALM, ADMINISTRATOR, AdminDdapPage::new);
-
-        ddapPage.getNavBar()
-                .assertAdminNavBar();
-
-        ddapPage.getNavBar().logOut();
-        ddapPage = doBrowserLogin(REALM, USER_WITHOUT_ACCESS, AdminDdapPage::new);
-
-        ddapPage.getNavBar()
-                .assertNonAdminNavBar();
-        assertThat(ddapPage.getNavBar().existsInNavBar(damResourceLink(DAM_ID)), is(false));
     }
 
     @Test
@@ -70,7 +46,7 @@ public class NavbarE2eTest extends AbstractFrontendE2eTest {
     }
 
     @Test
-    public void testProfileNameAndDescriptionLinkNavigation() {
+    public void testProfileName() {
         ddapPage = doBrowserLogin(REALM, ADMINISTRATOR, AdminDdapPage::new);
 
         // check profile name
@@ -84,42 +60,6 @@ public class NavbarE2eTest extends AbstractFrontendE2eTest {
          */
         final String firstLetter = displayedName.trim().substring(0, 1);
         assertEquals(format("Expected name [%s] to start with capital. Might not be a name?", displayedName), firstLetter.toUpperCase(), firstLetter);
-
-        AdminListPage adminListPage = ddapPage.getNavBar()
-                .goToAdmin(damResourceLink(DAM_ID));
-        adminListPage.clickDescriptionLink();
-        new WebDriverWait(driver, 3)
-                .until(ExpectedConditions.textToBe(DdapBy.se("page-title"), "Access Policies"));
-    }
-
-    @Ignore
-    @Test
-    public void reloadPageToTestIcPanelExpansion() {
-        ddapPage.getNavBar()
-                .goToAdmin(icClientsLink());
-
-        new WebDriverWait(driver, 10).until(d -> d.findElement(NavBar.icClientsLink().getSelector()).isDisplayed());
-        assertFalse(driver.findElement(NavBar.damOptionsLink("1").getSelector()).isDisplayed());
-
-        driver.navigate().refresh();
-
-        new WebDriverWait(driver, 10).until(d -> d.findElement(NavBar.icClientsLink().getSelector()).isDisplayed());
-        assertFalse(driver.findElement(NavBar.damOptionsLink("1").getSelector()).isDisplayed());
-    }
-
-    @Ignore
-    @Test
-    public void reloadPageToTestDamPanelExpansion() {
-        ddapPage.getNavBar()
-                .goToAdmin(damTestPersonaLink("1"));
-
-        new WebDriverWait(driver, 10).until(d -> d.findElement(NavBar.damTestPersonaLink("1").getSelector()).isDisplayed());
-        assertFalse(driver.findElement(NavBar.icClientsLink().getSelector()).isDisplayed());
-
-        driver.navigate().refresh();
-
-        new WebDriverWait(driver, 10).until(d -> d.findElement(NavBar.damTestPersonaLink("1").getSelector()).isDisplayed());
-        assertFalse(driver.findElement(NavBar.icClientsLink().getSelector()).isDisplayed());
     }
 
 }

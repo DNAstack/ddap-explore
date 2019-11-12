@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.dnastack</groupId>
-	<artifactId>ddap-frontend-e2e-tests</artifactId>
+	<artifactId>ddap-explore-e2e-tests</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<description>End-to-end tests of Wallet</description>
+	<description>End-to-end tests of DDAP-Explore</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

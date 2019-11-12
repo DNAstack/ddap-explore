@@ -37,8 +37,8 @@ import {
   RealmChangeConfirmationDialogComponent
 } from './realm/realm-change-confirmation-dialog/realm-change-confirmation-dialog.component';
 import { RealmInputComponent } from './realm/realm-input/realm-input.component';
-import { ResourceLogoComponent } from './resource-logo/resource-logo.component';
-import { ResourceViewItemComponent } from './resource-view-item/resource-view-item.component';
+import { ResourceLogoComponent } from './resource/resource-logo/resource-logo.component';
+import { ResourceViewItemComponent } from './resource/resource-view-item/resource-view-item.component';
 import { ViewAccessComponent } from './view-access/view-access.component';
 
 @NgModule({

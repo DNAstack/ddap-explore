@@ -53,7 +53,7 @@ USER root
 #    && mkdir /target \
 #    && chown seluser:seluser /target
 
-COPY --from=0 /build/e2e-app/target/ddap-frontend-e2e-tests*.jar /e2e-tests.jar
+COPY --from=0 /build/e2e-app/target/ddap-*.jar /e2e-tests.jar
 RUN mkdir /target
 RUN chown seluser:seluser /target /*.jar
 USER seluser:seluser

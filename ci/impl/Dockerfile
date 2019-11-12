@@ -54,6 +54,6 @@ FROM openjdk:11-slim
 ARG APP_NAME
 ARG APP_VERSION
 
-COPY --from=0 /build/target/ddap-frontend*.jar /app.jar
+COPY --from=0 /build/target/ddap-*.jar /app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -4,7 +4,6 @@ import com.dnastack.ddap.common.security.OAuthStateHandler;
 import com.dnastack.ddap.common.security.TokenExchangePurpose;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.common.util.http.UriUtil;
-import com.dnastack.ddap.ic.account.service.AccountLinkingService;
 import com.dnastack.ddap.ic.oauth.client.ReactiveOAuthClient;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
@@ -36,17 +35,14 @@ public class OAuthFlowController {
     private ReactiveOAuthClient oAuthClient;
     private UserTokenCookiePackager cookiePackager;
     private OAuthStateHandler stateHandler;
-    private AccountLinkingService accountLinkingService;
 
     @Autowired
     public OAuthFlowController(ReactiveOAuthClient oAuthClient,
                                UserTokenCookiePackager cookiePackager,
-                               OAuthStateHandler stateHandler,
-                               AccountLinkingService accountLinkingService) {
+                               OAuthStateHandler stateHandler) {
         this.oAuthClient = oAuthClient;
         this.cookiePackager = cookiePackager;
         this.stateHandler = stateHandler;
-        this.accountLinkingService = accountLinkingService;
     }
 
     /**
@@ -149,10 +145,6 @@ public class OAuthFlowController {
                     if (tokenExchangePurpose == TokenExchangePurpose.LOGIN) {
                         final URI ddapDataBrowserUrl = customDestination.orElseGet(() -> UriUtil.selfLinkToUi(request, realm, ""));
                         return Mono.just(assembleTokenResponse(ddapDataBrowserUrl, tokenResponse));
-                    } else if (tokenExchangePurpose == TokenExchangePurpose.LINK) {
-                        return accountLinkingService.finishAccountLinking(
-                                tokenResponse.getAccessToken(), request.getCookies().getFirst("ic_token").getValue(), realm, null
-                        ).map(success -> ResponseEntity.status(307).location(UriUtil.selfLinkToUi(request, realm, "identity")).build());
                     } else {
                         throw new TokenExchangeException("Unrecognized purpose in token exchange");
                     }

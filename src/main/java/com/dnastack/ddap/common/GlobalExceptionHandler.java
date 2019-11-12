@@ -3,7 +3,6 @@ package com.dnastack.ddap.common;
 import com.dnastack.ddap.common.security.*;
 import com.dnastack.ddap.common.util.http.XForwardUtil;
 import com.dnastack.ddap.explore.dataset.client.DatasetErrorException;
-import com.dnastack.ddap.ic.account.client.AccountLinkingFailedException;
 import com.dnastack.ddap.ic.cli.controller.CliSessionNotFoundException;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,7 @@ public class GlobalExceptionHandler {
             .body(new DdapErrorResponse(ex.getMessage(), 400));
     }
 
-    @ExceptionHandler({IllegalArgumentException.class, AccountLinkingFailedException.class, CliSessionNotFoundException.class})
+    @ExceptionHandler({IllegalArgumentException.class, CliSessionNotFoundException.class})
     public ResponseEntity<DdapErrorResponse> handle(RuntimeException ex) {
         return ResponseEntity.status(400).body(new DdapErrorResponse(ex.getMessage(), 400));
     }

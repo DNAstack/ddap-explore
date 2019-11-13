@@ -33,6 +33,7 @@ public class DamInfoController {
                    .flatMap(e -> {
                        final String damId = e.getKey();
                        final ReactiveDamClient damClient = e.getValue();
+                       final String damUiUrl = damClient.damUiUrl.toString();
                        return damClient.getDamInfo()
                                        .map(damInfoResponse -> {
 
@@ -43,7 +44,7 @@ public class DamInfoController {
                                                                         // If you use orElseGet here you will run into a compilation error on Java 11
                                                                         // Issue is not present using Java 12
                                                                         .orElse(damInfoResponse.getName());
-                                           return new DamInfo(damId, label, url);
+                                           return new DamInfo(damId, label, url, damUiUrl);
                                        });
                    })
                    .collect(Collectors.toMap(DamInfo::getId, Function.identity()))

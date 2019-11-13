@@ -8,5 +8,6 @@ public class DamProperties {
     private String baseUrl;
     private String clientId;
     private String clientSecret;
+    private String uiUrl;
 
 }

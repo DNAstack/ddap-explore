@@ -12,5 +12,6 @@ public class IdpProperties {
     private URI baseUrl;
     private String clientId;
     private String clientSecret;
+    private URI uiUrl;
 
 }

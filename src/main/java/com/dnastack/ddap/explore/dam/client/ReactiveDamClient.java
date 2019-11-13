@@ -21,15 +21,18 @@ public class ReactiveDamClient {
     private URI damBaseUrl;
     private String damClientId;
     private String damClientSecret;
+    public URI damUiUrl;
     private AuthAwareWebClientFactory webClientFactory;
 
     public ReactiveDamClient(URI damBaseUrl,
                              String damClientId,
                              String damClientSecret,
+                             URI damUiUrl,
                              AuthAwareWebClientFactory webClientFactory) {
         this.damBaseUrl = damBaseUrl;
         this.damClientId = damClientId;
         this.damClientSecret = damClientSecret;
+        this.damUiUrl = damUiUrl;
         this.webClientFactory = webClientFactory;
     }
 

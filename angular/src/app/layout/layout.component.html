@@ -63,6 +63,23 @@
         <mat-icon class="icon icon-rules"></mat-icon>
         <h4 mat-line>Workflows</h4>
       </mat-list-item>
+
+      <a [href]="icPath" target="_blank">
+        <mat-list-item
+          data-se="nav-identity-concentrator">
+            <mat-icon class="icon icon-identities"></mat-icon>
+            <h4 mat-line>Identity Concentrator</h4>
+        </mat-list-item>
+      </a>
+      <ng-container *ngFor="let damInfo of damsInfo">
+        <a [href]="damInfo.uiUrl" target="_blank">
+          <mat-list-item
+            data-se="nav-dam">
+              <mat-icon class="icon icon-resources"></mat-icon>
+              <h4 mat-line>{{damInfo.label}}</h4>
+          </mat-list-item>
+        </a>
+      </ng-container>
     </mat-nav-list>
   </mat-sidenav>
 

@@ -6,4 +6,5 @@ export interface DamInfo {
   id: string;
   label: string;
   url: string;
+  uiUrl: string;
 }

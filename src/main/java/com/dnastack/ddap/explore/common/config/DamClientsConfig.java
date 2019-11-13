@@ -26,10 +26,11 @@ public class DamClientsConfig {
             .map(damEntry -> {
                 DamProperties properties = damEntry.getValue();
                 return Map.of(damEntry.getKey(), new ReactiveDamClient(
-                    URI.create(properties.getBaseUrl()),
-                    properties.getClientId(),
-                    properties.getClientSecret(),
-                    webClientFactory
+                        URI.create(properties.getBaseUrl()),
+                        properties.getClientId(),
+                        properties.getClientSecret(),
+                        URI.create(properties.getUiUrl()),
+                        webClientFactory
                 ));
             })
             .flatMap(map -> map.entrySet().stream())

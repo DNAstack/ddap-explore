@@ -11,4 +11,5 @@ public class DamInfo {
     private String id;
     private String label;
     private String url;
+    private String uiUrl;
 }

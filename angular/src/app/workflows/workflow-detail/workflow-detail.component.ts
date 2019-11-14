@@ -32,14 +32,13 @@ export class WorkflowDetailComponent implements OnInit {
 
   private transformResponse(runDetails: any) {
     const realmId = this.activatedRoute.root.firstChild.snapshot.params.realmId;
-
     Object.keys(runDetails).forEach(key => {
       if (typeof runDetails[key] === 'object') {
         return this.transformResponse(runDetails[key]);
       }
       if (typeof runDetails[key] === 'string') {
         runDetails[key] = runDetails[key]
-          .replace('gs://', `${environment.ddapApiUrl}/${realmId}/access/gcs/`);
+          .replace('gs://', `${window.location.origin}/api/v1alpha/${realmId}/access/gcs/`);
       }
     });
     return runDetails;

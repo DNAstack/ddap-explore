@@ -58,7 +58,7 @@ public class DatasetController {
 
     private Mono<DatasetResult> getAccess(String datasetUrl, ServerHttpRequest request, String realm) {
         Map<CookieKind, String> tokens = cookiePackager.extractRequiredTokens(request, Set.of(CookieKind.DAM, CookieKind.REFRESH));
-        return getViews(tokens.get(CookieKind.DAM), realm, tokens.get(CookieKind.REFRESH), datasetUrl).flatMap(viewsForUrl -> {
+        return viewsService.getRelevantViewsForUrlInAllDams(realm, datasetUrl, tokens).flatMap(viewsForUrl -> {
             if(!viewsForUrl.isEmpty()) {
                 List<String> uniqueViews = new ArrayList<>(new HashSet<>(viewsForUrl));
                 return viewsService.authorizeViews(uniqueViews, tokens, realm)
@@ -81,26 +81,5 @@ public class DatasetController {
             }
         }
         );
-    }
-
-    private Mono<Set<String>> getViews(String damToken,
-                     String realm,
-                     String refreshToken,
-                     String datasetUrl){
-        return Flux.fromStream(damClients.entrySet().stream()).flatMap(clientEntry -> {
-            String damId = clientEntry.getKey();
-            ReactiveDamClient damClient = clientEntry.getValue();
-            return damClient.getFlattenedViews(realm, damToken, refreshToken).flatMap(flatViews ->
-                    viewsService.getRelevantViewsForUrlsInDam(damId, realm, flatViews, List.of(datasetUrl))
-            );
-        }).collectList().flatMap(viewsForAllDams -> {
-            final Set<String> finalViews = new HashSet<>();
-            for (Map<String, Set<String>> viewsForDam : viewsForAllDams) {
-                for (Map.Entry<String, Set<String>> entry : viewsForDam.entrySet()){
-                    finalViews.addAll(entry.getValue());
-                }
-            }
-            return Mono.just(finalViews);
-        });
     }
 }

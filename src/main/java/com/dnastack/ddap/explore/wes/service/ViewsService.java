@@ -20,10 +20,12 @@ import static com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieKi
 public class ViewsService {
 
     private DamClientFactory damClientFactory;
-
+    private Map<String, ReactiveDamClient> damClients;
     @Autowired
-    public ViewsService(DamClientFactory damClientFactory) {
+    public ViewsService(DamClientFactory damClientFactory,
+                        Map<String, ReactiveDamClient> damClients) {
         this.damClientFactory = damClientFactory;
+        this.damClients = damClients;
     }
 
     public Mono<Map<String, Set<String>>> getRelevantViewsForUrlsInDam(String damId,
@@ -90,6 +92,29 @@ public class ViewsService {
             } catch (Exception e) {
                 return Mono.just(new ViewAuthorization.ViewAuthorizationResponse(view, e));
             }
+        });
+    }
+
+    public Mono<Set<String>> getRelevantViewsForUrlInAllDams(String realm,
+                                                             String resourceUrl,
+                                                             Map<CookieKind, String> tokens) {
+        return Flux.fromStream(damClients.entrySet().stream()).flatMap(clientEntry -> {
+            String damId = clientEntry.getKey();
+            ReactiveDamClient damClient = clientEntry.getValue();
+            return damClient.getFlattenedViews(realm,
+                    tokens.get(CookieKind.DAM),
+                    tokens.get(CookieKind.REFRESH))
+                    .flatMap(flatViews ->
+                            getRelevantViewsForUrlsInDam(damId, realm, flatViews, List.of(resourceUrl))
+                    );
+        }).collectList().flatMap(viewsForAllDams -> {
+            final Set<String> finalViews = new HashSet<>();
+            for (Map<String, Set<String>> viewsForDam : viewsForAllDams) {
+                for (Map.Entry<String, Set<String>> entry : viewsForDam.entrySet()){
+                    finalViews.addAll(entry.getValue());
+                }
+            }
+            return Mono.just(finalViews);
         });
     }
 }

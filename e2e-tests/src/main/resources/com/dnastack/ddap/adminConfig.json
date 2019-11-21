@@ -1,7 +1,7 @@
 {
   "version": "v0",
-  "revision": "3",
-  "commitTime": 1570538126.6373634,
+  "revision": "1",
+  "commitTime": 1544824316,
   "trustedPassportIssuers": {
     "nih": {
       "issuer": "https://login.nih.gov/oidc",
@@ -16,20 +16,6 @@
       "ui": {
         "description": "trusted source for whitelisting users",
         "label": "trusted source for whitelisting users"
-      }
-    },
-    "edit-me": {
-      "issuer": "https://ic-chaopeng-dot-hcls-data-connect-demo.appspot.com/oidc",
-      "ui": {
-        "description": "test passport issuer for edit case",
-        "label": "edit-me"
-      }
-    },
-    "delete-me": {
-      "issuer": "https://ic-chaopeng-dot-hcls-data-connect-demo.appspot.com/oidc",
-      "ui": {
-        "description": "test passport issuer for delete case",
-        "label": "delete-me"
       }
     },
     "this_ic": {
@@ -53,42 +39,44 @@
         "description": "trusted source for whitelisting users",
         "label": "trusted source for whitelisting users"
       }
-    },
-    "delete_me": {
-      "sources": [
-        "https://delete.me"
-      ],
-      "claims": [
-        "ResearcherStatus"
-      ],
-      "ui": {
-        "description": "test trusted source for delete case",
-        "label": "delete_me"
-      }
     }
   },
   "policies": {
     "test_whitelist": {
-      "allow": {
-        "claim": "testing.only.Whitelist",
-        "values": [
-          "$$E2E_TEST_WHITELIST_VALUE$$"
-        ],
-        "from": [
-          "test_whitelist_source"
-        ]
-      },
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "type": "testing.only.Whitelist",
+              "value": "split_pattern:$$E2E_TEST_WHITELIST_VALUE$$",
+              "source": "split_pattern:test_whitelist_source"
+            }
+          ]
+        }
+      ],
       "ui": {
         "description": "Whitelist for testing DDAP on non-sensitive data",
         "label": "Whitelist for testing DDAP on non-sensitive data"
       }
     },
     "cag": {
-      "allow": {
-        "claim": "ControlledAccessGrants",
-        "values": [
-          "${URL}"
-        ]
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "type": "ControlledAccessGrants",
+              "value": "split_pattern:${DATASET}"
+            }
+          ]
+        }
+      ],
+      "variableDefinitions": {
+        "DATASET": {
+          "regexp": "^phs\\d{6}$",
+          "ui": {
+            "description": "The name of an NIH dataset of the form 'phsXXXXXX'"
+          }
+        }
       },
       "ui": {
         "description": "For testing usage of templated variable lookup in autocomplete",
@@ -96,78 +84,80 @@
       }
     },
     "researcherStatus" : {
-      "allow": {
-        "claim": "ResearcherStatus",
-        "values": [
-          "https://www.nature.com/articles/s99999-999-9999-z"
-        ]
-      },
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "type": "ResearcherStatus",
+              "value": "split_pattern:https://www.nature.com/articles/s99999-999-9999-z"
+            }
+          ]
+        }
+      ],
       "ui": {
         "description": "For testing usage of lookup in autocomplete",
         "label": "RS"
       }
     },
     "simplePolicy": {
-      "allow": {
-        "claim": "com.dnastack.test.claim",
-        "values": [
-          "foobar",
-          "foobar2"
-        ]
-      },
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "type": "com.dnastack.test.claim",
+              "value": "split_pattern:foobar;foobar2"
+            }
+          ]
+        }
+      ],
       "ui": {
         "description": "description",
         "label": "simplePolicy"
       }
     },
     "allTruePolicy": {
-      "allow": {
-        "allTrue": [
-          {
-            "claim": "com.dnastack.test.claim",
-            "values": [
-              "foobar3"
-            ]
-          }
-        ]
-      },
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "type": "com.dnastack.test.claim",
+              "value": "split_pattern:foobar3"
+            }
+          ]
+        }
+      ],
       "ui": {
         "description": "description",
         "label": "allTruePolicy"
       }
     },
     "anyTruePolicy": {
-      "allow": {
-        "anyTrue": [
-          {
-            "claim": "com.dnastack.test.claim",
-            "values": [
-              "foobar4"
-            ]
-          }
-        ]
-      },
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "type": "com.dnastack.test.claim",
+              "value": "split_pattern:foobar4"
+            }
+          ]
+        }
+      ],
       "ui": {
         "description": "description",
         "label": "anyTruePolicy"
       }
     },
     "anyAllTruePolicy": {
-      "allow": {
-        "anyTrue": [
-          {
-            "allTrue": [
-              {
-                "claim": "com.dnastack.test.claim",
-                "values": [
-                  "foobar5",
-                  "^.$"
-                ]
-              }
-            ]
-          }
-        ]
-      },
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "type": "com.dnastack.test.claim",
+              "value": "pattern:^.$"
+            }
+          ]
+        }
+      ],
       "ui": {
         "description": "description",
         "label": "anyAllTruePolicy"
@@ -175,358 +165,6 @@
     }
   },
   "resources": {
-    "andrew-test": {
-      "views": {
-        "all": {
-          "serviceTemplate": "views",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
-          "contentTypes": [],
-          "roles": {
-            "viewer": {}
-          },
-          "items": [
-            {
-              "vars": {
-                "resource": "andrew-test",
-                "view": "bq_read_01"
-              }
-            },
-            {
-              "vars": {
-                "resource": "andrew-test",
-                "view": "bq_read_02"
-              }
-            },
-            {
-              "vars": {
-                "resource": "andrew-test",
-                "view": "gcs_read_01"
-              }
-            },
-            {
-              "vars": {
-                "resource": "andrew-test",
-                "view": "gcs_read_02"
-              }
-            }
-          ],
-          "defaultRole": "viewer",
-          "ui": {
-            "description": "GCP all GCS+BigQuery resources from project andrew-test",
-            "label": "All andrew-test GCS+BigQuery resources"
-          }
-        },
-        "bq_read_01": {
-          "serviceTemplate": "bigquery",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
-          "contentTypes": [],
-          "roles": {
-            "viewer": {
-              "policies": [
-                "test_whitelist"
-              ]
-            }
-          },
-          "items": [
-            {
-              "vars": {
-                "project": "datahost01"
-              }
-            }
-          ],
-          "defaultRole": "viewer",
-          "ui": {
-            "description": "GCP BigQuery Read on datahost01",
-            "label": "BigQuery Read on datahost01"
-          }
-        },
-        "bq_read_02": {
-          "serviceTemplate": "bigquery",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
-          "contentTypes": [],
-          "roles": {
-            "viewer": {
-              "policies": [
-                "test_whitelist"
-              ]
-            }
-          },
-          "items": [
-            {
-              "vars": {
-                "project": "datahost02"
-              }
-            }
-          ],
-          "defaultRole": "viewer",
-          "ui": {
-            "description": "GCP BigQuery Read on datahost02",
-            "label": "BigQuery Read on datahost02"
-          }
-        },
-        "gcs_read_01": {
-          "serviceTemplate": "gcs",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
-          "contentTypes": [],
-          "roles": {
-            "viewer": {
-              "policies": [
-                "test_whitelist"
-              ]
-            }
-          },
-          "items": [
-            {
-              "vars": {
-                "bucket": "hclsdatahost",
-                "project": "datahost01"
-              }
-            }
-          ],
-          "defaultRole": "viewer",
-          "ui": {
-            "description": "GCP GCS File Read on datahost01/hclsdatahost",
-            "label": "GCS File Read on datahost01"
-          }
-        },
-        "gcs_read_02": {
-          "serviceTemplate": "gcs",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
-          "contentTypes": [],
-          "roles": {
-            "viewer": {
-              "policies": [
-                "test_whitelist"
-              ]
-            }
-          },
-          "items": [
-            {
-              "vars": {
-                "bucket": "hclsdatahost02",
-                "project": "datahost02"
-              }
-            }
-          ],
-          "defaultRole": "viewer",
-          "ui": {
-            "description": "GCP GCS File Read on datahost02/hclsdatahost02",
-            "label": "GCS File Read on datahost02"
-          }
-        }
-      },
-      "maxTokenTtl": "1h",
-      "ui": {
-        "access": "registered, controlled",
-        "applyUrl": "http://apply.example.org",
-        "description": "Google POC for Billing",
-        "imageUrl": "https://psmag.com/.image/t_share/MTI3NTgxNjU1MDk4NjkyODgy/genome.jpg",
-        "infoUrl": "http://info.example.org",
-        "label": "Billing Test for GCS and BigQuery",
-        "owner": "Google",
-        "size": "1 GB",
-        "tags": "Demo, Test, GCS, BigQuery",
-        "troubleshootUrl": "http://troubleshoot.example.org",
-        "year": "2019"
-      }
-    },
-    "dataset_example": {
-      "views": {
-        "bq_read": {
-          "serviceTemplate": "bigquery",
-          "version": "dataset v1",
-          "topic": "FHIR",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-b",
-          "contentTypes": [
-            "text/csv"
-          ],
-          "roles": {
-            "viewer": {
-              "policies": [
-                "test_whitelist"
-              ]
-            }
-          },
-          "items": [
-            {
-              "vars": {
-                "dataset": "dataset-example-view1",
-                "project": "dataset-example-project"
-              }
-            },
-            {
-              "vars": {
-                "dataset": "dataset-example-view2",
-                "project": "dataset-example-project"
-              }
-            }
-          ],
-          "defaultRole": "viewer",
-          "ui": {
-            "description": "Google BigQuery example",
-            "label": "BigQuery Read"
-          }
-        },
-        "gcs_read": {
-          "serviceTemplate": "gcs",
-          "version": "dataset v1",
-          "topic": "FHIR",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-b",
-          "contentTypes": [
-            "application/bam"
-          ],
-          "roles": {
-            "viewer": {
-              "policies": [
-                "test_whitelist"
-              ]
-            }
-          },
-          "items": [
-            {
-              "vars": {
-                "bucket": "dataset-example-bucket1",
-                "project": "dataset-example-project"
-              }
-            },
-            {
-              "vars": {
-                "bucket": "dataset-example-bucket2",
-                "project": "dataset-example-project"
-              }
-            }
-          ],
-          "defaultRole": "viewer",
-          "ui": {
-            "description": "Google GCS Read example",
-            "label": "File Read"
-          }
-        }
-      },
-      "maxTokenTtl": "3h",
-      "ui": {
-        "access": "controlled",
-        "applyUrl": "https://www.dataset-example.nih.gov/apply",
-        "description": "Records from U.S. citizens",
-        "imageUrl": "https://cdn2.techworld.com/cmsdata/features/3668601/gp-at-hand-nhs-ai-health-1000x600_thumb800.jpg",
-        "infoUrl": "https://dataset-example.nih.gov",
-        "label": "Dataset Example",
-        "owner": "NIH National Cancer Institute",
-        "size": "50 MB",
-        "tags": "Autism, Infants, Research, Teaching Hospital",
-        "troubleshootUrl": "https://dataset-example.nih.gov/about/dataset-example-program-protocol",
-        "year": "2018"
-      }
-    },
-    "ga4gh-apis": {
-      "views": {
-        "beacon": {
-          "serviceTemplate": "beacon",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "discovery",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
-          "contentTypes": [
-            "application/bam"
-          ],
-          "roles": {
-            "discovery": {
-              "policies": [
-                "test_whitelist"
-              ]
-            }
-          },
-          "items": [
-            {
-              "vars": {
-                "url": "https://gatekeeper-cafe-variome.$$E2E_TEST_NAMESPACE$$.dnastack.com/beacon/query"
-              }
-            }
-          ],
-          "aud": "https://ga4gh-apis-beacon.dnastack.com",
-          "defaultRole": "discovery",
-          "ui": {
-            "description": "Search data from Beacon Discovery server",
-            "label": "Beacon Discovery"
-          }
-        },
-        "gcs_read": {
-          "serviceTemplate": "gcs",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
-          "contentTypes": [
-            "application/bam"
-          ],
-          "roles": {
-            "viewer": {
-              "policies": [
-                "test_whitelist"
-              ]
-            },
-            "controlledAccessGrantValueUsage": {
-              "policies": [
-                "cag(URL=https://dnastack.com/used/value,https://dnastack.com/datasets/1,https://dnastack.com/datasets/2,https://dnastack.com/datasets/3,https://www.foobar.com)"
-              ]
-            }
-          },
-          "items": [
-            {
-              "vars": {
-                "bucket": "$$E2E_TEST_BUCKET$$",
-                "project": "$$E2E_TEST_PROJECT$$"
-              }
-            }
-          ],
-          "defaultRole": "viewer",
-          "ui": {
-            "description": "Read files from gcs bucket",
-            "label": "File Read"
-          }
-        }
-      },
-      "maxTokenTtl": "1h",
-      "ui": {
-        "access": "controlled",
-        "applyUrl": "http://apply.ga4gh-apis.org",
-        "description": "Google demo of GA4GH APIs using a subset of 1000 Genomes data. See: https://www.nature.com/articles/nature15393.",
-        "imageUrl": "https://www.ebi.ac.uk/sites/ebi.ac.uk/files/groups/external_relations/images/wide-imagery/Global_Alliance_news_logo_780x400_0.jpg",
-        "infoUrl": "http://info.ga4gh-apis.org",
-        "label": "GA4GH APIs",
-        "owner": "Human Genome Project",
-        "size": "200 GB",
-        "tags": "Demo, Genomes, Research",
-        "troubleshootUrl": "http://troubleshoot.ga4gh-apis.org",
-        "year": "2016"
-      }
-    },
     "thousand-genomes": {
       "views": {
         "discovery-access": {
@@ -542,7 +180,9 @@
           "roles": {
             "discovery": {
               "policies": [
-                "test_whitelist"
+                {
+                  "name": "test_whitelist"
+                }
               ]
             }
           },
@@ -573,7 +213,9 @@
           "roles": {
             "viewer": {
               "policies": [
-                "test_whitelist"
+                {
+                  "name": "test_whitelist"
+                }
               ]
             }
           },
@@ -616,7 +258,9 @@
           "roles": {
             "execute": {
               "policies": [
-                "test_whitelist"
+                {
+                  "name": "test_whitelist"
+                }
               ]
             }
           },
@@ -710,6 +354,37 @@
       "ui": {
         "description": "Query genome data from Beacon Discovery",
         "label": "Beacon Discovery Search"
+      }
+    },
+    "gcs_requester_pays": {
+      "targetAdapter": "token:gcp:sa",
+      "itemFormat": "gcs",
+      "roles": {
+        "viewer": {
+          "targetRoles": [
+            "roles/storage.objectViewer"
+          ],
+          "targetScopes": [
+            "https://www.googleapis.com/auth/cloud-platform"
+          ],
+          "damRoleCategories": [
+            "metadata",
+            "list",
+            "read"
+          ],
+          "ui": {
+            "label": "File Viewer",
+            "description": "List and read files"
+          }
+        }
+      },
+      "interfaces": {
+        "gcp:gs": "gs://${requester-pays-bucket}",
+        "http:gcp:gs": "https://www.googleapis.com/storage/v1/b/${requester-pays-bucket}"
+      },
+      "ui": {
+        "label": "Google Cloud Storage",
+        "description": "Google Cloud Storage (GCS) requester-pays bucket"
       }
     },
     "bigquery": {
@@ -952,15 +627,6 @@
         ]
       },
       "access": [
-        "andrew-test/all/viewer",
-        "andrew-test/bq_read_01/viewer",
-        "andrew-test/bq_read_02/viewer",
-        "andrew-test/gcs_read_01/viewer",
-        "andrew-test/gcs_read_02/viewer",
-        "dataset_example/bq_read/viewer",
-        "dataset_example/gcs_read/viewer",
-        "ga4gh-apis/beacon/discovery",
-        "ga4gh-apis/gcs_read/viewer",
         "thousand-genomes/discovery-access/discovery",
         "thousand-genomes/gcs-file-access/viewer",
         "wes-resource/wes-view/execute"

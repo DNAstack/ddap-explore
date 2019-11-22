@@ -46,7 +46,7 @@ public class BeaconSearchUnauthorizedBeaconExceptionHandlingTest extends Abstrac
                         .put("description", "Role That Will Give a 403")
                 );
         JSONObject badRoleBind = new JSONObject()
-                .put("policies", new JSONArray(asList("test_whitelist")));
+                .put("policies", new JSONArray(asList(new JSONObject().put("name", "test_whitelist"))));
         JSONObject realmConfigJson = new JSONObject(baseRealmConfig);
         realmConfigJson.getJSONObject("serviceTemplates")
                 .getJSONObject("beacon")

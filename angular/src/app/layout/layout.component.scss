@@ -32,6 +32,12 @@ mat-sidenav-container {
   }
 }
 
+::ng-deep .accordion-wrapper {
+  span.mat-line {
+    color: $navbar-font-subtle-color;
+  }
+}
+
 .sandbox-warning {
   font-size: 1rem;
   color: $warn-color;

@@ -64,22 +64,33 @@
         <h4 mat-line>Workflows</h4>
       </mat-list-item>
 
-      <a [href]="icPath" target="_blank">
-        <mat-list-item
-          data-se="nav-identity-concentrator">
-            <mat-icon class="icon icon-identities"></mat-icon>
-            <h4 mat-line>Identity Concentrator</h4>
-        </mat-list-item>
-      </a>
-      <ng-container *ngFor="let damInfo of damsInfo">
-        <a [href]="damInfo.uiUrl" target="_blank">
-          <mat-list-item
-            data-se="nav-dam">
-              <mat-icon class="icon icon-resources"></mat-icon>
-              <h4 mat-line>{{damInfo.label}}</h4>
-          </mat-list-item>
-        </a>
-      </ng-container>
+      <div class="accordion-wrapper">
+        <mat-accordion [multi]="false">
+          <mat-expansion-panel [expanded]="false"
+                               data-se="nav-administration-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span>Administration</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <a [href]="icPath" target="_blank">
+              <mat-list-item data-se="nav-identity-concentrator">
+                <mat-icon class="icon">launch</mat-icon>
+                <h4 mat-line>Identity Concentrator</h4>
+              </mat-list-item>
+            </a>
+            <a *ngFor="let damInfo of damsInfo"
+               [href]="damInfo.uiUrl"
+               target="_blank">
+              <mat-list-item data-se="nav-dam">
+                <mat-icon class="icon">launch</mat-icon>
+                <h4 mat-line>{{damInfo.label}}</h4>
+                <span mat-line>Data Access Manager</span>
+              </mat-list-item>
+            </a>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
     </mat-nav-list>
   </mat-sidenav>
 

@@ -249,6 +249,90 @@
         "year": "2017"
       }
     },
+    "ga4gh-apis": {
+      "views": {
+        "beacon": {
+          "serviceTemplate": "beacon",
+          "version": "Phase 3",
+          "topic": "variants",
+          "partition": "all",
+          "fidelity": "discovery",
+          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
+          "contentTypes": [
+            "application/bam"
+          ],
+          "roles": {
+            "discovery": {
+              "policies": [
+                {
+                  "name": "test_whitelist"
+                }
+              ]
+            }
+          },
+          "items": [
+            {
+              "vars": {
+                "url": "https://gatekeeper-cafe-variome.$$E2E_TEST_NAMESPACE$$.dnastack.com/beacon/query"
+              }
+            }
+          ],
+          "aud": "https://ga4gh-apis-beacon.dnastack.com",
+          "defaultRole": "discovery",
+          "ui": {
+            "description": "Search data from Beacon Discovery server",
+            "label": "Beacon Discovery"
+          }
+        },
+        "gcs_read": {
+          "serviceTemplate": "gcs",
+          "version": "Phase 3",
+          "topic": "variants",
+          "partition": "all",
+          "fidelity": "normalized",
+          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
+          "contentTypes": [
+            "application/bam"
+          ],
+          "roles": {
+            "viewer": {
+              "policies": [
+                {
+                  "name": "test_whitelist"
+                }
+              ]
+            }
+          },
+          "items": [
+            {
+              "vars": {
+                "bucket": "$$E2E_TEST_BUCKET$$",
+                "project": "$$E2E_TEST_PROJECT$$"
+              }
+            }
+          ],
+          "defaultRole": "viewer",
+          "ui": {
+            "description": "Read files from gcs bucket",
+            "label": "File Read"
+          }
+        }
+      },
+      "maxTokenTtl": "1h",
+      "ui": {
+        "access": "controlled",
+        "applyUrl": "http://apply.ga4gh-apis.org",
+        "description": "Google demo of GA4GH APIs using a subset of 1000 Genomes data. See: https://www.nature.com/articles/nature15393.",
+        "imageUrl": "https://www.ebi.ac.uk/sites/ebi.ac.uk/files/groups/external_relations/images/wide-imagery/Global_Alliance_news_logo_780x400_0.jpg",
+        "infoUrl": "http://info.ga4gh-apis.org",
+        "label": "GA4GH APIs",
+        "owner": "Human Genome Project",
+        "size": "200 GB",
+        "tags": "Demo, Genomes, Research",
+        "troubleshootUrl": "http://troubleshoot.ga4gh-apis.org",
+        "year": "2016"
+      }
+    },
     "wes-resource": {
       "views": {
         "wes-view": {
@@ -627,6 +711,8 @@
         ]
       },
       "access": [
+        "ga4gh-apis/beacon/discovery",
+        "ga4gh-apis/gcs_read/viewer",
         "thousand-genomes/discovery-access/discovery",
         "thousand-genomes/gcs-file-access/viewer",
         "wes-resource/wes-view/execute"

@@ -6,11 +6,10 @@ import com.dnastack.ddap.explore.dataset.client.DatasetErrorException;
 import com.dnastack.ddap.explore.dataset.client.ReactiveDatasetClient;
 import com.dnastack.ddap.explore.dataset.client.model.DatasetResult;
 import com.dnastack.ddap.explore.wes.service.ViewsService;
-import dam.v1.DamService.GetTokenResponse;
+import dam.v1.DamService.ResourceTokens.ResourceToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
@@ -66,7 +65,7 @@ public class DatasetController {
                     .flatMap(viewAuthorizationResponses -> {
                         // assuming that there is only one token for a bucket
                         if (!viewAuthorizationResponses.isEmpty()) {
-                            GetTokenResponse tokenResponse = viewAuthorizationResponses.get(0).getLocationAndToken();
+                            ResourceToken tokenResponse = viewAuthorizationResponses.get(0).getLocationAndToken();
                             String accessToken = "";
                             if (tokenResponse != null) {
                                 accessToken = tokenResponse.getToken();

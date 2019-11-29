@@ -2,6 +2,7 @@ package com.dnastack.ddap.explore.wes.controller;
 
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.explore.wes.service.ViewsService;
+import dam.v1.DamService.ResourceTokens.ResourceToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
-import dam.v1.DamService.GetTokenResponse;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -70,7 +70,7 @@ public class AccessController {
                         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                                 "You are not allowed to access this resource");
                     }
-                    GetTokenResponse tokenResponse = viewAuthorizationResponses.get(0).getLocationAndToken();
+                    ResourceToken tokenResponse = viewAuthorizationResponses.get(0).getLocationAndToken();
                     if(tokenResponse != null) {
                         String accessToken = tokenResponse.getToken();
                         log.info("Redirecting to {} with access token", bucketUri);

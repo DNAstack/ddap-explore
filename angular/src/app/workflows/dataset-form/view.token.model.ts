@@ -1,9 +1,9 @@
 import { dam } from '../../shared/proto/dam-service';
-import GetTokenResponse = dam.v1.GetTokenResponse;
+import ResourceToken = dam.v1.ResourceTokens.ResourceToken;
 
 export interface ViewToken {
   view: string;
-  locationAndToken?: GetTokenResponse;
+  locationAndToken?: ResourceToken;
   exception?: {[key: string]: any};
 }
 

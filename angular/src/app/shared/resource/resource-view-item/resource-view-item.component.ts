@@ -1,13 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { EntityModel } from 'ddap-common-lib';
-import GetTokenResponse = dam.v1.GetTokenResponse;
 import _get from 'lodash.get';
 import { Subscription } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { dam } from '../../proto/dam-service';
 import { ResourceService } from '../resource.service';
+import ResourceToken = dam.v1.ResourceTokens.ResourceToken;
 
 @Component({
   selector: 'ddap-resource-view-item',
@@ -24,7 +24,7 @@ export class ResourceViewItemComponent {
   damId: string;
 
   accessSubscription: Subscription;
-  access: GetTokenResponse;
+  access: ResourceToken;
   url?: string;
 
   ttlForm = new FormControl(1, Validators.compose([Validators.required, Validators.min(1)]));

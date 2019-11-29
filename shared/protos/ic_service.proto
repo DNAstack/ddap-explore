@@ -140,7 +140,7 @@ message ConnectedAccount {
   common.Passport passport = 7;
   repeated string tags = 8;
   IdentityProvider computed_identity_provider = 9
-  [json_name = "identityProvider"];
+      [json_name = "identityProvider"];
   string computed_login_hint = 10 [json_name = "loginHint"];
 }
 

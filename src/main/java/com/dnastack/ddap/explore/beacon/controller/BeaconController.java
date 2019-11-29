@@ -9,8 +9,8 @@ import com.dnastack.ddap.explore.beacon.client.model.BeaconQueryResult;
 import com.dnastack.ddap.explore.beacon.model.BeaconRequestModel;
 import com.dnastack.ddap.explore.dam.client.DamClientFactory;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamClient;
-import dam.v1.DamService.GetTokenResponse;
 import dam.v1.DamService.Resource;
+import dam.v1.DamService.ResourceTokens.ResourceToken;
 import dam.v1.DamService.View;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -173,8 +173,8 @@ class BeaconController {
                                                                       String refreshToken) {
 
         final BeaconInfo beaconInfo = createBeaconInfo(beaconView);
-        Mono<GetTokenResponse> tokenMono = damClient.getAccessTokenForView(realm, beaconView.getResourceId(),
-            beaconView.getViewId(), damToken, refreshToken);
+        Mono<ResourceToken> tokenMono = damClient.getAccessTokenForView(realm, beaconView.getResourceId(),
+                                                                        beaconView.getViewId(), damToken, refreshToken);
 
         return tokenMono.flatMap(viewToken -> {
             log.debug("About to query: {} beacon at {}", beaconView.getViewId(), beaconView.getUri());

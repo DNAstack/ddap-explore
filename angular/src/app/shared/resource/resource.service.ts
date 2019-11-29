@@ -4,11 +4,11 @@ import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
 import { Observable } from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 
-import GetTokenResponse = dam.v1.GetTokenResponse;
-import IGetTokenRequest = dam.v1.IGetTokenRequest;
 import { DamInfoService } from '../dam/dam-info.service';
 import { HttpParamsService } from '../http-params.service';
 import { dam } from '../proto/dam-service';
+import IGetTokenRequest = dam.v1.IGetTokenRequest;
+import ResourceToken = dam.v1.ResourceTokens.ResourceToken;
 
 @Injectable({
   providedIn: 'root',
@@ -21,19 +21,19 @@ export class ResourceService {
               private damInfoService: DamInfoService) {
   }
 
-  getAccessRequestToken(damId: string, resourceId: string, viewId: string, tokenRequest: IGetTokenRequest): Observable<GetTokenResponse> {
+  getAccessRequestToken(damId: string, resourceId: string, viewId: string, tokenRequest: IGetTokenRequest): Observable<ResourceToken> {
     return this.damInfoService.getDamUrls()
       .pipe(
         flatMap(damApiUrls => {
           const damApiUrl = damApiUrls.get(damId);
-          return this.http.get<GetTokenResponse>(
+          return this.http.get<ResourceToken>(
             `${damApiUrl}/${realmIdPlaceholder}/resources/${resourceId}/views/${viewId}/token`,
             {
               params: this.httpParamsService.getHttpParamsFrom(tokenRequest),
             }
           ).pipe(
             this.errorHandler.notifyOnError(`Can't get access token.`),
-            map(GetTokenResponse.create)
+            map(ResourceToken.create)
           );
         })
       );

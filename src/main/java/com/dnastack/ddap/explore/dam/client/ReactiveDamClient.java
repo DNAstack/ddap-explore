@@ -5,6 +5,7 @@ import com.dnastack.ddap.common.client.OAuthFilter;
 import com.dnastack.ddap.common.client.ProtobufDeserializer;
 import com.dnastack.ddap.common.client.WebClientFactory;
 import dam.v1.DamService;
+import dam.v1.DamService.ResourceTokens.ResourceToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriTemplate;
 import reactor.core.publisher.Mono;
@@ -103,11 +104,11 @@ public class ReactiveDamClient {
             .flatMap(json -> ProtobufDeserializer.fromJson(json, DamService.GetViewsResponse.getDefaultInstance()));
     }
 
-    public Mono<DamService.GetTokenResponse> getAccessTokenForView(String realm,
-                                                                   String resourceId,
-                                                                   String viewId,
-                                                                   String damToken,
-                                                                   String refreshToken) {
+    public Mono<ResourceToken> getAccessTokenForView(String realm,
+                                                     String resourceId,
+                                                     String viewId,
+                                                     String damToken,
+                                                     String refreshToken) {
         final UriTemplate template = new UriTemplate(
             "/dam/v1alpha/{realm}/resources/{resourceId}/views/{viewId}/token" +
                 "?client_id={clientId}" +
@@ -125,7 +126,7 @@ public class ReactiveDamClient {
             .header(AUTHORIZATION, "Bearer " + damToken)
             .retrieve()
             .bodyToMono(String.class)
-            .flatMap(json -> ProtobufDeserializer.fromJson(json, DamService.GetTokenResponse.getDefaultInstance()));
+            .flatMap(json -> ProtobufDeserializer.fromJson(json, ResourceToken.getDefaultInstance()));
     }
 
     public Mono<Map<String, DamService.GetFlatViewsResponse.FlatView>> getFlattenedViews(String realm, String damToken, String refreshToken) {

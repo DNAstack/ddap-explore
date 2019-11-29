@@ -1,23 +1,23 @@
 package com.dnastack.ddap.explore.dataset.model;
 
+import dam.v1.DamService.ResourceTokens.ResourceToken;
 import lombok.Data;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import dam.v1.DamService.GetTokenResponse;
 
 public class ViewAuthorization {
     @Data
     public static class ViewAuthorizationResponse {
 
         private final String view;
-        private final GetTokenResponse locationAndToken;
+        private final ResourceToken locationAndToken;
 
-        public GetTokenResponse getLocationAndToken() {
+        public ResourceToken getLocationAndToken() {
             return locationAndToken;
         }
 
         private final ViewAuthorizationError exception;
 
-        public ViewAuthorizationResponse(String view, GetTokenResponse locationAndToken) {
+        public ViewAuthorizationResponse(String view, ResourceToken locationAndToken) {
             this.view = view;
             this.locationAndToken = locationAndToken;
             this.exception = null;

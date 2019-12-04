@@ -1,7 +1,7 @@
 package com.dnastack.ddap.common.client;
 
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
-import com.dnastack.ddap.ic.oauth.client.ReactiveOAuthClient;
+import com.dnastack.ddap.ic.oauth.client.ReactiveIcOAuthClient;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +19,11 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 @Component
 public class OAuthFilter {
 
-    private ReactiveOAuthClient oAuthClient;
+    private ReactiveIcOAuthClient oAuthClient;
     private UserTokenCookiePackager cookiePackager;
 
     @Autowired
-    public OAuthFilter(ReactiveOAuthClient oAuthClient, UserTokenCookiePackager cookiePackager) {
+    public OAuthFilter(ReactiveIcOAuthClient oAuthClient, UserTokenCookiePackager cookiePackager) {
         this.oAuthClient = oAuthClient;
         this.cookiePackager = cookiePackager;
     }

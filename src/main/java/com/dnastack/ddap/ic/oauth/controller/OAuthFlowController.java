@@ -4,7 +4,7 @@ import com.dnastack.ddap.common.security.OAuthStateHandler;
 import com.dnastack.ddap.common.security.TokenExchangePurpose;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.common.util.http.UriUtil;
-import com.dnastack.ddap.ic.oauth.client.ReactiveOAuthClient;
+import com.dnastack.ddap.ic.oauth.client.ReactiveIcOAuthClient;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +32,12 @@ public class OAuthFlowController {
 
     private static final String DEFAULT_SCOPES = "openid ga4gh_passport_v1 account_admin identities";
 
-    private ReactiveOAuthClient oAuthClient;
+    private ReactiveIcOAuthClient oAuthClient;
     private UserTokenCookiePackager cookiePackager;
     private OAuthStateHandler stateHandler;
 
     @Autowired
-    public OAuthFlowController(ReactiveOAuthClient oAuthClient,
+    public OAuthFlowController(ReactiveIcOAuthClient oAuthClient,
                                UserTokenCookiePackager cookiePackager,
                                OAuthStateHandler stateHandler) {
         this.oAuthClient = oAuthClient;

@@ -6,7 +6,7 @@ import com.dnastack.ddap.common.security.OAuthStateHandler;
 import com.dnastack.ddap.common.util.http.UriUtil;
 import com.dnastack.ddap.ic.cli.model.CliLoginStatus;
 import com.dnastack.ddap.ic.cli.model.TokenResponse;
-import com.dnastack.ddap.ic.oauth.client.ReactiveOAuthClient;
+import com.dnastack.ddap.ic.oauth.client.ReactiveIcOAuthClient;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.security.Keys;
@@ -39,7 +39,7 @@ import static java.lang.String.format;
 public class CommandLineAccessController {
     private static final String DEFAULT_SCOPES = "openid ga4gh_passport_v1 account_admin identities";
 
-    private final ReactiveOAuthClient oAuthClient;
+    private final ReactiveIcOAuthClient oAuthClient;
     private final OAuthStateHandler stateHandler;
     private Duration tokenTtl;
     private final Resource cliZip;
@@ -55,7 +55,7 @@ public class CommandLineAccessController {
 
     @Autowired
     public CommandLineAccessController(OAuthStateHandler stateHandler,
-                                       ReactiveOAuthClient oAuthClient,
+                                       ReactiveIcOAuthClient oAuthClient,
                                        @Value("${ddap.command-line-service.aud}") String tokenAudience,
                                        @Value("${ddap.command-line-service.ttl}") Duration tokenTtl,
                                        @Value("${ddap.command-line-service.signingKey}") String tokenSigningKeyBase64,

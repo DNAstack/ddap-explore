@@ -65,34 +65,6 @@ public class ReactiveOAuthClient {
                 }).flatMap(code -> exchangeAuthorizationCodeForTokens(realm, redirectUri, code));
     }
 
-    /**
-     * Returns the URL that initiates an external login with a given identity provider (which must already be registered
-     * and configured in the remote Identity Concentrator).
-     *
-     * @param realm       the target realm for the IC login (should match the realm in redirectUri)
-     * @param state       the OAuth state cookie that should be appended to the given redirectUri.
-     * @param scopes      the scopes to request from the IC (these are IC scope names, not scopes with the external provider)
-     * @param redirectUri where the IC should redirect back to once the login has compelted
-     * @param provider    the ID Provider name as registered with the IC
-     * @return the calculated absolute URI to send the client's browser to. Never null.
-     */
-    public URI getDirectLoginUrl(String realm, String state, String scopes, URI redirectUri, String provider) {
-        final UriTemplate template = new UriTemplate("/identity/v1alpha/{realm}/login/{provider}" +
-                "?client_id={clientId}" +
-                "&redirect_uri={redirectUri}" +
-                "&scope={scopes}" +
-                "&state={state}");
-        final Map<String, Object> variables = new HashMap<>();
-        variables.put("realm", realm);
-        variables.put("state", state);
-        variables.put("scopes", scopes);
-        variables.put("redirectUri", redirectUri);
-        variables.put("provider", provider);
-        variables.put("clientId", idpProperties.getClientId());
-
-        return idpProperties.getBaseUrl().resolve(template.expand(variables));
-    }
-
     public Mono<TokenResponse> exchangeAuthorizationCodeForTokens(String realm, URI redirectUri, String code) {
         final UriTemplate template = new UriTemplate("/identity/v1alpha/{realm}/token" +
                 "?grant_type=authorization_code" +

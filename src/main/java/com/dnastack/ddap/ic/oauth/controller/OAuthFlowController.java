@@ -83,24 +83,16 @@ public class OAuthFlowController {
 
         final String state = stateHandler.generateLoginState(redirectUri);
 
-        if (persona != null) {
-            log.debug("Performing direct persona login for {}", persona);
-            return oAuthClient.personaLogin(realm, scope, persona, UriUtil.selfLinkToApi(request, realm, ""))
-                    .map(tokenResponse -> assembleTokenResponse(UriUtil.selfLinkToUi(request, realm, ""), tokenResponse))
-                    .doOnError(exception -> log.info("Failed to negotiate token", exception));
+        final URI postLoginTokenEndpoint = UriUtil.selfLinkToApi(request, realm, "identity/token");
+        final URI loginUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, loginHint);
+        log.debug("Redirecting to IdP login chooser page {}", loginUri);
 
-        } else {
-            final URI postLoginTokenEndpoint = UriUtil.selfLinkToApi(request, realm, "identity/token");
-            final URI loginUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, loginHint);
-            log.debug("Redirecting to IdP login chooser page {}", loginUri);
-
-            URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "identity/token");
-            ResponseEntity<Object> redirectToLoginPage = ResponseEntity.status(TEMPORARY_REDIRECT)
-                    .location(loginUri)
-                    .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), UserTokenCookiePackager.CookieKind.OAUTH_STATE).toString())
-                    .build();
-            return Mono.just(redirectToLoginPage);
-        }
+        URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "identity/token");
+        ResponseEntity<Object> redirectToLoginPage = ResponseEntity.status(TEMPORARY_REDIRECT)
+                .location(loginUri)
+                .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), UserTokenCookiePackager.CookieKind.OAUTH_STATE).toString())
+                .build();
+        return Mono.just(redirectToLoginPage);
     }
 
     @GetMapping("/refresh")

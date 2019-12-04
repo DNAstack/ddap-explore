@@ -17,6 +17,12 @@ public class ReactiveIcOAuthClient extends ReactiveOAuthClient {
         super(new AuthServerInfo(idpProperties.getClientId(), idpProperties.getClientSecret(), new IcEndpointResolver(idpProperties.getBaseUrl())));
     }
 
+    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, String loginHint) {
+        return getAuthorizedUriBuilder(realm, state, scopes, redirectUri)
+                .queryParam("login_hint", loginHint)
+                .build();
+    }
+
     @AllArgsConstructor
     public static class IcEndpointResolver implements OAuthEndpointResolver {
         private final URI baseUrl;

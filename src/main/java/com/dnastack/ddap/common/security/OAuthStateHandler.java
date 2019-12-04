@@ -8,10 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.time.Duration;
-import java.util.Base64;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Collections.singletonMap;
 
@@ -24,6 +21,7 @@ public class OAuthStateHandler {
 
     private static final String DESTINATION_AFTER_LOGIN = "destinationAfterLogin";
     private static final String CLI_SESSION_ID_KEY = "cliSessionId";
+    public static final String AUTH_RESOURCE_LIST = "resource";
     private final com.dnastack.ddap.common.security.JwtHandler jwtHandler;
 
     @Autowired
@@ -43,6 +41,11 @@ public class OAuthStateHandler {
     public String generateLoginState(URI destinationAfterLogin) {
         return generateState(TokenExchangePurpose.LOGIN,
                 singletonMap(DESTINATION_AFTER_LOGIN, destinationAfterLogin));
+    }
+
+    public String generateResourceState(URI destinationAfterLogin, List<URI> resources) {
+        return generateState(TokenExchangePurpose.RESOURCE_AUTH, Map.of(DESTINATION_AFTER_LOGIN, destinationAfterLogin,
+                                                                        AUTH_RESOURCE_LIST, resources));
     }
 
     public String generateCommandLineLoginState(String cliSessionId) {
@@ -83,6 +86,10 @@ public class OAuthStateHandler {
 
     public Optional<String> extractCliSessionId(String stateToken) {
         return Optional.ofNullable(parseStateToken(stateToken).getBody().get(CLI_SESSION_ID_KEY, String.class));
+    }
+
+    public Optional<List<String>> extractResource(String stateToken) {
+        return Optional.ofNullable(parseStateToken(stateToken).getBody().get(AUTH_RESOURCE_LIST, List.class));
     }
 
 }

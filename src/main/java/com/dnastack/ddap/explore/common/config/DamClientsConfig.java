@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.net.URI;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -25,13 +24,7 @@ public class DamClientsConfig {
         return dams.entrySet().stream()
             .map(damEntry -> {
                 DamProperties properties = damEntry.getValue();
-                return Map.of(damEntry.getKey(), new ReactiveDamClient(
-                        URI.create(properties.getBaseUrl()),
-                        properties.getClientId(),
-                        properties.getClientSecret(),
-                        URI.create(properties.getUiUrl()),
-                        webClientFactory
-                ));
+                return Map.of(damEntry.getKey(), new ReactiveDamClient(properties, webClientFactory));
             })
             .flatMap(map -> map.entrySet().stream())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

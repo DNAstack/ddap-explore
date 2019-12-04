@@ -4,6 +4,7 @@ import com.dnastack.ddap.common.client.AuthAwareWebClientFactory;
 import com.dnastack.ddap.common.client.OAuthFilter;
 import com.dnastack.ddap.common.client.ProtobufDeserializer;
 import com.dnastack.ddap.common.client.WebClientFactory;
+import com.dnastack.ddap.common.config.DamProperties;
 import dam.v1.DamService;
 import dam.v1.DamService.ResourceTokens.ResourceToken;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,16 @@ public class ReactiveDamClient {
     private String damClientSecret;
     public URI damUiUrl;
     private AuthAwareWebClientFactory webClientFactory;
+
+    public ReactiveDamClient(DamProperties properties, AuthAwareWebClientFactory webClientFactory) {
+        this(
+                URI.create(properties.getBaseUrl()),
+                properties.getClientId(),
+                properties.getClientSecret(),
+                URI.create(properties.getUiUrl()),
+                webClientFactory
+        );
+    }
 
     public ReactiveDamClient(URI damBaseUrl,
                              String damClientId,
@@ -145,6 +156,21 @@ public class ReactiveDamClient {
             .bodyToMono(String.class)
             .flatMap(json -> ProtobufDeserializer.fromJson(json, DamService.GetFlatViewsResponse.getDefaultInstance()))
             .map(DamService.GetFlatViewsResponse::getViewsMap);
+
+    }
+
+    // FIXME update proto and return checkout object
+    public Mono<Object> checkoutCart(String cartToken) {
+        final UriTemplate template = new UriTemplate("/dam/checkout?client_id={clientId}&client_secret={clientSecret}");
+        final Map<String, Object> variables = new HashMap<>();
+        variables.put("clientId", damClientId);
+        variables.put("clientSecret", damClientSecret);
+        return WebClientFactory.getWebClient()
+                               .post()
+                               .uri(damBaseUrl.resolve(template.expand(variables)))
+                               .header(AUTHORIZATION, "Bearer " + cartToken)
+                               .retrieve()
+                               .bodyToMono(Object.class);
 
     }
 

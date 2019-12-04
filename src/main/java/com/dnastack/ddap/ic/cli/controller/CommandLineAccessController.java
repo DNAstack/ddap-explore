@@ -91,12 +91,11 @@ public class CommandLineAccessController {
         final URI statusUrl = UriUtil.selfLinkToApi(request, realm, format("cli/login/%s/status", cliSessionId));
         final String state = stateHandler.generateCommandLineLoginState(cliSessionId);
         final URI webLoginUrl = oAuthClient.getAuthorizeUrl(realm,
-                                                         state,
-                                                         scope,
-                                                         UriUtil.selfLinkToApi(request,
-                                                                       realm,
-                                                                       format("cli/login/%s", cliSessionId)),
-                                                         null);
+                                                            state,
+                                                            scope,
+                                                            UriUtil.selfLinkToApi(request,
+                                                                                  realm,
+                                                                                  format("cli/login/%s", cliSessionId)));
         final String bearerToken = jwtHandler.createBuilder(JwtHandler.TokenKind.BEARER)
                                              .setSubject(cliSessionId)
                                              .claim("tokenKind", "bearer")

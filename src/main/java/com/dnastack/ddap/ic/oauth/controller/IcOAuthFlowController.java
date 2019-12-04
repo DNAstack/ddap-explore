@@ -28,7 +28,7 @@ import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1alpha/{realm}/identity")
-public class OAuthFlowController {
+public class IcOAuthFlowController {
 
     private static final String DEFAULT_SCOPES = "openid ga4gh_passport_v1 account_admin identities";
 
@@ -37,9 +37,9 @@ public class OAuthFlowController {
     private OAuthStateHandler stateHandler;
 
     @Autowired
-    public OAuthFlowController(ReactiveIcOAuthClient oAuthClient,
-                               UserTokenCookiePackager cookiePackager,
-                               OAuthStateHandler stateHandler) {
+    public IcOAuthFlowController(ReactiveIcOAuthClient oAuthClient,
+                                 UserTokenCookiePackager cookiePackager,
+                                 OAuthStateHandler stateHandler) {
         this.oAuthClient = oAuthClient;
         this.cookiePackager = cookiePackager;
         this.stateHandler = stateHandler;
@@ -78,13 +78,14 @@ public class OAuthFlowController {
                                                       @PathVariable String realm,
                                                       @RequestParam(required = false) URI redirectUri,
                                                       @RequestParam(defaultValue = DEFAULT_SCOPES) String scope,
-                                                      @RequestParam(required = false) String loginHint,
-                                                      @RequestParam(required = false) String persona) {
+                                                      @RequestParam(required = false) String loginHint) {
 
         final String state = stateHandler.generateLoginState(redirectUri);
 
         final URI postLoginTokenEndpoint = UriUtil.selfLinkToApi(request, realm, "identity/token");
-        final URI loginUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, loginHint);
+        final URI loginUri = (loginHint != null) ?
+                oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, loginHint) :
+                oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint);
         log.debug("Redirecting to IdP login chooser page {}", loginUri);
 
         URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "identity/token");

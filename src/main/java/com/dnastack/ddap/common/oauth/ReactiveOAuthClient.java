@@ -7,7 +7,7 @@ import com.dnastack.ddap.ic.oauth.model.TokenResponse;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.*;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -113,23 +113,20 @@ public class ReactiveOAuthClient {
                        .isPresent();
     }
 
-    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, String loginHint) {
-        final UriTemplate template = new UriTemplate("{authorizeEndpoint}" +
-                                                             "?response_type=code" +
-                                                             "&clientId={clientId}" +
-                                                             "&redirect_uri={redirectUri}" +
-                                                             "&state={state}" +
-                                                             "&scope={scopes}" +
-                                                             "&login_hint={loginHint}");
-        final Map<String, Object> variables = new HashMap<>();
-        variables.put("authorizeEndpoint", authServerInfo.getResolver().getAuthorizeEndpoint(realm));
-        variables.put("realm", realm);
-        variables.put("state", state);
-        variables.put("scopes", scopes);
-        variables.put("redirectUri", redirectUri);
-        variables.put("loginHint", loginHint);
-        variables.put("clientId", authServerInfo.getClientId());
+    protected UriBuilder getAuthorizedUriBuilder(String realm, String state, String scopes, URI redirectUri) {
+        final UriComponentsBuilder builder = UriComponentsBuilder.fromUri(authServerInfo.getResolver().getAuthorizeEndpoint(realm))
+                                                                 .queryParam("response_type", "code")
+                                                                 .queryParam("client_id", authServerInfo.getClientId())
+                                                                 .queryParam("redirect_uri", redirectUri)
+                                                                 .queryParam("state", state);
+        if (scopes != null) {
+            builder.queryParam("scope", scopes);
+        }
 
-        return template.expand(variables);
+        return builder;
+    }
+
+    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri) {
+        return getAuthorizedUriBuilder(realm, state, scopes, redirectUri).build();
     }
 }

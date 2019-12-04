@@ -3,6 +3,7 @@ package com.dnastack.ddap.explore.dam.client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.net.URI;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -24,5 +25,4 @@ public class DamClientFactory {
 
         return damClients.get(damId);
     }
-
 }

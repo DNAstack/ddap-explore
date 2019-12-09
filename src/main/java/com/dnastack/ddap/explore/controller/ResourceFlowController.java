@@ -91,6 +91,7 @@ public class ResourceFlowController {
                                                                 @RequestParam(required = false) String scope,
                                                                 @RequestParam("resource") List<URI> resources) {
 
+
         final URI postLoginTokenEndpoint = UriUtil.selfLinkToApi(request, realm, "resources/token");
         // FIXME better fallback page
         final URI nonNullRedirectUri = redirectUri != null ? redirectUri : cartCheckoutUrl(request, realm, resources);

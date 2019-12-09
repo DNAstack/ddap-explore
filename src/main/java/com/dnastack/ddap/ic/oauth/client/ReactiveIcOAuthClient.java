@@ -5,7 +5,6 @@ import com.dnastack.ddap.ic.common.config.IdpProperties;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriTemplate;
 
 import java.net.URI;
@@ -19,11 +18,9 @@ public class ReactiveIcOAuthClient extends ReactiveOAuthClient {
     }
 
     public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, String loginHint) {
-        UriBuilder builder = getAuthorizedUriBuilder(realm, state, scopes, redirectUri);
-        if (loginHint != null) {
-            builder = builder.queryParam("login_hint", loginHint);
-        }
-        return builder.build();
+        return getAuthorizedUriBuilder(realm, state, scopes, redirectUri)
+                .queryParam("login_hint", loginHint)
+                .build();
     }
 
     @AllArgsConstructor

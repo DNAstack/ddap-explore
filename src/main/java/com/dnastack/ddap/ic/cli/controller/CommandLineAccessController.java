@@ -77,7 +77,8 @@ public class CommandLineAccessController {
     @PostMapping("/login")
     public Mono<? extends ResponseEntity<?>> commandLineLogin(ServerHttpRequest request,
                                                               @PathVariable String realm,
-                                                              @RequestParam(defaultValue = DEFAULT_SCOPES) String scope) {
+                                                              @RequestParam(defaultValue = DEFAULT_SCOPES) String scope,
+                                                              @RequestParam(required = false) String loginHint) {
         final String cliSessionId = UUID.randomUUID().toString();
         loginStatusByCliSessionId.compute(cliSessionId, (id, monitor) -> {
             if (monitor == null) {
@@ -95,7 +96,8 @@ public class CommandLineAccessController {
                                                             scope,
                                                             UriUtil.selfLinkToApi(request,
                                                                                   realm,
-                                                                                  format("cli/login/%s", cliSessionId)));
+                                                                                  format("cli/login/%s", cliSessionId)),
+                                                            loginHint);
         final String bearerToken = jwtHandler.createBuilder(JwtHandler.TokenKind.BEARER)
                                              .setSubject(cliSessionId)
                                              .claim("tokenKind", "bearer")

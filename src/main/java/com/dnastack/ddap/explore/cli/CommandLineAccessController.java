@@ -1,4 +1,4 @@
-package com.dnastack.ddap.ic.cli.controller;
+package com.dnastack.ddap.explore.cli;
 
 import com.dnastack.ddap.common.security.BadCredentialsException;
 import com.dnastack.ddap.common.security.JwtHandler;

@@ -1,6 +1,6 @@
 package com.dnastack.ddap.explore.wes.service;
 
-import com.dnastack.ddap.explore.dam.client.ReactiveDamClient;
+import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.explore.wes.model.WesResourceViews;
 import dam.v1.DamService;
 import org.springframework.stereotype.Component;

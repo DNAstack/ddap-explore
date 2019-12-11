@@ -1,8 +1,8 @@
 package com.dnastack.ddap.explore.common.config;
 
 import com.dnastack.ddap.common.client.AuthAwareWebClientFactory;
+import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.config.DamProperties;
-import com.dnastack.ddap.explore.dam.client.ReactiveDamClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

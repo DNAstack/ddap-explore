@@ -1,7 +1,7 @@
 package com.dnastack.ddap.explore.dataset.controller;
 
+import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
-import com.dnastack.ddap.explore.dam.client.ReactiveDamClient;
 import com.dnastack.ddap.explore.dataset.client.DatasetErrorException;
 import com.dnastack.ddap.explore.dataset.client.ReactiveDatasetClient;
 import com.dnastack.ddap.explore.dataset.client.model.DatasetResult;

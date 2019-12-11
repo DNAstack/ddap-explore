@@ -1,7 +1,7 @@
 package com.dnastack.ddap.explore.wes.controller;
 
+import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
-import com.dnastack.ddap.explore.dam.client.ReactiveDamClient;
 import com.dnastack.ddap.explore.wes.client.ReactiveWdlValidatorClient;
 import com.dnastack.ddap.explore.wes.model.WesResourceViews;
 import com.dnastack.ddap.explore.wes.model.WorkflowExecutionRunModel;

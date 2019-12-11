@@ -1,4 +1,4 @@
-package com.dnastack.ddap.ic.cli.controller;
+package com.dnastack.ddap.explore.cli;
 
 import static java.lang.String.format;
 

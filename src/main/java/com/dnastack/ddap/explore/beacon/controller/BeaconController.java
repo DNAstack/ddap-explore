@@ -1,5 +1,6 @@
 package com.dnastack.ddap.explore.beacon.controller;
 
+import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.explore.beacon.client.BeaconErrorException;
 import com.dnastack.ddap.explore.beacon.client.ReactiveBeaconClient;
@@ -8,7 +9,6 @@ import com.dnastack.ddap.explore.beacon.client.model.BeaconQueryError;
 import com.dnastack.ddap.explore.beacon.client.model.BeaconQueryResult;
 import com.dnastack.ddap.explore.beacon.model.BeaconRequestModel;
 import com.dnastack.ddap.explore.dam.client.DamClientFactory;
-import com.dnastack.ddap.explore.dam.client.ReactiveDamClient;
 import dam.v1.DamService.Resource;
 import dam.v1.DamService.ResourceTokens.ResourceToken;
 import dam.v1.DamService.View;

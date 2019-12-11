@@ -1,6 +1,6 @@
 package com.dnastack.ddap.explore.wes.service;
 
-import com.dnastack.ddap.explore.dam.client.ReactiveDamClient;
+import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.explore.wes.client.ReactiveWesClient;
 import com.dnastack.ddap.explore.wes.model.WesResourceViews;
 import com.dnastack.ddap.explore.wes.model.WorkflowExecutionRunModel;

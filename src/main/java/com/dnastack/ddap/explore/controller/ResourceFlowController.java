@@ -1,6 +1,7 @@
 package com.dnastack.ddap.explore.controller;
 
 import com.dnastack.ddap.common.client.AuthAwareWebClientFactory;
+import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.config.DamProperties;
 import com.dnastack.ddap.common.config.DamsConfig;
 import com.dnastack.ddap.common.security.AuthCookieNotPresentInRequestException;
@@ -10,7 +11,6 @@ import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager.CartTokenCookieName;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieKind;
 import com.dnastack.ddap.common.util.http.UriUtil;
-import com.dnastack.ddap.explore.dam.client.ReactiveDamClient;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
@@ -124,7 +124,7 @@ public class ResourceFlowController {
         final String testResourceUrl = resources.get(0).toString();
         return dams.stream()
                    // FIXME make this more resilient
-                   .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl()))
+                   .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl().toString()))
                    .map(dam -> new ReactiveDamOAuthClient(dam))
                    .findFirst()
                    .orElseThrow(() -> new IllegalArgumentException(String.format("Could not find DAM for resource [%s]")));
@@ -138,7 +138,7 @@ public class ResourceFlowController {
         final String testResourceUrl = resources.get(0).toString();
         return dams.stream()
                    // FIXME make this more resilient
-                   .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl()))
+                   .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl().toString()))
                    .map(dam -> new ReactiveDamClient(dam, webClientFactory))
                    .findFirst()
                    .orElseThrow(() -> new IllegalArgumentException(String.format("Could not find DAM for resource [%s]")));

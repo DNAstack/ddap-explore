@@ -69,6 +69,8 @@ public abstract class AbstractBaseE2eTest {
     public static final String PERSONA_LOGIN_STRATEGY = "PersonaLoginStrategy";
     public static final String WALLET_LOGIN_STRATEGY = "WalletLoginStrategy";
     public static final String LOGIN_STRATEGY_NAME = optionalEnv("E2E_LOGIN_STRATEGY", PERSONA_LOGIN_STRATEGY);
+    public static final String DDAP_COOKIES_ENCRYPTOR_PASSWORD = optionalEnv("E2E_COOKIES_ENCRYPTOR_PASSWORD", "abcdefghijk");
+    public static final String DDAP_COOKIES_ENCRYPTOR_SALT = optionalEnv("E2E_COOKIES_ENCRYPTOR_SALT", "598953e322");
 
     protected static LoginStrategy loginStrategy;
 

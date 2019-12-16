@@ -8,8 +8,6 @@ import com.google.common.collect.ImmutableMap;
 import dam.v1.DamService;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.security.crypto.encrypt.Encryptors;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -134,7 +132,6 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
     }
 
     private String fakeUserToken(Instant exp) throws JsonProcessingException {
-        TextEncryptor encryptor = Encryptors.text(DDAP_COOKIES_ENCRYPTOR_PASSWORD, DDAP_COOKIES_ENCRYPTOR_SALT);
         // Note this will only work so long as DDAP frontend uses unencrypted DAM access tokens as cookie value
         ObjectMapper jsonMapper = new ObjectMapper();
         Base64.Encoder b64Encoder = Base64.getUrlEncoder().withoutPadding();
@@ -145,9 +142,9 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
         Map<String, Object> body = ImmutableMap.of(
                 "exp", exp.getEpochSecond());
 
-        return encryptor.encrypt(b64Encoder.encodeToString(jsonMapper.writeValueAsBytes(header)) +
-            "." +
-            b64Encoder.encodeToString(jsonMapper.writeValueAsBytes(body)) +
-            ".");
+        return b64Encoder.encodeToString(jsonMapper.writeValueAsBytes(header)) +
+                "." +
+                b64Encoder.encodeToString(jsonMapper.writeValueAsBytes(body)) +
+                ".";
     }
 }

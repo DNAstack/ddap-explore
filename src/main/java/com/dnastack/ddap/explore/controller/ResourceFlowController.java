@@ -4,6 +4,7 @@ import com.dnastack.ddap.common.client.AuthAwareWebClientFactory;
 import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.config.DamProperties;
 import com.dnastack.ddap.common.config.DamsConfig;
+import com.dnastack.ddap.common.controller.DdapErrorResponse;
 import com.dnastack.ddap.common.security.AuthCookieNotPresentInRequestException;
 import com.dnastack.ddap.common.security.OAuthStateHandler;
 import com.dnastack.ddap.common.security.TokenExchangePurpose;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 import static com.dnastack.ddap.common.util.http.XForwardUtil.getExternalPath;
 import static java.lang.String.format;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
 
 @Slf4j
@@ -66,7 +69,20 @@ public class ResourceFlowController {
                                             .getFirst(cartCookieName.cookieName());
 
         if (cartToken != null) {
-            return damClient.checkoutCart(cartToken.getValue());
+            return damClient.checkoutCart(cartToken.getValue())
+                            .onErrorResume(ex -> {
+                                try {
+                                    throw ex;
+                                } catch (WebClientResponseException wcre) {
+                                    return Mono.just(ResponseEntity.status(wcre.getStatusCode())
+                                                                   .body(new DdapErrorResponse(wcre.getResponseBodyAsString(), wcre.getRawStatusCode())));
+                                } catch (Exception e) {
+                                    return Mono.just(ResponseEntity.status(INTERNAL_SERVER_ERROR)
+                                                                   .body(new DdapErrorResponse(e.getMessage(), INTERNAL_SERVER_ERROR.value())));
+                                } catch (Throwable t) {
+                                    return Mono.error(t);
+                                }
+                            });
         } else {
             return Mono.error(new AuthCookieNotPresentInRequestException(cartCookieName.cookieName()));
         }

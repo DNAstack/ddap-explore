@@ -56,7 +56,7 @@ public class DatasetController {
     }
 
     private Mono<DatasetResult> getAccess(String datasetUrl, ServerHttpRequest request, String realm) {
-        Map<CookieKind, String> tokens = cookiePackager.extractRequiredTokens(request, Set.of(CookieKind.DAM, CookieKind.REFRESH));
+        Map<CookieKind, UserTokenCookiePackager.CookieValue> tokens = cookiePackager.extractRequiredTokens(request, Set.of(CookieKind.DAM, CookieKind.REFRESH));
         return viewsService.getRelevantViewsForUrlInAllDams(realm, datasetUrl, tokens).flatMap(viewsForUrl -> {
             if(!viewsForUrl.isEmpty()) {
                 List<String> uniqueViews = new ArrayList<>(new HashSet<>(viewsForUrl));
@@ -72,11 +72,11 @@ public class DatasetController {
                             }
                             return getDatasetResult(datasetUrl, accessToken, request, realm);
                         } else {
-                            throw new DatasetErrorException(403, "You are not allowed to access this resource");
+                            return Mono.error(new DatasetErrorException(403, "You are not allowed to access this resource"));
                         }
                 });
             } else {
-                throw new DatasetErrorException(500, "No views associated with the resource");
+                return Mono.error(new DatasetErrorException(500, "No views associated with the resource"));
             }
         }
         );

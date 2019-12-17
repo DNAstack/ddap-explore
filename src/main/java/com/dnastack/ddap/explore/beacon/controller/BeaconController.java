@@ -2,6 +2,7 @@ package com.dnastack.ddap.explore.beacon.controller;
 
 import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
+import com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieValue;
 import com.dnastack.ddap.explore.beacon.client.BeaconErrorException;
 import com.dnastack.ddap.explore.beacon.client.ReactiveBeaconClient;
 import com.dnastack.ddap.explore.beacon.client.model.BeaconInfo;
@@ -58,9 +59,9 @@ class BeaconController {
     public Flux<BeaconQueryResult> aggregateBeaconSearch(@PathVariable String realm,
                                                          BeaconRequestModel beaconRequest,
                                                          ServerHttpRequest request) {
-        Optional<String> damToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
-        Optional<String> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.REFRESH);
-        String refreshToken = foundRefreshToken.orElse(null);
+        Optional<CookieValue> damToken = cookiePackager.extractToken(request, CookieKind.DAM);
+        Optional<CookieValue> foundRefreshToken = cookiePackager.extractToken(request, CookieKind.REFRESH);
+        String refreshToken = foundRefreshToken.map(CookieValue::getClearText).orElse(null);
 
         return Flux.fromStream(damClients.entrySet().stream())
             .flatMap(clientEntry -> {
@@ -87,8 +88,8 @@ class BeaconController {
                                                               @PathVariable String resourceId,
                                                               BeaconRequestModel beaconRequest,
                                                               ServerHttpRequest request) {
-        Optional<String> damToken = cookiePackager.extractToken(request, CookieKind.DAM);
-        Optional<String> refreshToken = cookiePackager.extractToken(request, CookieKind.REFRESH);
+        Optional<CookieValue> damToken = cookiePackager.extractToken(request, CookieKind.DAM);
+        Optional<CookieValue> refreshToken = cookiePackager.extractToken(request, CookieKind.REFRESH);
 
         final ReactiveDamClient damClient = damClientFactory.getDamClient(damId);
 
@@ -101,7 +102,7 @@ class BeaconController {
                     realm,
                     beaconRequest,
                     damToken,
-                    refreshToken.get(),
+                    refreshToken.map(CookieValue::getClearText).get(),
                     Collections.singleton(resource)
                 );
             });
@@ -136,7 +137,7 @@ class BeaconController {
     private Flux<BeaconQueryResult> maybePerformBeaconQueries(ReactiveDamClient damClient,
                                                               String damId, String realm,
                                                               BeaconRequestModel beaconRequest,
-                                                              Optional<String> damToken,
+                                                              Optional<CookieValue> damToken,
                                                               String refreshToken,
                                                               Collection<Map.Entry<String, Resource>> resourceEntries) {
         return resourceEntries
@@ -147,7 +148,7 @@ class BeaconController {
                 realm,
                 beaconView,
                 beaconRequest,
-                token,
+                token.getClearText(),
                 refreshToken))
                 .orElseGet(() -> unauthorizedBeaconApiAlleleResponse(beaconView)))
             .map(Mono::flux)

@@ -25,7 +25,7 @@
         <protobuf.version>3.7.1</protobuf.version>
         <jwt.version>0.10.5</jwt.version>
         <ddap-cli.version>1.0-17-g971b16a</ddap-cli.version>
-        <ddap-common.version>0.0.1-6-g1d262cad</ddap-common.version>
+        <ddap-common.version>0.0.1-7-g68eb1aea</ddap-common.version>
     </properties>
 
     <repositories>

@@ -1,6 +1,7 @@
 package com.dnastack.ddap.explore.wes.controller;
 
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
+import com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieValue;
 import com.dnastack.ddap.explore.wes.service.ViewsService;
 import dam.v1.DamService.ResourceTokens.ResourceToken;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +41,8 @@ public class AccessController {
                                      @PathVariable String filePath,
                                      ServerHttpRequest request,
                                      ServerHttpResponse response) throws URISyntaxException {
-        Map<CookieKind, String> tokens = cookiePackager.extractRequiredTokens(request,
-                Set.of(CookieKind.DAM, CookieKind.REFRESH));
+        Map<CookieKind, CookieValue> tokens = cookiePackager.extractRequiredTokens(request,
+                                                                                                           Set.of(CookieKind.DAM, CookieKind.REFRESH));
         URI bucketUri = new URI("https://storage.cloud.google.com/" + bucketName + filePath);
 
         return getViews(realm, bucketName, tokens).flatMap(views -> {
@@ -58,7 +59,7 @@ public class AccessController {
     }
 
     private Mono<Void> getAccessAndRedirect(Set<String> views,
-                                            Map<CookieKind, String> tokens,
+                                            Map<CookieKind, CookieValue> tokens,
                                             String realm,
                                             URI bucketUri,
                                             ServerHttpResponse response) throws URISyntaxException {
@@ -89,7 +90,7 @@ public class AccessController {
 
     private Mono<Set<String>> getViews(String realm,
                                        String bucketName,
-                                       Map<CookieKind, String> tokens) {
+                                       Map<CookieKind, CookieValue> tokens) {
         String bucketUrl = "gs://" + bucketName;
         return viewsService.getRelevantViewsForUrlInAllDams(realm, bucketUrl, tokens);
     }

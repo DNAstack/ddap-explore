@@ -1,6 +1,8 @@
 package com.dnastack.ddap.explore.wes.service;
 
 import com.dnastack.ddap.common.client.ReactiveDamClient;
+import com.dnastack.ddap.common.security.UserTokenCookiePackager;
+import com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieValue;
 import com.dnastack.ddap.explore.dam.client.DamClientFactory;
 import com.dnastack.ddap.explore.dataset.model.ViewAuthorization;
 import dam.v1.DamService.GetFlatViewsResponse;
@@ -62,8 +64,8 @@ public class ViewsService {
     }
 
     public Flux<ViewAuthorization.ViewAuthorizationResponse> authorizeViews(List<String> uniqueViews,
-                                                                            Map<CookieKind, String> tokens,
-                                                                                   String realm) {
+                                                                            Map<CookieKind, CookieValue> tokens,
+                                                                            String realm) {
         Pattern viewPattern = Pattern.compile("/dam/(?<damId>[^/]+)/v1alpha/(?<realmId>[^/]+)/resources/"
                 + "(?<resourceId>[^/]+)/views/(?<viewName>[^/]+)(/.*)*");
 
@@ -77,7 +79,7 @@ public class ViewsService {
 
                     ReactiveDamClient reactiveDamClient = damClientFactory.getDamClient(damId);
                     return reactiveDamClient
-                            .getAccessTokenForView(realm, resourceId, viewName, tokens.get(CookieKind.DAM), tokens.get(CookieKind.REFRESH))
+                            .getAccessTokenForView(realm, resourceId, viewName, tokens.get(CookieKind.DAM).getClearText(), tokens.get(CookieKind.REFRESH).getClearText())
                             .flatMap(locationAndToken ->
                                     Mono.just(new ViewAuthorization.ViewAuthorizationResponse(view, locationAndToken)))
                             .onErrorResume(throwable ->
@@ -97,13 +99,13 @@ public class ViewsService {
 
     public Mono<Set<String>> getRelevantViewsForUrlInAllDams(String realm,
                                                              String resourceUrl,
-                                                             Map<CookieKind, String> tokens) {
+                                                             Map<CookieKind, CookieValue> tokens) {
         return Flux.fromStream(damClients.entrySet().stream()).flatMap(clientEntry -> {
             String damId = clientEntry.getKey();
             ReactiveDamClient damClient = clientEntry.getValue();
             return damClient.getFlattenedViews(realm,
-                    tokens.get(CookieKind.DAM),
-                    tokens.get(CookieKind.REFRESH))
+                    tokens.get(CookieKind.DAM).getClearText(),
+                    tokens.get(CookieKind.REFRESH).getClearText())
                     .flatMap(flatViews ->
                             getRelevantViewsForUrlsInDam(damId, realm, flatViews, List.of(resourceUrl))
                     );

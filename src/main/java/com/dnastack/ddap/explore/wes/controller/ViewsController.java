@@ -41,7 +41,7 @@ public class ViewsController {
         }
 
         final List<String> uniqueViews = new ArrayList<>(new HashSet<>(views));
-        Map<CookieKind, String> tokens = cookiePackager.extractRequiredTokens(request, Set.of(CookieKind.DAM, CookieKind.REFRESH));
+        Map<CookieKind, UserTokenCookiePackager.CookieValue> tokens = cookiePackager.extractRequiredTokens(request, Set.of(CookieKind.DAM, CookieKind.REFRESH));
 
         return viewsService.authorizeViews(uniqueViews, tokens, realm);
     }
@@ -55,12 +55,12 @@ public class ViewsController {
         }
         final List<String> uniqueUrls = new ArrayList<>(new HashSet<>(urls));
 
-        Map<CookieKind, String> tokens = cookiePackager.extractRequiredTokens(request, Set.of(CookieKind.DAM, CookieKind.REFRESH));
+        Map<CookieKind, UserTokenCookiePackager.CookieValue> tokens = cookiePackager.extractRequiredTokens(request, Set.of(CookieKind.DAM, CookieKind.REFRESH));
         return Flux.fromStream(damClients.entrySet().stream()).flatMap(clientEntry -> {
             String damId = clientEntry.getKey();
             ReactiveDamClient damClient = clientEntry.getValue();
             // TODO: Handle error when token is empty
-            return damClient.getFlattenedViews(realm, tokens.get(CookieKind.DAM), tokens.get(CookieKind.REFRESH))
+            return damClient.getFlattenedViews(realm, tokens.get(CookieKind.DAM).getClearText(), tokens.get(CookieKind.REFRESH).getClearText())
                     .flatMap(flatViews -> viewsService.getRelevantViewsForUrlsInDam(damId, realm, flatViews, uniqueUrls));
         }).collectList().flatMap(viewsForAllDams -> {
             final Map<String, Set<String>> finalViewListing = new HashMap<>();

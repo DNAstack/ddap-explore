@@ -65,17 +65,17 @@ public class WorkflowController {
                                                                     @PathVariable String damId,
                                                                     @PathVariable String viewId,
                                                                     @RequestParam(required = false) String nextPage) {
-        Optional<String> foundDamToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
-        Optional<String> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.REFRESH);
-        String damToken = foundDamToken.orElseThrow(() -> new IllegalArgumentException("Authorization dam token is required."));
-        String refreshToken = foundRefreshToken.orElseThrow(() -> new IllegalArgumentException("Authorization refresh token is required."));
+        Optional<UserTokenCookiePackager.CookieValue> foundDamToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
+        Optional<UserTokenCookiePackager.CookieValue> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.REFRESH);
+        UserTokenCookiePackager.CookieValue damToken = foundDamToken.orElseThrow(() -> new IllegalArgumentException("Authorization dam token is required."));
+        UserTokenCookiePackager.CookieValue refreshToken = foundRefreshToken.orElseThrow(() -> new IllegalArgumentException("Authorization refresh token is required."));
 
         // TODO: use damClientFactory
         Map.Entry<String, ReactiveDamClient> damClient = damClients.entrySet().stream()
                 .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
                 .findFirst()
                 .get();
-        return wesService.getAllWorkflowRunsFromWesServer(damClient, realm, damToken, refreshToken, viewId, nextPage);
+        return wesService.getAllWorkflowRunsFromWesServer(damClient, realm, damToken.getClearText(), refreshToken.getClearText(), viewId, nextPage);
     }
 
     @PostMapping(value = "/{damId}/views/{viewId}/runs")
@@ -84,17 +84,17 @@ public class WorkflowController {
                                                             @PathVariable String damId,
                                                             @PathVariable String viewId,
                                                             @RequestBody WorkflowExecutionRunRequestModel runRequest) {
-        Optional<String> foundDamToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
-        Optional<String> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
-        String damToken = foundDamToken.orElseThrow(() -> new IllegalArgumentException("Authorization dam token is required."));
-        String refreshToken = foundRefreshToken.orElseThrow(() -> new IllegalArgumentException("Authorization refresh token is required."));
+        Optional<UserTokenCookiePackager.CookieValue> foundDamToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
+        Optional<UserTokenCookiePackager.CookieValue> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.REFRESH);
+        UserTokenCookiePackager.CookieValue damToken = foundDamToken.orElseThrow(() -> new IllegalArgumentException("Authorization dam token is required."));
+        UserTokenCookiePackager.CookieValue refreshToken = foundRefreshToken.orElseThrow(() -> new IllegalArgumentException("Authorization refresh token is required."));
 
         // TODO: use damClientFactory
         Map.Entry<String, ReactiveDamClient> damClient = damClients.entrySet().stream()
                 .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
                 .findFirst()
                 .get();
-        return wesService.executeWorkflow(damClient, realm, damToken, refreshToken, viewId, runRequest);
+        return wesService.executeWorkflow(damClient, realm, damToken.getClearText(), refreshToken.getClearText(), viewId, runRequest);
     }
 
     @GetMapping(value = "/{damId}/views/{viewId}/runs/{runId}")
@@ -104,17 +104,17 @@ public class WorkflowController {
                                                                           @PathVariable String viewId,
                                                                           @PathVariable String runId) {
 
-        Optional<String> foundDamToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
-        Optional<String> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.REFRESH);
-        String damToken = foundDamToken.orElseThrow(() -> new IllegalArgumentException("Authorization dam token is required."));
-        String refreshToken = foundRefreshToken.orElseThrow(() -> new IllegalArgumentException("Authorization refresh token is required."));
+        Optional<UserTokenCookiePackager.CookieValue> foundDamToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
+        Optional<UserTokenCookiePackager.CookieValue> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.REFRESH);
+        UserTokenCookiePackager.CookieValue damToken = foundDamToken.orElseThrow(() -> new IllegalArgumentException("Authorization dam token is required."));
+        UserTokenCookiePackager.CookieValue refreshToken = foundRefreshToken.orElseThrow(() -> new IllegalArgumentException("Authorization refresh token is required."));
 
         // TODO: use damClientFactory
         Map.Entry<String, ReactiveDamClient> damClient = damClients.entrySet().stream()
                 .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
                 .findFirst()
                 .get();
-        return wesService.getWorkflowRunDetails(damClient, realm, damToken, refreshToken, viewId, runId);
+        return wesService.getWorkflowRunDetails(damClient, realm, damToken.getClearText(), refreshToken.getClearText(), viewId, runId);
     }
 
 }

@@ -18,6 +18,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -43,7 +45,7 @@ public class CommandLineAccessController {
     private final OAuthStateHandler stateHandler;
     private Duration tokenTtl;
     private final Resource cliZip;
-
+    private final TextEncryptor encryptor;
     private final JwtHandler jwtHandler;
 
     /*
@@ -59,7 +61,9 @@ public class CommandLineAccessController {
                                        @Value("${ddap.command-line-service.aud}") String tokenAudience,
                                        @Value("${ddap.command-line-service.ttl}") Duration tokenTtl,
                                        @Value("${ddap.command-line-service.signingKey}") String tokenSigningKeyBase64,
-                                       @Value("classpath:/static/ddap-cli.zip") Resource cliZip) {
+                                       @Value("classpath:/static/ddap-cli.zip") Resource cliZip,
+                                       @Value("${ddap.cookies.encryptor.password}") String encryptorPassword,
+                                       @Value("${ddap.cookies.encryptor.salt}") String encryptorSalt) {
         this.oAuthClient = oAuthClient;
         this.stateHandler = stateHandler;
         this.tokenTtl = tokenTtl;
@@ -67,6 +71,7 @@ public class CommandLineAccessController {
         this.jwtHandler = new JwtHandler(tokenAudience,
                                          tokenTtl,
                                          Keys.hmacShaKeyFor(Base64.getMimeDecoder().decode(tokenSigningKeyBase64)));
+        this.encryptor = Encryptors.text(encryptorPassword, encryptorSalt);
     }
 
     @GetMapping(produces = "application/zip", path = "/download")
@@ -147,8 +152,10 @@ public class CommandLineAccessController {
                                        throw new CliSessionNotFoundException(cliSessionId);
                                    } else {
                                        return new LoginStatus(oldStatus.getExpiry(),
-                                                              new TokenResponse(tokenResponse.getIdToken(),
-                                                                                tokenResponse.getAccessToken()));
+                                           new TokenResponse(
+                                               encryptor.encrypt(tokenResponse.getIdToken()),
+                                               encryptor.encrypt(tokenResponse.getAccessToken()))
+                                       );
                                    }
                                });
                            })

@@ -440,37 +440,6 @@
         "label": "Beacon Discovery Search"
       }
     },
-    "gcs_requester_pays": {
-      "targetAdapter": "token:gcp:sa",
-      "itemFormat": "gcs",
-      "roles": {
-        "viewer": {
-          "targetRoles": [
-            "roles/storage.objectViewer"
-          ],
-          "targetScopes": [
-            "https://www.googleapis.com/auth/cloud-platform"
-          ],
-          "damRoleCategories": [
-            "metadata",
-            "list",
-            "read"
-          ],
-          "ui": {
-            "label": "File Viewer",
-            "description": "List and read files"
-          }
-        }
-      },
-      "interfaces": {
-        "gcp:gs": "gs://${requester-pays-bucket}",
-        "http:gcp:gs": "https://www.googleapis.com/storage/v1/b/${requester-pays-bucket}"
-      },
-      "ui": {
-        "label": "Google Cloud Storage",
-        "description": "Google Cloud Storage (GCS) requester-pays bucket"
-      }
-    },
     "bigquery": {
       "targetAdapter": "token:gcp:sa",
       "itemFormat": "bigquery",

@@ -18,6 +18,7 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 public class ConfigE2eTest extends AbstractBaseE2eTest {
 
@@ -28,6 +29,21 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     public void setup() {
         basicUsername = requiredEnv("E2E_BASIC_USERNAME");
         basicPassword = requiredEnv("E2E_BASIC_PASSWORD");
+    }
+
+    @Test
+    public void doNotAcceptDevCookieEncryptorCredentials() {
+        Assume.assumeFalse("Dev cookie encryptor credentials are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
+        Assume.assumeFalse("Dev cookie encryptor credentials are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
+        assertThat("Default dev credentials for cookie encryptor are allowed only on localhost",
+            DDAP_COOKIES_ENCRYPTOR_PASSWORD, not(equalTo("abcdefghijk"))
+            // It is enough to test value of 'E2E_COOKIES_ENCRYPTOR_PASSWORD' env,
+            // since the password must be identical to 'DDAP_COOKIES_ENCRYPTOR_PASSWORD' of deployed app.
+            // In case of mismatch there will be failures all over the e2e suite.
+        );
+        assertThat("Default dev credentials for cookie encryptor are allowed only on localhost",
+            DDAP_COOKIES_ENCRYPTOR_SALT, not(equalTo("598953e322"))
+        );
     }
 
     @Test

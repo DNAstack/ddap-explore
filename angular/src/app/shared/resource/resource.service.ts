@@ -1,14 +1,13 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
-import { Observable } from 'rxjs';
-import { flatMap, map } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
+import { realmIdPlaceholder, RealmStateService } from "ddap-common-lib";
+import _get from 'lodash.get';
 
-import { DamInfoService } from '../dam/dam-info.service';
-import { HttpParamsService } from '../http-params.service';
-import { dam } from '../proto/dam-service';
-import IGetTokenRequest = dam.v1.IGetTokenRequest;
-import ResourceToken = dam.v1.ResourceTokens.ResourceToken;
+import { environment } from '../../../environments/environment';
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { dam } from "../proto/dam-service";
+import ResourceTokens = dam.v1.ResourceTokens;
 
 @Injectable({
   providedIn: 'root',
@@ -16,27 +15,25 @@ import ResourceToken = dam.v1.ResourceTokens.ResourceToken;
 export class ResourceService {
 
   constructor(private http: HttpClient,
-              private httpParamsService: HttpParamsService,
-              private errorHandler: ErrorHandlerService,
-              private damInfoService: DamInfoService) {
+              private activatedRoute: ActivatedRoute,
+              private realmStateService: RealmStateService) {
   }
 
-  getAccessRequestToken(damId: string, resourceId: string, viewId: string, tokenRequest: IGetTokenRequest): Observable<ResourceToken> {
-    return this.damInfoService.getDamUrls()
-      .pipe(
-        flatMap(damApiUrls => {
-          const damApiUrl = damApiUrls.get(damId);
-          return this.http.get<ResourceToken>(
-            `${damApiUrl}/${realmIdPlaceholder}/resources/${resourceId}/views/${viewId}/token`,
-            {
-              params: this.httpParamsService.getHttpParamsFrom(tokenRequest),
-            }
-          ).pipe(
-            this.errorHandler.notifyOnError(`Can't get access token.`),
-            map(ResourceToken.create)
-          );
-        })
-      );
+  getDamResourcePath(damId: string, resourceId: string, viewId: string, roleId: string): string {
+    return `${damId};${resourceId}/views/${viewId}/roles/${roleId}`;
+  }
+
+  getUrlForObtainingAccessToken(damId: string, resourceId: string, viewId: string, roleId: string, redirectUri: string): string {
+    const realmId = _get(this.activatedRoute, 'root.firstChild.snapshot.params.realmId', this.realmStateService.getRealm());
+    const resource = this.getDamResourcePath(damId, resourceId, viewId, roleId);
+    return `${environment.ddapApiUrl}/${realmId}/resources/authorize?resource=${resource}&redirectUri=${redirectUri}`;
+  }
+
+  getAccessTokensForAuthorizedResources(resource: string): Observable<ResourceTokens> {
+    return this.http.get<ResourceTokens>(
+      `${environment.ddapApiUrl}/${realmIdPlaceholder}/resources/checkout`,
+      { params: { resource }}
+    );
   }
 
 }

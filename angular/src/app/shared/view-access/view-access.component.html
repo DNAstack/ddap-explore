@@ -18,19 +18,19 @@
     </button>
   </div>
   <div class="flex vertical-center row"
-       *ngIf="access.token">
+       *ngIf="access['access_token']">
     <mat-form-field class="stretch">
       <input matInput
              readonly
              type="text"
              [placeholder]="'Access token'"
-             [value]="access.token">
+             [value]="access['access_token']">
     </mat-form-field>
     <button mat-flat-button
             matSuffix
             mat-icon-button
             ngxClipboard
-            [cbContent]="access.token || url"
+            [cbContent]="access['access_token'] || url"
             matTooltip="Copy to clipboard"
             aria-label="Copy to clipboard">
       <mat-icon class="icon icon-copy"></mat-icon>

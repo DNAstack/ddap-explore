@@ -27,8 +27,7 @@
       </mat-form-field>
       <mat-form-field>
         <mat-label>Time unit</mat-label>
-        <mat-select [(value)]="selectedTimeUnit"
-                    [disabled]="access?.token">
+        <mat-select [(value)]="selectedTimeUnit">
           <mat-option value="s">second</mat-option>
           <mat-option value="m">minute</mat-option>
           <mat-option value="h">hour</mat-option>
@@ -36,16 +35,27 @@
         </mat-select>
       </mat-form-field>
     </div>
-    <button mat-flat-button
+    <button *ngIf="resourceTokens else authorizeLink"
+            mat-flat-button
             color="primary"
             class="uppercase"
-            [class.success]="access?.token"
             [matMenuTriggerFor]="appMenu"
-            data-se="get-access-btn"
-            (click)="getAccess()">
+            data-se="get-access-btn">
       Access
       <mat-icon>keyboard_arrow_down</mat-icon>
     </button>
+    <ng-template #authorizeLink>
+      <a [href]="getUrlForObtainingAccessToken()">
+        <button mat-flat-button
+                color="primary"
+                class="uppercase"
+                [matMenuTriggerFor]="appMenu"
+                data-se="get-access-btn">
+          Access
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        </button>
+      </a>
+    </ng-template>
     <a href="{{ downloadCliUrl }}"
        class="right"
        data-se="download-cli-button"
@@ -64,8 +74,8 @@
           class="access-menu"
           yPosition="above"
           [overlapTrigger]="false">
-  <div *ngIf="access; else error">
-    <ddap-view-access [access]="access"
+  <div *ngIf="lookupResourceToken() as resourceToken; else error">
+    <ddap-view-access [access]="resourceToken"
                       [url]="url">
     </ddap-view-access>
     <div>

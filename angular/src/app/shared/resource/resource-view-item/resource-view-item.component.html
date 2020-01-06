@@ -7,6 +7,9 @@
       <mat-panel-title>
         <h3>{{ view.dto.ui.label || view.name }}</h3>
       </mat-panel-title>
+      <mat-panel-description class="flex vertical-center">
+        {{ defaultRole }}
+      </mat-panel-description>
     </mat-expansion-panel-header>
 
     <div class="flex">
@@ -40,24 +43,23 @@
       <ddap-view-access [access]="resourceToken"
                         [url]="url">
       </ddap-view-access>
-      <div>
-        <a *ngIf="url"
-           href="{{ url }}"
-           data-se="access-btn"
-           target='_blank'
-           rel='noopener noreferrer'>
-          <button mat-button
-                  color="primary"
-                  class="uppercase">
-            View
-          </button>
-        </a>
-      </div>
     </div>
 
     <mat-action-row>
+      <a *ngIf="url"
+         href="{{ url }}"
+         data-se="access-btn"
+         target='_blank'
+         rel='noopener noreferrer'>
+        <button mat-button
+                color="primary"
+                class="uppercase">
+          View
+        </button>
+      </a>
       <a *ngIf="!resourceTokens"
-         [href]="getUrlForObtainingAccessToken()">
+         [href]="getUrlForObtainingAccessToken()"
+         class="stretch">
         <button mat-flat-button
                 color="primary"
                 class="uppercase"

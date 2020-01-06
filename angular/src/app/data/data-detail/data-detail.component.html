@@ -30,6 +30,10 @@
         <ddap-metadata-list [metadata]="resource.dto.ui"></ddap-metadata-list>
       </div>
       <div class="ddap-column">
+        <h3 class="flex vertical-center">
+          <mat-icon class="icon icon-views"></mat-icon>
+          <span>Views</span>
+        </h3>
         <mat-list class="ddap-resource-views">
           <mat-list-item *ngFor="let view of views">
             <ddap-resource-view-item [view]="view"

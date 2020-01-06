@@ -1,6 +1,12 @@
 @import '~ddap-common-lib/styles/modules/colors';
 @import "~@angular/material/theming";
 
+h3 {
+ mat-icon {
+   margin-right: 0.5rem;
+ }
+}
+
 mat-list.mat-list-base .mat-list-item .mat-list-item-content {
   padding: 2rem 0;
 
@@ -45,8 +51,6 @@ ddap-resource-views {
 }
 
 ::ng-deep .mat-list-base {
-  padding-top: 1rem;
-
   mat-list-item.ddap-data-view {
     padding: 1rem 0;
 

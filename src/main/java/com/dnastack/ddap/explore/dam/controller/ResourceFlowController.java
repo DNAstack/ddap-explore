@@ -27,7 +27,6 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.dnastack.ddap.common.util.http.XForwardUtil.getExternalPath;
 import static java.lang.String.format;
@@ -122,6 +121,16 @@ public class ResourceFlowController {
         return Mono.just(redirectToAuthServer);
     }
 
+    /**
+     * Expecting list of strings in form: ${DAM_ID};${RESOURCE_ID}/views/${VIEW_ID}/roles/${ROLE_ID}
+     *
+     * Example:
+     *  1;test/views/test/roles/discovery
+     *
+     * @param realm
+     * @param damIdResourcePairs
+     * @return absolute URL pointing to DAM resource
+     */
     private List<URI> getResourcesFrom(String realm, List<String> damIdResourcePairs) {
         return damIdResourcePairs.stream()
             .map((damIdResourcePair) -> {

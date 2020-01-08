@@ -59,11 +59,11 @@
       </a>
       <a *ngIf="!resourceTokens"
          [href]="getUrlForObtainingAccessToken()"
-         class="stretch">
+         class="stretch"
+         data-se="get-access-btn">
         <button mat-flat-button
                 color="primary"
-                class="uppercase"
-                data-se="get-access-btn">
+                class="uppercase">
           Access
         </button>
       </a>
@@ -80,22 +80,3 @@
     </mat-action-row>
   </mat-expansion-panel>
 </mat-accordion>
-
-
-
-<!--<ng-template #error>-->
-<!--  <div class="error-container flex flex&#45;&#45;column"-->
-<!--       *ngIf="accessSubscription && accessSubscription.closed">-->
-<!--    <div class="flex flex&#45;&#45;row vertical-center">-->
-<!--      <mat-icon color="warn">warning</mat-icon>-->
-<!--      <p>Permission denied: you do not have sufficient claims to access this resource</p>-->
-<!--    </div>-->
-<!--    <div class="error-message">-->
-<!--      <button mat-button-->
-<!--              class="uppercase"-->
-<!--              disabled>-->
-<!--        Send Feedback-->
-<!--      </button>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</ng-template>-->

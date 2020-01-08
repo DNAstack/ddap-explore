@@ -1,8 +1,8 @@
 package com.dnastack.ddap.frontend;
 
+import com.dnastack.ddap.common.PolicyRequirementFailedException;
 import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.fragments.ExpandedAccessibleViewItem;
-import com.dnastack.ddap.common.fragments.ViewAccessMenu;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.DataDetailPage;
 import com.dnastack.ddap.common.page.DataListPage;
@@ -11,10 +11,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URI;
 
+import static com.dnastack.ddap.common.TestingPersona.USER_WITHOUT_ACCESS;
 import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
 import static io.restassured.RestAssured.given;
-import static org.junit.Assert.assertFalse;
 
 @SuppressWarnings("Duplicates")
 public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
@@ -39,16 +40,32 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
     }
 
     @Test
-    public void testRequestAccessForBeaconDiscoveryExpectSuccess() {
+    public void testRequestAccessForBeaconDiscoveryExpectSuccess() throws IOException {
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage thousandGenomesDetailPage = dataListPage
                 .findDataByName("1000 Genomes")
                 .clickViewButton();
 
-        ExpandedAccessibleViewItem beaconDiscoveryView = thousandGenomesDetailPage.expandViewItem("Beacon Discovery Access");
-        ViewAccessMenu beaconDiscoveryAccessMenu = beaconDiscoveryView.requestAccess();
-        assertFalse(beaconDiscoveryAccessMenu.accessRequestFailed());
-        beaconDiscoveryAccessMenu.closeMenu();
+        String viewId = "Beacon Discovery Access";
+        ExpandedAccessibleViewItem beaconDiscoveryView = thousandGenomesDetailPage.expandViewItem(viewId);
+        URI authorizeUrl = beaconDiscoveryView.requestAccess();
+        thousandGenomesDetailPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, DataDetailPage::new);
+
+        beaconDiscoveryView = thousandGenomesDetailPage.expandViewItem(viewId);
+        beaconDiscoveryView.assertHasAccessToken();
+    }
+
+    @Test(expected = PolicyRequirementFailedException.class)
+    public void testRequestAccessForBeaconDiscoveryAccessExpectFailure() throws IOException {
+        DataListPage dataListPage = ddapPage.getNavBar().goToData();
+        DataDetailPage thousandGenomesDetailPage = dataListPage
+            .findDataByName("1000 Genomes")
+            .clickViewButton();
+
+        String viewId = "Beacon Discovery Access";
+        ExpandedAccessibleViewItem beaconDiscoveryView = thousandGenomesDetailPage.expandViewItem(viewId);
+        URI authorizeUrl = beaconDiscoveryView.requestAccess();
+        loginStrategy.authorizeForResources(driver, USER_WITHOUT_ACCESS, REALM, authorizeUrl, DataDetailPage::new);
     }
 
     @Test

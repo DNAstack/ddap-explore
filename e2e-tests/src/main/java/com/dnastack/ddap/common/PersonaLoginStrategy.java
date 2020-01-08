@@ -76,4 +76,10 @@ public class PersonaLoginStrategy implements LoginStrategy {
         return icLoginPage.loginAsPersona(persona, pageFactory);
     }
 
+    @Override
+    public <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException {
+        // Intentionally left empty
+        return null;
+    }
+
 }

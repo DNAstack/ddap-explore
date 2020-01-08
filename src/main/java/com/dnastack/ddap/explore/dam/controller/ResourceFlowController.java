@@ -1,4 +1,4 @@
-package com.dnastack.ddap.explore.controller;
+package com.dnastack.ddap.explore.dam.controller;
 
 import com.dnastack.ddap.common.client.AuthAwareWebClientFactory;
 import com.dnastack.ddap.common.client.ReactiveDamClient;
@@ -26,14 +26,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static com.dnastack.ddap.common.util.http.XForwardUtil.getExternalPath;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
@@ -45,7 +42,7 @@ public class ResourceFlowController {
 
     private final UserTokenCookiePackager cookiePackager;
     private final OAuthStateHandler stateHandler;
-    private final Set<DamProperties> dams;
+    private final Map<String, DamProperties> dams;
     private AuthAwareWebClientFactory webClientFactory;
 
     @Autowired
@@ -55,13 +52,16 @@ public class ResourceFlowController {
                                   AuthAwareWebClientFactory webClientFactory) {
         this.cookiePackager = cookiePackager;
         this.stateHandler = stateHandler;
-        this.dams = Set.copyOf(damsConfig.getStaticDamsConfig().values());
+        this.dams = Map.copyOf(damsConfig.getStaticDamsConfig());
         this.webClientFactory = webClientFactory;
     }
 
     @GetMapping("/checkout")
     public Mono<ResponseEntity<Object>> checkout(ServerHttpRequest request,
-                                                 @RequestParam("resource") List<URI> resources) {
+                                                 @PathVariable String realm,
+                                                 @RequestParam("resource") List<String> damIdResourcePairs) {
+        final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
+
         final ReactiveDamClient damClient = lookupDamClient(resources);
         final CartTokenCookieName cartCookieName = new CartTokenCookieName(Set.copyOf(resources));
         final Optional<String> extractedCartToken = cookiePackager.extractToken(request, cartCookieName)
@@ -94,8 +94,7 @@ public class ResourceFlowController {
      * @return Absolute URL of the URL an OAuth login flow should redirect to upon completion.
      */
     private static URI rootLoginRedirectUrl(ServerHttpRequest request, String realm) {
-        return URI.create(getExternalPath(request,
-                format("/api/v1alpha/%s/identity/login", realm)));
+        return URI.create(getExternalPath(request, format("/api/v1alpha/%s/identity/login", realm)));
     }
 
     @GetMapping("/authorize")
@@ -103,8 +102,8 @@ public class ResourceFlowController {
                                                                 @PathVariable String realm,
                                                                 @RequestParam(required = false) URI redirectUri,
                                                                 @RequestParam(required = false) String scope,
-                                                                @RequestParam("resource") List<URI> resources) {
-
+                                                                @RequestParam("resource") List<String> damIdResourcePairs) {
+        final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
 
         final URI postLoginTokenEndpoint = UriUtil.selfLinkToApi(request, realm, "resources/token");
         // FIXME better fallback page
@@ -122,6 +121,26 @@ public class ResourceFlowController {
         return Mono.just(redirectToAuthServer);
     }
 
+    /**
+     * Expecting list of strings in form: ${DAM_ID};${RESOURCE_ID}/views/${VIEW_ID}/roles/${ROLE_ID}
+     *
+     * Example:
+     *  1;test/views/test/roles/discovery
+     *
+     * @param realm
+     * @param damIdResourcePairs
+     * @return absolute URL pointing to DAM resource
+     */
+    private List<URI> getResourcesFrom(String realm, List<String> damIdResourcePairs) {
+        return damIdResourcePairs.stream()
+            .map((damIdResourcePair) -> {
+                String[] pair = damIdResourcePair.split(";");
+                URI damBaseUrl = dams.get(pair[0]).getBaseUrl();
+                return damBaseUrl.resolve("dam/" + realm + "/resources/" + pair[1]);
+            })
+            .collect(toList());
+    }
+
     private URI cartCheckoutUrl(ServerHttpRequest request, @PathVariable String realm, List<URI> resources) {
         final URI baseUri = UriUtil.selfLinkToApi(request, realm, "resources/checkout");
         return UriComponentsBuilder.fromUri(baseUri)
@@ -136,10 +155,10 @@ public class ResourceFlowController {
             throw new IllegalArgumentException("Cannot look DAM from empty resource list");
         }
         final String testResourceUrl = resources.get(0).toString();
-        return dams.stream()
+        return dams.values().stream()
                    // FIXME make this more resilient
                    .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl().toString()))
-                   .map(dam -> new ReactiveDamOAuthClient(dam))
+                   .map(ReactiveDamOAuthClient::new)
                    .findFirst()
                    .orElseThrow(() -> new IllegalArgumentException(String.format("Could not find DAM for resource [%s]")));
     }
@@ -150,7 +169,7 @@ public class ResourceFlowController {
             throw new IllegalArgumentException("Cannot look DAM from empty resource list");
         }
         final String testResourceUrl = resources.get(0).toString();
-        return dams.stream()
+        return dams.values().stream()
                    // FIXME make this more resilient
                    .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl().toString()))
                    .map(dam -> new ReactiveDamClient(dam, webClientFactory))
@@ -182,7 +201,7 @@ public class ResourceFlowController {
                                                 .stream()
                                                 .flatMap(List::stream)
                                                 .map(URI::create)
-                                                .collect(Collectors.toList());
+                                                .collect(toList());
         final ReactiveDamOAuthClient oAuthClient = lookupDamOAuthClient(resources);
         return oAuthClient.exchangeAuthorizationCodeForTokens(realm, rootLoginRedirectUrl(request, realm), code)
                           .flatMap(tokenResponse -> {

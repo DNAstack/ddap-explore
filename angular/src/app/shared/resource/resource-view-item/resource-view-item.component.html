@@ -1,15 +1,17 @@
-<mat-accordion class="ddap-resource-view-item">
+<mat-accordion>
   <mat-expansion-panel>
     <mat-expansion-panel-header collapsedHeight="4rem">
       <mat-progress-bar mode="indeterminate"
                         *ngIf="accessSubscription && !accessSubscription.closed">
       </mat-progress-bar>
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>{{ view.dto.ui.label || view.name }}</mat-card-title>
-        </mat-card-header>
-      </mat-card>
+      <mat-panel-title>
+        <h3>{{ view.dto.ui.label || view.name }}</h3>
+      </mat-panel-title>
+      <mat-panel-description class="flex vertical-center">
+        {{ defaultRole }}
+      </mat-panel-description>
     </mat-expansion-panel-header>
+
     <div class="flex">
       <mat-form-field>
         <input matInput
@@ -27,8 +29,7 @@
       </mat-form-field>
       <mat-form-field>
         <mat-label>Time unit</mat-label>
-        <mat-select [(value)]="selectedTimeUnit"
-                    [disabled]="access?.token">
+        <mat-select [(value)]="selectedTimeUnit">
           <mat-option value="s">second</mat-option>
           <mat-option value="m">minute</mat-option>
           <mat-option value="h">hour</mat-option>
@@ -36,39 +37,15 @@
         </mat-select>
       </mat-form-field>
     </div>
-    <button mat-flat-button
-            color="primary"
-            class="uppercase"
-            [class.success]="access?.token"
-            [matMenuTriggerFor]="appMenu"
-            data-se="get-access-btn"
-            (click)="getAccess()">
-      Access
-      <mat-icon>keyboard_arrow_down</mat-icon>
-    </button>
-    <a href="{{ downloadCliUrl }}"
-       class="right"
-       data-se="download-cli-button"
-       target='_blank'
-       rel='noopener noreferrer'>
-      <button mat-button
-              color="primary"
-              class="uppercase">
-        Download Command Line Client
-      </button>
-    </a>
-  </mat-expansion-panel>
-</mat-accordion>
 
-<mat-menu #appMenu="matMenu"
-          class="access-menu"
-          yPosition="above"
-          [overlapTrigger]="false">
-  <div *ngIf="access; else error">
-    <ddap-view-access [access]="access"
-                      [url]="url">
-    </ddap-view-access>
-    <div>
+    <div *ngIf="lookupResourceToken() as resourceToken"
+         class="expansion-footer-content">
+      <ddap-view-access [access]="resourceToken"
+                        [url]="url">
+      </ddap-view-access>
+    </div>
+
+    <mat-action-row>
       <a *ngIf="url"
          href="{{ url }}"
          data-se="access-btn"
@@ -80,23 +57,26 @@
           View
         </button>
       </a>
-    </div>
-  </div>
-</mat-menu>
-
-<ng-template #error>
-  <div class="error-container flex flex--column"
-       *ngIf="accessSubscription && accessSubscription.closed">
-    <div class="flex flex--row vertical-center">
-      <mat-icon color="warn">warning</mat-icon>
-      <p>Permission denied: you do not have sufficient claims to access this resource</p>
-    </div>
-    <div class="error-message">
-      <button mat-button
-              class="uppercase"
-              disabled>
-        Send Feedback
-      </button>
-    </div>
-  </div>
-</ng-template>
+      <a *ngIf="!resourceTokens"
+         [href]="getUrlForObtainingAccessToken()"
+         class="stretch"
+         data-se="get-access-btn">
+        <button mat-flat-button
+                color="primary"
+                class="uppercase">
+          Access
+        </button>
+      </a>
+      <a href="{{ downloadCliUrl }}"
+         data-se="download-cli-button"
+         target='_blank'
+         rel='noopener noreferrer'>
+        <button mat-button
+                color="primary"
+                class="uppercase">
+          Download Command Line Client
+        </button>
+      </a>
+    </mat-action-row>
+  </mat-expansion-panel>
+</mat-accordion>

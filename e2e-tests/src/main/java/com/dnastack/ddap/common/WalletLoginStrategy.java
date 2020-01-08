@@ -2,13 +2,17 @@ package com.dnastack.ddap.common;
 
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -18,10 +22,7 @@ import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,6 +34,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
 
+@Slf4j
 @AllArgsConstructor
 public class WalletLoginStrategy implements LoginStrategy {
 
@@ -48,16 +50,8 @@ public class WalletLoginStrategy implements LoginStrategy {
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(personaName);
         final CookieStore cookieStore = new BasicCookieStore();
-        BasicCredentialsProvider credentialsProvider = null;
-        if(DDAP_USERNAME != null && DDAP_PASSWORD != null) {
-            credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY,
-                                               new UsernamePasswordCredentials(DDAP_USERNAME, DDAP_PASSWORD));
-        }
-        final HttpClient httpclient = HttpClientBuilder.create()
-                                                       .setDefaultCookieStore(cookieStore)
-                                                       .setDefaultCredentialsProvider(credentialsProvider)
-                                                       .build();
+        final HttpClient httpclient = setupHttpClient(cookieStore);
+
         {
             final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);
             HttpGet request = new HttpGet(String.format("%s/api/v1alpha/%s/identity/login?loginHint=wallet:%s%s", DDAP_BASE_URL, realmName, loginInfo.getEmail(), scopeString));
@@ -68,40 +62,9 @@ public class WalletLoginStrategy implements LoginStrategy {
             assertThat("Response body: " + responseBody, response.getStatusLine().getStatusCode(), is(200));
         }
 
-        final String path;
-        final String state;
-        {
-            final HttpGet request = new HttpGet(String.format("%s/login/token?token=%s", walletUrl, loginInfo.getPersonalAccessToken()));
+        final CsrfToken csrfToken = walletLogin(httpclient, loginInfo);
 
-            final HttpResponse response = httpclient.execute(request);
-            String responseBody = EntityUtils.toString(response.getEntity());
-            final String responseMessage = "Headers: " + Arrays.toString(response.getAllHeaders()) + "\nResponse body: " + responseBody;
-            assertThat(responseMessage, response.getStatusLine().getStatusCode(), is(200));
-
-            /*
-             There is a form for consenting to sharing claims with DDAP that must be clicked. It contains a CSRF
-             token in the page within a JavaScript function. This was a quick way to workaround the issue but it is brittle.
-             We need to figure out a proper way for test users to log in non-interactively in the DAM.
-             */
-            final Matcher pathMatcher = PATH_PATTERN.matcher(responseBody);
-            final Matcher stateMatcher = STATE_PATTERN.matcher(responseBody);
-
-            assertTrue(responseBody, pathMatcher.find());
-            assertTrue(responseBody, stateMatcher.find());
-
-            path = pathMatcher.group(1);
-            state = stateMatcher.group(1);
-        }
-        {
-            final HttpGet request = new HttpGet(String.format("%s%s?state=%s&agree=y", icUrl, path, state));
-            System.out.println("URL: " + request.getURI());
-
-            final HttpResponse response = httpclient.execute(request);
-
-            String responseBody = EntityUtils.toString(response.getEntity());
-            final String responseMessage = "Headers: " + Arrays.toString(response.getAllHeaders()) + "\nResponse body: " + responseBody;
-            assertThat(responseMessage, response.getStatusLine().getStatusCode(), is(200));
-        }
+        acceptPermissions(httpclient, csrfToken);
 
         return cookieStore;
     }
@@ -109,22 +72,141 @@ public class WalletLoginStrategy implements LoginStrategy {
     @Override
     public <T extends AnyDdapPage> T performPersonaLogin(WebDriver driver, TestingPersona persona, String realmName, Function<WebDriver, T> pageFactory) throws IOException {
         final CookieStore cookieStore = performPersonaLogin(persona.getId(), realmName, DEFAULT_SCOPES);
-        final Set<String> cookieNames = new HashSet<>(Arrays.asList("dam_token", "ic_token", "refresh_token"));
 
         // Need to navigate to site before setting cookie
         driver.get(getUrlWithBasicCredentials(URI.create(DDAP_BASE_URL).resolve(format("/%s/data", realmName)).toString(), DDAP_USERNAME, DDAP_PASSWORD));
-        cookieStore.getCookies()
-                   .stream()
-                   .filter(c -> cookieNames.contains(c.getName()))
-                   .forEach(cookie -> {
-                       driver.manage().deleteCookieNamed(cookie.getName());
-                       System.out.printf("Adding cookie to selenium: Cookie(name=%s, domain=%s, path=%s, expiry=%s, secure=%b", cookie.getName(), cookie.getDomain(), cookie.getPath(), cookie.getExpiryDate(), cookie.isSecure());
-                       final Cookie browserCookie = new Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(), cookie.getPath(), cookie.getExpiryDate(), cookie.isSecure());
-                       driver.manage().addCookie(browserCookie);
-                   });
+        addCookiesFromStoreToSelenium(cookieStore, driver);
         driver.navigate().refresh();
 
         return pageFactory.apply(driver);
+    }
+
+    @Override
+    public <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException {
+        final LoginInfo loginInfo = personalAccessTokens.get(persona.getId());
+        final CookieStore cookieStore = new BasicCookieStore();
+        final HttpClient httpclient = setupHttpClient(cookieStore);
+
+        URI loginUrl = null;
+        // Get login url and append login_hint
+        {
+            HttpGet request = new HttpGet(authorizeUri);
+            addDdapBasicAuthHeader(request);
+
+            HttpClientContext context = HttpClientContext.create();
+            final HttpResponse response = httpclient.execute(request, context);
+
+            List<URI> locations = context.getRedirectLocations();
+            if (locations != null) {
+                URI finalUrl = locations.get(locations.size() - 1);
+                loginUrl = URI.create(finalUrl.toString() + "&login_hint=wallet:" + loginInfo.getEmail());
+                log.info("Login url: {}", loginUrl);
+            }
+
+            String responseBody = EntityUtils.toString(response.getEntity());
+            assertThat("Response body: " + responseBody, response.getStatusLine().getStatusCode(), is(200));
+        }
+        // Execute GET login url
+        {
+            HttpGet request = new HttpGet(loginUrl);
+            addDdapBasicAuthHeader(request);
+
+            final HttpResponse response = httpclient.execute(request);
+
+            String responseBody = EntityUtils.toString(response.getEntity());
+            assertThat("Response body: " + responseBody, response.getStatusLine().getStatusCode(), is(200));
+        }
+
+        final CsrfToken csrfToken = walletLogin(httpclient, loginInfo);
+
+        final URI finalLocation = acceptPermissions(httpclient, csrfToken);
+
+        addCookiesFromStoreToSelenium(cookieStore, driver);
+        driver.get(finalLocation.toString());
+
+        return pageFactory.apply(driver);
+    }
+
+    private HttpClient setupHttpClient(CookieStore cookieStore) {
+        BasicCredentialsProvider credentialsProvider = null;
+        if(DDAP_USERNAME != null && DDAP_PASSWORD != null) {
+            credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY,
+                new UsernamePasswordCredentials(DDAP_USERNAME, DDAP_PASSWORD));
+        }
+
+        return HttpClientBuilder.create()
+            .setDefaultCookieStore(cookieStore)
+            .setDefaultCredentialsProvider(credentialsProvider)
+            .build();
+    }
+
+    private CsrfToken walletLogin(HttpClient httpClient, LoginInfo loginInfo) throws IOException {
+        final HttpGet request = new HttpGet(String.format("%s/login/token?token=%s", walletUrl, loginInfo.getPersonalAccessToken()));
+
+        final HttpResponse response = httpClient.execute(request);
+        String responseBody = EntityUtils.toString(response.getEntity());
+        final String responseMessage = "Headers: " + Arrays.toString(response.getAllHeaders()) + "\nResponse body: " + responseBody;
+        assertThat(responseMessage, response.getStatusLine().getStatusCode(), is(200));
+
+            /*
+             There is a form for consenting to sharing claims with DDAP that must be clicked. It contains a CSRF
+             token in the page within a JavaScript function. This was a quick way to workaround the issue but it is brittle.
+             We need to figure out a proper way for test users to log in non-interactively in the DAM.
+             */
+        final Matcher pathMatcher = PATH_PATTERN.matcher(responseBody);
+        final Matcher stateMatcher = STATE_PATTERN.matcher(responseBody);
+
+        assertTrue(responseBody, pathMatcher.find());
+        assertTrue(responseBody, stateMatcher.find());
+
+        return new CsrfToken(pathMatcher.group(1), stateMatcher.group(1));
+    }
+
+    private URI acceptPermissions(HttpClient httpClient, CsrfToken csrfToken) throws IOException {
+        final HttpGet request = new HttpGet(String.format("%s%s?state=%s&agree=y", icUrl, csrfToken.getPath(), csrfToken.getState()));
+
+        HttpClientContext context = HttpClientContext.create();
+        final HttpResponse response = httpClient.execute(request, context);
+
+        URI finalLocation = null;
+        List<URI> locations = context.getRedirectLocations();
+        if (locations != null) {
+            finalLocation = locations.get(locations.size() - 1);
+            log.info("Final location after permission acknowledgment: {}", finalLocation);
+        }
+
+        String responseBody = EntityUtils.toString(response.getEntity());
+        final String responseMessage = "Headers: " + Arrays.toString(response.getAllHeaders()) + "\nResponse body: " + responseBody;
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            if (responseMessage.contains("policy requirements failed")) {
+                throw new PolicyRequirementFailedException(responseMessage);
+            }
+            throw new IllegalStateException(responseMessage);
+        }
+
+        return finalLocation;
+    }
+
+    private void addCookiesFromStoreToSelenium(CookieStore cookieStore, WebDriver driver) {
+        cookieStore.getCookies()
+            .forEach(cookie -> {
+                driver.manage().deleteCookieNamed(cookie.getName());
+                System.out.printf("Adding cookie to selenium: Cookie(name=%s, domain=%s, path=%s, expiry=%s, secure=%b", cookie.getName(), cookie.getDomain(), cookie.getPath(), cookie.getExpiryDate(), cookie.isSecure());
+                // Making cookie null for localhost, more info: https://stackoverflow.com/a/29312227/4445511
+                final String domain = "localhost".equals(cookie.getDomain()) ? null : cookie.getDomain();
+                final Cookie browserCookie = new Cookie(cookie.getName(), cookie.getValue(), domain, cookie.getPath(), cookie.getExpiryDate(), cookie.isSecure());
+                driver.manage().addCookie(browserCookie);
+            });
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    static class CsrfToken {
+        private String path;
+        private String state;
     }
 
     @Value

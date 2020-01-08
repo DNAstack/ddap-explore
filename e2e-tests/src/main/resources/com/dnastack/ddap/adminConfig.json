@@ -25,6 +25,16 @@
         "label": "IC DDAP"
       },
       "clientId": "05c14eaf-c762-4dbf-b7aa-c7bab5dd41b2"
+    },
+    "ic_issuer": {
+      "issuer": "$$E2E_IC_BASE_URL$$/oidc",
+      "authUrl": "$$E2E_IC_BASE_URL$$/identity/v1alpha/master/authorize",
+      "tokenUrl": "$$E2E_IC_BASE_URL$$/identity/v1alpha/master/token",
+      "clientId": "5b401230-d69d-4822-993b-87e7edc7a9ec",
+      "ui": {
+        "description": "The Identity Concentrator to trust for issuing passports",
+        "label": "Trusted Identity Issuer"
+      }
     }
   },
   "trustedSources": {
@@ -398,7 +408,14 @@
       "ui": {
         "description": "This DDAP under test",
         "label": "DAM DDAP"
-      }
+      },
+      "redirectUris": [
+        "http://localhost:8085/api",
+        "https://ddap-explore.staging.dnastack.com",
+        "https://ddap-explore-candidate.staging.dnastack.com",
+        "https://ddap-explore.prod.dnastack.com",
+        "https://ddap-explore-candidate.prod.dnastack.com"
+      ]
     }
   },
   "serviceTemplates": {

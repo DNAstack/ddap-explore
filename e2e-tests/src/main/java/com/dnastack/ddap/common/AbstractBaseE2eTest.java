@@ -241,7 +241,8 @@ public abstract class AbstractBaseE2eTest {
                 .replace("$$E2E_TEST_PROJECT$$",TEST_PROJECT)
                 .replace("$$E2E_TEST_NAMESPACE$$", NAMESPACE)
                 .replace("$$E2E_TRUSTED_SOURCE$$", TRUSTED_SOURCE)
-                .replace("$$E2E_TEST_WHITELIST_VALUE$$", TEST_WHITELIST_VALUE);
+                .replace("$$E2E_TEST_WHITELIST_VALUE$$", TEST_WHITELIST_VALUE)
+                .replace("$$E2E_IC_BASE_URL$$", IC_BASE_URL);
     }
 
     private static String stripTrailingSlash(String url) {

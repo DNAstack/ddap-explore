@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 import { dam } from '../proto/dam-service';
-import ResourceToken = dam.v1.ResourceTokens.ResourceToken;
+import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 
 @Component({
   selector: 'ddap-view-access',
@@ -11,7 +11,7 @@ import ResourceToken = dam.v1.ResourceTokens.ResourceToken;
 export class ViewAccessComponent {
 
   @Input()
-  access: ResourceToken;
+  access: IResourceToken;
   @Input()
   url?: string;
 

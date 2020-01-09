@@ -22,7 +22,7 @@
       "issuer": "$$E2E_IC_BASE_URL$$/oidc",
       "authUrl": "$$E2E_IC_BASE_URL$$/identity/v1alpha/master/authorize",
       "tokenUrl": "$$E2E_IC_BASE_URL$$/identity/v1alpha/master/token",
-      "clientId": "$$E2E_CLIENT_ID$$",
+      "clientId": "$$E2E_BROKER_ID$$",
       "ui": {
         "description": "The Identity Concentrator to trust for issuing passports",
         "label": "Trusted Identity Issuer"

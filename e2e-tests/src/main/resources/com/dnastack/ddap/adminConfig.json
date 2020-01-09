@@ -18,19 +18,11 @@
         "label": "trusted source for whitelisting users"
       }
     },
-    "this_ic": {
-      "issuer": "$$E2E_PASSPORT_ISSUER$$",
-      "ui": {
-        "description": "IC DDAP",
-        "label": "IC DDAP"
-      },
-      "clientId": "05c14eaf-c762-4dbf-b7aa-c7bab5dd41b2"
-    },
     "ic_issuer": {
       "issuer": "$$E2E_IC_BASE_URL$$/oidc",
       "authUrl": "$$E2E_IC_BASE_URL$$/identity/v1alpha/master/authorize",
       "tokenUrl": "$$E2E_IC_BASE_URL$$/identity/v1alpha/master/token",
-      "clientId": "5b401230-d69d-4822-993b-87e7edc7a9ec",
+      "clientId": "$$E2E_CLIENT_ID$$",
       "ui": {
         "description": "The Identity Concentrator to trust for issuing passports",
         "label": "Trusted Identity Issuer"

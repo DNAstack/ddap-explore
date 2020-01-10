@@ -2,7 +2,6 @@ package com.dnastack.ddap.explore.wes.controller;
 
 import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
-import com.dnastack.ddap.explore.dataset.model.ViewAuthorization;
 import com.dnastack.ddap.explore.wes.service.ViewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -29,21 +28,6 @@ public class ViewsController {
         this.cookiePackager = cookiePackager;
         this.damClients = damClients;
         this.viewsService = viewsService;
-    }
-
-
-    @PostMapping(path = "/tokens")
-    public Flux<ViewAuthorization.ViewAuthorizationResponse> authorizeMultipleViews(@PathVariable String realm,
-                                                                                    @RequestBody List<String> views,
-                                                                                    ServerHttpRequest request) {
-        if (views == null || views.isEmpty()) {
-            throw new IllegalArgumentException("Urls cannot be empty or null");
-        }
-
-        final List<String> uniqueViews = new ArrayList<>(new HashSet<>(views));
-        Map<CookieKind, UserTokenCookiePackager.CookieValue> tokens = cookiePackager.extractRequiredTokens(request, Set.of(CookieKind.DAM, CookieKind.REFRESH));
-
-        return viewsService.authorizeViews(uniqueViews, tokens, realm);
     }
 
     @PostMapping(path = "/lookup")

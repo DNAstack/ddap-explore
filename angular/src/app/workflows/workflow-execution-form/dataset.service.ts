@@ -3,10 +3,9 @@ import { Injectable } from '@angular/core';
 import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
-import { Dataset } from './dataset-form/dataset.model';
-import { ViewToken } from './dataset-form/view.token.model';
+import { Dataset } from './dataset-selection-step/dataset.model';
 
 @Injectable({
   providedIn: 'root',
@@ -30,10 +29,4 @@ export class DatasetService {
       );
   }
 
-  getViewsAuthorization(views): Observable<Array<ViewToken>> {
-    return this.http.post<Array<ViewToken>>(`${environment.ddapApiUrl}/${realmIdPlaceholder}/views/tokens`, views)
-      .pipe(
-        this.errorHandler.notifyOnError()
-      );
-  }
 }

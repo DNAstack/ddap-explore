@@ -3,24 +3,104 @@
 </ddaplib-header>
 
 <ddaplib-main>
-  <ddap-dataset-form #datasetForm (datasetColumnsChanged)="datasetColumnsChange($event)"></ddap-dataset-form>
-  <ddap-workflow-form #workflowForm [datasetColumns]="datasetColumns"></ddap-workflow-form>
-  <div class="ddap-form-toolbar">
-    <ddaplib-form-footer-error [showError]="!isFormValid && isFormValidated"
-                            [message]="formErrorMessage">
-    </ddaplib-form-footer-error>
-    <button mat-flat-button
-            (click)="executeWorkflows()"
-            data-se="btn-execute"
-            type="submit"
-            color="primary"
-            class="uppercase">
-      <ng-container *ngIf="this.datasetForm.selectedData as selectedData; else singleWorkflow">
-        Execute {{ selectedData.length > 1 ? selectedData.length + ' Workflows' : ' Workflow' }}
-      </ng-container>
-      <ng-template #singleWorkflow>
-        Execute Workflow
-      </ng-template>
-    </button>
-  </div>
+  <mat-vertical-stepper #stepper
+                        [linear]="true">
+    <mat-step [stepControl]="datasetForm"
+              [completed]="resourceTokens"
+              [editable]="!resourceTokens">
+      <ng-template matStepLabel>Import dataset and select data</ng-template>
+      <ddap-dataset-selection-step [form]="datasetForm"
+                                   (datasetColumnsChanged)="datasetColumnsChange($event)">
+      </ddap-dataset-selection-step>
+      <div>
+        <button mat-button matStepperNext>Next</button>
+      </div>
+    </mat-step>
+    <mat-step [stepControl]="wdlForm"
+              [completed]="resourceTokens"
+              [editable]="!resourceTokens">
+      <form [formGroup]="wdlForm">
+        <ng-template matStepLabel>Import workflow description (WDL)</ng-template>
+        <ddap-wdl-selection-step #wdlStep [form]="workflowForm">
+        </ddap-wdl-selection-step>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button matStepperNext (click)="wdlStep.generateForm()">Next</button>
+        </div>
+      </form>
+    </mat-step>
+    <mat-step [stepControl]="inputsForm"
+              [completed]="resourceTokens"
+              [editable]="!resourceTokens">
+      <form [formGroup]="inputsForm">
+        <ng-template matStepLabel>Set workflow inputs</ng-template>
+        <ng-container *ngIf="wdlStep.inputSchema as inputSchema">
+          <ddap-inputs-selection-step [form]="workflowForm"
+                                      [inputSchema]="inputSchema"
+                                      [datasetColumns]="datasetColumns">
+          </ddap-inputs-selection-step>
+        </ng-container>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button matStepperNext>Next</button>
+        </div>
+      </form>
+    </mat-step>
+    <mat-step [completed]="resourceTokens"
+              [editable]="!resourceTokens">
+      <ng-template matStepLabel>Authorize for selected resources</ng-template>
+      <p>
+        Authorize for selected resources from previous steps.
+      </p>
+      <ddap-resource-authorization-step #resourceAuthorizationStep
+                                        [workflowId]="workflowId"
+                                        [selectedColumns]="selectedColumns"
+                                        [selectedRows]="selectedRows">
+      </ddap-resource-authorization-step>
+      <div class="flex stepper-actions">
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+        </div>
+        <a *ngIf="resourceAuthorizationStep.resourceAuthUrl as resourceAuthUrl"
+           [href]="resourceAuthUrl"
+           data-se="btn-authorize">
+          <button mat-flat-button
+                  color="primary"
+                  class="uppercase">
+            Authorize
+          </button>
+        </a>
+      </div>
+    </mat-step>
+    <mat-step>
+      <ng-template matStepLabel>Execute workflow</ng-template>
+      <p>
+        You are now ready to execute workflow.
+      </p>
+      <ddap-workflow-execution-step #executionStep
+                                    [form]="workflowForm"
+                                    [workflowId]="workflowId"
+                                    [selectedColumns]="selectedColumns"
+                                    [selectedRows]="selectedRows"
+                                    [resourceTokens]="resourceTokens">
+      </ddap-workflow-execution-step>
+      <div class="flex stepper-actions">
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button (click)="resetStepper()">Reset</button>
+        </div>
+        <button mat-flat-button
+                color="primary"
+                class="uppercase"
+                (click)="executeWorkflows()">
+          <ng-container *ngIf="this.datasetForm.get('selectedRows').value as selectedData; else singleWorkflow">
+            Execute {{ selectedData.length > 1 ? selectedData.length + ' Workflows' : ' Workflow' }}
+          </ng-container>
+          <ng-template #singleWorkflow>
+            Execute Workflow
+          </ng-template>
+        </button>
+      </div>
+    </mat-step>
+  </mat-vertical-stepper>
 </ddaplib-main>

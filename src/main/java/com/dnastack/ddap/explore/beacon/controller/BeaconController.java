@@ -70,14 +70,13 @@ class BeaconController {
                 return damClient.getResources(realm)
                     .flux()
                     .flatMap((damResources) -> {
-                        Map<String, Resource> resources = damResources.getResourcesMap();
                         return maybePerformBeaconQueries(damClient,
                             damId,
                             realm,
                             beaconRequest,
                             damToken,
                             refreshToken,
-                            resources.entrySet());
+                            damResources.entrySet());
                     });
             });
     }

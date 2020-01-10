@@ -1,0 +1,17 @@
+@import 'node_modules/ddap-common-lib/styles/modules/colors';
+
+mat-chip-list {
+  mat-label {
+    color: $color-grey;
+    font-size: 0.9rem;
+  }
+  margin-bottom: 0.5rem;
+}
+
+textarea {
+  background: $color-grey-light;
+}
+
+.row {
+  margin-top: 1rem;
+}

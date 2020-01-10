@@ -1,0 +1,27 @@
+<form class="ddap-form"
+      novalidate
+      [formGroup]="form">
+  <div class="row">
+    <mat-chip-list>
+      <mat-label>Example WDLs:</mat-label>
+      <mat-chip color="accent"
+                (click)="useExample('md5sum')">
+        md5sum
+      </mat-chip>
+      <mat-chip color="accent"
+                (click)="useExample('callDenovo')">
+        callDenovo
+      </mat-chip>
+    </mat-chip-list>
+  </div>
+  <div class="row">
+    <mat-form-field class="col">
+        <textarea matInput
+                  formControlName="wdl"
+                  data-se="inp-workflow-wdl"
+                  rows="20"
+                  required>
+        </textarea>
+    </mat-form-field>
+  </div>
+</form>

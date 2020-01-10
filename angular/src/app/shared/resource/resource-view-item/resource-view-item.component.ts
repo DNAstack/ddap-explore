@@ -9,7 +9,8 @@ import { environment } from '../../../../environments/environment';
 import { dam } from '../../proto/dam-service';
 import { ResourceService } from '../resource.service';
 import ResourceTokens = dam.v1.ResourceTokens;
-import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
+
+
 
 @Component({
   selector: 'ddap-resource-view-item',
@@ -66,9 +67,10 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
 
   getUrlForObtainingAccessToken(): string {
     const redirectUri = `${this.router.url}?checkout=true`;
-    return this.resourceService.getUrlForObtainingAccessToken(
-      this.damId, this.resource.name, this.view.name, this.defaultRole, redirectUri
+    const resource = this.resourceService.getDamResourcePath(
+      this.damId, this.resource.name, this.view.name, this.defaultRole
     );
+    return this.resourceService.getUrlForObtainingAccessToken([resource], redirectUri);
   }
 
   getUrlIfApplicable(): string {
@@ -82,7 +84,8 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
     }
 
     const viewAccessUrl = _get(interfaces, `[${httpInterfaces[0]}].uri[0]`);
-    const accessToken = this.lookupResourceToken()['access_token'];
+    const resourcePath = `${this.resource.name}/views/${this.view.name}/roles/${this.defaultRole}`;
+    const accessToken = this.resourceService.lookupResourceToken(this.resourceTokens, resourcePath)['access_token'];
     return `${viewAccessUrl}/o?access_token=${accessToken}`;
   }
 
@@ -90,27 +93,7 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
     const resource = this.resourceService.getDamResourcePath(
       this.damId, this.resource.name, this.view.name, this.defaultRole
     );
-    return this.resourceService.getAccessTokensForAuthorizedResources(resource);
-  }
-
-  lookupResourceToken(): IResourceToken {
-    if (!this.resourceTokens) {
-      return;
-    }
-    const resource = this.lookupResourceTokenDescriptor();
-    return this.resourceTokens.access[resource.access];
-  }
-
-  private lookupResourceTokenDescriptor() {
-    if (!this.resourceTokens) {
-      return;
-    }
-    const resourcePath = `${this.resource.name}/views/${this.view.name}/roles/${this.defaultRole}`;
-    const resourceKey: any = Object.keys(this.resourceTokens.resources)
-      .find((key) => {
-        return key.includes(resourcePath);
-      });
-    return this.resourceTokens.resources[resourceKey];
+    return this.resourceService.getAccessTokensForAuthorizedResources([resource]);
   }
 
 }

@@ -1,8 +1,8 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 
-import { isUrl } from '../../shared/util';
-import { Dataset } from '../dataset-form/dataset.model';
+import { isUrl } from '../../../../shared/util';
+import { Dataset } from '../dataset.model';
 
 @Component({
   selector: 'ddap-dataset-results',

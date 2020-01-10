@@ -1,15 +1,21 @@
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatStepperModule } from '@angular/material/stepper';
 import { NgJsonEditorModule } from 'ang-jsoneditor';
 import { MaterialDesignFrameworkModule } from 'angular7-json-schema-form';
 
 import { SharedModule } from '../shared/shared.module';
 
-import { DatasetFormComponent } from './dataset-form/dataset-form.component';
-import { DatasetResultsComponent } from './dataset-results/dataset-results.component';
 import { WorkflowDetailComponent } from './workflow-detail/workflow-detail.component';
-import { AutocompleteInputComponent } from './workflow-form/widget/autocomplete-input.component';
-import { WorkflowFormComponent } from './workflow-form/workflow-form.component';
+import { DatasetResultsComponent } from './workflow-execution-form/dataset-selection-step/dataset-results/dataset-results.component';
+import { DatasetSelectionStepComponent } from './workflow-execution-form/dataset-selection-step/dataset-selection-step.component';
+import { InputsSelectionStepComponent } from './workflow-execution-form/inputs-selection-step/inputs-selection-step.component';
+import { AutocompleteInputComponent } from './workflow-execution-form/inputs-selection-step/widget/autocomplete-input.component';
+import {
+  ResourceAuthorizationStepComponent
+} from './workflow-execution-form/resource-authorization-step/resource-authorization-step.component';
+import { WdlSelectionStepComponent } from './workflow-execution-form/wdl-selection-step/wdl-selection-step.component';
+import { WorkflowExecutionStepComponent } from './workflow-execution-form/workflow-execution-step/workflow-execution-step.component';
 import { WorkflowListMultiComponent } from './workflow-list-multi/workflow-list-multi.component';
 import { WorkflowListSingleComponent } from './workflow-list-single/workflow-list-single.component';
 import { WorkflowManageComponent } from './workflow-manage/workflow-manage.component';
@@ -21,18 +27,22 @@ import { WorkflowsRoutingModule } from './workflows-routing.module';
     WorkflowListSingleComponent,
     WorkflowDetailComponent,
     WorkflowManageComponent,
-    WorkflowFormComponent,
-    DatasetFormComponent,
     DatasetResultsComponent,
     WorkflowDetailComponent,
     AutocompleteInputComponent,
+    DatasetSelectionStepComponent,
+    WdlSelectionStepComponent,
+    InputsSelectionStepComponent,
+    ResourceAuthorizationStepComponent,
+    WorkflowExecutionStepComponent,
   ],
-  imports: [
-    SharedModule,
-    NgJsonEditorModule,
-    FlexLayoutModule,
-    MaterialDesignFrameworkModule,
-    WorkflowsRoutingModule,
-  ],
+    imports: [
+        SharedModule,
+        NgJsonEditorModule,
+        FlexLayoutModule,
+        MaterialDesignFrameworkModule,
+        WorkflowsRoutingModule,
+        MatStepperModule,
+    ],
 })
 export class WorkflowsModule { }

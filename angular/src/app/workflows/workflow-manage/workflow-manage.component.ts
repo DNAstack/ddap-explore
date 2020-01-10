@@ -1,14 +1,24 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { Component, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import ResourceTokens = dam.v1.ResourceTokens;
+import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Form } from 'ddap-common-lib';
 import { FormValidationService } from 'ddap-common-lib';
-import _cloneDeep from 'lodash.clonedeep';
-import _get from 'lodash.get';
-import { Observable, zip } from 'rxjs';
+import _isequal from 'lodash.isequal';
+import { Subscription, zip } from 'rxjs';
 
-import { DatasetFormComponent } from '../dataset-form/dataset-form.component';
-import { WorkflowFormComponent } from '../workflow-form/workflow-form.component';
+import { dam } from '../../shared/proto/dam-service';
+import { ResourceService } from '../../shared/resource/resource.service';
+import {
+  ResourceAuthorizationStepComponent
+} from '../workflow-execution-form/resource-authorization-step/resource-authorization-step.component';
+import { WdlSelectionStepComponent } from '../workflow-execution-form/wdl-selection-step/wdl-selection-step.component';
+import {
+  WorkflowExecutionStepComponent
+} from '../workflow-execution-form/workflow-execution-step/workflow-execution-step.component';
+import { WorkflowExecution } from '../workflow-execution-form/workflow-execution-step/workflow-execution.model';
+import { WorkflowFormBuilder } from '../workflow-execution-form/workflow-form-builder.service';
+import { WorkflowsStateService } from '../workflow-execution-form/workflows-state.service';
 import { WorkflowService } from '../workflows.service';
 
 @Component({
@@ -17,49 +27,100 @@ import { WorkflowService } from '../workflows.service';
   styleUrls: ['./workflow-manage.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class WorkflowManageComponent {
+export class WorkflowManageComponent implements OnInit, OnDestroy {
 
-  @ViewChild(DatasetFormComponent, { static: false })
-  datasetForm: DatasetFormComponent;
-  @ViewChild(WorkflowFormComponent, { static: false })
-  workflowForm: WorkflowFormComponent;
+  get wdlForm() {
+    return this.workflowForm.get('wdl') as FormGroup;
+  }
 
-  formErrorMessage: string;
-  isFormValid: boolean;
-  isFormValidated: boolean;
+  get inputsForm() {
+    return this.workflowForm.get('inputs') as FormGroup;
+  }
 
+  get selectedColumns(): string[] {
+    return this.datasetForm.get('selectedColumns').value;
+  }
+
+  get selectedRows(): object[] {
+    return this.datasetForm.get('selectedRows').value;
+  }
+
+  datasetForm: FormGroup;
+  workflowForm: FormGroup;
   datasetColumns: string[];
+  paramsSubscription: Subscription;
+  resourceTokens: ResourceTokens;
+  workflowId = Math.random().toString(36).substring(7);
+
+  @ViewChild('stepper', { static: false })
+  stepper: MatStepper;
+  @ViewChild(WdlSelectionStepComponent, { static: false })
+  wdlStep: WdlSelectionStepComponent;
+  @ViewChild(ResourceAuthorizationStepComponent, { static: false })
+  resourceAuthorizationStep: ResourceAuthorizationStepComponent;
+  @ViewChild(WorkflowExecutionStepComponent, { static: false })
+  executionStep: WorkflowExecutionStepComponent;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
               private validationService: FormValidationService,
-              private workflowService: WorkflowService) {
+              private workflowService: WorkflowService,
+              private resourceService: ResourceService,
+              private workflowFormBuilder: WorkflowFormBuilder,
+              private workflowsStateService: WorkflowsStateService) {
+  }
+
+  ngOnInit() {
+    this.datasetForm = this.workflowFormBuilder.buildDatasetForm();
+    this.datasetForm.valueChanges
+      .subscribe(() => this.saveState());
+    this.workflowForm = this.workflowFormBuilder.buildWorkflowForm();
+    this.workflowForm.valueChanges
+      .subscribe(() => this.saveState());
+
+    this.paramsSubscription = this.route.queryParams
+      .subscribe(params => {
+        if (!params.state) {
+          return;
+        }
+        this.workflowId = params.state;
+        this.loadFromStateAndCheckoutAuthorizedResources();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.paramsSubscription.unsubscribe();
+    this.workflowsStateService.removeWorkflowData(this.workflowId);
+  }
+
+  resetStepper() {
+    this.stepper.reset();
+    this.workflowsStateService.removeWorkflowData(this.workflowId);
   }
 
   datasetColumnsChange(columns) {
-    this.datasetColumns = columns;
+    if (!_isequal(this.datasetColumns, columns)) {
+      this.datasetColumns = columns;
+      if (this.workflowForm.get('wdl').value) {
+        this.wdlStep.generateForm();
+      }
+    }
+  }
+
+  getAccessTokensForAuthorizedResources(workflowId: string) {
+    const { columnDataMappedToViews } = this.workflowsStateService.getMetaInfoForWorkflow(workflowId);
+    const resourcePaths: string[] = Object.values(columnDataMappedToViews);
+    return this.resourceService.getAccessTokensForAuthorizedResources(resourcePaths);
   }
 
   executeWorkflows(): void {
-    if (!this.validate(this.workflowForm)) {
-      return;
-    }
+    const damId = this.executionStep.getDamId();
+    const wesView = this.workflowForm.get('wesView').value;
+    const executions: WorkflowExecution[] = this.executionStep.getWorkflowExecutionModels();
 
-    const damId = this.workflowForm.getDamId();
-    const wesView = this.workflowForm.form.get('wesView').value;
-    const wdl = this.workflowForm.form.get('wdl').value;
-    // TODO: make tokens relevant to single run -> instead of all tokens, just tokens which are needed for particular run
-    const tokens = JSON.stringify(this.datasetForm.getTokensModel());
-
-    if (this.datasetForm.selectedData && this.datasetForm.selectedData.length > 0) {
-      zip(...this.datasetForm.selectedData
-        .map((row) => this.executeWorkflowForSingleRow(row, damId, wesView, wdl, tokens))
-      ).subscribe((runs: object[]) => this.navigateUp('../..', runs, damId, wesView), this.showError);
-    } else {
-      const inputs = this.workflowForm.form.get('inputs').value;
-      this.workflowService.runWorkflow(damId, wesView, wdl, JSON.stringify(inputs), tokens)
-        .subscribe((run) => this.navigateUp('../..', [run], damId, wesView), this.showError);
-    }
+    zip(...executions.map((execution) =>
+        this.workflowService.runWorkflow(damId, wesView, execution)
+      )).subscribe((runs: object[]) => this.navigateUp('../..', runs, damId, wesView));
   }
 
   protected navigateUp = (path: string, runs: object[], damId, wesView) => {
@@ -68,36 +129,30 @@ export class WorkflowManageComponent {
     this.router.navigate(navigatePath, { relativeTo: this.route, state: { runs } });
   }
 
-  protected showError = ({ error }: HttpErrorResponse) => {
-    this.formErrorMessage = (error instanceof Object) ? JSON.stringify(error) : error;
-    this.isFormValid = false;
-    this.isFormValidated = true;
+  private loadFromStateAndCheckoutAuthorizedResources() {
+    const { datasetForm, workflowForm } = this.workflowsStateService.getWorkflowForm(this.workflowId);
+    this.datasetForm = this.workflowFormBuilder.buildDatasetForm(datasetForm);
+    this.workflowForm = this.workflowFormBuilder.buildWorkflowForm(workflowForm);
+
+    this.getAccessTokensForAuthorizedResources(this.workflowId)
+      .subscribe((access) => {
+        this.resourceTokens = access;
+        this.moveToExecutionStep();
+      });
   }
 
-  private executeWorkflowForSingleRow(row, damId, wesView, wdl, tokens): Observable<any> {
-    const inputs = _cloneDeep(this.workflowForm.form.get('inputs').value);
-    this.substituteColumnNamesWithValues(inputs, row);
-    return this.workflowService.runWorkflow(damId, wesView, wdl, JSON.stringify(inputs), tokens);
-  }
-
-  private substituteColumnNamesWithValues(object: object, row: object) {
-    Object.entries(object).forEach(([key, value]) => {
-      switch (typeof object[key]) {
-        case 'object':
-          this.substituteColumnNamesWithValues(object[key], row); break;
-        case 'string':
-          if (value.startsWith('${') && value.endsWith('}')) {
-            object[key] = _get(row, value.substring(2, value.length - 1), '');
-          }
-      }
+  private saveState() {
+    this.workflowsStateService.storeWorkflowForm(this.workflowId, {
+      datasetForm: this.datasetForm.value,
+      workflowForm: this.workflowForm.value,
     });
   }
 
-  private validate(form: Form): boolean {
-    this.formErrorMessage = null;
-    this.isFormValid = this.validationService.validate(form);
-    this.isFormValidated = true;
-    return this.isFormValid;
+  private moveToExecutionStep() {
+    // https://stackoverflow.com/a/56201015
+    this.stepper.linear = false;
+    this.stepper.selectedIndex = 4;
+    this.stepper.linear = true;
   }
 
 }

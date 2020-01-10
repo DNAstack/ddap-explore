@@ -29,7 +29,6 @@ public class WesResourceService {
      */
     public Flux<WesResourceViews> getResources(Map.Entry<String, ReactiveDamClient> damClient, String realm) {
         return damClient.getValue().getResources(realm)
-                .map(DamService.GetResourcesResponse::getResourcesMap)
                 .map(Map::entrySet)
                 .map(Collection::stream)
                 .map(resources -> getResources(damClient.getKey(), resources))

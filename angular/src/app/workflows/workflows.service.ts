@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 
+import { WorkflowExecution } from './workflow-execution-form/workflow-execution-step/workflow-execution.model';
 import { SimplifiedWesResourceViews, WesResourceViews, WorkflowRunsResponse } from './workflow.model';
 
 @Injectable({
@@ -32,13 +33,9 @@ export class WorkflowService {
       );
   }
 
-  public runWorkflow(damId: string, view: String, wdl: String, inputs: String, tokens: string): Observable<any> {
+  public runWorkflow(damId: string, view: String, model: WorkflowExecution): Observable<any> {
     return this.http.post(`${environment.ddapApiUrl}/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs`,
-      {
-        wdl,
-        inputsJson: inputs,
-        tokensJson: tokens,
-      }
+      { ...model }
     );
   }
 

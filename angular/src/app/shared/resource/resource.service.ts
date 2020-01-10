@@ -1,13 +1,15 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { realmIdPlaceholder, RealmStateService } from "ddap-common-lib";
+import { realmIdPlaceholder, RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
+import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { dam } from "../proto/dam-service";
+import { dam } from '../proto/dam-service';
 import ResourceTokens = dam.v1.ResourceTokens;
+import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
+import IResourceTokens = dam.v1.IResourceTokens;
 
 @Injectable({
   providedIn: 'root',
@@ -23,17 +25,40 @@ export class ResourceService {
     return `${damId};${resourceId}/views/${viewId}/roles/${roleId}`;
   }
 
-  getUrlForObtainingAccessToken(damId: string, resourceId: string, viewId: string, roleId: string, redirectUri: string): string {
+  getUrlForObtainingAccessToken(resourcePaths: string[], redirectUri: string): string {
     const realmId = _get(this.activatedRoute, 'root.firstChild.snapshot.params.realmId', this.realmStateService.getRealm());
-    const resource = this.getDamResourcePath(damId, resourceId, viewId, roleId);
-    return `${environment.ddapApiUrl}/${realmId}/resources/authorize?resource=${resource}&redirectUri=${redirectUri}`;
+    const resources = resourcePaths.map((resource) => {
+      return `resource=${resource}`;
+    });
+    return `${environment.ddapApiUrl}/${realmId}/resources/authorize?${resources.join('&')}&redirectUri=${redirectUri}`;
   }
 
-  getAccessTokensForAuthorizedResources(resource: string): Observable<ResourceTokens> {
+  getAccessTokensForAuthorizedResources(resourcePaths: string[]): Observable<ResourceTokens> {
+    const resources = resourcePaths.map((resource) => {
+      return `resource=${resource}`;
+    });
     return this.http.get<ResourceTokens>(
-      `${environment.ddapApiUrl}/${realmIdPlaceholder}/resources/checkout`,
-      { params: { resource }}
+      `${environment.ddapApiUrl}/${realmIdPlaceholder}/resources/checkout?${resources.join('&')}`
     );
+  }
+
+  lookupResourceToken(resourceTokens: IResourceTokens, resourcePath: string): IResourceToken {
+    if (!resourceTokens) {
+      return;
+    }
+    const resource = this.lookupResourceTokenDescriptor(resourceTokens, resourcePath);
+    return resourceTokens.access[resource.access];
+  }
+
+  private lookupResourceTokenDescriptor(resourceTokens: IResourceTokens, resourcePath: string): ResourceTokens.IDescriptor {
+    if (!resourceTokens) {
+      return;
+    }
+    const resourceKey: any = Object.keys(resourceTokens.resources)
+      .find((key) => {
+        return key.includes(resourcePath);
+      });
+    return resourceTokens.resources[resourceKey];
   }
 
 }

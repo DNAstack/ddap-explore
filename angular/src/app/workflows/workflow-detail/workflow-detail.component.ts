@@ -1,9 +1,15 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
+import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
+import { map } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { JsonEditorDefaults } from '../../shared/jsonEditorDefaults';
+import { dam } from '../../shared/proto/dam-service';
+import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
+import { ResourceService } from '../../shared/resource/resource.service';
+import { SimplifiedWesResourceViews } from '../workflow.model';
 import { WorkflowService } from '../workflows.service';
 
 @Component({
@@ -12,6 +18,7 @@ import { WorkflowService } from '../workflows.service';
   styleUrls: ['./workflow-detail.component.scss'],
 })
 export class WorkflowDetailComponent implements OnInit {
+
   runDetails;
   editorOptions: JsonEditorOptions | any;
 
@@ -19,15 +26,25 @@ export class WorkflowDetailComponent implements OnInit {
   editor: JsonEditorComponent;
 
   constructor(private workflowService: WorkflowService,
-              private activatedRoute: ActivatedRoute) {
+              private activatedRoute: ActivatedRoute,
+              private resourceService: ResourceService,
+              private resourceAuthStateService: ResourceAuthStateService) {
     this.editorOptions = new JsonEditorDefaults();
   }
 
   ngOnInit() {
     const {damId, viewId, runId} = this.activatedRoute.snapshot.params;
-    this.workflowService.workflowRunDetail(damId, viewId, runId).subscribe(runDetails => {
-      this.runDetails = this.transformResponse(runDetails);
-    });
+    this.workflowService.getAllWesViews()
+      .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
+        const resourcePath = this.workflowService.getResourcePathForView(damId, viewId, wesResourceViews);
+        const resourceTokens = this.resourceAuthStateService.getAccess();
+        const resourceToken = this.resourceService.lookupResourceToken(resourceTokens, resourcePath);
+
+        this.workflowService.workflowRunDetail(damId, viewId, runId, resourceToken['access_token'])
+          .subscribe(runDetails => {
+            this.runDetails = this.transformResponse(runDetails);
+          });
+      });
   }
 
   private transformResponse(runDetails: any) {
@@ -43,4 +60,5 @@ export class WorkflowDetailComponent implements OnInit {
     });
     return runDetails;
   }
+
 }

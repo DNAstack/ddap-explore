@@ -9,6 +9,8 @@ import { environment } from '../../../../environments/environment';
 import { dam } from '../../proto/dam-service';
 import { ResourceService } from '../resource.service';
 import ResourceTokens = dam.v1.ResourceTokens;
+import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
+import IResourceTokens = dam.v1.IResourceTokens;
 
 
 
@@ -33,7 +35,7 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
 
   paramsSubscription: Subscription;
   accessSubscription: Subscription;
-  resourceTokens: ResourceTokens;
+  resourceToken: IResourceToken;
   url?: string;
 
   ttlForm = new FormControl(1, Validators.compose([Validators.required, Validators.min(1)]));
@@ -55,7 +57,8 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
         }
         this.accessSubscription = this.getAccessTokensForAuthorizedResources()
           .subscribe((access) => {
-            this.resourceTokens = access;
+            const resourcePath = `${this.resource.name}/views/${this.view.name}/roles/${this.defaultRole}`;
+            this.resourceToken = this.resourceService.lookupResourceToken(access, resourcePath);
             this.url = this.getUrlIfApplicable();
           });
       });
@@ -84,9 +87,8 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
     }
 
     const viewAccessUrl = _get(interfaces, `[${httpInterfaces[0]}].uri[0]`);
-    const resourcePath = `${this.resource.name}/views/${this.view.name}/roles/${this.defaultRole}`;
-    const accessToken = this.resourceService.lookupResourceToken(this.resourceTokens, resourcePath)['access_token'];
-    return `${viewAccessUrl}/o?access_token=${accessToken}`;
+
+    return `${viewAccessUrl}/o?access_token=${this.resourceToken['access_token']}`;
   }
 
   getAccessTokensForAuthorizedResources() {

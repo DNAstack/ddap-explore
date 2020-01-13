@@ -11,13 +11,11 @@ import com.dnastack.ddap.explore.wes.service.WesResourceService;
 import com.dnastack.ddap.explore.wes.service.WesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -47,7 +45,7 @@ public class WorkflowController {
     }
 
     @PostMapping(value = "/describe")
-    public Mono<Object> getJsonSchemaFromWdl(@PathVariable String realm, @RequestBody String wdl) {
+    public Mono<Object> getJsonSchemaFromWdl(@RequestBody String wdl) {
         return wdlValidatorClient.getJsonSchema(wdl);
     }
 
@@ -60,61 +58,45 @@ public class WorkflowController {
     }
 
     @GetMapping(value = "/{damId}/views/{viewId}/runs")
-    public Mono<WorkflowExecutionRunsResponseModel> getWorkflowRuns(ServerHttpRequest request,
-                                                                    @PathVariable String realm,
+    public Mono<WorkflowExecutionRunsResponseModel> getWorkflowRuns(@PathVariable String realm,
                                                                     @PathVariable String damId,
                                                                     @PathVariable String viewId,
+                                                                    @RequestParam String accessToken,
                                                                     @RequestParam(required = false) String nextPage) {
-        Optional<UserTokenCookiePackager.CookieValue> foundDamToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
-        Optional<UserTokenCookiePackager.CookieValue> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.REFRESH);
-        UserTokenCookiePackager.CookieValue damToken = foundDamToken.orElseThrow(() -> new IllegalArgumentException("Authorization dam token is required."));
-        UserTokenCookiePackager.CookieValue refreshToken = foundRefreshToken.orElseThrow(() -> new IllegalArgumentException("Authorization refresh token is required."));
-
         // TODO: use damClientFactory
         Map.Entry<String, ReactiveDamClient> damClient = damClients.entrySet().stream()
                 .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
                 .findFirst()
                 .get();
-        return wesService.getAllWorkflowRunsFromWesServer(damClient, realm, damToken.getClearText(), refreshToken.getClearText(), viewId, nextPage);
+        return wesService.getAllWorkflowRunsFromWesServer(damClient, realm, accessToken, viewId, nextPage);
     }
 
     @PostMapping(value = "/{damId}/views/{viewId}/runs")
-    public Mono<WorkflowExecutionRunModel> addWorkflowToRun(ServerHttpRequest request,
-                                                            @PathVariable String realm,
+    public Mono<WorkflowExecutionRunModel> addWorkflowToRun(@PathVariable String realm,
                                                             @PathVariable String damId,
                                                             @PathVariable String viewId,
+                                                            @RequestParam String accessToken,
                                                             @RequestBody WorkflowExecutionRunRequestModel runRequest) {
-        Optional<UserTokenCookiePackager.CookieValue> foundDamToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
-        Optional<UserTokenCookiePackager.CookieValue> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.REFRESH);
-        UserTokenCookiePackager.CookieValue damToken = foundDamToken.orElseThrow(() -> new IllegalArgumentException("Authorization dam token is required."));
-        UserTokenCookiePackager.CookieValue refreshToken = foundRefreshToken.orElseThrow(() -> new IllegalArgumentException("Authorization refresh token is required."));
-
         // TODO: use damClientFactory
         Map.Entry<String, ReactiveDamClient> damClient = damClients.entrySet().stream()
                 .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
                 .findFirst()
                 .get();
-        return wesService.executeWorkflow(damClient, realm, damToken.getClearText(), refreshToken.getClearText(), viewId, runRequest);
+        return wesService.executeWorkflow(damClient, realm, accessToken, viewId, runRequest);
     }
 
     @GetMapping(value = "/{damId}/views/{viewId}/runs/{runId}")
-    public Mono<WorkflowExecutionRunModel> getWorkflowRunDetails(ServerHttpRequest request,
-                                                                          @PathVariable String realm,
+    public Mono<WorkflowExecutionRunModel> getWorkflowRunDetails(@PathVariable String realm,
                                                                           @PathVariable String damId,
                                                                           @PathVariable String viewId,
-                                                                          @PathVariable String runId) {
-
-        Optional<UserTokenCookiePackager.CookieValue> foundDamToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.DAM);
-        Optional<UserTokenCookiePackager.CookieValue> foundRefreshToken = cookiePackager.extractToken(request, UserTokenCookiePackager.CookieKind.REFRESH);
-        UserTokenCookiePackager.CookieValue damToken = foundDamToken.orElseThrow(() -> new IllegalArgumentException("Authorization dam token is required."));
-        UserTokenCookiePackager.CookieValue refreshToken = foundRefreshToken.orElseThrow(() -> new IllegalArgumentException("Authorization refresh token is required."));
-
+                                                                          @PathVariable String runId,
+                                                                 @RequestParam String accessToken) {
         // TODO: use damClientFactory
         Map.Entry<String, ReactiveDamClient> damClient = damClients.entrySet().stream()
                 .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
                 .findFirst()
                 .get();
-        return wesService.getWorkflowRunDetails(damClient, realm, damToken.getClearText(), refreshToken.getClearText(), viewId, runId);
+        return wesService.getWorkflowRunDetails(damClient, realm, accessToken, viewId, runId);
     }
 
 }

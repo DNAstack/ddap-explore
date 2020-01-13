@@ -19,7 +19,7 @@ import { WorkflowExecution } from './workflow-execution.model';
   templateUrl: './workflow-execution-step.component.html',
   styleUrls: ['./workflow-execution-step.component.scss'],
 })
-export class WorkflowExecutionStepComponent implements OnInit {
+export class WorkflowExecutionStepComponent {
 
   @Input()
   form: FormGroup;
@@ -32,23 +32,10 @@ export class WorkflowExecutionStepComponent implements OnInit {
   @Input()
   resourceTokens: IResourceTokens;
 
-  wesResourceViews: SimplifiedWesResourceViews[];
-
   constructor(private route: ActivatedRoute,
               private resourceService: ResourceService,
               private workflowService: WorkflowService,
               private workflowsStateService: WorkflowsStateService) {
-  }
-
-  ngOnInit() {
-    this.workflowService.getAllWesViews()
-      .subscribe((sanitizedWesResourceViews: SimplifiedWesResourceViews[]) => {
-        this.wesResourceViews = sanitizedWesResourceViews;
-        const { viewId } = this.route.snapshot.params;
-        if (viewId) {
-          this.form.get('wesView').patchValue(viewId);
-        }
-      });
   }
 
   getWorkflowExecutionModels(): WorkflowExecution[] {
@@ -66,12 +53,6 @@ export class WorkflowExecutionStepComponent implements OnInit {
           tokensJson: tokens,
         };
       });
-  }
-
-  getDamId(): string {
-    return this.wesResourceViews.find((wesResourceViews: SimplifiedWesResourceViews) => {
-      return wesResourceViews.views.some((view) => view.name === this.form.get('wesView').value);
-    }).damId;
   }
 
   private substituteColumnNamesWithValues(object: object, row: object) {

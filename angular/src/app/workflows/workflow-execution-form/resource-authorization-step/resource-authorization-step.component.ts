@@ -20,6 +20,8 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
   selectedRows: object[];
   @Input()
   selectedColumns: string[];
+  @Input()
+  damIdWesResourcePathPair: string;
 
   resourceAuthUrl: string;
 
@@ -57,6 +59,7 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
 
   private getUrlForObtainingAccessToken(resources: string[]): string {
     const redirectUri = this.getRedirectUrl();
+    resources.push(this.damIdWesResourcePathPair);
     return this.resourceService.getUrlForObtainingAccessToken(resources, redirectUri);
   }
 

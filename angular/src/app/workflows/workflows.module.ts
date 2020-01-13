@@ -15,6 +15,7 @@ import {
   ResourceAuthorizationStepComponent
 } from './workflow-execution-form/resource-authorization-step/resource-authorization-step.component';
 import { WdlSelectionStepComponent } from './workflow-execution-form/wdl-selection-step/wdl-selection-step.component';
+import { WesServerSelectionStepComponent } from './workflow-execution-form/wes-server-selection-step/wes-server-selection-step.component';
 import { WorkflowExecutionStepComponent } from './workflow-execution-form/workflow-execution-step/workflow-execution-step.component';
 import { WorkflowListMultiComponent } from './workflow-list-multi/workflow-list-multi.component';
 import { WorkflowListSingleComponent } from './workflow-list-single/workflow-list-single.component';
@@ -33,6 +34,7 @@ import { WorkflowsRoutingModule } from './workflows-routing.module';
     DatasetSelectionStepComponent,
     WdlSelectionStepComponent,
     InputsSelectionStepComponent,
+    WesServerSelectionStepComponent,
     ResourceAuthorizationStepComponent,
     WorkflowExecutionStepComponent,
   ],

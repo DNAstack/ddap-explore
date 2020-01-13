@@ -10,6 +10,7 @@ import { dam } from '../proto/dam-service';
 import ResourceTokens = dam.v1.ResourceTokens;
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 import IResourceTokens = dam.v1.IResourceTokens;
+import IView = dam.v1.IView;
 
 @Injectable({
   providedIn: 'root',
@@ -21,20 +22,26 @@ export class ResourceService {
               private realmStateService: RealmStateService) {
   }
 
+  getView(damId: string, viewId: string): Observable<IView> {
+    return this.http.get<IView>(
+      `${environment.ddapApiUrl}/${realmIdPlaceholder}/dams/${damId}/views/${viewId}`
+    );
+  }
+
   getDamResourcePath(damId: string, resourceId: string, viewId: string, roleId: string): string {
     return `${damId};${resourceId}/views/${viewId}/roles/${roleId}`;
   }
 
-  getUrlForObtainingAccessToken(resourcePaths: string[], redirectUri: string): string {
+  getUrlForObtainingAccessToken(damIdResourcePathPairs: string[], redirectUri: string): string {
     const realmId = _get(this.activatedRoute, 'root.firstChild.snapshot.params.realmId', this.realmStateService.getRealm());
-    const resources = resourcePaths.map((resource) => {
+    const resources = damIdResourcePathPairs.map((resource) => {
       return `resource=${resource}`;
     });
     return `${environment.ddapApiUrl}/${realmId}/resources/authorize?${resources.join('&')}&redirectUri=${redirectUri}`;
   }
 
-  getAccessTokensForAuthorizedResources(resourcePaths: string[]): Observable<ResourceTokens> {
-    const resources = resourcePaths.map((resource) => {
+  getAccessTokensForAuthorizedResources(damIdResourcePathPairs: string[]): Observable<IResourceTokens> {
+    const resources = damIdResourcePathPairs.map((resource) => {
       return `resource=${resource}`;
     });
     return this.http.get<ResourceTokens>(

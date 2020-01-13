@@ -16,12 +16,12 @@
         {{ view.url }}
       </mat-card-content>
       <mat-card-actions align="end">
-        <a [routerLink]="[resourceViews.damId, 'views', view.name, 'runs']">
+        <a [href]="getResourceAuthUrl(resourceViews.damId, view)"
+           data-se="btn-authorize">
           <button mat-button
                   color="primary"
-                  class="uppercase"
-                  data-se="view-btn">
-            View Runs
+                  class="uppercase">
+            Authorize To View Runs
           </button>
         </a>
       </mat-card-actions>

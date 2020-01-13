@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
+import { dam } from '../shared/proto/dam-service';
 
 import { WorkflowExecution } from './workflow-execution-form/workflow-execution-step/workflow-execution.model';
 import { SimplifiedWesResourceViews, WesResourceViews, WorkflowRunsResponse } from './workflow.model';
@@ -18,9 +19,9 @@ export class WorkflowService {
               private errorHandler: ErrorHandlerService) {
   }
 
-  public getWorkflowRuns(damId: string, view: String, nextPage: string = ''): Observable<WorkflowRunsResponse> {
+  public getWorkflowRuns(damId: string, view: String, wesAccessToken: string, nextPage: string = ''): Observable<WorkflowRunsResponse> {
     return this.http.get<WorkflowRunsResponse>(
-      `${environment.ddapApiUrl}/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs?nextPage=${nextPage}`
+      `${environment.ddapApiUrl}/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs?nextPage=${nextPage}&accessToken=${wesAccessToken}`
     );
   }
 
@@ -33,15 +34,17 @@ export class WorkflowService {
       );
   }
 
-  public runWorkflow(damId: string, view: String, model: WorkflowExecution): Observable<any> {
-    return this.http.post(`${environment.ddapApiUrl}/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs`,
+  public runWorkflow(damId: string, view: String, model: WorkflowExecution, wesAccessToken: string): Observable<any> {
+    return this.http.post(
+      `${environment.ddapApiUrl}/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs?accessToken=${wesAccessToken}`,
       { ...model }
     );
   }
 
-  public workflowRunDetail(damId: string, viewId: string, runId: string): Observable<any> {
-    return this.http.get(`${environment.ddapApiUrl}/${realmIdPlaceholder}/wes/${damId}/views/${viewId}/runs/${runId}`)
-      .pipe(
+  public workflowRunDetail(damId: string, viewId: string, runId: string, wesAccessToken: string): Observable<any> {
+    return this.http.get(
+      `${environment.ddapApiUrl}/${realmIdPlaceholder}/wes/${damId}/views/${viewId}/runs/${runId}?accessToken=${wesAccessToken}`
+    ).pipe(
         this.errorHandler.notifyOnError()
       );
   }
@@ -52,6 +55,20 @@ export class WorkflowService {
     ).pipe(
       this.errorHandler.notifyOnError()
     );
+  }
+
+  public getResourcePathForView(damId: string, viewId: string, wesResourceViews: SimplifiedWesResourceViews[]): string {
+    const resourcePaths: string[] = wesResourceViews
+      .filter((wesResourceView) => wesResourceView.damId === damId)
+      .map((wesResourceView) => {
+        const view = wesResourceView.views.find((resourceView) => {
+          return resourceView.name === viewId;
+        });
+        if (view) {
+          return view.resourcePath;
+        }
+      });
+    return resourcePaths[0];
   }
 
 }

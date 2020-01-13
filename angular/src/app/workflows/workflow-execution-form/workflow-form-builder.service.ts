@@ -22,6 +22,7 @@ export class WorkflowFormBuilder {
   buildWorkflowForm(workflow?: any): FormGroup {
     return this.formBuilder.group({
       wesView: [_get(workflow, 'wesView'), [Validators.required]],
+      wesViewResourcePath: [_get(workflow, 'wesViewResourcePath'), [Validators.required]],
       wdl: [_get(workflow, 'wdl'), [Validators.required]],
       inputs: [_get(workflow, 'inputs'), [Validators.required]],
     });

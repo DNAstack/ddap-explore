@@ -21,7 +21,8 @@
               [editable]="!resourceTokens">
       <form [formGroup]="wdlForm">
         <ng-template matStepLabel>Import workflow description (WDL)</ng-template>
-        <ddap-wdl-selection-step #wdlStep [form]="workflowForm">
+        <ddap-wdl-selection-step #wdlStep
+                                 [form]="workflowForm">
         </ddap-wdl-selection-step>
         <div>
           <button mat-button matStepperPrevious>Back</button>
@@ -46,6 +47,20 @@
         </div>
       </form>
     </mat-step>
+    <mat-step [stepControl]="wesForm"
+              [completed]="resourceTokens"
+              [editable]="!resourceTokens">
+      <form [formGroup]="wesForm">
+        <ng-template matStepLabel>Select WES server</ng-template>
+        <ddap-wes-server-selection-step #wesStep
+                                        [form]="workflowForm">
+        </ddap-wes-server-selection-step>
+        <div>
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button matStepperNext>Next</button>
+        </div>
+      </form>
+    </mat-step>
     <mat-step [completed]="resourceTokens"
               [editable]="!resourceTokens">
       <ng-template matStepLabel>Authorize for selected resources</ng-template>
@@ -55,7 +70,8 @@
       <ddap-resource-authorization-step #resourceAuthorizationStep
                                         [workflowId]="workflowId"
                                         [selectedColumns]="selectedColumns"
-                                        [selectedRows]="selectedRows">
+                                        [selectedRows]="selectedRows"
+                                        [damIdWesResourcePathPair]="workflowForm.get('wesViewResourcePath').value">
       </ddap-resource-authorization-step>
       <div class="flex stepper-actions">
         <div>
@@ -75,7 +91,7 @@
     <mat-step>
       <ng-template matStepLabel>Execute workflow</ng-template>
       <p>
-        You are now ready to execute workflow.
+        You are now ready to execute workflow(s).
       </p>
       <ddap-workflow-execution-step #executionStep
                                     [form]="workflowForm"

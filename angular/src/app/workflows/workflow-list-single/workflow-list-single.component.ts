@@ -2,7 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { PaginationTypes } from '../../shared/paginator/pagination-type.enum';
-import { WorkflowRunsResponse } from '../workflow.model';
+import { dam } from '../../shared/proto/dam-service';
+import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
+import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
+import { ResourceService } from '../../shared/resource/resource.service';
+import { SimplifiedWesResourceViews, WorkflowRunsResponse } from '../workflow.model';
 import { WorkflowService } from '../workflows.service';
 
 @Component({
@@ -12,14 +16,16 @@ import { WorkflowService } from '../workflows.service';
 })
 export class WorkflowListSingleComponent implements OnInit {
 
+  resourceToken: IResourceToken;
   workflowRunsResponse: WorkflowRunsResponse;
-
   newlyCreatedWorkflows?: any[];
   paginationType = PaginationTypes.unidirectional;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
-              private workflowService: WorkflowService) {
+              private resourceService: ResourceService,
+              private workflowService: WorkflowService,
+              private resourceAuthStateService: ResourceAuthStateService) {
     const navigation = this.router.getCurrentNavigation();
     if (navigation && navigation.extras.state) {
       this.newlyCreatedWorkflows = navigation.extras.state.runs;
@@ -27,15 +33,31 @@ export class WorkflowListSingleComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getWorkflows();
+    const { damId, viewId } = this.route.snapshot.params;
+
+    this.workflowService.getAllWesViews()
+      .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
+        const resourcePath = this.workflowService.getResourcePathForView(damId, viewId, wesResourceViews);
+        const damIdResourcePathPair = `${damId};${resourcePath}`;
+        this.getAccessTokensForAuthorizedResources(damIdResourcePathPair)
+          .subscribe((resourceTokens) => {
+            this.resourceAuthStateService.storeAccess(resourceTokens);
+            this.resourceToken = this.resourceService.lookupResourceToken(resourceTokens, resourcePath);
+            this.getWorkflows(this.resourceToken['access_token']);
+          });
+      });
   }
 
-  private getWorkflows(pageToken?: string) {
+  getWorkflows(accessToken: string, pageToken?: string) {
     const { damId, viewId } = this.route.snapshot.params;
-    this.workflowService.getWorkflowRuns(damId, viewId, pageToken)
+    this.workflowService.getWorkflowRuns(damId, viewId, accessToken, pageToken)
       .subscribe((workflowRunsResponse: WorkflowRunsResponse) => {
         this.workflowRunsResponse = workflowRunsResponse;
       });
+  }
+
+  private getAccessTokensForAuthorizedResources(damIdResourcePathPair: string) {
+    return this.resourceService.getAccessTokensForAuthorizedResources([damIdResourcePathPair]);
   }
 
 }

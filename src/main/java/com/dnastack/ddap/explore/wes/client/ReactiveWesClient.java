@@ -23,8 +23,10 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 public class ReactiveWesClient {
 
     public Mono<WorkflowExecutionRunsResponseModel> getRuns(URI wesServerUrl, String wesToken, String nextPage) {
-        final UriTemplate template = new UriTemplate("/ga4gh/wes/v1/runs?page_size=20&page_token=" + nextPage);
+        final UriTemplate template = new UriTemplate("/ga4gh/wes/v1/runs?page_size={pageSize}&page_token={nextPage}");
         final Map<String, Object> variables = new HashMap<>();
+        variables.put("pageSize", 20);
+        variables.put("nextPage", nextPage);
 
         return WebClientFactory.getWebClient()
                 .get()

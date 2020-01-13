@@ -34,35 +34,33 @@ export class SimplifiedWesResourceViews {
     name: string;
     label: string;
     url: string;
+    resourcePath: string;
   }[];
 
-  constructor(resourceId: string, resource: string, damId: string, views: { name: string; label: string; url: string }[]) {
-    this.resourceId = resourceId;
-    this.resource = resource;
-    this.damId = damId;
-    this.views = views;
-  }
-
   static fromWesResourceViews(wesResourceViews: WesResourceViews): SimplifiedWesResourceViews {
+    const resourceId = Object.keys(wesResourceViews.resource)[0];
     const views = flatten(wesResourceViews.views
       .map((viewMap) => {
         return Object.entries(viewMap)
-          .map(([key, value]) => {
+          .map(([viewId, value]) => {
             const wesInterface = Object.keys(value.interfaces)[0];
             const wesUri = value.interfaces[wesInterface].uri[0];
+            const defaultRole = Object.keys(value.roles)[0];
+            const resourcePath = `${resourceId}/views/${viewId}/roles/${defaultRole}`;
             return {
-              name: key,
+              name: viewId,
               label: value.ui.label,
               url: wesUri,
+              resourcePath,
             };
           });
       }));
-    const resourceId = Object.keys(wesResourceViews.resource)[0];
-    return new SimplifiedWesResourceViews(
+
+    return {
       resourceId,
-      wesResourceViews.resource[resourceId].ui.label,
-      wesResourceViews.damId,
-      views
-    );
+      resource: wesResourceViews.resource[resourceId].ui.label,
+      damId: wesResourceViews.damId,
+      views,
+    };
   }
 }

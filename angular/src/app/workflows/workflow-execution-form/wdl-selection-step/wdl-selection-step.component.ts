@@ -4,6 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { WorkflowService } from '../../workflows.service';
 
 import { callDenovo, md5sum } from './example.wdl';
+import { WorkflowsStateService } from "../workflows-state.service";
 
 
 @Component({
@@ -14,11 +15,14 @@ import { callDenovo, md5sum } from './example.wdl';
 export class WdlSelectionStepComponent {
 
   @Input()
+  workflowId: string;
+  @Input()
   form: FormGroup;
 
   inputSchema;
 
-  constructor(private workflowService: WorkflowService) {
+  constructor(private workflowService: WorkflowService,
+              private workflowsStateService: WorkflowsStateService) {
   }
 
   generateForm() {

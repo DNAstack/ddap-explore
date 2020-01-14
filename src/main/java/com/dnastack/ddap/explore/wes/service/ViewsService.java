@@ -1,7 +1,6 @@
 package com.dnastack.ddap.explore.wes.service;
 
 import com.dnastack.ddap.common.client.ReactiveDamClient;
-import com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieValue;
 import dam.v1.DamService.GetFlatViewsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,8 +9,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
-
-import static com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieKind;
 
 @Component
 public class ViewsService {
@@ -26,7 +23,6 @@ public class ViewsService {
                                                               String realm,
                                                               Map<String, GetFlatViewsResponse.FlatView> flatViews,
                                                               List<String> uniqueUrls) {
-
         Map<String, Set<String>> views = new HashMap<>();
         uniqueUrls.forEach(url -> {
             Set<String> viewsForUrl = new HashSet<>();
@@ -54,21 +50,22 @@ public class ViewsService {
     }
 
     public Mono<Set<String>> getRelevantViewsForUrlInAllDams(String realm, String resourceUrl) {
-        return Flux.fromStream(damClients.entrySet().stream()).flatMap(clientEntry -> {
-            String damId = clientEntry.getKey();
-            ReactiveDamClient damClient = clientEntry.getValue();
-            return damClient.getFlattenedViews(realm)
-                    .flatMap(flatViews ->
-                            getRelevantViewsForUrlsInDam(damId, realm, flatViews, List.of(resourceUrl))
-                    );
-        }).collectList().flatMap(viewsForAllDams -> {
-            final Set<String> finalViews = new HashSet<>();
-            for (Map<String, Set<String>> viewsForDam : viewsForAllDams) {
-                for (Map.Entry<String, Set<String>> entry : viewsForDam.entrySet()){
-                    finalViews.addAll(entry.getValue());
+        return Flux.fromStream(damClients.entrySet().stream())
+            .flatMap(clientEntry -> {
+                String damId = clientEntry.getKey();
+                ReactiveDamClient damClient = clientEntry.getValue();
+                return damClient.getFlattenedViews(realm)
+                    .flatMap(flatViews -> getRelevantViewsForUrlsInDam(damId, realm, flatViews, List.of(resourceUrl)));
+            })
+            .collectList()
+            .flatMap(viewsForAllDams -> {
+                final Set<String> finalViews = new HashSet<>();
+                for (Map<String, Set<String>> viewsForDam : viewsForAllDams) {
+                    for (Map.Entry<String, Set<String>> entry : viewsForDam.entrySet()){
+                        finalViews.addAll(entry.getValue());
+                    }
                 }
-            }
-            return Mono.just(finalViews);
-        });
+                return Mono.just(finalViews);
+            });
     }
 }

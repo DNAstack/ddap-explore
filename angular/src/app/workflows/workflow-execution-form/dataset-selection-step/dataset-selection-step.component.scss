@@ -11,3 +11,8 @@ mat-chip-list {
 .row {
   margin-top: 1rem;
 }
+
+.error {
+  color: $failure-color;
+  font-size: 0.9rem;
+}

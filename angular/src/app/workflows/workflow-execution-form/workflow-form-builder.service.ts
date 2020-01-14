@@ -14,7 +14,7 @@ export class WorkflowFormBuilder {
   buildDatasetForm(dataset?: any): FormGroup {
     return this.formBuilder.group({
       url: [_get(dataset, 'url'), [Validators.required, FormValidators.url]],
-      selectedColumns: [_get(dataset, 'selectedColumns'), [Validators.required]],
+      selectedColumns: [_get(dataset, 'selectedColumns'), []],
       selectedRows: [_get(dataset, 'selectedRows'), [Validators.required]],
     });
   }

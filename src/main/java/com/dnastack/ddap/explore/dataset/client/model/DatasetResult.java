@@ -13,8 +13,7 @@ import java.util.Map;
 public class DatasetResult {
 
     List<Map<String, Object>> objects;
-
     Map<String, String> pagination;
-
     Map<String, Object> schema;
+
 }

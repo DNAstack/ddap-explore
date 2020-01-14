@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from "@angular/router";
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 import { map } from 'rxjs/operators';
@@ -11,6 +11,8 @@ import { ResourceAuthStateService } from '../../shared/resource-auth-state.servi
 import { ResourceService } from '../../shared/resource/resource.service';
 import { SimplifiedWesResourceViews } from '../workflow.model';
 import { WorkflowService } from '../workflows.service';
+import { DatasetService } from "../workflow-execution-form/dataset.service";
+import { flatDeep } from "ddap-common-lib";
 
 @Component({
   selector: 'ddap-workflow-detail',
@@ -20,13 +22,19 @@ import { WorkflowService } from '../workflows.service';
 export class WorkflowDetailComponent implements OnInit {
 
   runDetails;
+  runDetailsResponse;
   editorOptions: JsonEditorOptions | any;
+  resourceToken: IResourceToken;
+  fileResourceAuthUrl: string;
 
   @ViewChild(JsonEditorComponent, { static: false })
   editor: JsonEditorComponent;
 
-  constructor(private workflowService: WorkflowService,
+  constructor(private route: ActivatedRoute,
+              private router: Router,
+              private workflowService: WorkflowService,
               private activatedRoute: ActivatedRoute,
+              private datasetService: DatasetService,
               private resourceService: ResourceService,
               private resourceAuthStateService: ResourceAuthStateService) {
     this.editorOptions = new JsonEditorDefaults();
@@ -38,27 +46,76 @@ export class WorkflowDetailComponent implements OnInit {
       .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
         const resourcePath = this.workflowService.getResourcePathForView(damId, viewId, wesResourceViews);
         const resourceTokens = this.resourceAuthStateService.getAccess();
-        const resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, resourcePath);
+        this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, resourcePath);
 
-        this.workflowService.workflowRunDetail(damId, viewId, runId, resourceToken['access_token'])
+        this.workflowService.workflowRunDetail(damId, viewId, runId, this.resourceToken['access_token'])
           .subscribe(runDetails => {
-            this.runDetails = this.transformResponse(runDetails);
+            this.runDetails = this.runDetailsResponse = runDetails;
+            const gcsUrl = this.getFlatValues(runDetails).find((value: string) => value.includes('gs://'));
+            this.datasetService.getViews([gcsUrl])
+              .subscribe((views) => {
+                if (!views) {
+                  return;
+                }
+                const damIdResourcePathPairs: string[] = Object.values(views);
+                this.fileResourceAuthUrl = this.getUrlForObtainingAccessToken(damIdResourcePathPairs);
+              });
+          });
+      });
+
+    this.route.queryParams
+      .subscribe(params => {
+        if (!params.resource) {
+          return;
+        }
+        const damIdResourcePathPair = params.resource;
+        this.resourceService.getAccessTokensForAuthorizedResources([damIdResourcePathPair])
+          .pipe(
+            map(this.resourceService.toResourceAccessMap)
+          )
+          .subscribe((access) => {
+            this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(access, damIdResourcePathPair.split(';')[1]);
+            this.runDetails = this.transformResponse(this.runDetailsResponse);
           });
       });
   }
 
+  private getFlatValues(runDetails: any): string[] {
+    return flatDeep(Object.keys(runDetails)
+      .map(key => {
+        if (typeof runDetails[key] === 'object') {
+          return flatDeep(this.getFlatValues(runDetails[key]));
+        }
+        if (typeof runDetails[key] === 'string') {
+          return runDetails[key];
+        }
+      }));
+  }
+
   private transformResponse(runDetails: any) {
-    const realmId = this.activatedRoute.root.firstChild.snapshot.params.realmId;
     Object.keys(runDetails).forEach(key => {
       if (typeof runDetails[key] === 'object') {
         return this.transformResponse(runDetails[key]);
       }
       if (typeof runDetails[key] === 'string') {
-        runDetails[key] = runDetails[key]
-          .replace('gs://', `${window.location.origin}/api/v1alpha/${realmId}/access/gcs/`);
+        const gcsBaseUrl = 'https://storage.cloud.google.com/';
+        runDetails[key] = runDetails[key].replace('gs://', gcsBaseUrl);
+        if (runDetails[key].includes(gcsBaseUrl)) {
+          runDetails[key] = `${runDetails[key]}/o?access_token=${this.resourceToken['access_token']}`;
+        }
       }
     });
     return runDetails;
+  }
+
+  private getUrlForObtainingAccessToken(resources: string[]): string {
+    const redirectUri = this.getRedirectUrl(resources);
+    return this.resourceService.getUrlForObtainingAccessToken(resources, redirectUri);
+  }
+
+  private getRedirectUrl(damIdResourcePathPairs: string[]): string {
+    const currentUrl = this.router.url;
+    return `${currentUrl}?resource=${damIdResourcePathPairs[0]}`; // assuming that there is just one view
   }
 
 }

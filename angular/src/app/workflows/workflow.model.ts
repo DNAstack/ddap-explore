@@ -1,4 +1,5 @@
-import { flatten } from '../shared/util';
+import { flatten } from "ddap-common-lib";
+
 
 export interface WorkflowRunsResponse {
   runs: WorkflowRun[];

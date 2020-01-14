@@ -1,7 +1,6 @@
 package com.dnastack.ddap.explore.wes.controller;
 
 import com.dnastack.ddap.common.client.ReactiveDamClient;
-import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.explore.wes.client.ReactiveWdlValidatorClient;
 import com.dnastack.ddap.explore.wes.model.WesResourceViews;
 import com.dnastack.ddap.explore.wes.model.WorkflowExecutionRunModel;
@@ -24,7 +23,6 @@ import static java.util.stream.Collectors.toList;
 @RequestMapping("/api/v1alpha/{realm}/wes")
 public class WorkflowController {
 
-    private UserTokenCookiePackager cookiePackager;
     private WesResourceService wesResourceService;
     private WesService wesService;
 
@@ -32,12 +30,10 @@ public class WorkflowController {
     private Map<String, ReactiveDamClient> damClients;
 
     @Autowired
-    public WorkflowController(UserTokenCookiePackager cookiePackager,
-                              ReactiveWdlValidatorClient wdlValidatorClient,
+    public WorkflowController(ReactiveWdlValidatorClient wdlValidatorClient,
                               Map<String, ReactiveDamClient> damClients,
                               WesResourceService wesResourceService,
                               WesService wesService) {
-        this.cookiePackager = cookiePackager;
         this.wdlValidatorClient = wdlValidatorClient;
         this.wesResourceService = wesResourceService;
         this.wesService = wesService;

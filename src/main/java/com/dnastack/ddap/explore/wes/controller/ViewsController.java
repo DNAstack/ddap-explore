@@ -42,13 +42,11 @@ public class ViewsController {
                 ReactiveDamClient damClient = clientEntry.getValue();
                 return damClient.getFlattenedViews(realm)
                     .flatMap(flatViews -> {
-                        log.warn("FLATTEN VIEWS: {}", flatViews);
                         return viewsService.getRelevantViewsForUrlsInDam(damId, realm, flatViews, uniqueUrls);
                     });
             })
             .collectList()
             .flatMap(viewsForAllDams -> {
-                log.warn("VIEWS: {}", viewsForAllDams);
                 final Map<String, Set<String>> finalViewListing = new HashMap<>();
 
                 for (Map<String, Set<String>> viewsForDam : viewsForAllDams) {

@@ -40,7 +40,6 @@ public class ViewsService {
 
                 if (url.startsWith(interfaceUri)) {
                     UriTemplate template = new UriTemplate("{damId};{resourceId}/views/{viewId}/roles/{roleId}");
-
                     final Map<String, Object> variables = new HashMap<>();
                     variables.put("damId", damId);
                     variables.put("resourceId", flatView.getResourceName());
@@ -54,15 +53,11 @@ public class ViewsService {
         return Mono.just(views);
     }
 
-    public Mono<Set<String>> getRelevantViewsForUrlInAllDams(String realm,
-                                                             String resourceUrl,
-                                                             Map<CookieKind, CookieValue> tokens) {
+    public Mono<Set<String>> getRelevantViewsForUrlInAllDams(String realm, String resourceUrl) {
         return Flux.fromStream(damClients.entrySet().stream()).flatMap(clientEntry -> {
             String damId = clientEntry.getKey();
             ReactiveDamClient damClient = clientEntry.getValue();
-            return damClient.getFlattenedViews(realm,
-                    tokens.get(CookieKind.DAM).getClearText(),
-                    tokens.get(CookieKind.REFRESH).getClearText())
+            return damClient.getFlattenedViews(realm)
                     .flatMap(flatViews ->
                             getRelevantViewsForUrlsInDam(damId, realm, flatViews, List.of(resourceUrl))
                     );

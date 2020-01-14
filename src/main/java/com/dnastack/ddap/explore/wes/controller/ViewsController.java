@@ -11,21 +11,15 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 
-import static com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieKind;
-
 @RestController
 @RequestMapping("/api/v1alpha/{realm}/views")
 public class ViewsController {
 
-    private final UserTokenCookiePackager cookiePackager;
     private final ViewsService viewsService;
     private Map<String, ReactiveDamClient> damClients;
 
     @Autowired
-    public ViewsController(Map<String, ReactiveDamClient> damClients,
-                           UserTokenCookiePackager cookiePackager,
-                           ViewsService viewsService) {
-        this.cookiePackager = cookiePackager;
+    public ViewsController(Map<String, ReactiveDamClient> damClients, ViewsService viewsService) {
         this.damClients = damClients;
         this.viewsService = viewsService;
     }
@@ -39,12 +33,11 @@ public class ViewsController {
         }
         final List<String> uniqueUrls = new ArrayList<>(new HashSet<>(urls));
 
-        Map<CookieKind, UserTokenCookiePackager.CookieValue> tokens = cookiePackager.extractRequiredTokens(request, Set.of(CookieKind.DAM, CookieKind.REFRESH));
         return Flux.fromStream(damClients.entrySet().stream()).flatMap(clientEntry -> {
             String damId = clientEntry.getKey();
             ReactiveDamClient damClient = clientEntry.getValue();
             // TODO: Handle error when token is empty
-            return damClient.getFlattenedViews(realm, tokens.get(CookieKind.DAM).getClearText(), tokens.get(CookieKind.REFRESH).getClearText())
+            return damClient.getFlattenedViews(realm)
                     .flatMap(flatViews -> viewsService.getRelevantViewsForUrlsInDam(damId, realm, flatViews, uniqueUrls));
         }).collectList().flatMap(viewsForAllDams -> {
             final Map<String, Set<String>> finalViewListing = new HashMap<>();

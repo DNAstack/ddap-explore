@@ -40,11 +40,9 @@ public class AccessController {
                                      @PathVariable String filePath,
                                      ServerHttpRequest request,
                                      ServerHttpResponse response) throws URISyntaxException {
-        Map<CookieKind, CookieValue> tokens = cookiePackager.extractRequiredTokens(request,
-                                                                                                           Set.of(CookieKind.DAM, CookieKind.REFRESH));
         URI bucketUri = new URI("https://storage.cloud.google.com/" + bucketName + filePath);
 
-        return getViews(realm, bucketName, tokens).flatMap(views -> {
+        return getViews(realm, bucketName).flatMap(views -> {
             if(views.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                         "There are no views associated with the resource");
@@ -88,10 +86,8 @@ public class AccessController {
 //                });
 //    }
 
-    private Mono<Set<String>> getViews(String realm,
-                                       String bucketName,
-                                       Map<CookieKind, CookieValue> tokens) {
+    private Mono<Set<String>> getViews(String realm, String bucketName) {
         String bucketUrl = "gs://" + bucketName;
-        return viewsService.getRelevantViewsForUrlInAllDams(realm, bucketUrl, tokens);
+        return viewsService.getRelevantViewsForUrlInAllDams(realm, bucketUrl);
     }
 }

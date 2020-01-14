@@ -13,6 +13,7 @@ import { WorkflowsStateService } from '../workflows-state.service';
 
 import IResourceTokens = dam.v1.IResourceTokens;
 import { WorkflowExecution } from './workflow-execution.model';
+import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 
 @Component({
   selector: 'ddap-workflow-execution-step',
@@ -30,7 +31,7 @@ export class WorkflowExecutionStepComponent {
   @Input()
   selectedColumns: string[];
   @Input()
-  resourceTokens: IResourceTokens;
+  resourceTokens: {[key: string]: IResourceToken};
 
   constructor(private route: ActivatedRoute,
               private resourceService: ResourceService,
@@ -70,7 +71,7 @@ export class WorkflowExecutionStepComponent {
 
   private getTokensModel(): object {
     const tokensModel = {};
-    if (!this.resourceTokens) {
+    if (!this.resourceTokens || !this.selectedRows || !this.selectedColumns) {
       return tokensModel;
     }
 
@@ -82,7 +83,7 @@ export class WorkflowExecutionStepComponent {
       const damIdResourcePathPairs: string[] = columnDataMappedToViews[extractedColumnData];
       damIdResourcePathPairs.forEach((damIdResourcePathPair) => {
         const resourcePath = damIdResourcePathPair.split(';')[1];
-        const resourceToken = this.resourceService.lookupResourceToken(this.resourceTokens, resourcePath);
+        const resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceTokens, resourcePath);
         accessTokens.push({ file: extractedColumnData, token: resourceToken['access_token'] });
       });
     });

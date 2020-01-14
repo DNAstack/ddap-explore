@@ -15,14 +15,14 @@ export class DatasetService {
   constructor(private http: HttpClient,
               private errorHandler: ErrorHandlerService) { }
 
-  fetchDataset(url: string): Observable<Dataset> {
-    return this.http.get<Dataset>(`${environment.ddapApiUrl}/${realmIdPlaceholder}/dataset?dataset_url=${url}`)
+  fetchDataset(url: string, accessToken: string): Observable<Dataset> {
+    return this.http.get<Dataset>(`${environment.ddapApiUrl}/${realmIdPlaceholder}/dataset?dataset_url=${url}&access_token=${accessToken}`)
       .pipe(
         this.errorHandler.notifyOnError(`Can't fetch dataset list.`)
       );
   }
 
-  getViews(urls): Observable<any> {
+  getViews(urls: string[]): Observable<any> {
     return this.http.post(`${environment.ddapApiUrl}/${realmIdPlaceholder}/views/lookup`, urls)
       .pipe(
         this.errorHandler.notifyOnError()

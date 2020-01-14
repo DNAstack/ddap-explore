@@ -8,6 +8,10 @@
                 (click)="useExample('https://storage.googleapis.com/ddap-e2etest-objects/dataset/dnastack-internal-subjects-with-objects')">
         With URLs
       </mat-chip>
+      <mat-chip color="accent"
+                (click)="useExample('https://storage.googleapis.com/ddap-e2etest-objects/dataset/subjects-retricted-access')">
+        Secured
+      </mat-chip>
     </mat-chip-list>
   </div>
   <div class="row">
@@ -27,6 +31,25 @@
       Load Dataset
     </button>
   </div>
+  <div class="row"
+       *ngIf="error">
+    <p class="warning-section"
+       *ngIf="error.status === 403; else genericError">
+      <mat-icon class="icon icon-warning"></mat-icon>
+      <span>You are trying to fetch secured dataset. Please
+        <a [href]="datasetResourceAuthUrl"
+           *ngIf="datasetResourceAuthUrl"
+           data-se="btn-authorize-dataset">
+        authorize
+      </a> first to proceed.
+      </span>
+    </p>
+    <ng-template #genericError>
+      <p class="error">
+        {{ error.message }}
+      </p>
+    </ng-template>
+  </div>
 
   <ng-container *ngIf="dataset && dataset.objects.length">
     <ng-container *ngIf="getFileOnlyColumns() as columns">
@@ -35,7 +58,8 @@
                             (pageChanged)="pageChange($event)">
       </ddap-dataset-results>
 
-      <div class="row">
+      <div class="row"
+           *ngIf="columns && columns.length > 0">
         <mat-form-field class="col">
           <mat-label>Select columns for further authorization</mat-label>
           <mat-select formControlName="selectedColumns"

@@ -8,6 +8,7 @@ import { ResourceAuthStateService } from '../../shared/resource-auth-state.servi
 import { ResourceService } from '../../shared/resource/resource.service';
 import { SimplifiedWesResourceViews, WorkflowRunsResponse } from '../workflow.model';
 import { WorkflowService } from '../workflows.service';
+import { map } from "rxjs/operators";
 
 @Component({
   selector: 'ddap-workflow-list-single',
@@ -40,9 +41,12 @@ export class WorkflowListSingleComponent implements OnInit {
         const resourcePath = this.workflowService.getResourcePathForView(damId, viewId, wesResourceViews);
         const damIdResourcePathPair = `${damId};${resourcePath}`;
         this.getAccessTokensForAuthorizedResources(damIdResourcePathPair)
-          .subscribe((resourceTokens) => {
-            this.resourceAuthStateService.storeAccess(resourceTokens);
-            this.resourceToken = this.resourceService.lookupResourceToken(resourceTokens, resourcePath);
+          .pipe(
+            map(this.resourceService.toResourceAccessMap)
+          )
+          .subscribe((accessMap) => {
+            this.resourceAuthStateService.storeAccess(accessMap);
+            this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(accessMap, resourcePath);
             this.getWorkflows(this.resourceToken['access_token']);
           });
       });

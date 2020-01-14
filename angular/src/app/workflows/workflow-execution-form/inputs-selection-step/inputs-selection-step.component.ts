@@ -9,8 +9,6 @@ import { FormGroup } from '@angular/forms';
 import { NoneComponent } from 'angular7-json-schema-form';
 import _set from 'lodash.set';
 
-import { WorkflowService } from '../../workflows.service';
-
 import { AutocompleteInputComponent } from './widget/autocomplete-input.component';
 
 

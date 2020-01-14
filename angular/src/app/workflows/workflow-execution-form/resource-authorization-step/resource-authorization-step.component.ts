@@ -37,6 +37,7 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
 
   getViewsAndSetResourceAuthUrl() {
     if (!this.selectedRows || !this.selectedColumns) {
+      this.resourceAuthUrl = this.getUrlForObtainingAccessToken();
       return;
     }
 
@@ -57,7 +58,7 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
     ).filter((columnData) => columnData);
   }
 
-  private getUrlForObtainingAccessToken(resources: string[]): string {
+  private getUrlForObtainingAccessToken(resources: string[] = []): string {
     const redirectUri = this.getRedirectUrl();
     resources.push(this.damIdWesResourcePathPair);
     return this.resourceService.getUrlForObtainingAccessToken(resources, redirectUri);

@@ -44,7 +44,7 @@ public class ReactiveDatasetClient {
         return webClient.get()
             .uri(datasetUrl)
             .headers(h -> {
-                if (viewAccessToken != null) {
+                if (viewAccessToken != null && !viewAccessToken.isEmpty()) {
                     log.info("Attaching bearer token to dataset request");
                     h.setBearerAuth(viewAccessToken);
                 }
@@ -162,19 +162,21 @@ public class ReactiveDatasetClient {
 
         //TODO add cache here (governed by cache control header)
 
-        return webClient.get().uri(uriToFetch).accept(MediaType.APPLICATION_JSON).exchange().flatMap(clientResponse -> {
-            if (clientResponse.statusCode().is2xxSuccessful()) {
-                return clientResponse.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                }).flatMap(resolvedSchema -> resolveSchemaObject(uriToFetch, resolvedSchema));
-            } else {
-                return clientResponse.bodyToMono(String.class)
-                    .flatMap(body -> Mono
-                        .error(new DatasetErrorException(clientResponse.statusCode().value(), body)));
-            }
-        });
+        return webClient.get()
+            .uri(uriToFetch)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .flatMap(clientResponse -> {
+                if (clientResponse.statusCode().is2xxSuccessful()) {
+                    return clientResponse.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                    }).flatMap(resolvedSchema -> resolveSchemaObject(uriToFetch, resolvedSchema));
+                } else {
+                    return clientResponse.bodyToMono(String.class)
+                        .flatMap(body -> Mono
+                            .error(new DatasetErrorException(clientResponse.statusCode().value(), body)));
+                }
+            });
 
     }
-
-
 
 }

@@ -44,7 +44,7 @@ export class ResourceService {
     const resources = damIdResourcePathPairs.map((resource) => {
       return `resource=${resource}`;
     });
-    return this.http.get<ResourceTokens>(
+    return this.http.get<IResourceTokens>(
       `${environment.ddapApiUrl}/${realmIdPlaceholder}/resources/checkout?${resources.join('&')}`
     );
   }
@@ -55,6 +55,24 @@ export class ResourceService {
     }
     const resource = this.lookupResourceTokenDescriptor(resourceTokens, resourcePath);
     return resourceTokens.access[resource.access];
+  }
+
+  lookupResourceTokenFromAccessMap(accessMap: {[key: string]: IResourceToken}, resourcePath: string): IResourceToken {
+    if (!accessMap) {
+      return;
+    }
+    const resourceKey = Object.keys(accessMap)
+      .find((key) => key.includes(resourcePath));
+    return accessMap[resourceKey];
+  }
+
+  toResourceAccessMap(resourceTokens: IResourceTokens): {[key: string]: IResourceToken} {
+    const accessMap = {};
+    Object.entries(resourceTokens.resources)
+      .forEach(([resource, value]) => {
+        accessMap[resource] = resourceTokens.access[value.access];
+      });
+    return accessMap;
   }
 
   private lookupResourceTokenDescriptor(resourceTokens: IResourceTokens, resourcePath: string): ResourceTokens.IDescriptor {

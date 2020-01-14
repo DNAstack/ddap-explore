@@ -1,10 +1,17 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { Router } from '@angular/router';
 import _sampleSize from 'lodash.samplesize';
 
+import { ResourceService } from '../../../shared/resource/resource.service';
 import { DatasetService } from '../dataset.service';
+import { WorkflowsStateService } from '../workflows-state.service';
 
 import { Dataset } from './dataset.model';
+import { ResourceAuthStateService } from "../../../shared/resource-auth-state.service";
+import { dam } from "../../../shared/proto/dam-service";
+import IResourceTokens = dam.v1.IResourceTokens;
+import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 
 
 @Component({
@@ -12,7 +19,7 @@ import { Dataset } from './dataset.model';
   templateUrl: './dataset-selection-step.component.html',
   styleUrls: ['./dataset-selection-step.component.scss'],
 })
-export class DatasetSelectionStepComponent {
+export class DatasetSelectionStepComponent implements OnInit {
 
   get datasetUrl() {
     return this.currentDatasetUrl
@@ -22,24 +29,56 @@ export class DatasetSelectionStepComponent {
 
   @Input()
   form: FormGroup;
+  @Input()
+  workflowId: string;
   @Output()
   readonly datasetColumnsChanged: EventEmitter<string[]> = new EventEmitter<string[]>();
 
   dataset: Dataset;
   currentDatasetUrl: string;
-  error: string;
+  datasetResourceAuthUrl: string;
+  resourceToken: IResourceToken;
+  error: any;
 
   constructor(private formBuilder: FormBuilder,
-              private datasetService: DatasetService) {
+              private router: Router,
+              private resourceService: ResourceService,
+              private datasetService: DatasetService,
+              private workflowsStateService: WorkflowsStateService,
+              private resourceAuthStateService: ResourceAuthStateService) {
+  }
+
+  ngOnInit(): void {
+    const { datasetDamIdResourcePathPairs } = this.workflowsStateService.getMetaInfoForWorkflow(this.workflowId);
+    if (datasetDamIdResourcePathPairs) {
+      const resourceTokens = this.resourceAuthStateService.getAccess();
+      const datasetResourcePath = datasetDamIdResourcePathPairs[0][0].split(';')[1];
+      this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, datasetResourcePath);
+    }
   }
 
   fetchDataset(url: string) {
-    this.datasetService.fetchDataset(url)
+    this.datasetService.fetchDataset(url, this.resourceToken ? this.resourceToken['access_token'] : '')
       .subscribe((dataset) => {
         this.dataset = dataset;
         this.datasetColumnsChanged.emit(this.getDatasetColumns());
-      }, () => {
+      }, (error) => {
+        this.error = error;
         this.dataset = null;
+
+        if (error.status === 403) {
+          this.datasetService.getViews([url])
+            .subscribe((views) => {
+              if (!views) {
+                this.error.message = 'No views associated with dataset';
+              }
+              const damIdResourcePathPairs: string[] = Object.values(views);
+              const workflowMetaInfo = this.workflowsStateService.getMetaInfoForWorkflow(this.workflowId);
+              workflowMetaInfo.datasetDamIdResourcePathPairs = damIdResourcePathPairs;
+              this.workflowsStateService.storeMetaInfoForWorkflow(this.workflowId, workflowMetaInfo);
+              this.datasetResourceAuthUrl = this.getUrlForObtainingAccessToken(damIdResourcePathPairs);
+            });
+        }
       });
   }
 
@@ -57,17 +96,35 @@ export class DatasetSelectionStepComponent {
     const columns: string[] = this.getDatasetColumns();
     const samples: object[] = _sampleSize(this.dataset.objects, 15);
 
-    return columns.filter((column) => {
+    const fileColumns: string[] = columns.filter((column) => {
       return samples.some((sample) => {
         const value = sample[column];
         return value && value.startsWith('gs://');
       });
     });
+    if (fileColumns.length > 0) {
+      this.form.get('selectedColumns').setValidators(Validators.required);
+    }
+
+    return fileColumns;
   }
 
   useExample(datasetUrl: string) {
     this.form.patchValue({ url: datasetUrl });
     this.fetchDataset(datasetUrl);
+  }
+
+  private getUrlForObtainingAccessToken(resources: string[]): string {
+    const redirectUri = this.getRedirectUrl();
+    return this.resourceService.getUrlForObtainingAccessToken(resources, redirectUri);
+  }
+
+  private getRedirectUrl(): string {
+    let currentUrl = this.router.url;
+    if (currentUrl.includes('?state=')) {
+      currentUrl = currentUrl.split('?')[0];
+    }
+    return `${currentUrl}?state=${this.workflowId}`;
   }
 
   private getDatasetColumns() {

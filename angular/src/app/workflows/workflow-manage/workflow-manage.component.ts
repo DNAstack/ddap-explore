@@ -5,7 +5,9 @@ import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormValidationService } from 'ddap-common-lib';
 import _isequal from 'lodash.isequal';
-import { Subscription, zip } from 'rxjs';
+import { Observable, Subscription, zip } from 'rxjs';
+import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
+import { map } from 'rxjs/operators';
 
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
@@ -55,9 +57,10 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   datasetForm: FormGroup;
   workflowForm: FormGroup;
   datasetColumns: string[];
-  paramsSubscription: Subscription;
-  resourceTokens: IResourceTokens;
+  subscriptions: Subscription[] = [];
+  resourceTokens: {[key: string]: IResourceToken};
   workflowId = Math.random().toString(36).substring(7);
+  readyToExecute = false;
 
   @ViewChild('stepper', { static: false })
   stepper: MatStepper;
@@ -82,24 +85,22 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.datasetForm = this.workflowFormBuilder.buildDatasetForm();
-    this.datasetForm.valueChanges
-      .subscribe(() => this.saveState());
     this.workflowForm = this.workflowFormBuilder.buildWorkflowForm();
-    this.workflowForm.valueChanges
-      .subscribe(() => this.saveState());
+    this.subscribeToFormChanges();
 
-    this.paramsSubscription = this.route.queryParams
+    this.subscriptions.push(this.route.queryParams
       .subscribe(params => {
         if (!params.state) {
           return;
         }
         this.workflowId = params.state;
         this.loadFromStateAndCheckoutAuthorizedResources();
-      });
+      }));
   }
 
   ngOnDestroy(): void {
-    this.paramsSubscription.unsubscribe();
+    this.subscriptions
+      .forEach((subscription) => subscription.unsubscribe());
     this.workflowsStateService.removeWorkflowData(this.workflowId);
   }
 
@@ -117,19 +118,47 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     }
   }
 
-  getAccessTokensForAuthorizedResources(workflowId: string) {
-    const { columnDataMappedToViews } = this.workflowsStateService.getMetaInfoForWorkflow(workflowId);
-    const damIdResourcePathPairs: string[] = Object.values(columnDataMappedToViews);
+  getAccessTokensForAuthorizedResources(workflowId: string): Observable<{[key: string]: IResourceToken}> {
+    const { columnDataMappedToViews, datasetDamIdResourcePathPairs } = this.workflowsStateService.getMetaInfoForWorkflow(workflowId);
     const damIdWesResourcePathPair = this.workflowForm.get('wesViewResourcePath').value;
-    damIdResourcePathPairs.push(damIdWesResourcePathPair);
-    return this.resourceService.getAccessTokensForAuthorizedResources(damIdResourcePathPairs);
+    const inputsStepCompleted = this.workflowForm.get('inputs').value;
+    const damIdResourcePathPairs: string[] = [];
+    if (columnDataMappedToViews) {
+      const pairs: string[] = Object.values(columnDataMappedToViews);
+      damIdResourcePathPairs.push(...pairs);
+    }
+    if (damIdWesResourcePathPair && inputsStepCompleted) {
+      damIdResourcePathPairs.push(damIdWesResourcePathPair);
+    }
+    const formResourceTokens$ = this.resourceService.getAccessTokensForAuthorizedResources(damIdResourcePathPairs);
+
+    if (datasetDamIdResourcePathPairs) {
+      // Needs to be done separately, because secured dataset view was checkout separately, hence the separate cart
+      const datasetResourceTokens$ = this.resourceService.getAccessTokensForAuthorizedResources(datasetDamIdResourcePathPairs);
+      if (damIdResourcePathPairs.length > 0) {
+        return zip(formResourceTokens$, datasetResourceTokens$, (resourceTokens1, resourceTokens2) => {
+          return {
+            ...this.resourceService.toResourceAccessMap(resourceTokens1),
+            ...this.resourceService.toResourceAccessMap(resourceTokens2),
+          };
+        });
+      } else {
+        return datasetResourceTokens$.pipe(
+          map(this.resourceService.toResourceAccessMap)
+        );
+      }
+    } else {
+      return formResourceTokens$.pipe(
+        map(this.resourceService.toResourceAccessMap)
+      );
+    }
   }
 
   executeWorkflows(): void {
     const damId = this.wesStep.getDamId();
     const wesViewId = this.workflowForm.get('wesView').value;
     const wesResourcePath = this.workflowForm.get('wesViewResourcePath').value.split(';')[1];
-    const wesAccessToken = this.resourceService.lookupResourceToken(this.resourceTokens, wesResourcePath)['access_token'];
+    const wesAccessToken = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceTokens, wesResourcePath)['access_token'];
     const executions: WorkflowExecution[] = this.executionStep.getWorkflowExecutionModels();
 
     zip(...executions.map((execution) =>
@@ -148,12 +177,29 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     this.datasetForm = this.workflowFormBuilder.buildDatasetForm(datasetForm);
     this.workflowForm = this.workflowFormBuilder.buildWorkflowForm(workflowForm);
 
+    this.subscribeToFormChanges();
+
     this.getAccessTokensForAuthorizedResources(this.workflowId)
       .subscribe((access) => {
         this.resourceTokens = access;
-        // this.resourceAuthStateService.storeAccess(this.resourceTokens);
-        this.moveToExecutionStep();
+        this.resourceAuthStateService.storeAccess(access);
+        const { wesView, wesViewResourcePath, wdl, inputs } = this.workflowForm.value;
+        if (wesView && wesViewResourcePath && wdl && inputs) {
+          this.readyToExecute = true;
+          this.moveToExecutionStep();
+        }
       });
+  }
+
+  private subscribeToFormChanges() {
+    this.subscriptions.push(this.datasetForm.valueChanges
+      .subscribe(() => {
+        this.saveState();
+      }));
+    this.subscriptions.push(this.workflowForm.valueChanges
+      .subscribe(() => {
+        this.saveState();
+      }));
   }
 
   private saveState() {

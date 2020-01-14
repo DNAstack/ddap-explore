@@ -38,7 +38,7 @@ export class WorkflowDetailComponent implements OnInit {
       .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
         const resourcePath = this.workflowService.getResourcePathForView(damId, viewId, wesResourceViews);
         const resourceTokens = this.resourceAuthStateService.getAccess();
-        const resourceToken = this.resourceService.lookupResourceToken(resourceTokens, resourcePath);
+        const resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, resourcePath);
 
         this.workflowService.workflowRunDetail(damId, viewId, runId, resourceToken['access_token'])
           .subscribe(runDetails => {

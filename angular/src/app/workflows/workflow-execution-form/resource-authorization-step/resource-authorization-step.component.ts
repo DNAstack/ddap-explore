@@ -2,9 +2,9 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ResourceService } from '../../../shared/resource/resource.service';
-import { flatten } from '../../../shared/util';
 import { DatasetService } from '../dataset.service';
 import { WorkflowsStateService } from '../workflows-state.service';
+import { flatten } from "ddap-common-lib";
 
 
 @Component({

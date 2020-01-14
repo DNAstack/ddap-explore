@@ -6,7 +6,6 @@ import _get from 'lodash.get';
 
 import { dam } from '../../../shared/proto/dam-service';
 import { ResourceService } from '../../../shared/resource/resource.service';
-import { flatten } from '../../../shared/util';
 import { SimplifiedWesResourceViews } from '../../workflow.model';
 import { WorkflowService } from '../../workflows.service';
 import { WorkflowsStateService } from '../workflows-state.service';
@@ -14,6 +13,7 @@ import { WorkflowsStateService } from '../workflows-state.service';
 import IResourceTokens = dam.v1.IResourceTokens;
 import { WorkflowExecution } from './workflow-execution.model';
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
+import { flatten } from "ddap-common-lib";
 
 @Component({
   selector: 'ddap-workflow-execution-step',

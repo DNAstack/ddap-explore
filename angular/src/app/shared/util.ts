@@ -1,4 +1,5 @@
 import _uniq from 'lodash.uniq';
+import { flatten } from "ddap-common-lib";
 
 export function objectToArray(dto) {
   const bar = Object
@@ -11,10 +12,6 @@ export function objectToArray(dto) {
     });
 
   return bar;
-}
-
-export function flatten<T>(arrayOfArrays: T[][]): T[] {
-  return arrayOfArrays.reduce((accumulator, currentVal) => accumulator.concat(...currentVal), []);
 }
 
 export function unique<T>(arrayOfArrays: T[][]): T[] {

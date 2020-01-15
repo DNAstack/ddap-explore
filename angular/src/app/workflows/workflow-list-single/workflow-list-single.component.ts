@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { map } from 'rxjs/operators';
 
 import { PaginationTypes } from '../../shared/paginator/pagination-type.enum';
 import { dam } from '../../shared/proto/dam-service';
@@ -8,7 +9,6 @@ import { ResourceAuthStateService } from '../../shared/resource-auth-state.servi
 import { ResourceService } from '../../shared/resource/resource.service';
 import { SimplifiedWesResourceViews, WorkflowRunsResponse } from '../workflow.model';
 import { WorkflowService } from '../workflows.service';
-import { map } from "rxjs/operators";
 
 @Component({
   selector: 'ddap-workflow-list-single',
@@ -40,15 +40,22 @@ export class WorkflowListSingleComponent implements OnInit {
       .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
         const resourcePath = this.workflowService.getResourcePathForView(damId, viewId, wesResourceViews);
         const damIdResourcePathPair = `${damId};${resourcePath}`;
-        this.getAccessTokensForAuthorizedResources(damIdResourcePathPair)
-          .pipe(
-            map(this.resourceService.toResourceAccessMap)
-          )
-          .subscribe((accessMap) => {
-            this.resourceAuthStateService.storeAccess(accessMap);
-            this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(accessMap, resourcePath);
-            this.getWorkflows(this.resourceToken['access_token']);
-          });
+
+        const accessMap = this.resourceAuthStateService.getAccess();
+        if (accessMap) {
+          this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(accessMap, resourcePath);
+          this.getWorkflows(this.resourceToken['access_token']);
+        } else {
+          this.getAccessTokensForAuthorizedResources(damIdResourcePathPair)
+            .pipe(
+              map(this.resourceService.toResourceAccessMap)
+            )
+            .subscribe((response) => {
+              this.resourceAuthStateService.storeAccess(response);
+              this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(response, resourcePath);
+              this.getWorkflows(this.resourceToken['access_token']);
+            });
+        }
       });
   }
 

@@ -14,7 +14,11 @@
                                    (datasetColumnsChanged)="datasetColumnsChange($event)">
       </ddap-dataset-selection-step>
       <div>
-        <button mat-button matStepperNext>Next</button>
+        <button mat-button
+                matStepperNext
+                data-se="btn-next-to-wdl">
+          Next
+        </button>
       </div>
     </mat-step>
     <mat-step [stepControl]="wdlForm"
@@ -27,7 +31,12 @@
         </ddap-wdl-selection-step>
         <div>
           <button mat-button matStepperPrevious>Back</button>
-          <button mat-button matStepperNext (click)="wdlStep.generateForm()">Next</button>
+          <button mat-button
+                  matStepperNext
+                  data-se="btn-next-to-inputs"
+                  (click)="wdlStep.generateForm()">
+            Next
+          </button>
         </div>
       </form>
     </mat-step>
@@ -44,7 +53,11 @@
         </ng-container>
         <div>
           <button mat-button matStepperPrevious>Back</button>
-          <button mat-button matStepperNext>Next</button>
+          <button mat-button
+                  matStepperNext
+                  data-se="btn-next-to-wes-server">
+            Next
+          </button>
         </div>
       </form>
     </mat-step>
@@ -58,7 +71,11 @@
         </ddap-wes-server-selection-step>
         <div>
           <button mat-button matStepperPrevious>Back</button>
-          <button mat-button matStepperNext>Next</button>
+          <button mat-button
+                  matStepperNext
+                  data-se="btn-next-to-auth">
+            Next
+          </button>
         </div>
       </form>
     </mat-step>
@@ -109,6 +126,7 @@
         <button mat-flat-button
                 color="primary"
                 class="uppercase"
+                data-se="btn-execute"
                 (click)="executeWorkflows()">
           <ng-container *ngIf="this.datasetForm.get('selectedRows').value as selectedData; else singleWorkflow">
             Execute {{ selectedData.length > 1 ? selectedData.length + ' Workflows' : ' Workflow' }}

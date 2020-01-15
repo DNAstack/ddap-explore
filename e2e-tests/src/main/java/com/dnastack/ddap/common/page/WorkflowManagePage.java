@@ -6,6 +6,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.net.URI;
 import java.util.List;
 
 public class WorkflowManagePage extends AnyDdapPage {
@@ -62,7 +63,7 @@ public class WorkflowManagePage extends AnyDdapPage {
         button.click();
     }
 
-    public WorkflowListPage saveEntity(Integer expectedNumberOfNewWorkflowRuns) {
+    public WorkflowListPage executeWorkflows(Integer expectedNumberOfNewWorkflowRuns) {
         clickSave();
         waitForInflightRequests();
         return new WorkflowListPage(driver, expectedNumberOfNewWorkflowRuns);
@@ -70,6 +71,14 @@ public class WorkflowManagePage extends AnyDdapPage {
 
     public void clickSave() {
         this.clickButton(DdapBy.se("btn-execute"));
+    }
+
+    public void tryFetchDatasetResult(String datasetUrl) {
+        WebElement datasetInput = driver.findElement(DdapBy.se("dataset-url"));
+        WebElement fetchButton = driver.findElement(DdapBy.se("btn-import-dataset"));
+        datasetInput.clear();
+        datasetInput.sendKeys(datasetUrl);
+        fetchButton.click();
     }
 
     public List<WebElement> fetchDatasetResult(String datasetUrl) {
@@ -89,17 +98,9 @@ public class WorkflowManagePage extends AnyDdapPage {
         return datasetResults.findElements(By.xpath("//mat-row"));
     }
 
-    public List<WebElement> getAccessTokens(String columnName) {
+    public void selectColumn(String columnName) {
         fillFieldFromDropdown(DdapBy.se("select-column"), columnName);
         closeDropdown();
-        new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(DdapBy.se("btn-get-access")));
-        WebElement access = driver.findElement(DdapBy.se("btn-get-access"));
-        WebPageScroller.scrollTo(driver, access);
-        access.click();
-        new WebDriverWait(driver, 15)
-                .until(ExpectedConditions.numberOfElementsToBeMoreThan(DdapBy.se("access-token"), 0));
-
-        return driver.findElements(DdapBy.se("access-token"));
     }
 
     public void clickCheckbox(By checkboxSelector) {
@@ -111,5 +112,11 @@ public class WorkflowManagePage extends AnyDdapPage {
 
     public void closeDropdown() {
         driver.switchTo().activeElement().sendKeys(Keys.ESCAPE);
+    }
+
+    public URI requestAccess(String selector) {
+        WebElement accessBtn = driver.findElement(DdapBy.se(selector));
+        new WebDriverWait(driver, 5).until(ExpectedConditions.elementToBeClickable(accessBtn));
+        return URI.create(accessBtn.getAttribute("href"));
     }
 }

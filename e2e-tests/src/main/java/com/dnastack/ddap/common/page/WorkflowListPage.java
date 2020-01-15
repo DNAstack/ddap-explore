@@ -3,16 +3,21 @@ package com.dnastack.ddap.common.page;
 import com.dnastack.ddap.common.WorkflowRunState;
 import com.dnastack.ddap.common.util.DdapBy;
 import lombok.extern.slf4j.Slf4j;
+import org.hamcrest.MatcherAssert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfElementsToBeMoreThan;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
@@ -55,31 +60,34 @@ public class WorkflowListPage extends AnyDdapPage {
         return new WebDriverWait(driver, 10).until(WorkflowDetailPage::new);
     }
 
-    public void assertNewRunsInState(List<WorkflowRunState> acceptedStates) {
-        reloadPageUntilNewRunsNotInState(acceptedStates, 15, 0);
+    public void assertNewRunsInState(List<WorkflowRunState> acceptedStates, int maxWaitTimeInMinutes) {
+        reloadPageUntilNewRunsNotInState(acceptedStates, LocalDateTime.now(), maxWaitTimeInMinutes);
     }
 
-    private void reloadPageUntilNewRunsNotInState(List<WorkflowRunState> acceptedStates, int maxReloads, int currentReload) {
+    private void reloadPageUntilNewRunsNotInState(List<WorkflowRunState> acceptedStates, LocalDateTime startedAt, int maxWaitTimeInMinutes) {
         waitForInflightRequests();
         List<WebElement> allRuns = driver.findElements(DdapBy.se("run"));
         List<WebElement> newRuns = allRuns.stream()
-                .filter((run) -> {
-                    String runId = run.findElement(DdapBy.se("run-id")).getText();
-                    return workflowRunIds.contains(runId);
-                })
-                .collect(toList());
-        boolean allInExpectedState = newRuns.stream()
-                .allMatch((newRun) -> {
-                    String state = newRun.findElement(DdapBy.se("run-state")).getText();
-                    return acceptedStates.stream()
-                            .map(Enum::name)
-                            .anyMatch(s -> s.equals(state));
-                });
+            .filter((run) -> {
+                String runId = run.findElement(DdapBy.se("run-id")).getText();
+                return workflowRunIds.contains(runId);
+            })
+            .collect(toList());
+        final Map<String, String> runStates = newRuns.stream()
+            .collect(toMap(run -> run.findElement(DdapBy.se("run-id")).getText(),
+                run -> run.findElement(DdapBy.se("run-state")).getText()));
+        boolean allInExpectedState = runStates
+            .values()
+            .stream()
+            .allMatch((state) -> acceptedStates.stream()
+                .map(Enum::name)
+                .anyMatch(s -> s.equals(state)));
 
         if (newRuns.isEmpty() || !allInExpectedState) {
-            assertThat("Failed to assert states of new workflow runs within valid reload duration", currentReload, lessThanOrEqualTo(maxReloads));
+            LocalDateTime stopTryingAt = LocalDateTime.from(startedAt.plusMinutes(maxWaitTimeInMinutes));
+            MatcherAssert.assertThat(String.format("Failed to assert states of workflow runs [%s] within valid reload duration.\nExpected states: %s\nFound states:%s\n", workflowRunIds, acceptedStates, runStates), LocalDateTime.now(), lessThanOrEqualTo(stopTryingAt));
             driver.navigate().refresh();
-            reloadPageUntilNewRunsNotInState(acceptedStates, maxReloads, ++currentReload);
+            reloadPageUntilNewRunsNotInState(acceptedStates, startedAt, maxWaitTimeInMinutes);
         }
     }
 

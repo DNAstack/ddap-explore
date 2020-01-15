@@ -1,7 +1,10 @@
 package com.dnastack.ddap.frontend;
 
 import com.dnastack.ddap.common.TestingPersona;
-import com.dnastack.ddap.common.page.*;
+import com.dnastack.ddap.common.page.AnyDdapPage;
+import com.dnastack.ddap.common.page.WorkflowListPage;
+import com.dnastack.ddap.common.page.WorkflowManagePage;
+import com.dnastack.ddap.common.page.WorkflowWesServersPage;
 import com.dnastack.ddap.common.util.DdapBy;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
@@ -29,6 +32,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         "E2E_SECURED_DATASET_URL",
         "https://storage.googleapis.com/ddap-e2etest-objects/dataset/subjects-retricted-access"
     );
+    private static Integer maxWaitTimeInMinutes = Integer.valueOf(optionalEnv("E2E_WORKFLOW_MAX_WAIT_TIME_IN_MINUTES", "5"));
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
@@ -70,7 +74,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         WorkflowListPage workflowListPage = managePage.executeWorkflows(1);
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Asserting new workflows are in expected state");
-        workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE));
+        workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE), maxWaitTimeInMinutes);
     }
 
     @Test
@@ -107,7 +111,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         WorkflowListPage workflowListPage = managePage.executeWorkflows(3);
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Asserting new workflows are in expected state");
-        workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE));
+        workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE), maxWaitTimeInMinutes);
     }
 
     @Test
@@ -153,7 +157,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         WorkflowListPage workflowListPage = managePage.executeWorkflows(1);
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Asserting new workflows are in expected state");
-        workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE));
+        workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE), maxWaitTimeInMinutes);
     }
 
 }

@@ -37,8 +37,8 @@
        *ngIf="error.status === 403; else genericError">
       <mat-icon class="icon icon-warning"></mat-icon>
       <span>You are trying to fetch secured dataset. Please
-        <a [href]="datasetResourceAuthUrl"
-           *ngIf="datasetResourceAuthUrl"
+        <a *ngIf="datasetResourceAuthUrl"
+           [href]="datasetResourceAuthUrl"
            data-se="btn-authorize-dataset">
         authorize
       </a> first to proceed.

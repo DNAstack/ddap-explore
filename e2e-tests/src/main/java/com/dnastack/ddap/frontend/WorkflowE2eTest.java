@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import java.io.IOException;
+import java.net.URI;
 
 import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
 import static com.dnastack.ddap.common.WorkflowRunState.*;
@@ -20,7 +21,11 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     private static String datasetUrl = optionalEnv(
             "E2E_DATASET_URL",
-            "https://storage.googleapis.com/ddap-e2etest-objects/dataset/subjects-with-objects"
+            "https://storage.googleapis.com/ddap-e2etest-objects/dataset/dnastack-internal-subjects-with-objects"
+    );
+    private static String securedDatasetUrl = optionalEnv(
+        "E2E_SECURED_DATASET_URL",
+        "https://storage.googleapis.com/ddap-e2etest-objects/dataset/subjects-retricted-access"
     );
 
     @BeforeClass
@@ -32,70 +37,100 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
     }
 
     @Test
-    public void testSingleSimpleWorkflowExecution() {
+    public void testSingleWorkflowExecutionWithTokens() throws IOException {
         WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
                 .goToWorkflows();
-        WorkflowListPage workflowListPage = workflowWesServersPage.clickViewRuns();
-        WorkflowManagePage managePage = workflowListPage.clickManage();
-
-        managePage.fillFieldWithFirstValueFromDropdown(DdapBy.se("inp-workflow-wes-view"));
-        managePage.fillField(DdapBy.se("inp-workflow-wdl"), loadTemplate("/com/dnastack/ddap/workflow/simple-workflow.wdl"));
-        managePage.clickButton(DdapBy.se("btn-generate-form"));
-        managePage.waitForInflightRequests();
-        managePage.fillField(By.name("test.name"), "e2e-test");
-
-        workflowListPage = managePage.saveEntity(1);
-        workflowListPage.assertNewRunsInState(asList(RUNNING, COMPLETE));
-
-        WorkflowDetailPage runDetailsPage = workflowListPage.viewRunDetails();
-        runDetailsPage.assertDetailsArePresent();
-    }
-
-    @Test
-    public void testSingleWorkflowExecutionWithTokens() {
-        WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
-                .goToWorkflows();
-        WorkflowListPage workflowListPage = workflowWesServersPage.clickViewRuns();
-        WorkflowManagePage managePage = workflowListPage.clickManage();
+        WorkflowManagePage managePage = workflowWesServersPage.clickManage();
 
         managePage.fetchDatasetResult(datasetUrl);
         managePage.waitForInflightRequests();
         managePage.clickCheckbox(DdapBy.se("checkbox-0"));
-        managePage.getAccessTokens("bam_file");
-        managePage.waitForInflightRequests();
-
-        managePage.fillFieldWithFirstValueFromDropdown(DdapBy.se("inp-workflow-wes-view"));
+        managePage.selectColumn("bam_file");
+        managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         managePage.fillField(DdapBy.se("inp-workflow-wdl"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
-        managePage.clickButton(DdapBy.se("btn-generate-form"));
+        managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         managePage.fillFieldFromDropdown(By.name("md5Sum.inputFile"), "bam_file");
+        managePage.clickButton(DdapBy.se("btn-next-to-wes-server"));
+        managePage.fillFieldWithFirstValueFromDropdown(DdapBy.se("inp-workflow-wes-view"));
+        managePage.waitForInflightRequests();
+        managePage.clickButton(DdapBy.se("btn-next-to-auth"));
 
-        workflowListPage = managePage.saveEntity(1);
+        URI authorizeUrl = managePage.requestAccess("btn-authorize");
+        managePage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
+        managePage.waitForInflightRequests();
+
+        WorkflowListPage workflowListPage = managePage.executeWorkflows(1);
+        managePage.waitForInflightRequests();
         workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE));
     }
 
     @Test
-    public void testMultipleWorkflowExecutionWithTokens() {
+    public void testMultipleWorkflowExecutionWithTokens() throws IOException {
         WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
-                .goToWorkflows();
-        WorkflowListPage workflowListPage = workflowWesServersPage.clickViewRuns();
-        WorkflowManagePage managePage = workflowListPage.clickManage();
+            .goToWorkflows();
+        WorkflowManagePage managePage = workflowWesServersPage.clickManage();
 
         managePage.fetchDatasetResult(datasetUrl);
         managePage.waitForInflightRequests();
         managePage.clickCheckbox(DdapBy.se("checkbox-0"));
         managePage.clickCheckbox(DdapBy.se("checkbox-2"));
         managePage.clickCheckbox(DdapBy.se("checkbox-3"));
-        managePage.getAccessTokens("bam_file");
-        managePage.waitForInflightRequests();
-
-        managePage.fillFieldWithFirstValueFromDropdown(DdapBy.se("inp-workflow-wes-view"));
+        managePage.selectColumn("bam_file");
+        managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         managePage.fillField(DdapBy.se("inp-workflow-wdl"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
-        managePage.clickButton(DdapBy.se("btn-generate-form"));
+        managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         managePage.fillFieldFromDropdown(By.name("md5Sum.inputFile"), "bam_file");
+        managePage.clickButton(DdapBy.se("btn-next-to-wes-server"));
+        managePage.fillFieldWithFirstValueFromDropdown(DdapBy.se("inp-workflow-wes-view"));
+        managePage.waitForInflightRequests();
+        managePage.clickButton(DdapBy.se("btn-next-to-auth"));
 
-        workflowListPage = managePage.saveEntity(3);
+        URI authorizeUrl = managePage.requestAccess("btn-authorize");
+        managePage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
+        managePage.waitForInflightRequests();
+
+        WorkflowListPage workflowListPage = managePage.executeWorkflows(3);
+        managePage.waitForInflightRequests();
+        workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE));
+    }
+
+    @Test
+    public void testSingleWorkflowExecutionWithTokensFromSecuredDataset() throws IOException {
+        WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
+            .goToWorkflows();
+        WorkflowManagePage managePage = workflowWesServersPage.clickManage();
+
+        // Try to fetch without access token
+        managePage.tryFetchDatasetResult(securedDatasetUrl);
+        managePage.waitForInflightRequests();
+
+        URI authorizeDatasetUrl = managePage.requestAccess("btn-authorize-dataset");
+        managePage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeDatasetUrl, WorkflowManagePage::new);
+        managePage.waitForInflightRequests();
+
+        // Need to re-fetch with access token
+        managePage.fetchDatasetResult(securedDatasetUrl);
+        managePage.waitForInflightRequests();
+
+        managePage.clickCheckbox(DdapBy.se("checkbox-0"));
+        managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
+        managePage.fillField(DdapBy.se("inp-workflow-wdl"), loadTemplate("/com/dnastack/ddap/workflow/simple-workflow.wdl"));
+        managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
+        managePage.waitForInflightRequests();
+        managePage.fillFieldFromDropdown(By.name("test.name"), "blood_type");
+        managePage.clickButton(DdapBy.se("btn-next-to-wes-server"));
+        managePage.fillFieldWithFirstValueFromDropdown(DdapBy.se("inp-workflow-wes-view"));
+        managePage.waitForInflightRequests();
+        managePage.clickButton(DdapBy.se("btn-next-to-auth"));
+
+        URI authorizeUrl = managePage.requestAccess("btn-authorize");
+        managePage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
+        managePage.waitForInflightRequests();
+
+        WorkflowListPage workflowListPage = managePage.executeWorkflows(1);
+        managePage.waitForInflightRequests();
         workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE));
     }
 

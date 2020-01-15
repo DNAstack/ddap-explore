@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from '@angular/router';
 import _sampleSize from 'lodash.samplesize';
@@ -10,7 +10,6 @@ import { WorkflowsStateService } from '../workflows-state.service';
 import { Dataset } from './dataset.model';
 import { ResourceAuthStateService } from "../../../shared/resource-auth-state.service";
 import { dam } from "../../../shared/proto/dam-service";
-import IResourceTokens = dam.v1.IResourceTokens;
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 
 
@@ -19,7 +18,7 @@ import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
   templateUrl: './dataset-selection-step.component.html',
   styleUrls: ['./dataset-selection-step.component.scss'],
 })
-export class DatasetSelectionStepComponent implements OnInit {
+export class DatasetSelectionStepComponent {
 
   get datasetUrl() {
     return this.currentDatasetUrl
@@ -48,16 +47,8 @@ export class DatasetSelectionStepComponent implements OnInit {
               private resourceAuthStateService: ResourceAuthStateService) {
   }
 
-  ngOnInit(): void {
-    const { datasetDamIdResourcePathPairs } = this.workflowsStateService.getMetaInfoForWorkflow(this.workflowId);
-    if (datasetDamIdResourcePathPairs) {
-      const resourceTokens = this.resourceAuthStateService.getAccess();
-      const datasetResourcePath = datasetDamIdResourcePathPairs[0][0].split(';')[1];
-      this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, datasetResourcePath);
-    }
-  }
-
   fetchDataset(url: string) {
+    this.setResourceToken();
     this.datasetService.fetchDataset(url, this.resourceToken ? this.resourceToken['access_token'] : '')
       .subscribe((dataset) => {
         this.dataset = dataset;
@@ -112,6 +103,15 @@ export class DatasetSelectionStepComponent implements OnInit {
   useExample(datasetUrl: string) {
     this.form.patchValue({ url: datasetUrl });
     this.fetchDataset(datasetUrl);
+  }
+
+  private setResourceToken() {
+    const { datasetDamIdResourcePathPairs } = this.workflowsStateService.getMetaInfoForWorkflow(this.workflowId);
+    if (datasetDamIdResourcePathPairs) {
+      const resourceTokens = this.resourceAuthStateService.getAccess();
+      const datasetResourcePath = datasetDamIdResourcePathPairs[0][0].split(';')[1];
+      this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, datasetResourcePath);
+    }
   }
 
   private getUrlForObtainingAccessToken(resources: string[]): string {

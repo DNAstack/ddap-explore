@@ -32,7 +32,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         "E2E_SECURED_DATASET_URL",
         "https://storage.googleapis.com/ddap-e2etest-objects/dataset/subjects-retricted-access"
     );
-    private static Integer maxWaitTimeInMinutes = Integer.valueOf(optionalEnv("E2E_WORKFLOW_MAX_WAIT_TIME_IN_MINUTES", "5"));
+    private static Integer maxWaitTimeInMinutes = Integer.valueOf(optionalEnv("E2E_WORKFLOW_MAX_WAIT_TIME_IN_MINUTES", "2"));
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {

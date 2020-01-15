@@ -15,8 +15,12 @@ import org.junit.rules.TestName;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.logging.LogEntries;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -78,6 +82,15 @@ public abstract class AbstractFrontendE2eTest extends AbstractBaseE2eTest {
     public void afterEach() {
         String testName = this.getClass().getSimpleName() + "." + name.getMethodName() + ".png";
         ScreenshotUtil.capture(testName, driver);
+        writeBrowserConsoleLog();
+    }
+
+    private void writeBrowserConsoleLog() {
+        LogEntries logs = driver.manage().logs().get("browser");
+        logs.getAll().forEach((logEntry) -> {
+            LocalTime loggedAt = Instant.ofEpochMilli(logEntry.getTimestamp()).atZone(ZoneId.systemDefault()).toLocalTime();
+            log.info("Browser's console log: {} {} {}", loggedAt, logEntry.getLevel(), logEntry.getMessage());
+        });
     }
 
     protected static String getUrlWithBasicCredentials(String original) {

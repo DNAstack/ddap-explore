@@ -8,17 +8,16 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.net.URI;
 import java.util.List;
 
 public class SearchPage extends AnyDdapPage {
 
     private static final String SEARCH_REVEAL_BUTTON_SELECTOR = "search-reveal";
     private static final String SEARCH_INPUT_SELECTOR = "search-input";
-    private static final By SEARCH_HEADER = By.xpath("//*[@data-se=\"" + SEARCH_REVEAL_BUTTON_SELECTOR + "\"]");
 
     public SearchPage(WebDriver driver) {
         super(driver);
-        driver.findElement(SEARCH_HEADER);
     }
 
     public void openSearchInput() {
@@ -50,5 +49,11 @@ public class SearchPage extends AnyDdapPage {
 
     public void clickLimitSearch() {
         getDriver().findElement(DdapBy.se("limit-search"));
+    }
+
+    public URI requestAccess() {
+        WebElement accessBtn = driver.findElement(DdapBy.se("btn-authorize"));
+        new WebDriverWait(driver, 5).until(ExpectedConditions.elementToBeClickable(accessBtn));
+        return URI.create(accessBtn.getAttribute("href"));
     }
 }

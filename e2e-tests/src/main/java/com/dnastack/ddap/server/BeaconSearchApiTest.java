@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -52,17 +51,12 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldGetTwoResultsForAggregateSearch() throws IOException {
-        String validPersonaToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
-        String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
-
         /* Run the aggregate search query on the realm */
         // @formatter:off
         final Response response = getRequestSpecification()
                 .log().method()
                 .log().uri()
                 .when()
-                .cookie("dam_token", validPersonaToken)
-                .cookie("refresh_token", refreshToken)
                 .get("/api/v1alpha/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C");
         response
                 .then()
@@ -91,16 +85,11 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldGetOneResultForSingleResourceSearch() throws IOException {
-        String validPersonaToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
-        String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
-
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
-            .cookie("dam_token", validPersonaToken)
-                .cookie("refresh_token", refreshToken)
         .when()
             .get(format(
                     // FIXME make DAM ID environment variable

@@ -5,7 +5,8 @@ export interface BeaconResponse {
     damId: string,
     resourceLabel: string,
     resourceId: string,
-    viewId: string
+    viewId: string,
+    resourcePath: string,
   };
   datasetAlleleResponses: [{
     datasetId: string,

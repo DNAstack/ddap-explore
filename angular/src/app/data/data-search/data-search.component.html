@@ -22,14 +22,26 @@
     <h3>No results</h3>
     <p>
       <b>Tip:</b> Try searching for a BRCA2 variant:
-      <a [routerLink]="['./', { query: '13 : 32936732 G > C', assembly: 'GRCh37' }]"
+      <a [routerLink]="['./']"
+         [queryParams]="{ query: '13 : 32936732 G > C', assembly: 'GRCh37' }"
          data-se="brca2-link">
         13 : 32936732 G > C
       </a>
     </p>
   </div>
 
-  <ng-template [ngIf]="resultsAction.closed && results?.length">
+  <ng-template [ngIf]="results?.length">
+
+    <a *ngIf="resourceAuthUrl && requireAuth"
+       [href]="resourceAuthUrl"
+       data-se="btn-authorize">
+      <button mat-flat-button
+              color="primary"
+              class="uppercase">
+        Authorize for all
+      </button>
+    </a>
+
     <ddap-beacon-result *ngFor="let beaconResult of results"
                         [beacon]="beaconResult">
     </ddap-beacon-result>

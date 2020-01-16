@@ -17,18 +17,20 @@ export class ResourceBeaconService {
               private errorHandler: ErrorHandlerService) {
   }
 
-  query(queryValue: BeaconServiceQuery): Observable<BeaconResponse[]> {
-    const {query, assembly, resource, damId, limitSearch} = queryValue;
+  query(queryValue: BeaconServiceQuery, accessToken?: string): Observable<BeaconResponse[]> {
+    const {query, assembly, resource, damId} = queryValue;
 
     if (!DnaChangeQueryParser.validate(query)) {
       return of([]);
     }
 
     const params = DnaChangeQueryParser.parseParams(query);
-    params.type = 'beacon';
     params.assemblyId = assembly;
+    if (accessToken) {
+      params.accessToken = accessToken;
+    }
 
-    if (resource && damId && limitSearch) {
+    if (resource && damId) {
       return this.queryBeacon(damId, resource, params);
     }
 

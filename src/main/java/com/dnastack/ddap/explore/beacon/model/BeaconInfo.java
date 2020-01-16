@@ -1,11 +1,13 @@
 package com.dnastack.ddap.explore.beacon.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Data
 public class BeaconInfo {
 
@@ -14,5 +16,6 @@ public class BeaconInfo {
     private String damId;
     private String resourceId;
     private String viewId;
+    private String resourcePath;
 
 }

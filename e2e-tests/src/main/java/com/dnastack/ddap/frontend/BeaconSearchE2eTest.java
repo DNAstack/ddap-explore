@@ -4,6 +4,7 @@ import com.dnastack.ddap.common.util.DdapBy;
 import com.dnastack.ddap.common.fragments.DataListItem;
 import com.dnastack.ddap.common.page.*;
 import com.dnastack.ddap.common.TestingPersona;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -11,6 +12,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,8 +36,15 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AdminDdapPage::new);
     }
 
+    @Override
+    @Before
+    public void setUp() {
+        super.setUp();
+        driver.manage().deleteAllCookies(); // need to remove cart cookies to provide isolation
+    }
+
     @Test
-    public void searchBeaconWithValidQuery() {
+    public void searchBeaconWithValidQuery() throws IOException {
         ddapPage.getNavBar()
             .goTo(dataLink());
 
@@ -45,12 +54,17 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.submitSearchQuery(query);
 
         List<WebElement> results = searchPage.getSearchResults(2);
+        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
 
+        URI authorizeUrl = searchPage.requestAccess();
+        searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
+
+        results = searchPage.getSearchResults(2);
         assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
     }
 
     @Test
-    public void searchBeaconWithInvalidQuery() {
+    public void searchBeaconWithInvalidQuery() throws IOException {
         ddapPage.getNavBar()
             .goTo(dataLink());
 
@@ -60,6 +74,12 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.submitSearchQuery(query);
 
         List<WebElement> results = searchPage.getSearchResults(2);
+        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+
+        URI authorizeUrl = searchPage.requestAccess();
+        searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
+
+        results = searchPage.getSearchResults(2);
         assertFalse(findFirstElementByCssClass(results, "match-success").isPresent());
         assertTrue(findFirstElementByCssClass(results, "match-failure").isPresent());
     }
@@ -100,7 +120,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
     }
 
     @Test
-    public void limitSearchFromDataDetails() {
+    public void limitSearchFromDataDetails() throws IOException {
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -116,12 +136,17 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.submitSearchQuery(query);
 
         List<WebElement> results = searchPage.getSearchResults(1);
+        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
 
+        URI authorizeUrl = searchPage.requestAccess();
+        searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
+
+        results = searchPage.getSearchResults(1);
         assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
     }
 
     @Test
-    public void limitSearchOnSearchPage() {
+    public void limitSearchOnSearchPage() throws IOException {
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -137,12 +162,17 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.submitSearchQuery(query);
 
         List<WebElement> results = searchPage.getSearchResults(1);
+        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
 
+        URI authorizeUrl = searchPage.requestAccess();
+        searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
+
+        results = searchPage.getSearchResults(1);
         assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
     }
 
     @Test
-    public void changeQueryOnSearchPageAndGoBack() {
+    public void changeQueryOnSearchPageAndGoBack() throws IOException {
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -154,7 +184,12 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         // Start with a valid search
 
         List<WebElement> results = searchPage.getSearchResults(2);
+        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
 
+        URI authorizeUrl = searchPage.requestAccess();
+        searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
+
+        results = searchPage.getSearchResults(2);
         assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
 
         // Continue with invalid search
@@ -176,7 +211,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
     }
 
     @Test
-    public void testBRCA2SearchLink() {
+    public void testBRCA2SearchLink() throws IOException {
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -195,6 +230,12 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         assertThat(results.size(), is(0));
 
         searchPage.clickBRCA2();
+
+        results = searchPage.getSearchResults(2);
+        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+
+        URI authorizeUrl = searchPage.requestAccess();
+        searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
 
         results = searchPage.getSearchResults(2);
         assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());

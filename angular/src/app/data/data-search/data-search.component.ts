@@ -1,13 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable} from 'rxjs';
 import { Subscription } from 'rxjs';
+import { filter, flatMap, mergeAll } from "rxjs/operators";
 
 import { BeaconResponse } from '../../shared/beacon-search/beacon-response.model';
 import { BeaconSearchParams } from '../../shared/beacon-search/beacon-search-params.model';
-import { BeaconServiceQuery, ResourceBeaconService } from '../../shared/beacon-search/resource-beacon.service';
+import { ResourceBeaconService } from '../../shared/beacon-search/resource-beacon.service';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
+import { dam } from '../../shared/proto/dam-service';
+import { ResourceService } from '../../shared/resource/resource.service';
 import { DataService } from '../data.service';
+import IResourceTokens = dam.v1.IResourceTokens;
 
 @Component({
   selector: 'ddap-resource-detail',
@@ -20,28 +24,71 @@ export class DataSearchComponent implements OnDestroy, OnInit {
   resource: string;
   resourceName$:  Observable<string>;
   views: any;
-  results: BeaconResponse[];
+  results: BeaconResponse[] = [];
   resultsAction: Subscription;
   limitSearch = false;
+  resourceAuthUrl: string;
+  requireAuth = true;
 
-  private searchStateSubscription: Subscription;
+  private queryParamsSubscription: Subscription;
   private searchParams: BeaconSearchParams;
 
-  constructor(private activatedRoute: ActivatedRoute,
+  constructor(private route: ActivatedRoute,
+              private router: Router,
+              private activatedRoute: ActivatedRoute,
               private dataService: DataService,
               private beaconService: ResourceBeaconService,
-              private router: Router) {
+              private resourceService: ResourceService) {
   }
 
   ngOnInit() {
-    this.resultsAction = new Subscription();
+    this.queryParamsSubscription = this.route.queryParams
+      .subscribe(({ auth, ...searchState }: any) => {
+        this.results = [];
+        this.initializeComponentFields(searchState);
+        const queryParams = { ...searchState };
 
-    this.searchStateSubscription = this.activatedRoute.params
-      .subscribe((searchState: BeaconSearchParams) => this.initializeComponentFields(searchState));
+        let allBeaconsResponse = [];
+        let damIdResourcePathPairs: string[];
+        this.resultsAction = this.beaconService.query(queryParams)
+          .pipe(
+            filter((beaconResponse) => beaconResponse && beaconResponse.length > 0),
+            flatMap((beaconResponse: BeaconResponse[]) => {
+              allBeaconsResponse = beaconResponse;
+              damIdResourcePathPairs = beaconResponse.map((result) => {
+                return `${result.beaconInfo.damId};${result.beaconInfo.resourcePath}`;
+              });
+              return this.resourceService.getAccessTokensForAuthorizedResources(damIdResourcePathPairs);
+            }),
+            flatMap((resourceTokens: IResourceTokens) => {
+              this.requireAuth = false;
+              return damIdResourcePathPairs
+                .map((damIdResourcePathPair) => {
+                  const damId = damIdResourcePathPair.split(';')[0];
+                  const resourcePath = damIdResourcePathPair.split(';')[1];
+                  const resourceId = resourcePath.split('/')[0];
+
+                  queryParams.damId = damId;
+                  queryParams.resource = resourceId;
+
+                  const accessToken = this.resourceService.lookupResourceToken(resourceTokens, resourcePath)['access_token'];
+                  return this.beaconService.query(queryParams, accessToken);
+                });
+            }),
+            mergeAll()
+          ).subscribe((beaconResponse: BeaconResponse[]) => {
+              beaconResponse.forEach((response) => this.results.push(response));
+          },
+          (error) => {
+            this.requireAuth = true;
+            this.results = allBeaconsResponse;
+            this.resourceAuthUrl = this.getUrlForObtainingAccessToken(this.getResourcePathsFrom(allBeaconsResponse));
+          });
+      });
   }
 
   ngOnDestroy() {
-    this.searchStateSubscription.unsubscribe();
+    this.queryParamsSubscription.unsubscribe();
   }
 
   limitSearchChange($event) {
@@ -51,7 +98,10 @@ export class DataSearchComponent implements OnDestroy, OnInit {
        // Don't put a boolean into this map, so that we are always pulling out the limitSearch as a string
       limitSearch: limitSearch + '',
     };
-    this.router.navigate(['.', searchParams], {relativeTo: this.activatedRoute, replaceUrl: true});
+    this.router.navigate(['.'], {
+      relativeTo: this.activatedRoute, replaceUrl: true,
+      queryParams: { ...searchParams },
+    });
   }
 
   private initializeComponentFields(searchParams: BeaconSearchParams) {
@@ -61,21 +111,23 @@ export class DataSearchComponent implements OnDestroy, OnInit {
     }
     this.searchParams = searchParams;
     this.limitSearch = searchParams.limitSearch === 'true';
-    const queryParams = {
-      ...searchParams,
-      limitSearch: this.limitSearch,
-    };
-
-    this.queryBeacon(queryParams);
   }
 
-  private queryBeacon(queryParams: BeaconServiceQuery) {
-    const beaconResult$ = this.beaconService.query(queryParams);
-
-    this.resultsAction = beaconResult$
-      .subscribe((beaconResponseDto: any) => {
-          this.results = beaconResponseDto;
-        }
-      );
+  private getResourcePathsFrom(queryResponse: BeaconResponse[]): string[] {
+    return queryResponse.map((beaconResponse) => {
+      const { beaconInfo } = beaconResponse;
+      return `${beaconInfo.damId};${beaconInfo.resourcePath}`;
+    });
   }
+
+  private getUrlForObtainingAccessToken(damIdResourcePathPairs: string[] = []): string {
+    const redirectUri = this.getRedirectUrl();
+    return this.resourceService.getUrlForObtainingAccessToken(damIdResourcePathPairs, encodeURIComponent(redirectUri));
+  }
+
+  private getRedirectUrl(): string {
+    const currentUrl = this.router.url;
+    return `${currentUrl}`;
+  }
+
 }

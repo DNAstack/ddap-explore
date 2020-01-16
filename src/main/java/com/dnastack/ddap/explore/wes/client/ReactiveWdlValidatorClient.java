@@ -1,8 +1,8 @@
 package com.dnastack.ddap.explore.wes.client;
 
 import com.dnastack.ddap.common.client.WebClientFactory;
-import com.dnastack.ddap.explore.wes.client.model.WdlDescribeDependencyRequestModel;
-import com.dnastack.ddap.explore.wes.client.model.WdlDescribeRequestModel;
+import com.dnastack.ddap.explore.wes.model.WdlDescribeDependencyRequestModel;
+import com.dnastack.ddap.explore.wes.model.WdlDescribeRequestModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;

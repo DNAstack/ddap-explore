@@ -1,4 +1,4 @@
-package com.dnastack.ddap.explore.beacon.client.model;
+package com.dnastack.ddap.explore.beacon.model;
 
 public enum BeaconApiIncludeDatasetResponseType {
 

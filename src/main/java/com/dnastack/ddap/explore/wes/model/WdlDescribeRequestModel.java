@@ -1,4 +1,4 @@
-package com.dnastack.ddap.explore.wes.client.model;
+package com.dnastack.ddap.explore.wes.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

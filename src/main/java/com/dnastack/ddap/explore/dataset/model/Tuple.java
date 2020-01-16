@@ -1,4 +1,4 @@
-package com.dnastack.ddap.explore.dataset.client.model;
+package com.dnastack.ddap.explore.dataset.model;
 
 public class Tuple<X, Y> {
 

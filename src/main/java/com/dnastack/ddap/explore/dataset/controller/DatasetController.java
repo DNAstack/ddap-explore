@@ -2,7 +2,7 @@ package com.dnastack.ddap.explore.dataset.controller;
 
 import com.dnastack.ddap.explore.dataset.client.DatasetErrorException;
 import com.dnastack.ddap.explore.dataset.client.ReactiveDatasetClient;
-import com.dnastack.ddap.explore.dataset.client.model.DatasetResult;
+import com.dnastack.ddap.explore.dataset.model.DatasetResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

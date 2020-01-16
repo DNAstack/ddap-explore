@@ -51,7 +51,7 @@ public class GetBeaconInfoAsAdmin extends AbstractBaseE2eTest {
                 .when()
                 .cookie("dam_token", validPersonaToken)
                 .cookie("refresh_token", refreshToken)
-                .get("/api/v1alpha/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C");
+                .get("/api/v1alpha/realm/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C");
         response
                     .then()
                     .log().everything()

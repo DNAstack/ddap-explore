@@ -24,7 +24,7 @@ public class IdentityE2eTest extends AbstractBaseE2eTest {
     }
 
     private String ddap(String path) {
-        return format("/api/v1alpha/%s%s", REALM, path);
+        return format("/api/v1alpha/realm/%s%s", REALM, path);
     }
 
     @Test

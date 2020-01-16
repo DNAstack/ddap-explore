@@ -54,7 +54,7 @@ public class WalletLoginStrategy implements LoginStrategy {
 
         {
             final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);
-            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/%s/identity/login?loginHint=wallet:%s%s", DDAP_BASE_URL, realmName, loginInfo.getEmail(), scopeString));
+            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", DDAP_BASE_URL, realmName, loginInfo.getEmail(), scopeString));
             addDdapBasicAuthHeader(request);
 
             final HttpResponse response = httpclient.execute(request);

@@ -39,7 +39,7 @@ public class PersonaLoginStrategy implements LoginStrategy {
         final String state;
 
         {
-            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/%s/identity/login?loginHint=persona:%s%s", DDAP_BASE_URL, realmName, personaName, scopeString));
+            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=persona:%s%s", DDAP_BASE_URL, realmName, personaName, scopeString));
         addDdapBasicAuthHeader(request);
 
             HttpResponse response = httpclient.execute(request);
@@ -71,7 +71,7 @@ public class PersonaLoginStrategy implements LoginStrategy {
 
     @Override
     public <T extends AnyDdapPage> T performPersonaLogin(WebDriver driver, TestingPersona persona, String realm, Function<WebDriver, T> pageFactory) {
-        driver.get(getUrlWithBasicCredentials(URI.create(DDAP_BASE_URL).resolve(format("/api/v1alpha/%s/identity/login", realm)).toString(), DDAP_USERNAME, DDAP_PASSWORD));
+        driver.get(getUrlWithBasicCredentials(URI.create(DDAP_BASE_URL).resolve(format("/api/v1alpha/realm/%s/identity/login", realm)).toString(), DDAP_USERNAME, DDAP_PASSWORD));
         ICLoginPage icLoginPage = new ICLoginPage(driver);
         return icLoginPage.loginAsPersona(persona, pageFactory);
     }

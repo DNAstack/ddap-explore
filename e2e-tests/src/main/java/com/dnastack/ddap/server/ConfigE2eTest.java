@@ -71,7 +71,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
                 .log().uri()
                 .auth().preemptive().basic(basicUsername, basicPassword)
                 .when()
-                .post("/api/v1alpha/dnastack/cli/login");
+                .post("/api/v1alpha/realm/dnastack/cli/login");
         response
                 .then()
                 .log().ifValidationFails()
@@ -95,7 +95,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
                 .auth().preemptive().basic(basicUsername, basicPassword)
                 .redirects().follow(false)
                 .when()
-                .get("/api/v1alpha/dnastack/identity/login");
+                .get("/api/v1alpha/realm/dnastack/identity/login");
         response
                 .then()
                 .log().ifValidationFails()

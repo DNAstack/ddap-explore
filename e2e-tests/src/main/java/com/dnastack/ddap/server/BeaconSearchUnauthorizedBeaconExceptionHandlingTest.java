@@ -69,7 +69,7 @@ public class BeaconSearchUnauthorizedBeaconExceptionHandlingTest extends Abstrac
                 .log().method()
                 .log().uri()
                 .when()
-                .get("/api/v1alpha/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C")
+                .get("/api/v1alpha/realm/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C")
                 .then()
                 .log().body()
                 .contentType(JSON)

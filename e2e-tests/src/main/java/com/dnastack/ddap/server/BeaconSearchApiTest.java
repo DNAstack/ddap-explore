@@ -57,7 +57,7 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
                 .log().method()
                 .log().uri()
                 .when()
-                .get("/api/v1alpha/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C");
+                .get("/api/v1alpha/realm/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C");
         response
                 .then()
                 .log().everything()
@@ -93,7 +93,7 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
         .when()
             .get(format(
                     // FIXME make DAM ID environment variable
-                    "/api/v1alpha/%s/resources/1/thousand-genomes/search" +
+                    "/api/v1alpha/realm/%s/resources/1/thousand-genomes/search" +
                             "?referenceName=13" +
                             "&start=32936732" +
                             "&referenceBases=G" +
@@ -128,7 +128,7 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
         .when()
             .get(format(
                     // FIXME make DAM ID environment variable
-                    "/api/v1alpha/%s/resources/1/thousand-genomes/search" +
+                    "/api/v1alpha/realm/%s/resources/1/thousand-genomes/search" +
                             "?referenceName=13" +
                             "&start=32936732" +
                             "&referenceBases=G" +

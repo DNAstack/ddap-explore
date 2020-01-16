@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1alpha/{realm}/dataset")
+@RequestMapping("/api/v1alpha/realm/{realm}/dataset")
 public class DatasetController {
 
     private final ReactiveDatasetClient datasetClient;

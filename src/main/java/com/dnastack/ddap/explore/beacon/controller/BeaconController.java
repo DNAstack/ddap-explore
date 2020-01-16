@@ -26,7 +26,7 @@ import static java.lang.String.format;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/v1alpha/{realm}/resources")
+@RequestMapping(value = "/api/v1alpha/realm/{realm}/resources")
 class BeaconController {
 
     private static final String BEACON_INTERFACE = "http:beacon";

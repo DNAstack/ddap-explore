@@ -13,7 +13,7 @@ import java.util.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1alpha/{realm}/views")
+@RequestMapping("/api/v1alpha/realm/{realm}/views")
 public class ViewsController {
 
     private final ViewsService viewsService;

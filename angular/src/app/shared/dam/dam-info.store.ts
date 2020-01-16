@@ -26,7 +26,7 @@ export class DamInfoStore {
 
   private getDamInfoResponse(): Observable<DamsInfo> {
     // DAM URLs are the same in all realms so use master
-    return this.http.get<DamsInfo>(`${environment.ddapApiUrl}/master/dam`);
+    return this.http.get<DamsInfo>(`${environment.ddapApiUrl}/realm/master/dam`);
   }
 
 

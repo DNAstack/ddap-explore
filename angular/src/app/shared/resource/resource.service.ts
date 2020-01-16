@@ -24,7 +24,7 @@ export class ResourceService {
 
   getView(damId: string, viewId: string): Observable<IView> {
     return this.http.get<IView>(
-      `${environment.ddapApiUrl}/${realmIdPlaceholder}/dams/${damId}/views/${viewId}`
+      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/dams/${damId}/views/${viewId}`
     );
   }
 
@@ -37,7 +37,7 @@ export class ResourceService {
     const resources = damIdResourcePathPairs.map((resource) => {
       return `resource=${resource}`;
     });
-    return `${environment.ddapApiUrl}/${realmId}/resources/authorize?${resources.join('&')}&redirectUri=${redirectUri}`;
+    return `${environment.ddapApiUrl}/realm/${realmId}/resources/authorize?${resources.join('&')}&redirectUri=${redirectUri}`;
   }
 
   getAccessTokensForAuthorizedResources(damIdResourcePathPairs: string[]): Observable<IResourceTokens> {
@@ -45,7 +45,7 @@ export class ResourceService {
       return `resource=${resource}`;
     });
     return this.http.get<IResourceTokens>(
-      `${environment.ddapApiUrl}/${realmIdPlaceholder}/resources/checkout?${resources.join('&')}`
+      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/resources/checkout?${resources.join('&')}`
     );
   }
 

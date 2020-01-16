@@ -49,7 +49,7 @@ export class LayoutComponent implements OnInit {
 
     this.activatedRoute.root.firstChild.params.subscribe((params) => {
       this.realm = params.realmId;
-      this.loginPath = `/api/v1alpha/${this.realm}/identity/login`;
+      this.loginPath = `/api/v1alpha/realm/${this.realm}/identity/login`;
     });
 
     // Workaround to get fresh cookies

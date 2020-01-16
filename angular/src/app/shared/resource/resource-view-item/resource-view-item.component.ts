@@ -40,8 +40,7 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
 
   ttlForm = new FormControl(1, Validators.compose([Validators.required, Validators.min(1)]));
   selectedTimeUnit = 'h';
-  // Downloads the same zip file regardless of realm
-  downloadCliUrl = `${environment.ddapApiUrl}/master/cli/download`;
+  downloadCliUrl = `${environment.ddapApiUrl}/cli/download`;
 
   constructor(public resourceService: ResourceService,
               private route: ActivatedRoute,

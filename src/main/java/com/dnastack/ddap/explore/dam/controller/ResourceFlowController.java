@@ -28,8 +28,6 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.*;
 
-import static com.dnastack.ddap.common.util.http.XForwardUtil.getExternalPath;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -37,7 +35,6 @@ import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1alpha/{realm}/resources")
 public class ResourceFlowController {
 
     private final UserTokenCookiePackager cookiePackager;
@@ -56,7 +53,7 @@ public class ResourceFlowController {
         this.webClientFactory = webClientFactory;
     }
 
-    @GetMapping("/checkout")
+    @GetMapping("/api/v1alpha/realm/{realm}/resources/checkout")
     public Mono<ResponseEntity<Object>> checkout(ServerHttpRequest request,
                                                  @PathVariable String realm,
                                                  @RequestParam("resource") List<String> damIdResourcePairs) {
@@ -86,18 +83,7 @@ public class ResourceFlowController {
                                                     })).orElseGet(() -> Mono.error(new AuthCookieNotPresentInRequestException(cartCookieName.cookieName())));
     }
 
-    /**
-     * Returns the absolute URL that points to the {@link #authorizeResources} controller method.
-     *
-     * @param request the current request (required for determining this service's hostname).
-     * @param realm   the realm the returned URL should target.
-     * @return Absolute URL of the URL an OAuth login flow should redirect to upon completion.
-     */
-    private static URI rootLoginRedirectUrl(ServerHttpRequest request, String realm) {
-        return URI.create(getExternalPath(request, format("/api/v1alpha/%s/identity/login", realm)));
-    }
-
-    @GetMapping("/authorize")
+    @GetMapping("/api/v1alpha/realm/{realm}/resources/authorize")
     public Mono<? extends ResponseEntity<?>> authorizeResources(ServerHttpRequest request,
                                                                 @PathVariable String realm,
                                                                 @RequestParam(required = false) URI redirectUri,
@@ -105,20 +91,33 @@ public class ResourceFlowController {
                                                                 @RequestParam("resource") List<String> damIdResourcePairs) {
         final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
 
-        final URI postLoginTokenEndpoint = UriUtil.selfLinkToApi(request, realm, "resources/token");
+        final URI postLoginTokenEndpoint = getRedirectUri(request);
         // FIXME better fallback page
         final URI nonNullRedirectUri = redirectUri != null ? redirectUri : cartCheckoutUrl(request, realm, resources);
-        final String state = stateHandler.generateResourceState(nonNullRedirectUri, resources);
+        final String state = stateHandler.generateResourceState(nonNullRedirectUri, realm, resources);
         // FIXME should separate resources by DAM
         final ReactiveDamOAuthClient oAuthClient = lookupDamOAuthClient(resources);
         final URI authorizeUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources);
+        return oAuthClient.testAuthorizeEndpoint(authorizeUri)
+                          .map(status -> {
+                              if (status.is4xxClientError()) {
+                                  log.info("Falling back to legacy authorize url because of response {}", status);
+                                  return oAuthClient.getLegacyAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources);
+                              } else {
+                                  return authorizeUri;
+                              }
+                          })
+                          .map(loginUri -> {
+                              URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
+                              return ResponseEntity.status(TEMPORARY_REDIRECT)
+                                                   .location(loginUri)
+                                                   .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), CookieKind.OAUTH_STATE).toString())
+                                                   .build();
+                          });
+    }
 
-        URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
-        ResponseEntity<Object> redirectToAuthServer = ResponseEntity.status(TEMPORARY_REDIRECT)
-                                                                    .location(authorizeUri)
-                                                                    .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), CookieKind.OAUTH_STATE).toString())
-                                                                    .build();
-        return Mono.just(redirectToAuthServer);
+    private URI getRedirectUri(ServerHttpRequest request) {
+        return UriUtil.selfLinkToApi(request, "resources/loggedIn");
     }
 
     /**
@@ -136,7 +135,7 @@ public class ResourceFlowController {
             .map((damIdResourcePair) -> {
                 String[] pair = damIdResourcePair.split(";");
                 URI damBaseUrl = dams.get(pair[0]).getBaseUrl();
-                return damBaseUrl.resolve("dam/" + realm + "/resources/" + pair[1]);
+                return damBaseUrl.resolve("/dam/" + realm + "/resources/" + pair[1]);
             })
             .collect(toList());
     }
@@ -191,23 +190,25 @@ public class ResourceFlowController {
      * @return a redirect to the main UI along with some set-cookie headers that store the user's authentication
      * info for subsequent requests.
      */
-    @GetMapping("/token")
+    @GetMapping("/api/v1alpha/resources/loggedIn")
     public Mono<? extends ResponseEntity<?>> handleTokenRequest(ServerHttpRequest request,
-                                                                @PathVariable String realm,
                                                                 @RequestParam String code,
                                                                 @RequestParam("state") String stateParam,
                                                                 @CookieValue("oauth_state") String stateFromCookie) {
-        final List<URI> resources = stateHandler.extractResource(stateParam)
-                                                .stream()
-                                                .flatMap(List::stream)
-                                                .map(URI::create)
-                                                .collect(toList());
+        final OAuthStateHandler.ValidatedState validatedState = stateHandler.parseAndVerify(stateParam, stateFromCookie);
+        final TokenExchangePurpose tokenExchangePurpose = validatedState.getTokenExchangePurpose();
+        final List<URI> resources = validatedState.getResourceList()
+                                                  .stream()
+                                                  .flatMap(List::stream)
+                                                  .map(URI::create)
+                                                  .collect(toList());
         final ReactiveDamOAuthClient oAuthClient = lookupDamOAuthClient(resources);
-        return oAuthClient.exchangeAuthorizationCodeForTokens(realm, rootLoginRedirectUrl(request, realm), code)
+        final URI redirectUri = getRedirectUri(request);
+        final String realm = validatedState.getRealm();
+        return oAuthClient.exchangeAuthorizationCodeForTokens(realm, redirectUri, code)
                           .flatMap(tokenResponse -> {
-                              TokenExchangePurpose tokenExchangePurpose = stateHandler.parseAndVerify(stateParam, stateFromCookie);
-                              Optional<URI> customDestination = stateHandler.getDestinationAfterLogin(stateParam)
-                                                                            .map(possiblyRelativeUrl -> UriUtil.selfLinkToUi(request, realm, "").resolve(possiblyRelativeUrl));
+                              Optional<URI> customDestination = validatedState.getDestinationAfterLogin()
+                                                                              .map(possiblyRelativeUrl -> UriUtil.selfLinkToUi(request, realm, "").resolve(possiblyRelativeUrl));
                               if (tokenExchangePurpose == TokenExchangePurpose.RESOURCE_AUTH) {
                                   final URI ddapDataBrowserUrl = customDestination.orElseGet(() -> UriUtil.selfLinkToUi(request, realm, ""));
                                   return Mono.just(assembleTokenResponse(ddapDataBrowserUrl, tokenResponse, Set.copyOf(resources)));

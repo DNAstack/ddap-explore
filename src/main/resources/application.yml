@@ -8,7 +8,11 @@ server:
 
 dams:
   1:
-    base-url: http://localhost:8083/
+    # If you try to run the DAM and IC locally, they need to use different domain names,
+    # otherwise their cookies will conflict.
+    # Unfortunately when not using HTTPS, DAM requires it's domain to START with localhost,
+    # and Hydra requires it's domain to END with localhost
+    base-url: http://localhost.dam.localhost:8083/
     client-id: 812c1319-fef5-4aa6-9393-beb5ec8facdf
     client-secret: 0000-0000-0000-0000-0000
     ui-url: http://localhost:8087/

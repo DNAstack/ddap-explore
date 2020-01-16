@@ -25,7 +25,7 @@ export class RealmChangeConfirmationDialogComponent {
   private changeRealmAndGoToLogin() {
     this.identityStore.getLoginHintForPrimaryAccount()
       .subscribe((loginHint) => {
-        window.location.href = `/api/v1alpha/${this.data.realm}/identity/login?loginHint=${loginHint}`;
+        window.location.href = `/api/v1alpha/realm/${this.data.realm}/identity/login?loginHint=${loginHint}`;
       });
   }
 

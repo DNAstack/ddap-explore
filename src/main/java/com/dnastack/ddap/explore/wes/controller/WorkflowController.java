@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1alpha/{realm}/wes")
+@RequestMapping("/api/v1alpha/realm/{realm}/wes")
 public class WorkflowController {
 
     private WesResourceService wesResourceService;

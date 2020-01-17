@@ -78,14 +78,15 @@ public class CommandLineAccessController {
 
     @GetMapping("/api/v1alpha/realm/{realm}/cli/login/{cliSessionId}")
     public Mono<? extends ResponseEntity<?>> initiateBrowserLogin(ServerHttpRequest request,
-                                                             @PathVariable String realm,
-                                                             @PathVariable String cliSessionId) {
+                                                                  @PathVariable String realm,
+                                                                  @PathVariable String cliSessionId,
+                                                                  @RequestParam(required = false) String loginHint) {
         final LoginStatus loginStatus = loginStatusByCliSessionId.computeIfAbsent(cliSessionId, k -> {
             throw new CliSessionNotFoundException(cliSessionId);
         });
         final String state = stateHandler.generateCommandLineLoginState(cliSessionId, realm);
         final URI redirectUri = UriUtil.selfLinkToApi(request, "cli/loggedIn");
-        return getActiveLoginUri(realm, loginStatus.getScope(), state, redirectUri)
+        return getActiveLoginUri(realm, loginStatus.getScope(), state, redirectUri, loginHint)
                 .map(webLoginUrl -> ResponseEntity.status(HttpStatus.FOUND)
                                                   .location(webLoginUrl)
                                                   .header(SET_COOKIE, userTokenCookiePackager.packageToken(state, CookieKind.OAUTH_STATE).toString())
@@ -94,8 +95,8 @@ public class CommandLineAccessController {
 
     @PostMapping("/api/v1alpha/realm/{realm}/cli/login")
     public ResponseEntity<?> commandLineLogin(ServerHttpRequest request,
-                                                              @PathVariable String realm,
-                                                              @RequestParam(defaultValue = DEFAULT_SCOPES) String scope) {
+                                              @PathVariable String realm,
+                                              @RequestParam(defaultValue = DEFAULT_SCOPES) String scope) {
         final String cliSessionId = UUID.randomUUID().toString();
         loginStatusByCliSessionId.compute(cliSessionId, (id, monitor) -> {
             if (monitor == null) {
@@ -120,17 +121,15 @@ public class CommandLineAccessController {
                              .body(new StartLoginResponse(bearerToken));
     }
 
-    public Mono<URI> getActiveLoginUri(String realm, String scope, String state, URI redirectUri) {
-        final URI webLoginUrl = oAuthClient.getAuthorizeUrl(realm,
-                                                            state,
-                                                            scope,
-                                                            redirectUri);
+    public Mono<URI> getActiveLoginUri(String realm, String scope, String state, URI redirectUri, String loginHint) {
+        final URI webLoginUrl = oAuthClient.getAuthorizeUrl(realm, state, scope, redirectUri, loginHint);
+
         return oAuthClient.testAuthorizeEndpoint(webLoginUrl)
                                          .map(status -> {
                                              if (status.is4xxClientError()) {
                                                  // For now try the legacy login URI on client error
                                                  log.info("Authorize endpoint returned [{}] status: Falling back to legacy authorize endpoint", status);
-                                                 return oAuthClient.getLegacyAuthorizeUrl(realm, state, scope, redirectUri);
+                                                 return oAuthClient.getLegacyAuthorizeUrl(realm, state, scope, redirectUri, loginHint);
                                              } else {
                                                  return webLoginUrl;
                                              }

@@ -8,15 +8,12 @@ import com.google.common.collect.ImmutableMap;
 import dam.v1.DamService;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.security.crypto.encrypt.Encryptors;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
 
-import static io.restassured.RestAssured.given;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.Matchers.not;
@@ -34,44 +31,6 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     private String damViaDdap(String path) {
         return format("/dam/v1alpha/%s%s", REALM, path);
-    }
-
-    @Test
-    public void shouldIncludeValidAuthStatusInResponseHeader() throws Exception {
-        String unexpiredUserTokenCookie = fakeUserToken(Instant.now().plusSeconds(10));
-
-        // @formatter:off
-        getRequestSpecification()
-            .log().method()
-            .log().cookies()
-            .log().uri()
-            .cookie("dam_token", unexpiredUserTokenCookie)
-        .when()
-            .get(damViaDdap("/resources/resource-name/views/view-name"))
-        .then()
-            .log().body()
-            .log().ifValidationFails()
-            .header("X-DDAP-Authenticated", "true");
-        // @formatter:on
-    }
-
-    @Test
-    public void shouldIncludeInvalidAuthStatusInResponseHeader() throws Exception {
-        String expiredUserTokenCookie = fakeUserToken(Instant.now().minusSeconds(10));
-
-        // @formatter:off
-        getRequestSpecification()
-            .log().method()
-            .log().cookies()
-            .log().uri()
-            .cookie("dam_token", expiredUserTokenCookie)
-        .when()
-            .get(damViaDdap("/resources/resource-name/views/view-name"))
-        .then()
-            .log().body()
-            .log().ifValidationFails()
-            .header("X-DDAP-Authenticated", "false");
-        // @formatter:on
     }
 
     @Test
@@ -106,46 +65,6 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
             .log().everything()
             .contentType(not("text/html"))
             .statusCode(200);
-        // @formatter:on
-    }
-
-    @Test
-    public void expiredDamTokenShouldExpireUserTokenCookies() throws Exception {
-        String expiredUserTokenCookie = fakeUserToken(Instant.now().minusSeconds(10));
-
-        // @formatter:off
-        getRequestSpecification()
-            .log().method()
-            .log().cookies()
-            .log().uri()
-            .cookie("dam_token", expiredUserTokenCookie)
-            .when()
-            .get(damViaDdap("/resources/resource-name/views/view-name"))
-            .then()
-            .log().body()
-            .log().ifValidationFails()
-            .statusCode(isOneOf(401, 404))
-            .cookie("dam_token", "expired");
-        // @formatter:on
-    }
-
-    @Test
-    public void expiredIcTokenShouldExpireUserTokenCookies() throws Exception {
-        String expiredUserTokenCookie = fakeUserToken(Instant.now().minusSeconds(10));
-
-        // @formatter:off
-        getRequestSpecification()
-            .log().method()
-            .log().cookies()
-            .log().uri()
-            .cookie("ic_token", expiredUserTokenCookie)
-            .when()
-            .get(damViaDdap("/accounts/-"))
-            .then()
-            .log().body()
-            .log().ifValidationFails()
-            .statusCode(isOneOf(401, 404))
-            .cookie("ic_token", "expired");
         // @formatter:on
     }
 
@@ -191,11 +110,6 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     private String icViaDdap(String path) {
         return format("/identity/v1alpha/%s%s", REALM, path);
-    }
-
-    private String fakeUserToken(Instant exp) throws JsonProcessingException {
-        TextEncryptor encryptor = Encryptors.text(DDAP_COOKIES_ENCRYPTOR_PASSWORD, DDAP_COOKIES_ENCRYPTOR_SALT);
-        return encryptor.encrypt(fakeClearTextUserToken(exp));
     }
 
     private String fakeClearTextUserToken(Instant exp) throws JsonProcessingException {

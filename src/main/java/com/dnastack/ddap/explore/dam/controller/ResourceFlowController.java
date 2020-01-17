@@ -61,7 +61,7 @@ public class ResourceFlowController {
 
         final ReactiveDamClient damClient = lookupDamClient(resources);
         final CartTokenCookieName cartCookieName = new CartTokenCookieName(Set.copyOf(resources));
-        final Optional<String> extractedCartToken = cookiePackager.extractToken(request, cartCookieName)
+        final Optional<String> extractedCartToken = cookiePackager.extractTokenIgnoringInvalid(request, cartCookieName)
                                                                   .map(UserTokenCookiePackager.CookieValue::getClearText);
 
         return extractedCartToken.map(s -> damClient.checkoutCart(s)

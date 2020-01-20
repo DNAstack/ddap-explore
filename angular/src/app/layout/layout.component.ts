@@ -45,16 +45,6 @@ export class LayoutComponent implements OnInit {
   }
 
   ngOnInit() {
-    // fetch('/api/v1alpha/config')
-    //   .then(response => {
-    //     return response.json();
-    //   })
-    //   .then(data => {
-    //     this.appConfig = data;
-    //     this.titleService.setTitle(this.appConfig.title);
-    //   })
-    // ;
-
     this.http.get<AppConfig>('/api/v1alpha/config')
       .subscribe((data: AppConfig) => {
         this.appConfig = data;

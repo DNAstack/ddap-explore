@@ -73,7 +73,7 @@ public class WalletLoginStrategy implements LoginStrategy {
         final CookieStore cookieStore = performPersonaLogin(persona.getId(), realmName, DEFAULT_SCOPES);
 
         // Need to navigate to site before setting cookie
-        driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s/data", realmName)).toString());
+        driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s", realmName)).toString());
         {
             // Need to add session cookie separately
             org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
@@ -81,7 +81,7 @@ public class WalletLoginStrategy implements LoginStrategy {
         }
         addCookiesFromStoreToSelenium(cookieStore, driver);
         // Visit again with session cookie
-        driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s/data", realmName)).toString());
+        driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s", realmName)).toString());
 
         return pageFactory.apply(driver);
     }

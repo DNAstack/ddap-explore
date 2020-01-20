@@ -4,10 +4,15 @@
                   data-se="main-progress-bar">
 </mat-progress-bar>
 <mat-sidenav-container>
-  <mat-sidenav #sidenav mode="side" [opened]="true" disableClose>
+  <mat-sidenav
+    *ngIf="appConfig.sidebarEnabled"
+    #sidenav
+    mode="side"
+    [opened]="true"
+    disableClose>
     <header>
       <h1 class="flex flex--column">
-        <span>DDAP</span>
+        <span>{{ appConfig.title }}</span>
         <span *ngIf="isSandbox"
               class="sandbox-warning"
               matTooltip="This is sandbox testing environment">
@@ -53,18 +58,22 @@
 
       <mat-list-item [routerLink]="['data']"
                      [routerLinkActive]="['active-nav-link']"
-                     data-se="nav-data">
+                     data-se="nav-data"
+                     *ngIf="appConfig.featureExploreDataEnabled">
         <mat-icon class="icon icon-explore"></mat-icon>
         <h4 mat-line>Explore Data</h4>
       </mat-list-item>
+
       <mat-list-item [routerLink]="['workflows']"
                      [routerLinkActive]="['active-nav-link']"
-                     data-se="nav-workflows">
+                     data-se="nav-workflows"
+                     *ngIf="appConfig.featureWorkflowsEnabled">
         <mat-icon class="icon icon-rules"></mat-icon>
         <h4 mat-line>Workflows</h4>
       </mat-list-item>
 
-      <div class="accordion-wrapper">
+      <div class="accordion-wrapper"
+           *ngIf="appConfig.featureAdministrationEnabled">
         <mat-accordion [multi]="false">
           <mat-expansion-panel [expanded]="false"
                                data-se="nav-administration-panel">

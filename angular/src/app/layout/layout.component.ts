@@ -1,4 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { interval, Observable } from 'rxjs';
@@ -7,6 +9,7 @@ import { repeatWhen } from 'rxjs/operators';
 import { IdentityService } from '../identity/identity.service';
 import { IdentityStore } from '../identity/identity.store';
 import { Profile } from '../identity/profile.model';
+import { AppConfig } from '../shared/app-config/app-config';
 import { DamInfoStore } from '../shared/dam/dam-info.store';
 import { DamInfo } from '../shared/dam/dams-info';
 
@@ -24,8 +27,17 @@ export class LayoutComponent implements OnInit {
   loginPath: string;
   damsInfo: DamInfo[] = [];
   icPath: string;
+  appConfig: AppConfig = {
+    title: 'DDAP',
+    sidebarEnabled: true,
+    featureAdministrationEnabled: true,
+    featureExploreDataEnabled: true,
+    featureWorkflowsEnabled: true,
+  };
 
   constructor(public loader: LoadingBarService,
+              private titleService: Title,
+              private http: HttpClient,
               private activatedRoute: ActivatedRoute,
               private identityService: IdentityService,
               private identityStore: IdentityStore,
@@ -33,6 +45,22 @@ export class LayoutComponent implements OnInit {
   }
 
   ngOnInit() {
+    // fetch('/api/v1alpha/config')
+    //   .then(response => {
+    //     return response.json();
+    //   })
+    //   .then(data => {
+    //     this.appConfig = data;
+    //     this.titleService.setTitle(this.appConfig.title);
+    //   })
+    // ;
+
+    this.http.get<AppConfig>('/api/v1alpha/config')
+      .subscribe((data: AppConfig) => {
+        this.appConfig = data;
+        this.titleService.setTitle(this.appConfig.title);
+      });
+
     this.damInfoStore.getDamsInfo().subscribe(damsInfo => {
       for (const damId in damsInfo) {
         this.damsInfo.push(damsInfo[damId]);

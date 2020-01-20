@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
 
+import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.Matchers.not;
@@ -35,11 +36,13 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldIncludeMissingAuthStatusInResponseHeader() throws Exception {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
         .when()
             .get(damViaDdap("/resources/resource-name/views/view-name"))
         .then()
@@ -51,6 +54,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldBeAbleToAccessICWithAppropriateCookie() throws IOException {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String validPersonaToken = fetchRealPersonaIcToken(TestingPersona.USER_WITH_ACCESS, REALM);
 
         // @formatter:off
@@ -58,6 +62,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
             .log().method()
             .log().cookies()
             .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
             .cookie("ic_token", validPersonaToken)
         .when()
             .get(icViaDdap("/accounts/-"))
@@ -70,6 +75,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     @Test
     public void staleDamTokenShouldExpireUserTokenCookies() throws Exception {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String expiredUserTokenCookie = fakeClearTextUserToken(Instant.now().minusSeconds(10));
 
         // @formatter:off
@@ -77,6 +83,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
             .log().method()
             .log().cookies()
             .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
             .cookie("dam_token", expiredUserTokenCookie)
             .when()
             .get(damViaDdap("/resources/resource-name/views/view-name"))
@@ -90,6 +97,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     @Test
     public void staleIcTokenShouldExpireUserTokenCookies() throws Exception {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String expiredUserTokenCookie = fakeClearTextUserToken(Instant.now().minusSeconds(10));
 
         // @formatter:off
@@ -97,6 +105,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
             .log().method()
             .log().cookies()
             .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
             .cookie("ic_token", expiredUserTokenCookie)
             .when()
             .get(icViaDdap("/accounts/-"))

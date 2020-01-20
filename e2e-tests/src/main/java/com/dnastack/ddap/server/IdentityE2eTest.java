@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.*;
 
@@ -30,6 +31,7 @@ public class IdentityE2eTest extends AbstractBaseE2eTest {
     @Test
     public void testScopes() throws Exception {
         String requestedScope = "link";
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String icToken = fetchRealPersonaIcToken(TestingPersona.USER_WITH_ACCESS, REALM, "openid");
         String damToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
@@ -39,6 +41,7 @@ public class IdentityE2eTest extends AbstractBaseE2eTest {
                 .log().method()
                 .log().cookies()
                 .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
                 .cookie("ic_token", icToken)
                 .cookie("dam_token", damToken)
                 .cookie("refresh_token", refreshToken)
@@ -62,6 +65,7 @@ public class IdentityE2eTest extends AbstractBaseE2eTest {
                 .log().method()
                 .log().cookies()
                 .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
                 .cookie("ic_token", icToken)
                 .cookie("dam_token", damToken)
                 .cookie("refresh_token", refreshToken)
@@ -80,6 +84,7 @@ public class IdentityE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void testAccount() throws Exception {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String icToken = fetchRealPersonaIcToken(TestingPersona.USER_WITH_ACCESS, REALM, "");
         String danToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
@@ -89,6 +94,7 @@ public class IdentityE2eTest extends AbstractBaseE2eTest {
                 .log().method()
                 .log().cookies()
                 .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
                 .cookie("ic_token", icToken)
                 .cookie("dam_token", danToken)
                 .cookie("refresh_token", refreshToken)

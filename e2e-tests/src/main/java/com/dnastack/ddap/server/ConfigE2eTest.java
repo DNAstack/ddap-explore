@@ -1,6 +1,7 @@
 package com.dnastack.ddap.server;
 
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureException;
 import io.restassured.RestAssured;
@@ -8,28 +9,21 @@ import io.restassured.response.Response;
 import lombok.Data;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.cookie.Cookie;
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class ConfigE2eTest extends AbstractBaseE2eTest {
-
-    private String basicUsername;
-    private String basicPassword;
-
-    @Before
-    public void setup() {
-        basicUsername = requiredEnv("E2E_BASIC_USERNAME");
-        basicPassword = requiredEnv("E2E_BASIC_PASSWORD");
-    }
 
     @Test
     public void doNotAcceptDevCookieEncryptorCredentials() {
@@ -48,13 +42,12 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void doNotAcceptDevCredentials() {
-        Assume.assumeTrue(basicPassword != null);
+        Assume.assumeTrue(DDAP_PASSWORD != null);
         Assume.assumeFalse("Dev credentials are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev credentials are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
         given()
             .log().method()
             .log().uri()
-            .auth().preemptive().basic("dev", "dev")
         .when()
             .get("/index.html")
         .then()
@@ -69,7 +62,6 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
         final Response response = given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
                 .when()
                 .post("/api/v1alpha/realm/dnastack/cli/login");
         response
@@ -92,7 +84,6 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
         final Response response = given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
                 .redirects().follow(false)
                 .when()
                 .get("/api/v1alpha/realm/dnastack/identity/login");
@@ -126,7 +117,8 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
                 .get("/index.html")
         .then()
                 .log().ifValidationFails()
-                .statusCode(401);
+                .statusCode(200)
+        .body("html.head.title", containsString("Please sign in"));
     }
 
     @Test
@@ -146,7 +138,6 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
         given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
         .when()
                 .get("/index.html")
         .then()
@@ -155,11 +146,13 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     }
 
     @Test
-    public void accessDamEndpoint() {
+    public void accessDamEndpoint() throws IOException {
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+
         given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
         .when()
                 .get("/dam/1/v1alpha/dnastack/resources")
         .then()
@@ -169,11 +162,13 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     }
 
     @Test
-    public void accessIdpEndpoint() {
+    public void accessIdpEndpoint() throws IOException {
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+
         given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
                 .when()
                 .get("/identity")
                 .then()
@@ -187,7 +182,6 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
         given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
         .when()
                 .get("/resources")
         .then()
@@ -196,11 +190,13 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     }
 
     @Test
-    public void angularRoutesDoNotWorkForJavaScriptFiles() {
+    public void angularRoutesDoNotWorkForJavaScriptFiles() throws IOException {
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+
         given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
         .when()
                 .get("/made-up-resource-name.js")
         .then()
@@ -209,11 +205,13 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     }
 
     @Test
-    public void noAngularRoutesForMapFiles() {
+    public void noAngularRoutesForMapFiles() throws IOException {
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+
         given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
         .when()
                 .get("/made-up-resource-name.js.map")
         .then()
@@ -222,11 +220,13 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     }
 
     @Test
-    public void noAngularRoutesForHtmlFiles() {
+    public void noAngularRoutesForHtmlFiles() throws IOException {
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+
         given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
         .when()
                 .get("/made-up-resource-name.html")
         .then()
@@ -235,11 +235,13 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     }
 
     @Test
-    public void noAngularRoutesForFileWithArbitraryExtension() {
+    public void noAngularRoutesForFileWithArbitraryExtension() throws IOException {
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+
         given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
         .when()
                 .get("/made-up-resource-name.foobar")
         .then()

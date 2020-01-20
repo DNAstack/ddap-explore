@@ -3,7 +3,6 @@ package com.dnastack.ddap.common;
 import com.dnastack.ddap.common.WalletLoginStrategy.LoginInfo;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Message;
@@ -14,13 +13,11 @@ import io.restassured.config.ObjectMapperConfig;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.specification.RequestSpecification;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -33,11 +30,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static io.restassured.RestAssured.given;
 import static java.lang.Math.min;
 import static java.lang.String.format;
@@ -46,6 +42,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
 
 @SuppressWarnings("Duplicates")
+@Slf4j
 public abstract class AbstractBaseE2eTest {
 
     public static final String DDAP_USERNAME = optionalEnv("E2E_BASIC_USERNAME",null);
@@ -115,11 +112,7 @@ public abstract class AbstractBaseE2eTest {
     }
 
     protected static RequestSpecification getRequestSpecification(){
-        if(DDAP_USERNAME == null && DDAP_PASSWORD == null) {
-            return given();
-        }else{
-            return given().auth().basic(DDAP_USERNAME, DDAP_PASSWORD);
-        }
+        return given();
     }
 
     protected static String requiredEnv(String name) {
@@ -159,43 +152,6 @@ public abstract class AbstractBaseE2eTest {
         }
     }
 
-    protected static void setupIcConfig(TestingPersona persona, String config, String realmName) throws IOException {
-        final CookieStore cookieStore = loginStrategy.performPersonaLogin(persona.getId(), realmName);
-
-        final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
-        final ObjectMapper mapper = new ObjectMapper();
-
-        // Don't clobber wallet config in case we are using wallet test user login
-        final Map<String, Object> walletConfig = getIdentityProviderConfig(realmName, "wallet", httpclient);
-        if (walletConfig != null) {
-            final IcConfig parsedConfig = mapper.readValue(config, IcConfig.class);
-            parsedConfig.getIdentityProviders().put("wallet", walletConfig);
-            config = mapper.writeValueAsString(parsedConfig);
-        }
-
-        final Map<String, Object> personaConfig = getIdentityProviderConfig(realmName, "persona", httpclient);;
-        if(personaConfig !=null) {
-            final IcConfig parsedConfig = mapper.readValue(config, IcConfig.class);
-            parsedConfig.getIdentityProviders().put("persona", personaConfig);
-            config = mapper.writeValueAsString(parsedConfig);
-        }
-
-        final String modificationPayload = format("{ \"item\": %s }", config);
-
-        {
-            HttpPut request = new HttpPut(format("%s/identity/v1alpha/%s/config", DDAP_BASE_URL, realmName));
-            addDdapBasicAuthHeader(request);
-            request.setEntity(new StringEntity(modificationPayload));
-
-            final HttpResponse response = httpclient.execute(request);
-            final String responseBody = EntityUtils.toString(response.getEntity());
-
-            assertThat("Unable to set realm config. Response:\n" + responseBody,
-                       response.getStatusLine().getStatusCode(),
-                       allOf(greaterThanOrEqualTo(200), lessThan(300)));
-        }
-    }
-
     protected static void setupRealmConfig(TestingPersona persona, String config, String damId, String realmName) throws IOException {
         DamService.DamConfig.Builder damConfigBuilder = DamService.DamConfig.newBuilder();
         validateProtoBuf(config, damConfigBuilder);
@@ -210,7 +166,6 @@ public abstract class AbstractBaseE2eTest {
 
         final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
         HttpPut request = new HttpPut(format("%s/dam/%s/v1alpha/%s/config", DDAP_BASE_URL, damId, realmName));
-        addDdapBasicAuthHeader(request);
         request.setEntity(new StringEntity(modificationPayload));
 
         System.out.printf("Sending setup realm request to URI [%s]\n", request.getURI());
@@ -251,6 +206,10 @@ public abstract class AbstractBaseE2eTest {
         return (url.endsWith("/"))
                 ? url.substring(0, url.length() - 1)
                 : url;
+    }
+
+    protected String fetchRealSessionToken(TestingPersona persona, String realmName) throws IOException {
+        return fetchRealPersonaToken(persona.getId(), SESSION_COOKIE_NAME, realmName);
     }
 
     protected String fetchRealPersonaIcToken(String personaName, String realmName, String ... scopes) throws IOException {
@@ -300,30 +259,4 @@ public abstract class AbstractBaseE2eTest {
         return tokenCookie.getValue();
     }
 
-    public static void addDdapBasicAuthHeader(HttpRequest request) {
-        String auth = DDAP_USERNAME + ":" + DDAP_PASSWORD;
-        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.ISO_8859_1));
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(encodedAuth));
-    }
-
-    private static Map<String, Object> getIdentityProviderConfig(String realmName,
-                                                          String provider,
-                                                          HttpClient httpclient) throws IOException {
-        final Map<String, Object> providerConfig;
-        final ObjectMapper mapper = new ObjectMapper();
-
-        HttpGet request = new HttpGet(format("%s/identity/v1alpha/%s/config/identityProviders/%s",
-                DDAP_BASE_URL, realmName, provider));
-        addDdapBasicAuthHeader(request);
-
-        final HttpResponse response = httpclient.execute(request);
-        final int statusCode = response.getStatusLine().getStatusCode();
-        if (statusCode == 200) {
-            final String responseBody = EntityUtils.toString(response.getEntity());
-            providerConfig = mapper.readValue(responseBody, new TypeReference<Map<String, Object>>() {});
-        } else {
-            providerConfig = null;
-        }
-        return providerConfig;
-    }
 }

@@ -6,10 +6,7 @@ import com.dnastack.ddap.common.page.AdminDdapPage;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.IOException;

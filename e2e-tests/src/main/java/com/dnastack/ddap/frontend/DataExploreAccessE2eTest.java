@@ -6,7 +6,6 @@ import com.dnastack.ddap.common.fragments.ExpandedAccessibleViewItem;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.DataDetailPage;
 import com.dnastack.ddap.common.page.DataListPage;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,6 +14,7 @@ import java.net.URI;
 
 import static com.dnastack.ddap.common.TestingPersona.USER_WITHOUT_ACCESS;
 import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
+import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static io.restassured.RestAssured.given;
 
 @SuppressWarnings("Duplicates")
@@ -28,15 +28,6 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
         setupRealmConfig(TestingPersona.ADMINISTRATOR, damConfig, "1", REALM);
 
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
-    }
-
-    private String basicUsername;
-    private String basicPassword;
-
-    @Before
-    public void setup() {
-        basicUsername = requiredEnv("E2E_BASIC_USERNAME");
-        basicPassword = requiredEnv("E2E_BASIC_PASSWORD");
     }
 
     @Test
@@ -69,7 +60,9 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
     }
 
     @Test
-    public void shouldFindWorkingDownloadLink() {
+    public void shouldFindWorkingDownloadLink() throws IOException {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage thousandGenomesDetailPage = dataListPage
                 .findDataByName("1000 Genomes")
@@ -85,7 +78,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
         given()
                 .log().method()
                 .log().uri()
-                .auth().preemptive().basic(basicUsername, basicPassword)
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
                 .when()
                 .get(downloadHref)
                 .then()

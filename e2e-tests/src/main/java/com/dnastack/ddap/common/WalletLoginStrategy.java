@@ -1,34 +1,33 @@
 package com.dnastack.ddap.common;
 
 import com.dnastack.ddap.common.page.AnyDdapPage;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
+import com.dnastack.ddap.common.util.WebDriverCookieHelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.dnastack.ddap.common.AbstractBaseE2eTest.*;
-import static com.dnastack.ddap.common.util.WebDriverUtil.getUrlWithBasicCredentials;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -49,13 +48,13 @@ public class WalletLoginStrategy implements LoginStrategy {
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(personaName);
-        final CookieStore cookieStore = new BasicCookieStore();
+        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {
             final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);
             HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", DDAP_BASE_URL, realmName, loginInfo.getEmail(), scopeString));
-            addDdapBasicAuthHeader(request);
 
             final HttpResponse response = httpclient.execute(request);
             String responseBody = EntityUtils.toString(response.getEntity());
@@ -74,9 +73,15 @@ public class WalletLoginStrategy implements LoginStrategy {
         final CookieStore cookieStore = performPersonaLogin(persona.getId(), realmName, DEFAULT_SCOPES);
 
         // Need to navigate to site before setting cookie
-        driver.get(getUrlWithBasicCredentials(URI.create(DDAP_BASE_URL).resolve(format("/%s/data", realmName)).toString(), DDAP_USERNAME, DDAP_PASSWORD));
+        driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s/data", realmName)).toString());
+        {
+            // Need to add session cookie separately
+            org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+            WebDriverCookieHelper.addBrowserCookie(driver, session);
+        }
         addCookiesFromStoreToSelenium(cookieStore, driver);
-        driver.navigate().refresh();
+        // Visit again with session cookie
+        driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s/data", realmName)).toString());
 
         return pageFactory.apply(driver);
     }
@@ -84,14 +89,14 @@ public class WalletLoginStrategy implements LoginStrategy {
     @Override
     public <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(persona.getId());
-        final CookieStore cookieStore = new BasicCookieStore();
+        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         URI loginUrl = null;
         // Get login url and append login_hint
         {
             HttpGet request = new HttpGet(authorizeUri);
-            addDdapBasicAuthHeader(request);
 
             HttpClientContext context = HttpClientContext.create();
             final HttpResponse response = httpclient.execute(request, context);
@@ -109,7 +114,6 @@ public class WalletLoginStrategy implements LoginStrategy {
         // Execute GET login url
         {
             HttpGet request = new HttpGet(loginUrl);
-            addDdapBasicAuthHeader(request);
 
             final HttpResponse response = httpclient.execute(request);
 
@@ -127,17 +131,15 @@ public class WalletLoginStrategy implements LoginStrategy {
         return pageFactory.apply(driver);
     }
 
-    private HttpClient setupHttpClient(CookieStore cookieStore) {
-        BasicCredentialsProvider credentialsProvider = null;
-        if(DDAP_USERNAME != null && DDAP_PASSWORD != null) {
-            credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY,
-                new UsernamePasswordCredentials(DDAP_USERNAME, DDAP_PASSWORD));
-        }
+    private CookieStore setupCookieStore(org.apache.http.cookie.Cookie sessionCookie) {
+        final CookieStore cookieStore = new BasicCookieStore();
+        cookieStore.addCookie(sessionCookie);
+        return cookieStore;
+    }
 
+    private HttpClient setupHttpClient(CookieStore cookieStore) {
         return HttpClientBuilder.create()
             .setDefaultCookieStore(cookieStore)
-            .setDefaultCredentialsProvider(credentialsProvider)
             .build();
     }
 
@@ -192,12 +194,8 @@ public class WalletLoginStrategy implements LoginStrategy {
     private void addCookiesFromStoreToSelenium(CookieStore cookieStore, WebDriver driver) {
         cookieStore.getCookies()
             .forEach(cookie -> {
-                driver.manage().deleteCookieNamed(cookie.getName());
                 System.out.printf("Adding cookie to selenium: Cookie(name=%s, domain=%s, path=%s, expiry=%s, secure=%b" + System.lineSeparator(), cookie.getName(), cookie.getDomain(), cookie.getPath(), cookie.getExpiryDate(), cookie.isSecure());
-                // Making cookie null for localhost, more info: https://stackoverflow.com/a/29312227/4445511
-                final String domain = "localhost".equals(cookie.getDomain()) ? null : cookie.getDomain();
-                final Cookie browserCookie = new Cookie(cookie.getName(), cookie.getValue(), domain, cookie.getPath(), cookie.getExpiryDate(), cookie.isSecure());
-                driver.manage().addCookie(browserCookie);
+                WebDriverCookieHelper.addBrowserCookie(driver, cookie);
             });
     }
 

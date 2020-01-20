@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static java.lang.String.format;
 
 public class ViewsApiTest extends AbstractBaseE2eTest {
@@ -26,11 +27,13 @@ public class ViewsApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldReturnViewForBucket() throws IOException {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
             .contentType("application/json")
             .body(Arrays.asList("gs://ga4gh-apis-controlled-access","https://www.googleapis.com/storage/v1/b/ga4gh-apis-controlled-access"))
         .when()
@@ -46,11 +49,13 @@ public class ViewsApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldNotReturnViewForPartialSubset() throws IOException {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
             .contentType("application/json")
             .body(Arrays.asList("gs://ga4gh-apis-controlled-access-with-more-stuff"))
         .when()
@@ -66,11 +71,13 @@ public class ViewsApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldReturnEmptyViewsForNonExistantResource() throws IOException {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
             .contentType("application/json")
             .body(Arrays.asList("gs://empty-view"))
         .when()

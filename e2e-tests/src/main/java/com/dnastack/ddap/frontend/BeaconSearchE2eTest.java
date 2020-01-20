@@ -7,7 +7,8 @@ import com.dnastack.ddap.common.page.DataDetailPage;
 import com.dnastack.ddap.common.page.DataListPage;
 import com.dnastack.ddap.common.page.SearchPage;
 import com.dnastack.ddap.common.util.DdapBy;
-import org.junit.Assume;
+import com.dnastack.ddap.common.util.WebDriverCookieHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,7 +18,6 @@ import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
 import java.net.URI;
-import java.time.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@Slf4j
 @SuppressWarnings("Duplicates")
 public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
@@ -45,16 +46,11 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
     @Before
     public void setUp() {
         super.setUp();
-        driver.manage().deleteAllCookies(); // need to remove cart cookies to provide isolation
+        WebDriverCookieHelper.cleanUpAllCartCookies(driver); // need to remove cart cookies to provide isolation
     }
 
     @Test
     public void searchBeaconWithValidQuery() throws IOException {
-        Assume.assumeTrue("Feature is temporarily broken. Temporarily unblocking build.",
-            Instant.now().isAfter(ZonedDateTime.of(LocalDateTime.of(
-                        2020, Month.JANUARY, 28, 12, 0), ZoneId.of("America/Toronto")
-                ).toInstant()));
-
         ddapPage.getNavBar()
             .goTo(dataLink());
 
@@ -75,11 +71,6 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void searchBeaconWithInvalidQuery() throws IOException {
-        Assume.assumeTrue("Feature is temporarily broken. Temporarily unblocking build.",
-            Instant.now().isAfter(ZonedDateTime.of(LocalDateTime.of(
-                2020, Month.JANUARY, 28, 12, 0), ZoneId.of("America/Toronto")
-            ).toInstant()));
-
         ddapPage.getNavBar()
             .goTo(dataLink());
 
@@ -101,11 +92,6 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void backLinkFromDataList() {
-        Assume.assumeTrue("Feature is temporarily broken. Temporarily unblocking build.",
-            Instant.now().isAfter(ZonedDateTime.of(LocalDateTime.of(
-                2020, Month.JANUARY, 28, 12, 0), ZoneId.of("America/Toronto")
-            ).toInstant()));
-
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -121,11 +107,6 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void backLinkFromDataDetails() {
-        Assume.assumeTrue("Feature is temporarily broken. Temporarily unblocking build.",
-            Instant.now().isAfter(ZonedDateTime.of(LocalDateTime.of(
-                2020, Month.JANUARY, 28, 12, 0), ZoneId.of("America/Toronto")
-            ).toInstant()));
-
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -146,11 +127,6 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void limitSearchFromDataDetails() throws IOException {
-        Assume.assumeTrue("Feature is temporarily broken. Temporarily unblocking build.",
-            Instant.now().isAfter(ZonedDateTime.of(LocalDateTime.of(
-                2020, Month.JANUARY, 28, 12, 0), ZoneId.of("America/Toronto")
-            ).toInstant()));
-
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -177,11 +153,6 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void limitSearchOnSearchPage() throws IOException {
-        Assume.assumeTrue("Feature is temporarily broken. Temporarily unblocking build.",
-            Instant.now().isAfter(ZonedDateTime.of(LocalDateTime.of(
-                2020, Month.JANUARY, 28, 12, 0), ZoneId.of("America/Toronto")
-            ).toInstant()));
-
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -208,11 +179,6 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void changeQueryOnSearchPageAndGoBack() throws IOException {
-        Assume.assumeTrue("Feature is temporarily broken. Temporarily unblocking build.",
-            Instant.now().isAfter(ZonedDateTime.of(LocalDateTime.of(
-                2020, Month.JANUARY, 28, 12, 0), ZoneId.of("America/Toronto")
-            ).toInstant()));
-
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -252,11 +218,6 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void testBRCA2SearchLink() throws IOException {
-        Assume.assumeTrue("Feature is temporarily broken. Temporarily unblocking build.",
-            Instant.now().isAfter(ZonedDateTime.of(LocalDateTime.of(
-                2020, Month.JANUARY, 28, 12, 0), ZoneId.of("America/Toronto")
-            ).toInstant()));
-
         ddapPage.getNavBar()
                 .goTo(dataLink());
 

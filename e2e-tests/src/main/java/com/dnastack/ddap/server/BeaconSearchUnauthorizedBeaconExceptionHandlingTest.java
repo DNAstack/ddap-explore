@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static io.restassured.http.ContentType.JSON;
 import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
@@ -62,12 +63,14 @@ public class BeaconSearchUnauthorizedBeaconExceptionHandlingTest extends Abstrac
     }
 
     @Test
-    public void shouldGet401InBeaconResponsesWhenUnauthenticated() {
+    public void shouldGet401InBeaconResponsesWhenUnauthenticated() throws IOException {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         /* Run the aggregate search query on the realm */
         // @formatter:off
         BeaconQueryResult[] allResults = getRequestSpecification()
                 .log().method()
                 .log().uri()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
                 .when()
                 .get("/api/v1alpha/realm/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C")
                 .then()

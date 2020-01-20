@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.restassured.RestAssured.given;
+import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
@@ -41,6 +41,7 @@ public class GetBeaconInfoAsAdmin extends AbstractBaseE2eTest {
      */
     @Test
     public void exerciseMissingBeaconInfo() throws IOException {
+        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String validPersonaToken = fetchRealPersonaDamToken(TestingPersona.ADMINISTRATOR, REALM);
         String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.ADMINISTRATOR, REALM);
 
@@ -49,6 +50,7 @@ public class GetBeaconInfoAsAdmin extends AbstractBaseE2eTest {
                 .log().method()
                 .log().uri()
                 .when()
+            .cookie(SESSION_COOKIE_NAME, validSessionToken)
                 .cookie("dam_token", validPersonaToken)
                 .cookie("refresh_token", refreshToken)
                 .get("/api/v1alpha/realm/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C");

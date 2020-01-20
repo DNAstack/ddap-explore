@@ -2,11 +2,13 @@ package com.dnastack.ddap.server;
 
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
 import com.dnastack.ddap.common.TestingPersona;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
 import dam.v1.DamService;
 import io.restassured.response.Response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.http.cookie.Cookie;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -52,13 +54,13 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldGetTwoResultsForAggregateSearch() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         /* Run the aggregate search query on the realm */
         // @formatter:off
         final Response response = getRequestSpecification()
                 .log().method()
                 .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
                 .when()
                 .get("/api/v1alpha/realm/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C");
         response
@@ -88,13 +90,13 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldGetOneResultForSingleResourceSearch() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
         .when()
             .get(format(
                     // FIXME make DAM ID environment variable
@@ -120,7 +122,7 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void missingResourceUiLabel() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         String validPersonaToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
 
@@ -129,7 +131,7 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
             .log().method()
             .log().cookies()
             .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
             .cookie("ic_identity", validPersonaToken)
             .cookie("ic_refresh", refreshToken)
         .when()

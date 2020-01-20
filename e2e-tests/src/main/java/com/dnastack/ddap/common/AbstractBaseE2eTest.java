@@ -33,7 +33,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static io.restassured.RestAssured.given;
 import static java.lang.Math.min;
 import static java.lang.String.format;
@@ -208,10 +207,6 @@ public abstract class AbstractBaseE2eTest {
                 : url;
     }
 
-    protected String fetchRealSessionToken(TestingPersona persona, String realmName) throws IOException {
-        return fetchRealPersonaToken(persona.getId(), SESSION_COOKIE_NAME, realmName);
-    }
-
     protected String fetchRealPersonaIcToken(String personaName, String realmName, String ... scopes) throws IOException {
         return fetchRealPersonaToken(personaName, "ic_access", realmName, scopes);
     }
@@ -245,11 +240,6 @@ public abstract class AbstractBaseE2eTest {
                 .orElse(null);
 
         assertThat(tokenCookie, notNullValue());
-
-        // Skip assertions for session cookie
-        if (tokenCookie.getName().equals(SESSION_COOKIE_NAME)) {
-            return tokenCookie.getValue();
-        }
 
         // Require cookies to be marked as secure unless we're testing on localhost
         if (!(DDAP_BASE_URL.startsWith("http://localhost:") || DDAP_BASE_URL.startsWith("http://host.docker.internal:"))) {

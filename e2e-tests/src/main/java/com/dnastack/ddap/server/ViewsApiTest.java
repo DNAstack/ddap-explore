@@ -2,7 +2,9 @@ package com.dnastack.ddap.server;
 
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
 import com.dnastack.ddap.common.TestingPersona;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
 import dam.v1.DamService;
+import org.apache.http.cookie.Cookie;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,13 +29,13 @@ public class ViewsApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldReturnViewForBucket() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+           .cookie(SESSION_COOKIE_NAME, session.getValue())
             .contentType("application/json")
             .body(Arrays.asList("gs://ga4gh-apis-controlled-access","https://www.googleapis.com/storage/v1/b/ga4gh-apis-controlled-access"))
         .when()
@@ -49,13 +51,13 @@ public class ViewsApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldNotReturnViewForPartialSubset() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+           .cookie(SESSION_COOKIE_NAME, session.getValue())
             .contentType("application/json")
             .body(Arrays.asList("gs://ga4gh-apis-controlled-access-with-more-stuff"))
         .when()
@@ -71,13 +73,13 @@ public class ViewsApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldReturnEmptyViewsForNonExistantResource() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+           .cookie(SESSION_COOKIE_NAME, session.getValue())
             .contentType("application/json")
             .body(Arrays.asList("gs://empty-view"))
         .when()

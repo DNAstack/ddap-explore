@@ -2,7 +2,9 @@ package com.dnastack.ddap.server;
 
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
 import com.dnastack.ddap.common.TestingPersona;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
 import lombok.Data;
+import org.apache.http.cookie.Cookie;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
@@ -64,13 +66,13 @@ public class BeaconSearchUnauthorizedBeaconExceptionHandlingTest extends Abstrac
 
     @Test
     public void shouldGet401InBeaconResponsesWhenUnauthenticated() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         /* Run the aggregate search query on the realm */
         // @formatter:off
         BeaconQueryResult[] allResults = getRequestSpecification()
                 .log().method()
                 .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
                 .when()
                 .get("/api/v1alpha/realm/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C")
                 .then()

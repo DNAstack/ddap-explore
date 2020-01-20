@@ -141,10 +141,13 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     }
 
     @Test
-    public void accessAngularIndexPage() {
+    public void accessAngularIndexPage() throws IOException {
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+
         given()
                 .log().method()
                 .log().uri()
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
         .when()
                 .get("/index.html")
         .then()

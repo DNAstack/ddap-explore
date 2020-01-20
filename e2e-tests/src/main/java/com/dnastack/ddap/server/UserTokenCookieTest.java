@@ -2,10 +2,12 @@ package com.dnastack.ddap.server;
 
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
 import com.dnastack.ddap.common.TestingPersona;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import dam.v1.DamService;
+import org.apache.http.cookie.Cookie;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -36,13 +38,13 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldIncludeMissingAuthStatusInResponseHeader() throws Exception {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()
             .log().cookies()
             .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
         .when()
             .get(damViaDdap("/resources/resource-name/views/view-name"))
         .then()
@@ -54,7 +56,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldBeAbleToAccessICWithAppropriateCookie() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         String validPersonaToken = fetchRealPersonaIcToken(TestingPersona.USER_WITH_ACCESS, REALM);
 
         // @formatter:off
@@ -62,7 +64,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
             .log().method()
             .log().cookies()
             .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
             .cookie("ic_access", validPersonaToken)
         .when()
             .get(icViaDdap("/accounts/-"))
@@ -72,7 +74,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
             .statusCode(200);
         // @formatter:on
     }
-
+    
     private String icViaDdap(String path) {
         return format("/identity/v1alpha/%s%s", REALM, path);
     }

@@ -2,11 +2,13 @@ package com.dnastack.ddap.server;
 
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
 import com.dnastack.ddap.common.TestingPersona;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
 import dam.v1.DamService;
 import io.restassured.response.Response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.http.cookie.Cookie;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,7 +43,7 @@ public class GetBeaconInfoAsAdmin extends AbstractBaseE2eTest {
      */
     @Test
     public void exerciseMissingBeaconInfo() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
         String validPersonaToken = fetchRealPersonaDamToken(TestingPersona.ADMINISTRATOR, REALM);
         String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.ADMINISTRATOR, REALM);
 
@@ -50,7 +52,7 @@ public class GetBeaconInfoAsAdmin extends AbstractBaseE2eTest {
                 .log().method()
                 .log().uri()
                 .when()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+                .cookie(SESSION_COOKIE_NAME, session.getValue())
                 .cookie("ic_identity", validPersonaToken)
                 .cookie("ic_refresh", refreshToken)
                 .get("/api/v1alpha/realm/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C");

@@ -52,16 +52,20 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
             .get("/index.html")
         .then()
             .log().ifValidationFails()
-            .statusCode(401);
+            .statusCode(200)
+            .body("html.head.title", containsString("Please sign in"));
     }
 
     @Test(expected = SignatureException.class)
-    public void doNotUseDevSigningKeyForCliLogin() {
+    public void doNotUseDevSigningKeyForCliLogin() throws IOException {
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+
         final Response response = given()
                 .log().method()
                 .log().uri()
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
                 .when()
                 .post("/api/v1alpha/realm/dnastack/cli/login");
         response
@@ -78,13 +82,16 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     }
 
     @Test(expected = SignatureException.class)
-    public void doNotUseDevSigningKeyForOAuthState() {
+    public void doNotUseDevSigningKeyForOAuthState() throws IOException {
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+
         final Response response = given()
                 .log().method()
                 .log().uri()
                 .redirects().follow(false)
+            .cookie(SESSION_COOKIE_NAME, session.getValue())
                 .when()
                 .get("/api/v1alpha/realm/dnastack/identity/login");
         response

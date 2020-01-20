@@ -246,10 +246,14 @@ public abstract class AbstractBaseE2eTest {
 
         assertThat(tokenCookie, notNullValue());
 
+        // Skip assertions for session cookie
+        if (tokenCookie.getName().equals(SESSION_COOKIE_NAME)) {
+            return tokenCookie.getValue();
+        }
+
         // Require cookies to be marked as secure unless we're testing on localhost
         if (!(DDAP_BASE_URL.startsWith("http://localhost:") || DDAP_BASE_URL.startsWith("http://host.docker.internal:"))) {
-            assertThat("It looks like DDAP_COOKIES_SECURE=true isn't set on this deployment",
-                    tokenCookie.containsAttribute("secure"), is(true));
+            assertThat("It looks like DDAP_COOKIES_SECURE=true isn't set on this deployment", tokenCookie.containsAttribute("secure"), is(true));
             assertThat(tokenCookie.getAttribute("secure"), nullValue());
         }
 

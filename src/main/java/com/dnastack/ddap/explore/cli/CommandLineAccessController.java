@@ -1,7 +1,7 @@
 package com.dnastack.ddap.explore.cli;
 
 import com.dnastack.ddap.common.security.*;
-import com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieKind;
+import com.dnastack.ddap.common.security.UserTokenCookiePackager.TokenKind;
 import com.dnastack.ddap.common.util.http.UriUtil;
 import com.dnastack.ddap.ic.cli.model.CliLoginStatus;
 import com.dnastack.ddap.ic.cli.model.TokenResponse;
@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -31,6 +32,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicServices.IC;
 import static java.lang.String.format;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
@@ -89,7 +91,7 @@ public class CommandLineAccessController {
         return getActiveLoginUri(realm, loginStatus.getScope(), state, redirectUri, loginHint)
                 .map(webLoginUrl -> ResponseEntity.status(HttpStatus.FOUND)
                                                   .location(webLoginUrl)
-                                                  .header(SET_COOKIE, userTokenCookiePackager.packageToken(state, CookieKind.OAUTH_STATE).toString())
+                                                  .header(SET_COOKIE, userTokenCookiePackager.packageToken(state, IC.cookieName(TokenKind.OAUTH_STATE)).toString())
                                                   .build());
     }
 
@@ -159,11 +161,11 @@ public class CommandLineAccessController {
     @GetMapping(path = "/api/v1alpha/cli/loggedIn")
     public Mono<? extends ResponseEntity<?>> finishCliLogin(ServerHttpRequest request,
                                                             @RequestParam("state") String state,
-                                                            @CookieValue("oauth_state") String stateFromCookie,
                                                             @RequestParam("code") String code) {
-        final OAuthStateHandler.ValidatedState validatedState = stateHandler.parseAndVerify(state, stateFromCookie);
+        final UserTokenCookiePackager.CookieName cookieName = IC.cookieName(TokenKind.OAUTH_STATE);
+        final OAuthStateHandler.ValidatedState validatedState = stateHandler.parseAndVerify(request, cookieName);
         final String cliSessionId = validatedState.getCliSession()
-                                                  .orElseThrow(() -> new InvalidOAuthStateException("State does not contain a login session ID", state));
+                                                  .orElseThrow(() -> new InvalidOAuthStateException("State does not contain a login session ID", state, cookieName));
         final String realm = validatedState.getRealm();
         final LoginStatus loginStatus = loginStatusByCliSessionId.get(cliSessionId);
         if (loginStatus == null) {

@@ -130,8 +130,8 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
             .log().cookies()
             .log().uri()
             .cookie(SESSION_COOKIE_NAME, validSessionToken)
-            .cookie("dam_token", validPersonaToken)
-            .cookie("refresh_token", refreshToken)
+            .cookie("ic_identity", validPersonaToken)
+            .cookie("ic_refresh", refreshToken)
         .when()
             .get(format(
                     // FIXME make DAM ID environment variable

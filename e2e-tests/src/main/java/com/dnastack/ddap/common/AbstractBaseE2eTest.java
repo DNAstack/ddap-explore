@@ -213,7 +213,7 @@ public abstract class AbstractBaseE2eTest {
     }
 
     protected String fetchRealPersonaIcToken(String personaName, String realmName, String ... scopes) throws IOException {
-        return fetchRealPersonaToken(personaName, "ic_token", realmName, scopes);
+        return fetchRealPersonaToken(personaName, "ic_access", realmName, scopes);
     }
 
     protected String fetchRealPersonaIcToken(TestingPersona persona, String realmName, String ... scopes) throws IOException {
@@ -221,7 +221,7 @@ public abstract class AbstractBaseE2eTest {
     }
 
     protected String fetchRealPersonaDamToken(String personaName, String realmName) throws IOException {
-        return fetchRealPersonaToken(personaName, "dam_token", realmName);
+        return fetchRealPersonaToken(personaName, "ic_identity", realmName);
     }
 
     protected String fetchRealPersonaDamToken(TestingPersona persona, String realmName) throws IOException {
@@ -229,7 +229,7 @@ public abstract class AbstractBaseE2eTest {
     }
 
     protected String fetchRealPersonaRefreshToken(String personaName, String realmName) throws IOException {
-        return fetchRealPersonaToken(personaName, "refresh_token", realmName);
+        return fetchRealPersonaToken(personaName, "ic_refresh", realmName);
     }
 
     protected String fetchRealPersonaRefreshToken(TestingPersona persona, String realmName) throws IOException {

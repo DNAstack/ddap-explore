@@ -51,8 +51,8 @@ public class GetBeaconInfoAsAdmin extends AbstractBaseE2eTest {
                 .log().uri()
                 .when()
             .cookie(SESSION_COOKIE_NAME, validSessionToken)
-                .cookie("dam_token", validPersonaToken)
-                .cookie("refresh_token", refreshToken)
+                .cookie("ic_identity", validPersonaToken)
+                .cookie("ic_refresh", refreshToken)
                 .get("/api/v1alpha/realm/" + REALM + "/resources/search?type=beacon&assemblyId=GRCh37&referenceName=1&start=156105028&referenceBases=T&alternateBases=C");
         response
                     .then()

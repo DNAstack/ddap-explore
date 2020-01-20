@@ -31,18 +31,18 @@ public class NavbarE2eTest extends AbstractFrontendE2eTest {
         ddapPage = doBrowserLogin(REALM, ADMINISTRATOR, AdminDdapPage::new);
 
         // check if cookies are present on landing page
-        assertThat(driver.manage().getCookieNamed("dam_token"), notNullValue());
-        assertThat(driver.manage().getCookieNamed("ic_token"), notNullValue());
-        assertThat(driver.manage().getCookieNamed("refresh_token"), notNullValue());
+        assertThat(driver.manage().getCookieNamed("ic_identity"), notNullValue());
+        assertThat(driver.manage().getCookieNamed("ic_access"), notNullValue());
+        assertThat(driver.manage().getCookieNamed("ic_refresh"), notNullValue());
 
         ICLoginPage icLoginPage = ddapPage.getNavBar().logOut();
         assertThat(icLoginPage.getRealm(), is(REALM));
 
         // check if cookies are not present on landing page without logging in
         driver.get(getUrlWithBasicCredentials(DDAP_BASE_URL));
-        assertThat(driver.manage().getCookieNamed("dam_token"), nullValue());
-        assertThat(driver.manage().getCookieNamed("ic_token"), nullValue());
-        assertThat(driver.manage().getCookieNamed("refresh_token"), nullValue());
+        assertThat(driver.manage().getCookieNamed("ic_identity"), nullValue());
+        assertThat(driver.manage().getCookieNamed("ic_access"), nullValue());
+        assertThat(driver.manage().getCookieNamed("ic_refresh"), nullValue());
     }
 
     @Test

@@ -63,7 +63,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
             .log().cookies()
             .log().uri()
             .cookie(SESSION_COOKIE_NAME, validSessionToken)
-            .cookie("ic_token", validPersonaToken)
+            .cookie("ic_access", validPersonaToken)
         .when()
             .get(icViaDdap("/accounts/-"))
         .then()
@@ -73,68 +73,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
         // @formatter:on
     }
 
-    @Test
-    public void staleDamTokenShouldExpireUserTokenCookies() throws Exception {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
-        String expiredUserTokenCookie = fakeClearTextUserToken(Instant.now().minusSeconds(10));
-
-        // @formatter:off
-        getRequestSpecification()
-            .log().method()
-            .log().cookies()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
-            .cookie("dam_token", expiredUserTokenCookie)
-            .when()
-            .get(damViaDdap("/resources/resource-name/views/view-name"))
-            .then()
-            .log().body()
-            .log().ifValidationFails()
-            .statusCode(isOneOf(401, 404))
-            .cookie("dam_token", "expired");
-        // @formatter:on
-    }
-
-    @Test
-    public void staleIcTokenShouldExpireUserTokenCookies() throws Exception {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
-        String expiredUserTokenCookie = fakeClearTextUserToken(Instant.now().minusSeconds(10));
-
-        // @formatter:off
-        getRequestSpecification()
-            .log().method()
-            .log().cookies()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
-            .cookie("ic_token", expiredUserTokenCookie)
-            .when()
-            .get(icViaDdap("/accounts/-"))
-            .then()
-            .log().body()
-            .log().ifValidationFails()
-            .statusCode(isOneOf(401, 404))
-            .cookie("ic_token", "expired");
-        // @formatter:on
-    }
-
     private String icViaDdap(String path) {
         return format("/identity/v1alpha/%s%s", REALM, path);
-    }
-
-    private String fakeClearTextUserToken(Instant exp) throws JsonProcessingException {
-        // Note this will only work so long as DDAP frontend uses unencrypted DAM access tokens as cookie value
-        ObjectMapper jsonMapper = new ObjectMapper();
-        Base64.Encoder b64Encoder = Base64.getUrlEncoder().withoutPadding();
-
-        Map<String, Object> header = ImmutableMap.of(
-            "typ", "JWT",
-            "alg", "none");
-        Map<String, Object> body = ImmutableMap.of(
-            "exp", exp.getEpochSecond());
-
-        return b64Encoder.encodeToString(jsonMapper.writeValueAsBytes(header)) +
-            "." +
-            b64Encoder.encodeToString(jsonMapper.writeValueAsBytes(body)) +
-            ".";
     }
 }

@@ -9,10 +9,10 @@ import com.dnastack.ddap.common.security.AuthCookieNotPresentInRequestException;
 import com.dnastack.ddap.common.security.OAuthStateHandler;
 import com.dnastack.ddap.common.security.TokenExchangePurpose;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
-import com.dnastack.ddap.common.security.UserTokenCookiePackager.CartTokenCookieName;
-import com.dnastack.ddap.common.security.UserTokenCookiePackager.CookieKind;
+import com.dnastack.ddap.common.security.UserTokenCookiePackager.TokenKind;
 import com.dnastack.ddap.common.util.http.UriUtil;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
+import com.dnastack.ddap.explore.security.CartTokenCookieName;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -28,6 +31,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.*;
 
+import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicServices.DAM;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -111,7 +115,7 @@ public class ResourceFlowController {
                               URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
                               return ResponseEntity.status(TEMPORARY_REDIRECT)
                                                    .location(loginUri)
-                                                   .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), CookieKind.OAUTH_STATE).toString())
+                                                   .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString())
                                                    .build();
                           });
     }
@@ -193,9 +197,9 @@ public class ResourceFlowController {
     @GetMapping("/api/v1alpha/resources/loggedIn")
     public Mono<? extends ResponseEntity<?>> handleTokenRequest(ServerHttpRequest request,
                                                                 @RequestParam String code,
-                                                                @RequestParam("state") String stateParam,
-                                                                @CookieValue("oauth_state") String stateFromCookie) {
-        final OAuthStateHandler.ValidatedState validatedState = stateHandler.parseAndVerify(stateParam, stateFromCookie);
+                                                                @RequestParam("state") String stateParam) {
+        final UserTokenCookiePackager.CookieName cookieName = DAM.cookieName(TokenKind.OAUTH_STATE);
+        final OAuthStateHandler.ValidatedState validatedState = stateHandler.parseAndVerify(request, cookieName);
         final TokenExchangePurpose tokenExchangePurpose = validatedState.getTokenExchangePurpose();
         final List<URI> resources = validatedState.getResourceList()
                                                   .stream()

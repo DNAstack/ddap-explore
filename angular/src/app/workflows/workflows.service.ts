@@ -20,8 +20,9 @@ export class WorkflowService {
   }
 
   public getWorkflowRuns(damId: string, view: String, wesAccessToken: string, nextPage: string = ''): Observable<WorkflowRunsResponse> {
+    const queryString = `nextPage=${nextPage}&accessToken=${wesAccessToken}`;
     return this.http.get<WorkflowRunsResponse>(
-      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs?nextPage=${nextPage}&accessToken=${wesAccessToken}`
+      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs?${queryString}`
     );
   }
 
@@ -34,9 +35,10 @@ export class WorkflowService {
       );
   }
 
-  public runWorkflow(damId: string, view: String, model: WorkflowExecution, wesAccessToken: string): Observable<any> {
+  public runWorkflow(damId: string, view: String, model: WorkflowExecution, resources: string[]): Observable<any> {
+    const queryString = resources.map(r => `resource=${r}`).join('&');
     return this.http.post(
-      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs?accessToken=${wesAccessToken}`,
+      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs?${queryString}`,
       { ...model }
     );
   }

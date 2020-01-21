@@ -160,9 +160,10 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     const wesResourcePath = this.workflowForm.get('wesViewResourcePath').value.split(';')[1];
     const wesAccessToken = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceTokens, wesResourcePath)['access_token'];
     const executions: WorkflowExecution[] = this.executionStep.getWorkflowExecutionModels();
+    const resourceUris: string[] = Object.keys(this.resourceTokens);
 
     zip(...executions.map((execution) =>
-        this.workflowService.runWorkflow(damId, wesViewId, execution, wesAccessToken)
+        this.workflowService.runWorkflow(damId, wesViewId, execution, resourceUris)
       )).subscribe((runs: object[]) => this.navigateUp('../..', runs, damId, wesViewId));
   }
 

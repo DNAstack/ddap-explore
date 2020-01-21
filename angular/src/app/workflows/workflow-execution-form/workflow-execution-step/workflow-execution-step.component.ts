@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
+import { flatten } from 'ddap-common-lib';
 import _cloneDeep from 'lodash.clonedeep';
 import _get from 'lodash.get';
 
@@ -10,10 +12,9 @@ import { SimplifiedWesResourceViews } from '../../workflow.model';
 import { WorkflowService } from '../../workflows.service';
 import { WorkflowsStateService } from '../workflows-state.service';
 
-import IResourceTokens = dam.v1.IResourceTokens;
 import { WorkflowExecution } from './workflow-execution.model';
-import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
-import { flatten } from "ddap-common-lib";
+
+import IResourceTokens = dam.v1.IResourceTokens;
 
 @Component({
   selector: 'ddap-workflow-execution-step',
@@ -81,11 +82,13 @@ export class WorkflowExecutionStepComponent {
     // Add as many time access token as there is file -> 1 token per file
     columnData.forEach((extractedColumnData) => {
       const damIdResourcePathPairs: string[] = columnDataMappedToViews[extractedColumnData];
-      damIdResourcePathPairs.forEach((damIdResourcePathPair) => {
-        const resourcePath = damIdResourcePathPair.split(';')[1];
-        const resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceTokens, resourcePath);
-        accessTokens.push({ file: extractedColumnData, token: resourceToken['access_token'] });
-      });
+      if (damIdResourcePathPairs !== undefined && damIdResourcePathPairs !== null) {
+        damIdResourcePathPairs.forEach((damIdResourcePathPair) => {
+          const resourcePath = damIdResourcePathPair.split(';')[1];
+          const resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceTokens, resourcePath);
+          accessTokens.push({ file: extractedColumnData, token: resourceToken['access_token'] });
+        });
+      }
     });
 
     accessTokens.forEach((token)  => {

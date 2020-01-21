@@ -6,6 +6,8 @@ import com.dnastack.ddap.common.fragments.ExpandedAccessibleViewItem;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.DataDetailPage;
 import com.dnastack.ddap.common.page.DataListPage;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
+import org.apache.http.cookie.Cookie;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -61,7 +63,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void shouldFindWorkingDownloadLink() throws IOException {
-        String validSessionToken = fetchRealSessionToken(TestingPersona.USER_WITH_ACCESS, REALM);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
 
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage thousandGenomesDetailPage = dataListPage
@@ -78,7 +80,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
         given()
                 .log().method()
                 .log().uri()
-            .cookie(SESSION_COOKIE_NAME, validSessionToken)
+                .cookie(SESSION_COOKIE_NAME, session.getValue())
                 .when()
                 .get(downloadHref)
                 .then()

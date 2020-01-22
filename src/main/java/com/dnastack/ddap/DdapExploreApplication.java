@@ -1,5 +1,6 @@
 package com.dnastack.ddap;
 
+import com.dnastack.ddap.explore.common.config.DamFacadeConfig;
 import com.dnastack.ddap.explore.config.model.AppConfig;
 import com.dnastack.ddap.ic.common.config.IdpProperties;
 import org.springframework.boot.SpringApplication;
@@ -8,7 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
-@EnableConfigurationProperties(value = {AppConfig.class, IdpProperties.class })
+@EnableConfigurationProperties(value = {AppConfig.class, DamFacadeConfig.class, IdpProperties.class})
 @SpringBootApplication
 public class DdapExploreApplication {
 

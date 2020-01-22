@@ -7,14 +7,15 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 public class ReactiveDamFacadeClient implements ReactiveDamClient {
-    @Override
+    public ReactiveDamFacadeClient() {
+    }
+
     public Mono<DamService.GetInfoResponse> getDamInfo() {
         return Mono.just(DamService.GetInfoResponse.newBuilder()
                                                    .putUi("label", "DAM Facade")
                                                    .build());
     }
 
-    @Override
     public Mono<Map<String, DamService.Resource>> getResources(String realm) {
         return Mono.just(Map.of(
                 "wes",
@@ -31,27 +32,23 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
         ));
     }
 
-    @Override
     public Mono<DamService.Resource> getResource(String realm, String resourceId) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public Mono<Map<String, DamService.View>> getResourceViews(String realm, String resourceId, String damToken, String refreshToken) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public Mono<DamService.ResourceTokens.ResourceToken> getAccessTokenForView(String realm, String resourceId, String viewId, String damToken, String refreshToken) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public Mono<Map<String, DamService.GetFlatViewsResponse.FlatView>> getFlattenedViews(String realm) {
-        throw new UnsupportedOperationException();
+        // In this mode, all input data are assumed to be accessible as given without additional authorizations.
+        return Mono.just(Map.of());
     }
 
-    @Override
     public Mono<DamService.ResourceTokens> checkoutCart(String cartToken) {
         throw new UnsupportedOperationException();
     }

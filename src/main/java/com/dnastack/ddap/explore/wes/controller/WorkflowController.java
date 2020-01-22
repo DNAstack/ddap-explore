@@ -5,7 +5,6 @@ import com.dnastack.ddap.common.config.DamProperties;
 import com.dnastack.ddap.common.config.DamsConfig;
 import com.dnastack.ddap.common.security.AuthCookieNotPresentInRequestException;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
-import com.dnastack.ddap.explore.security.CartTokenCookieName;
 import com.dnastack.ddap.explore.wes.client.ReactiveWdlValidatorClient;
 import com.dnastack.ddap.explore.wes.model.WesResourceViews;
 import com.dnastack.ddap.explore.wes.model.WorkflowExecutionRunModel;
@@ -159,7 +158,7 @@ public class WorkflowController {
     }
 
     private Mono<ResourceTokens> checkoutToken(ServerHttpRequest request, ReactiveDamClient damClient, Collection<URI> resources) {
-        final CartTokenCookieName cartCookieName = new CartTokenCookieName(Set.copyOf(resources));
+        final UserTokenCookiePackager.CartTokenCookieName cartCookieName = new UserTokenCookiePackager.CartTokenCookieName(Set.copyOf(resources));
         final Optional<String> extractedCartToken = cookiePackager.extractTokenIgnoringInvalid(request, cartCookieName)
                 .map(UserTokenCookiePackager.CookieValue::getClearText);
 

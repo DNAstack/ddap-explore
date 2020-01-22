@@ -30,6 +30,10 @@ idp:
   ui-url: http://localhost:8086/
 
 dam-facade:
+  resource-name: WES
+  resource-description: Workflow Execution Service
+  view-name: WES-SOLO
+  view-description: Standalone Mode
   wes-server-url: https://wes.experimental.dnastack.com  # This is a fake location.
 
 ddap:

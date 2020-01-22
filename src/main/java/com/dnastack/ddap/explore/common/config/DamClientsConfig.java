@@ -24,18 +24,21 @@ public class DamClientsConfig {
 
     private final AuthAwareWebClientFactory webClientFactory;
     private final Boolean damFacadeInUse;
+    private final DamFacadeConfig damFacadeConfig;
 
     @Autowired
     public DamClientsConfig(AuthAwareWebClientFactory webClientFactory,
-                            @Value("${ddap.dam-facade}") Boolean damFacadeInUse) {
+                            @Value("${ddap.dam-facade}") Boolean damFacadeInUse,
+                            DamFacadeConfig damFacadeConfig) {
         this.webClientFactory = webClientFactory;
         this.damFacadeInUse = damFacadeInUse;
+        this.damFacadeConfig = damFacadeConfig;
     }
 
     @Bean
     public Map<String, ReactiveDamClient> getDamClients(@Qualifier("dams") Map<String, DamProperties> dams)  {
         if (damFacadeInUse) {
-            return Map.of("1", new ReactiveDamFacadeClient());
+            return Map.of("1", new ReactiveDamFacadeClient(damFacadeConfig));
         } else {
             return dams.entrySet().stream()
                        .map(damEntry -> {

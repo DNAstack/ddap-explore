@@ -28,7 +28,8 @@ public class WesResourceService {
      * @return Resources with only WES views in convenient format defined by WesResourceViews class
      */
     public Flux<WesResourceViews> getResources(Map.Entry<String, ReactiveDamClient> damClient, String realm) {
-        return damClient.getValue().getResources(realm)
+        return damClient.getValue()
+                .getResources(realm)
                 .map(Map::entrySet)
                 .map(Collection::stream)
                 .map(resources -> getResources(damClient.getKey(), resources))

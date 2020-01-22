@@ -9,12 +9,26 @@ import java.util.Map;
 public class ReactiveDamFacadeClient implements ReactiveDamClient {
     @Override
     public Mono<DamService.GetInfoResponse> getDamInfo() {
-        throw new UnsupportedOperationException();
+        return Mono.just(DamService.GetInfoResponse.newBuilder()
+                                                   .putUi("label", "DAM Facade")
+                                                   .build());
     }
 
     @Override
     public Mono<Map<String, DamService.Resource>> getResources(String realm) {
-        throw new UnsupportedOperationException();
+        return Mono.just(Map.of(
+                "wes",
+                DamService.Resource
+                        .newBuilder()
+                        .putUi("label", "WES")
+                        .putUi("description", "WES")
+                        .putViews("wes", DamService.View.newBuilder()
+                                                        .putUi("label", "WES")
+                                                        .putUi("description", "WES")
+                                                        .setServiceTemplate("wes")
+                                                        .build())
+                        .build()
+        ));
     }
 
     @Override

@@ -48,7 +48,7 @@ public class DamClientsConfig {
     }
 
     @Bean
-    public Map<String, ReactiveDamOAuthClient> getDamClients(@Qualifier("dams") Map<String, DamProperties> dams)  {
+    public Map<String, ReactiveDamOAuthClient> getDamOAuthClients(@Qualifier("dams") Map<String, DamProperties> dams)  {
         if (damFacade) {
             return Map.of("1", new ReactiveDamOAuthFacadeClient());
         } else {

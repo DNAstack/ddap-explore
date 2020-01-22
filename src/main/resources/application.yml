@@ -28,6 +28,8 @@ idp:
   client-id: 812c1319-fef5-4aa6-9393-beb5ec8facdf
   client-secret: 0000-0000-0000-0000-0000
   ui-url: http://localhost:8086/
+dam-facade:
+  wes-server-url: https://.....
 ddap:
   dam-facade: false
   public-uri: http://localhost:8085

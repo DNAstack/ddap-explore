@@ -14,7 +14,7 @@ import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.security.CartTokenCookieName;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
-import dam.v1.DamService;
+import dam.v1.DamService.ResourceTokens;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
@@ -56,9 +56,9 @@ public class ResourceFlowController {
     }
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/checkout")
-    public Mono<ResponseEntity<DamService.ResourceTokens>> checkout(ServerHttpRequest request,
-                                                                                  @PathVariable String realm,
-                                                                                  @RequestParam("resource") List<String> damIdResourcePairs) {
+    public Mono<ResponseEntity<ResourceTokens>> checkout(ServerHttpRequest request,
+                                                         @PathVariable String realm,
+                                                         @RequestParam("resource") List<String> damIdResourcePairs) {
         final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
 
         final ReactiveDamClient damClient = lookupDamClient(resources);
@@ -68,8 +68,8 @@ public class ResourceFlowController {
             .map(UserTokenCookiePackager.CookieValue::getClearText);
 
         return extractedCartToken.map(s -> damClient.checkoutCart(s)
-            .map(ResponseEntity::ok))
-            .orElseGet(() -> Mono.error(new AuthCookieNotPresentInRequestException(cartCookieName.cookieName())));
+                                                    .map(ResponseEntity::ok))
+                                 .orElseGet(() -> Mono.error(new AuthCookieNotPresentInRequestException(cartCookieName.cookieName())));
     }
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/authorize")

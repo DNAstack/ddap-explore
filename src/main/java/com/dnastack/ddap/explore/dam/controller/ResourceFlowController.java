@@ -10,6 +10,8 @@ import com.dnastack.ddap.common.security.TokenExchangePurpose;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager.TokenKind;
 import com.dnastack.ddap.common.util.http.UriUtil;
+import com.dnastack.ddap.explore.dam.client.DamClientFactory;
+import com.dnastack.ddap.explore.dam.client.HttpReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.security.CartTokenCookieName;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
@@ -31,6 +33,7 @@ import java.net.URI;
 import java.util.*;
 
 import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicServices.DAM;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
@@ -42,16 +45,19 @@ public class ResourceFlowController {
     private final UserTokenCookiePackager cookiePackager;
     private final OAuthStateHandler stateHandler;
     private final Map<String, DamProperties> dams;
+    private final DamClientFactory damClientFactory;
     private AuthAwareWebClientFactory webClientFactory;
 
     @Autowired
     public ResourceFlowController(DamsConfig damsConfig,
                                   UserTokenCookiePackager cookiePackager,
                                   OAuthStateHandler stateHandler,
+                                  DamClientFactory damClientFactory,
                                   AuthAwareWebClientFactory webClientFactory) {
         this.cookiePackager = cookiePackager;
         this.stateHandler = stateHandler;
         this.dams = Map.copyOf(damsConfig.getStaticDamsConfig());
+        this.damClientFactory = damClientFactory;
         this.webClientFactory = webClientFactory;
     }
 
@@ -146,23 +152,25 @@ public class ResourceFlowController {
         return dams.values().stream()
                    // FIXME make this more resilient
                    .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl().toString()))
-                   .map(ReactiveDamOAuthClient::new)
+                   .map(HttpReactiveDamOAuthClient::new)
                    .findFirst()
-                   .orElseThrow(() -> new IllegalArgumentException(String.format("Could not find DAM for resource [%s]")));
+                   .orElseThrow(() -> new IllegalArgumentException(format("Could not find DAM for resource [%s]")));
     }
 
-    // FIXME should move this into a client factory
     private ReactiveDamClient lookupDamClient(List<URI> resources) {
         if (resources.isEmpty()) {
             throw new IllegalArgumentException("Cannot look DAM from empty resource list");
         }
         final String testResourceUrl = resources.get(0).toString();
-        return dams.values().stream()
+        return dams.entrySet()
+                   .stream()
                    // FIXME make this more resilient
-                   .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl().toString()))
-                   .map(dam -> new ReactiveDamClient(dam, webClientFactory))
+                   .filter(damEntry -> testResourceUrl.startsWith(damEntry.getValue()
+                                                                          .getBaseUrl()
+                                                                          .toString()))
+                   .map(damEntry -> damClientFactory.getDamClient(damEntry.getKey()))
                    .findFirst()
-                   .orElseThrow(() -> new IllegalArgumentException(String.format("Could not find DAM for resource [%s]")));
+                   .orElseThrow(() -> new IllegalArgumentException(format("Could not find DAM for resources [%s]", resources)));
     }
 
     /**

@@ -11,11 +11,14 @@ import static java.lang.String.format;
 @Component
 public class DamClientFactory {
 
-    private Map<String, com.dnastack.ddap.common.client.ReactiveDamClient> damClients;
+    private Map<String, ReactiveDamClient> damClients;
+    private final Map<String, ReactiveDamOAuthClient> damOAuthClients;
 
     @Autowired
-    public DamClientFactory(Map<String, com.dnastack.ddap.common.client.ReactiveDamClient> damClients) {
+    public DamClientFactory(Map<String, ReactiveDamClient> damClients,
+                            Map<String, ReactiveDamOAuthClient> damOAuthClients) {
         this.damClients = damClients;
+        this.damOAuthClients = damOAuthClients;
     }
 
     public ReactiveDamClient getDamClient(String damId) {
@@ -24,5 +27,13 @@ public class DamClientFactory {
         }
 
         return damClients.get(damId);
+    }
+
+    public ReactiveDamOAuthClient getDamOAuthClient(String damId) {
+        if (!damOAuthClients.containsKey(damId)) {
+            throw new IllegalArgumentException(format("Unknown damId [%s]", damId));
+        }
+
+        return damOAuthClients.get(damId);
     }
 }

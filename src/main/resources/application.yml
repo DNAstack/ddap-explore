@@ -13,8 +13,6 @@ ui:
   feature-explore-data-enabled: true
   feature-workflows-enabled: true
 
-dam-enabled: true
-
 dams:
   1:
     # If you try to run the DAM and IC locally, they need to use different domain names,

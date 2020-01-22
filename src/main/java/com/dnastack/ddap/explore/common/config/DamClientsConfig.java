@@ -23,18 +23,18 @@ import java.util.stream.Collectors;
 public class DamClientsConfig {
 
     private final AuthAwareWebClientFactory webClientFactory;
-    private final Boolean damFacade;
+    private final Boolean damFacadeInUse;
 
     @Autowired
     public DamClientsConfig(AuthAwareWebClientFactory webClientFactory,
-                            @Value("${ddap.dam-facade}") Boolean damFacade) {
+                            @Value("${ddap.dam-facade}") Boolean damFacadeInUse) {
         this.webClientFactory = webClientFactory;
-        this.damFacade = damFacade;
+        this.damFacadeInUse = damFacadeInUse;
     }
 
     @Bean
     public Map<String, ReactiveDamClient> getDamClients(@Qualifier("dams") Map<String, DamProperties> dams)  {
-        if (damFacade) {
+        if (damFacadeInUse) {
             return Map.of("1", new ReactiveDamFacadeClient());
         } else {
             return dams.entrySet().stream()
@@ -49,7 +49,7 @@ public class DamClientsConfig {
 
     @Bean
     public Map<String, ReactiveDamOAuthClient> getDamOAuthClients(@Qualifier("dams") Map<String, DamProperties> dams)  {
-        if (damFacade) {
+        if (damFacadeInUse) {
             return Map.of("1", new ReactiveDamOAuthFacadeClient());
         } else {
             return dams.entrySet().stream()

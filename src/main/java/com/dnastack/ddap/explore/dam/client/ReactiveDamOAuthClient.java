@@ -1,4 +1,12 @@
 package com.dnastack.ddap.explore.dam.client;
 
-public interface ReactiveDamOAuthClient {
+import com.dnastack.ddap.common.oauth.ReactiveOAuthClient;
+
+import java.net.URI;
+import java.util.List;
+
+public interface ReactiveDamOAuthClient extends ReactiveOAuthClient {
+    URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources);
+
+    URI getLegacyAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources);
 }

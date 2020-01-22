@@ -61,9 +61,9 @@ public class WorkflowController {
                                                                     @RequestParam(required = false) String nextPage) {
         // TODO: use damClientFactory
         Map.Entry<String, ReactiveDamClient> damClient = damClients.entrySet().stream()
-                .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
-                .findFirst()
-                .get();
+                                                                   .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
+                                                                   .findFirst()
+                                                                   .get();
         return wesService.getAllWorkflowRunsFromWesServer(damClient, realm, accessToken, viewId, nextPage);
     }
 
@@ -75,9 +75,9 @@ public class WorkflowController {
                                                             @RequestBody WorkflowExecutionRunRequestModel runRequest) {
         // TODO: use damClientFactory
         Map.Entry<String, ReactiveDamClient> damClient = damClients.entrySet().stream()
-                .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
-                .findFirst()
-                .get();
+                                                                   .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
+                                                                   .findFirst()
+                                                                   .get();
         return wesService.executeWorkflow(damClient, realm, accessToken, viewId, runRequest);
     }
 
@@ -89,9 +89,9 @@ public class WorkflowController {
                                                                  @RequestParam String accessToken) {
         // TODO: use damClientFactory
         Map.Entry<String, ReactiveDamClient> damClient = damClients.entrySet().stream()
-                .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
-                .findFirst()
-                .get();
+                                                                   .filter(damClientEntry -> damClientEntry.getKey().equals(damId))
+                                                                   .findFirst()
+                                                                   .get();
         return wesService.getWorkflowRunDetails(damClient, realm, accessToken, viewId, runId);
     }
 

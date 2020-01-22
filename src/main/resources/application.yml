@@ -29,6 +29,7 @@ idp:
   client-secret: 0000-0000-0000-0000-0000
   ui-url: http://localhost:8086/
 ddap:
+  dam-facade: false
   public-uri: http://localhost:8085
   default-realm: dnastack
   # Development key should not be deployed. There is an e2e test preventing this.

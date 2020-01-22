@@ -1,7 +1,7 @@
 package com.dnastack.ddap.explore.dam.client;
 
 import com.dnastack.ddap.common.config.DamProperties;
-import com.dnastack.ddap.common.oauth.ReactiveOAuthClient;
+import com.dnastack.ddap.common.oauth.BaseReactiveOAuthClient;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriTemplate;
@@ -10,12 +10,13 @@ import java.net.URI;
 import java.util.List;
 
 @Slf4j
-public class HttpReactiveDamOAuthClient extends ReactiveOAuthClient {
+public class HttpReactiveDamOAuthClient extends BaseReactiveOAuthClient implements ReactiveDamOAuthClient {
 
     public HttpReactiveDamOAuthClient(DamProperties damProperties) {
         super(new AuthServerInfo(damProperties.getClientId(), damProperties.getClientSecret(), new DamEndpointResolver(damProperties.getBaseUrl()), new DamLegacyEndpointResolver(damProperties.getBaseUrl())));
     }
 
+    @Override
     public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources) {
         return getAuthorizedUriBuilder(realm, state, scopes, redirectUri)
                 .queryParam("resource", resources.toArray())
@@ -23,6 +24,7 @@ public class HttpReactiveDamOAuthClient extends ReactiveOAuthClient {
                 .build();
     }
 
+    @Override
     public URI getLegacyAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources) {
         return getLegacyAuthorizedUriBuilder(realm, state, scopes, redirectUri)
                 .queryParam("resource", resources.toArray())

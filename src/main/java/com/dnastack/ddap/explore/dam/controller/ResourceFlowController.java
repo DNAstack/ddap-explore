@@ -4,7 +4,6 @@ import com.dnastack.ddap.common.client.AuthAwareWebClientFactory;
 import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.config.DamProperties;
 import com.dnastack.ddap.common.config.DamsConfig;
-import com.dnastack.ddap.common.controller.DdapErrorResponse;
 import com.dnastack.ddap.common.security.AuthCookieNotPresentInRequestException;
 import com.dnastack.ddap.common.security.OAuthStateHandler;
 import com.dnastack.ddap.common.security.TokenExchangePurpose;
@@ -15,6 +14,7 @@ import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.security.CartTokenCookieName;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
+import dam.v1.DamService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
@@ -34,7 +33,6 @@ import java.util.*;
 import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicServices.DAM;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
 
 @Slf4j
@@ -58,33 +56,20 @@ public class ResourceFlowController {
     }
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/checkout")
-    public Mono<ResponseEntity<Object>> checkout(ServerHttpRequest request,
-                                                 @PathVariable String realm,
-                                                 @RequestParam("resource") List<String> damIdResourcePairs) {
+    public Mono<ResponseEntity<DamService.ResourceTokens>> checkout(ServerHttpRequest request,
+                                                                                  @PathVariable String realm,
+                                                                                  @RequestParam("resource") List<String> damIdResourcePairs) {
         final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
 
         final ReactiveDamClient damClient = lookupDamClient(resources);
         final CartTokenCookieName cartCookieName = new CartTokenCookieName(Set.copyOf(resources));
-        final Optional<String> extractedCartToken = cookiePackager.extractTokenIgnoringInvalid(request, cartCookieName)
-                                                                  .map(UserTokenCookiePackager.CookieValue::getClearText);
+        final Optional<String> extractedCartToken = cookiePackager
+            .extractTokenIgnoringInvalid(request, cartCookieName)
+            .map(UserTokenCookiePackager.CookieValue::getClearText);
 
         return extractedCartToken.map(s -> damClient.checkoutCart(s)
-                                                    .map(ResponseEntity::ok)
-                                                    .onErrorResume(ex -> {
-                                                        try {
-                                                            throw ex;
-                                                        } catch (WebClientResponseException wcre) {
-                                                            return Mono.just(ResponseEntity.status(wcre.getStatusCode())
-                                                                                           .body(new DdapErrorResponse(wcre.getResponseBodyAsString(),
-                                                                                                                       wcre.getRawStatusCode())));
-                                                        } catch (Exception e) {
-                                                            return Mono.just(ResponseEntity.status(INTERNAL_SERVER_ERROR)
-                                                                                           .body(new DdapErrorResponse(e.getMessage(),
-                                                                                                                       INTERNAL_SERVER_ERROR.value())));
-                                                        } catch (Throwable t) {
-                                                            return Mono.error(t);
-                                                        }
-                                                    })).orElseGet(() -> Mono.error(new AuthCookieNotPresentInRequestException(cartCookieName.cookieName())));
+            .map(ResponseEntity::ok))
+            .orElseGet(() -> Mono.error(new AuthCookieNotPresentInRequestException(cartCookieName.cookieName())));
     }
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/authorize")

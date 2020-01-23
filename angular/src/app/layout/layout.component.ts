@@ -82,11 +82,18 @@ export class LayoutComponent implements OnInit {
       });
   }
 
+  withRealm(uiUrl: string) {
+    if (uiUrl !== null && uiUrl !== undefined) {
+      return uiUrl.replace(new RegExp('/$'), '') + '/' + this.realm;
+    } else {
+      return uiUrl;
+    }
+  }
+
   private periodicallyRefreshTokens(): Observable<any> {
     return this.identityService.refreshTokens()
       .pipe(
         repeatWhen(() => interval(refreshRepeatTimeoutInMs))
       );
   }
-
 }

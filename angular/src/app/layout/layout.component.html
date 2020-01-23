@@ -82,14 +82,14 @@
                 <span>Administration</span>
               </mat-panel-title>
             </mat-expansion-panel-header>
-            <a [href]="icPath" target="_blank">
+            <a [href]="withRealm(icPath)" target="_blank">
               <mat-list-item data-se="nav-identity-concentrator">
                 <mat-icon class="icon">launch</mat-icon>
                 <h4 mat-line>Identity Concentrator</h4>
               </mat-list-item>
             </a>
             <a *ngFor="let damInfo of damsInfo"
-               [href]="damInfo.uiUrl"
+               [href]="withRealm(damInfo.uiUrl)"
                target="_blank">
               <mat-list-item data-se="nav-dam">
                 <mat-icon class="icon">launch</mat-icon>

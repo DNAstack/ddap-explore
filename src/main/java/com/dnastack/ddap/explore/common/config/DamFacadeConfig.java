@@ -11,4 +11,7 @@ public class DamFacadeConfig {
     private String viewName;
     private String viewDescription;
     private String wesServerUrl;
+    private String baseUrl;
+    private String clientId;
+    private String clientSecret;
 }

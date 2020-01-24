@@ -30,11 +30,18 @@ idp:
   ui-url: http://localhost:8086/
 
 dam-facade:
+  base-url: ${ddap.public-uri}
+  client-id: 1F10AE66-2EBB-477C-9AFC-F1102B87D983
+  client-secret: 0000-0000-0000-0000-0000
   resource-name: WES
   resource-description: Workflow Execution Service
   view-name: WES-SOLO
   view-description: Standalone Mode
   wes-server-url: https://wes.experimental.dnastack.com  # This is a fake location.
+  jwt:
+    aud: ${ddap.public-uri}
+    signing-key: a8d298c1abbbfcf73b7e3579da2368a867ffffbfda9f9598f81cc1778fdaa3ae
+    ttl: PT10M
 
 ddap:
   dam-facade: false

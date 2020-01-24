@@ -8,6 +8,7 @@ import com.dnastack.ddap.explore.common.ReactiveDamFacadeClient;
 import com.dnastack.ddap.explore.common.ReactiveDamOAuthFacadeClient;
 import com.dnastack.ddap.explore.dam.client.HttpReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class DamClientsConfig {
 
     private final AuthAwareWebClientFactory webClientFactory;
+    @Getter
     private final Boolean damFacadeInUse;
     private final DamFacadeConfig damFacadeConfig;
 
@@ -53,7 +55,7 @@ public class DamClientsConfig {
     @Bean
     public Map<String, ReactiveDamOAuthClient> getDamOAuthClients(@Qualifier("dams") Map<String, DamProperties> dams)  {
         if (damFacadeInUse) {
-            return Map.of("1", new ReactiveDamOAuthFacadeClient());
+            return Map.of("1", new ReactiveDamOAuthFacadeClient(damFacadeConfig));
         } else {
             return dams.entrySet().stream()
                        .map(damEntry -> {

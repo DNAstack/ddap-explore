@@ -5,10 +5,12 @@ import com.dnastack.ddap.explore.common.config.DamFacadeConfig;
 import dam.v1.DamService;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 
 public class ReactiveDamFacadeClient implements ReactiveDamClient {
     private final DamFacadeConfig damFacadeConfig;
+    private final String interfaceName = "http:wes";
 
     public ReactiveDamFacadeClient(DamFacadeConfig damFacadeConfig) {
         this.damFacadeConfig = damFacadeConfig;
@@ -30,9 +32,7 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
                         .build())
                 .setServiceTemplate("wes")
                 .setVersion("1")
-                .putComputedInterfaces("http:wes", DamService.Interface.newBuilder()
-                        .addUri(damFacadeConfig.getWesServerUrl())
-                        .build())
+                .putComputedInterfaces(interfaceName, makeInterface())
                 .build();
         return Mono.just(Map.of(
                 "wes",
@@ -63,6 +63,25 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
     }
 
     public Mono<DamService.ResourceTokens> checkoutCart(String cartToken) {
-        throw new UnsupportedOperationException();
+        return Mono.just(DamService.ResourceTokens.newBuilder()
+                .putResources(cartToken, DamService.ResourceTokens.Descriptor.newBuilder()
+                        .putInterfaces(interfaceName, makeInterface())
+                        .setAccess("0")
+                        .addAllPermissions(List.of("list", "metadata", "read", "write"))
+                        .build())
+                .putAccess("0", DamService.ResourceTokens.ResourceToken.newBuilder()
+                        .setAccount("dummy account")
+                        .setAccessToken("dummy access token")
+                        .setExpiresIn(3600)
+                        .setPlatform("ddap-standalone-mode")
+                        .build())
+                .setEpochSeconds(3600)
+                .build());
+    }
+
+    private DamService.Interface makeInterface() {
+        return DamService.Interface.newBuilder()
+                .addUri(damFacadeConfig.getWesServerUrl())
+                .build();
     }
 }

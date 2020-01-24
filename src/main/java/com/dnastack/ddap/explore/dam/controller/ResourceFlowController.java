@@ -10,6 +10,7 @@ import com.dnastack.ddap.common.security.TokenExchangePurpose;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager.TokenKind;
 import com.dnastack.ddap.common.util.http.UriUtil;
+import com.dnastack.ddap.explore.common.config.DamClientsConfig;
 import com.dnastack.ddap.explore.dam.client.DamClientFactory;
 import com.dnastack.ddap.explore.dam.client.HttpReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
@@ -31,6 +32,7 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicServices.DAM;
 import static java.lang.String.format;
@@ -47,18 +49,21 @@ public class ResourceFlowController {
     private final Map<String, DamProperties> dams;
     private final DamClientFactory damClientFactory;
     private AuthAwareWebClientFactory webClientFactory;
+    private DamClientsConfig damClientsConfig;
 
     @Autowired
     public ResourceFlowController(DamsConfig damsConfig,
                                   UserTokenCookiePackager cookiePackager,
                                   OAuthStateHandler stateHandler,
                                   DamClientFactory damClientFactory,
-                                  AuthAwareWebClientFactory webClientFactory) {
+                                  AuthAwareWebClientFactory webClientFactory,
+                                  DamClientsConfig damClientsConfig) {
         this.cookiePackager = cookiePackager;
         this.stateHandler = stateHandler;
         this.dams = Map.copyOf(damsConfig.getStaticDamsConfig());
         this.damClientFactory = damClientFactory;
         this.webClientFactory = webClientFactory;
+        this.damClientsConfig = damClientsConfig;
     }
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/checkout")
@@ -85,25 +90,29 @@ public class ResourceFlowController {
                                                                 @RequestParam(required = false) String scope,
                                                                 @RequestParam("resource") List<String> damIdResourcePairs) {
         final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
+        URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
 
-        final URI postLoginTokenEndpoint = getRedirectUri(request);
         // FIXME better fallback page
         final URI nonNullRedirectUri = redirectUri != null ? redirectUri : cartCheckoutUrl(request, realm, resources);
         final String state = stateHandler.generateResourceState(nonNullRedirectUri, realm, resources);
+
+        final URI postLoginTokenEndpoint = getRedirectUri(request);
+
         // FIXME should separate resources by DAM
-        final ReactiveDamOAuthClient oAuthClient = lookupDamOAuthClient(resources);
+        final ReactiveDamOAuthClient oAuthClient = damClientFactory.lookupDamOAuthClient(resources);
         final URI authorizeUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources);
+        log.info("***** Testing the authorize endpoint");
         return oAuthClient.testAuthorizeEndpoint(authorizeUri)
                           .map(status -> {
+                              log.info(String.format("***** testAuthorizeEndpoint responded %s", status.value()));
                               if (status.is4xxClientError()) {
-                                  log.info("Falling back to legacy authorize url because of response {}", status);
+                                  log.warn("***** Break the flow.");
                                   return oAuthClient.getLegacyAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources);
                               } else {
                                   return authorizeUri;
                               }
                           })
                           .map(loginUri -> {
-                              URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
                               return ResponseEntity.status(TEMPORARY_REDIRECT)
                                                    .location(loginUri)
                                                    .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString())
@@ -144,17 +153,19 @@ public class ResourceFlowController {
     }
 
     // FIXME should move this into a client factory
+    @Deprecated(forRemoval = true)
     private ReactiveDamOAuthClient lookupDamOAuthClient(List<URI> resources) {
         if (resources.isEmpty()) {
             throw new IllegalArgumentException("Cannot look DAM from empty resource list");
         }
         final String testResourceUrl = resources.get(0).toString();
+
         return dams.values().stream()
                    // FIXME make this more resilient
                    .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl().toString()))
                    .map(HttpReactiveDamOAuthClient::new)
                    .findFirst()
-                   .orElseThrow(() -> new IllegalArgumentException(format("Could not find DAM for resource [%s]")));
+                   .orElseThrow(() -> new IllegalArgumentException(format("Could not find DAM for resource [%s]", resources)));
     }
 
     private ReactiveDamClient lookupDamClient(List<URI> resources) {
@@ -199,7 +210,7 @@ public class ResourceFlowController {
                                                   .flatMap(List::stream)
                                                   .map(URI::create)
                                                   .collect(toList());
-        final ReactiveDamOAuthClient oAuthClient = lookupDamOAuthClient(resources);
+        final ReactiveDamOAuthClient oAuthClient = damClientFactory.lookupDamOAuthClient(resources);
         final URI redirectUri = getRedirectUri(request);
         final String realm = validatedState.getRealm();
         return oAuthClient.exchangeAuthorizationCodeForTokens(realm, redirectUri, code)

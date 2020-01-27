@@ -89,7 +89,7 @@ public class ResourceFlowController {
                                                                 @RequestParam(required = false) URI redirectUri,
                                                                 @RequestParam(required = false) String scope,
                                                                 @RequestParam("resource") List<String> damIdResourcePairs) {
-        final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
+        final List<URI> resources = damClientsConfig.getDamFacadeInUse() ? List.of() : getResourcesFrom(realm, damIdResourcePairs);
         URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
 
         // FIXME better fallback page
@@ -147,22 +147,6 @@ public class ResourceFlowController {
                                    .queryParam("resource", resources.toArray())
                                    .build()
                                    .toUri();
-    }
-
-    // FIXME should move this into a client factory
-    @Deprecated(forRemoval = true)
-    private ReactiveDamOAuthClient lookupDamOAuthClient(List<URI> resources) {
-        if (resources.isEmpty()) {
-            throw new IllegalArgumentException("Cannot look DAM from empty resource list");
-        }
-        final String testResourceUrl = resources.get(0).toString();
-
-        return dams.values().stream()
-                   // FIXME make this more resilient
-                   .filter(dam -> testResourceUrl.startsWith(dam.getBaseUrl().toString()))
-                   .map(HttpReactiveDamOAuthClient::new)
-                   .findFirst()
-                   .orElseThrow(() -> new IllegalArgumentException(format("Could not find DAM for resource [%s]", resources)));
     }
 
     private ReactiveDamClient lookupDamClient(List<URI> resources) {

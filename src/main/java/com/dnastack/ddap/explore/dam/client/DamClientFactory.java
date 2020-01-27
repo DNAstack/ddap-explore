@@ -56,15 +56,15 @@ public class DamClientFactory {
 
     public ReactiveDamOAuthClient lookupDamOAuthClient(List<URI> resources) {
         if (resources.isEmpty()) {
-            throw new IllegalArgumentException("Cannot look DAM from empty resource list");
+            log.warn("The DAM OAuth client has been requested with no resources specified");
         }
-
-        final String testResourceUrl = resources.get(0).toString();
 
         if (damClientsConfig.getDamFacadeInUse()) {
             // TODO check if (testResourceUrl.startsWith(the base url of DDAP))
             return new ReactiveDamOAuthFacadeClient(damFacadeConfig);
         }
+
+        final String testResourceUrl = resources.get(0).toString();
 
         return dams.values().stream()
                 // FIXME make this more resilient

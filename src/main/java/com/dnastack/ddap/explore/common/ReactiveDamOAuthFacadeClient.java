@@ -21,7 +21,7 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
 
     @Override
     public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources) {
-        var builder = UriComponentsBuilder.fromUri(URI.create(damFacadeConfig.getBaseUrl() + "/api/v1alpha/standalone-mode/oauth2/auth"))
+        var builder = UriComponentsBuilder.fromUri(URI.create(damFacadeConfig.getOauth2Url() + "/oauth2/authorize"))
                 .queryParam("response_type", "code")
                 .queryParam("client_id", damFacadeConfig.getClientId())
                 .queryParam("redirect_uri", redirectUri)
@@ -44,8 +44,8 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
     public Mono<TokenResponse> exchangeAuthorizationCodeForTokens(String realm, URI redirectUri, String code) {
         return Mono.just(TokenResponse.builder()
                 .accessToken("fake access token")
-                .idToken("fake id token - not used")
-                .refreshToken("fake refresh token")
+                .idToken("anonymous")
+                .refreshToken("unused")
                 .build());
     }
 

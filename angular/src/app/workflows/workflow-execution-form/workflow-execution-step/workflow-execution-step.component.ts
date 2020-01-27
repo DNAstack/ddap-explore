@@ -82,7 +82,7 @@ export class WorkflowExecutionStepComponent {
     // Add as many time access token as there is file -> 1 token per file
     columnData.forEach((extractedColumnData) => {
       const damIdResourcePathPairs: string[] = columnDataMappedToViews[extractedColumnData];
-      if (damIdResourcePathPairs !== undefined && damIdResourcePathPairs !== null) {
+      if (damIdResourcePathPairs) {
         damIdResourcePathPairs.forEach((damIdResourcePathPair) => {
           const resourcePath = damIdResourcePathPair.split(';')[1];
           const resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceTokens, resourcePath);

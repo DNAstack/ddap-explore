@@ -39,36 +39,4 @@ public class FacadeJwtHandler {
                 .addClaims(claims)
                 .compact();
     }
-
-//    public OAuthStateHandler.ValidatedState parseAndVerify(ServerHttpRequest request, UserTokenCookiePackager.CookieName cookieName) {
-//        final String stateStringParam = request.getQueryParams()
-//                .getFirst("state");
-//        final HttpCookie stateCookie = request.getCookies()
-//                .getFirst(cookieName.cookieName());
-//        final String stateStringCookie;
-//
-//        if (stateCookie == null) {
-//            throw new InvalidOAuthStateException(format("Missing '%s' cookie", cookieName.cookieName()), null, cookieName);
-//        } else {
-//            stateStringCookie = stateCookie.getValue();
-//        }
-//        if (stateStringParam == null) {
-//            throw new InvalidOAuthStateException("Missing 'state' parameter", null, cookieName);
-//        }
-//
-//        if (!Objects.equals(stateStringParam, stateStringCookie)) {
-//            throw new InvalidOAuthStateException("CSRF state cookie mismatch", stateStringCookie, cookieName);
-//        }
-//        try {
-//            Jws<Claims> state = parseStateToken(stateStringParam);
-//            return new OAuthStateHandler.ValidatedState(state.getBody());
-//        } catch (Exception e) {
-//            throw new InvalidOAuthStateException("Invalid state token", stateStringParam, cookieName, e);
-//        }
-//    }
-//
-//    private Jws<Claims> parseStateToken(String jwt) {
-//        return jwtHandler.createParser(JwtHandler.TokenKind.STATE)
-//                .parseClaimsJws(jwt);
-//    }
 }

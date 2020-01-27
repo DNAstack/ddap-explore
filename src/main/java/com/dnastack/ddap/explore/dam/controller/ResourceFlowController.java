@@ -101,12 +101,9 @@ public class ResourceFlowController {
         // FIXME should separate resources by DAM
         final ReactiveDamOAuthClient oAuthClient = damClientFactory.lookupDamOAuthClient(resources);
         final URI authorizeUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources);
-        log.info("***** Testing the authorize endpoint");
         return oAuthClient.testAuthorizeEndpoint(authorizeUri)
                           .map(status -> {
-                              log.info(String.format("***** testAuthorizeEndpoint responded %s", status.value()));
                               if (status.is4xxClientError()) {
-                                  log.warn("***** Break the flow.");
                                   return oAuthClient.getLegacyAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources);
                               } else {
                                   return authorizeUri;

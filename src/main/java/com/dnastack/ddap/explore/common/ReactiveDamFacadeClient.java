@@ -24,6 +24,9 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
     }
 
     public Mono<Map<String, DamService.Resource>> getResources(String realm) {
+        String resourceId = damFacadeConfig.getResourceName().toLowerCase();
+        String viewId = damFacadeConfig.getViewName().toLowerCase();
+
         var view = DamService.View.newBuilder()
                 .putUi("label", damFacadeConfig.getViewDescription())
                 .putUi("description", damFacadeConfig.getViewDescription())
@@ -36,12 +39,12 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
                 .putComputedInterfaces(interfaceName, makeInterface())
                 .build();
         return Mono.just(Map.of(
-                "wes",
+                resourceId,
                 DamService.Resource
                         .newBuilder()
                         .putUi("label", damFacadeConfig.getResourceName())
                         .putUi("description", damFacadeConfig.getResourceDescription())
-                        .putViews("wes", view)
+                        .putViews(viewId, view)
                         .build()
         ));
     }
@@ -64,8 +67,9 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
     }
 
     public Mono<DamService.ResourceTokens> checkoutCart(String cartToken) {
+        String resourcePath = String.format("%s/views/%s/roles/execute", damFacadeConfig.getResourceName(), damFacadeConfig.getViewName()).toLowerCase();
         return Mono.just(DamService.ResourceTokens.newBuilder()
-                .putResources(cartToken, DamService.ResourceTokens.Descriptor.newBuilder()
+                .putResources(resourcePath, DamService.ResourceTokens.Descriptor.newBuilder()
                         .putInterfaces(interfaceName, makeInterface())
                         .setAccess("0")
                         .addAllPermissions(List.of("list", "metadata", "read", "write"))

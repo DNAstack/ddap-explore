@@ -39,6 +39,7 @@ dam-facade:
   view-name: WES-SOLO
   view-description: Standalone Mode
   wes-server-url: https://wes.experimental.dnastack.com  # This is a fake location.
+  wes-resource-id: 0000-0000-0000-0000-0000
 
 ddap:
   dam-facade: false

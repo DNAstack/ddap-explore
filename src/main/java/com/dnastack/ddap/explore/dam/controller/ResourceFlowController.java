@@ -89,7 +89,7 @@ public class ResourceFlowController {
                                                                 @RequestParam(required = false) URI redirectUri,
                                                                 @RequestParam(required = false) String scope,
                                                                 @RequestParam("resource") List<String> damIdResourcePairs) {
-        final List<URI> resources = damClientsConfig.getDamFacadeInUse() ? List.of() : getResourcesFrom(realm, damIdResourcePairs);
+        final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
         URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
 
         // FIXME better fallback page

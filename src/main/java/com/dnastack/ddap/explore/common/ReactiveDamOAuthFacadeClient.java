@@ -35,8 +35,8 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
                 .queryParam("response_type", "code")
                 .queryParam("client_id", damFacadeConfig.getClientId())
                 .queryParam("redirect_uri", redirectUri)
-                .queryParam("resource", resources.toArray())
-                // .queryParam("nonce", state)  // Azure-specified, equivalent to state
+                .queryParam("resource", damFacadeConfig.getWesResourceId())
+                .queryParam("nonce", state)
                 .queryParam("state", state);
 
         if (scopes != null) {

@@ -3,6 +3,7 @@ package com.dnastack.ddap.explore.common;
 import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.explore.common.config.DamFacadeConfig;
 import dam.v1.DamService;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -70,13 +71,18 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
                         .addAllPermissions(List.of("list", "metadata", "read", "write"))
                         .build())
                 .putAccess("0", DamService.ResourceTokens.ResourceToken.newBuilder()
-                        .setAccount("dummy account")
-                        .setAccessToken("dummy access token")
+                        .setAccount("standalone user")
+                        .setAccessToken(cartToken)
                         .setExpiresIn(3600)
-                        .setPlatform("ddap-standalone-mode")
+                        .setPlatform("ddap-explore-standalone-mode")
                         .build())
                 .setEpochSeconds(3600)
                 .build());
+    }
+
+    @Deprecated(forRemoval = true)
+    public Mono<DamService.ResourceTokens> checkoutCart(ServerHttpRequest request, String cartToken) {
+        throw new UnsupportedOperationException("Use the custom checkoutCart");
     }
 
     private DamService.Interface makeInterface() {

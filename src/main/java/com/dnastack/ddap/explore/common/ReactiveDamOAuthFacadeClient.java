@@ -111,6 +111,11 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Mono<Object> getUserInfo(String realm, String accessToken) {
+        throw new UnsupportedOperationException();
+    }
+
     private String encodeBasicAuth(String user, String password) {
         // NOTE: Copied from BaseReactiveOauthClient
         return Base64.getEncoder()

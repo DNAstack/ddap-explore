@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
-@EnableConfigurationProperties(value = {AppConfig.class, DamFacadeConfig.class, IdpProperties.class})
+@EnableConfigurationProperties(value = {AppConfig.class, DamFacadeConfig.class})
 @SpringBootApplication
 public class DdapExploreApplication {
 

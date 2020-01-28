@@ -5,7 +5,7 @@ import com.dnastack.ddap.common.security.UserTokenCookiePackager.TokenKind;
 import com.dnastack.ddap.common.util.http.UriUtil;
 import com.dnastack.ddap.ic.cli.model.CliLoginStatus;
 import com.dnastack.ddap.ic.cli.model.TokenResponse;
-import com.dnastack.ddap.ic.oauth.client.ReactiveIcOAuthClient;
+import com.dnastack.ddap.ic.oauth.client.ReactiveIdpOAuthClient;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.security.Keys;
@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -36,12 +35,14 @@ import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicSer
 import static java.lang.String.format;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
+/*
+ * Temporarily disabling this until we extract all IC dependencies and rework to use DAM OAuth
+ */
 @Slf4j
-@RestController
 public class CommandLineAccessController {
     private static final String DEFAULT_SCOPES = "openid ga4gh_passport_v1 account_admin identities";
 
-    private final ReactiveIcOAuthClient oAuthClient;
+    private final ReactiveIdpOAuthClient oAuthClient;
     private final OAuthStateHandler stateHandler;
     private Duration tokenTtl;
     private final Resource cliZip;
@@ -57,7 +58,7 @@ public class CommandLineAccessController {
 
     @Autowired
     public CommandLineAccessController(OAuthStateHandler stateHandler,
-                                       ReactiveIcOAuthClient oAuthClient,
+                                       ReactiveIdpOAuthClient oAuthClient,
                                        UserTokenCookiePackager userTokenCookiePackager,
                                        @Value("${ddap.command-line-service.aud}") String tokenAudience,
                                        @Value("${ddap.command-line-service.ttl}") Duration tokenTtl,

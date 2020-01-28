@@ -8,6 +8,7 @@ import org.springframework.web.util.UriTemplate;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class HttpReactiveDamOAuthClient extends BaseReactiveOAuthClient implements ReactiveDamOAuthClient {
@@ -50,6 +51,11 @@ public class HttpReactiveDamOAuthClient extends BaseReactiveOAuthClient implemen
         public URI getRevokeEndpoint(String realm) {
             return baseUrl.resolve(new UriTemplate("/oauth2/revoke").expand(realm));
         }
+
+        @Override
+        public Optional<URI> getUserInfoEndpoint(String realm) {
+            return Optional.of(baseUrl.resolve("/userinfo"));
+        }
     }
 
     @AllArgsConstructor
@@ -69,6 +75,11 @@ public class HttpReactiveDamOAuthClient extends BaseReactiveOAuthClient implemen
         @Override
         public URI getRevokeEndpoint(String realm) {
             return baseUrl.resolve(new UriTemplate("/dam/oidc/revoke").expand(realm));
+        }
+
+        @Override
+        public Optional<URI> getUserInfoEndpoint(String realm) {
+            return Optional.empty();
         }
     }
 }

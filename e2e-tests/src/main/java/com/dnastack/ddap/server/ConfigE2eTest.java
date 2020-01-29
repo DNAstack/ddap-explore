@@ -60,7 +60,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     public void doNotUseDevSigningKeyForCliLogin() throws IOException {
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         final Response response = given()
                 .log().method()
@@ -85,7 +85,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     public void doNotUseDevSigningKeyForOAuthState() throws IOException {
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         final Response response = given()
                 .log().method()
@@ -142,7 +142,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void accessAngularIndexPage() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         given()
                 .log().method()
@@ -157,7 +157,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void accessDamEndpoint() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         given()
                 .log().method()
@@ -173,7 +173,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void accessIdpEndpoint() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         given()
                 .log().method()
@@ -201,7 +201,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void angularRoutesDoNotWorkForJavaScriptFiles() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         given()
                 .log().method()
@@ -216,7 +216,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void noAngularRoutesForMapFiles() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         given()
                 .log().method()
@@ -231,7 +231,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void noAngularRoutesForHtmlFiles() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         given()
                 .log().method()
@@ -246,7 +246,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void noAngularRoutesForFileWithArbitraryExtension() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         given()
                 .log().method()

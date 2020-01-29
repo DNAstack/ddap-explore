@@ -63,7 +63,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void shouldFindWorkingDownloadLink() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage thousandGenomesDetailPage = dataListPage

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +48,7 @@ public abstract class AbstractBaseE2eTest {
     public static final String DDAP_USERNAME = optionalEnv("E2E_BASIC_USERNAME",null);
     public static final String DDAP_PASSWORD = optionalEnv("E2E_BASIC_PASSWORD", null);
     public static final String DDAP_BASE_URL = requiredEnv("E2E_BASE_URI");
+    public static final String DDAP_DAM_ADMIN_URL = requiredEnv("E2E_DDAP_DAM_ADMIN_URI");
     public static final String DAM_ID = requiredEnv("E2E_DAM_ID");
     public static final String DDAP_TEST_REALM_NAME_PREFIX = requiredEnv("E2E_TEST_REALM");
     public static final String CLIENT_ID = requiredEnv("E2E_CLIENT_ID");
@@ -164,7 +166,7 @@ public abstract class AbstractBaseE2eTest {
         final CookieStore cookieStore = loginStrategy.performPersonaLogin(persona.getId(), "master");
 
         final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
-        HttpPut request = new HttpPut(format("%s/dam/%s/v1alpha/%s/config", DDAP_BASE_URL, damId, realmName));
+        HttpPut request = new HttpPut(format("%s/dam/v1alpha/%s/config", DDAP_DAM_ADMIN_URL, realmName));
         request.setEntity(new StringEntity(modificationPayload));
 
         System.out.printf("Sending setup realm request to URI [%s]\n", request.getURI());
@@ -182,7 +184,7 @@ public abstract class AbstractBaseE2eTest {
         final String resourceTemplate;
         try (InputStream is = AbstractBaseE2eTest.class.getResourceAsStream(resourcePath)) {
             final StringWriter writer = new StringWriter();
-            IOUtils.copy(is, writer, Charset.forName("UTF-8"));
+            IOUtils.copy(is, writer, StandardCharsets.UTF_8);
             resourceTemplate = writer.toString();
         } catch (IOException e) {
             throw new RuntimeException("Unable to load test resource template.", e);

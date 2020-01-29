@@ -33,7 +33,7 @@ public class IdentityE2eTest extends AbstractBaseE2eTest {
     @Test
     public void testScopes() throws Exception {
         String requestedScope = "link";
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         String icToken = fetchRealPersonaIcToken(TestingPersona.USER_WITH_ACCESS, REALM, "openid");
         String damToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
@@ -86,7 +86,7 @@ public class IdentityE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void testAccount() throws Exception {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         String icToken = fetchRealPersonaIcToken(TestingPersona.USER_WITH_ACCESS, REALM, "");
         String danToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);

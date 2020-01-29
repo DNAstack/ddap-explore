@@ -3,22 +3,15 @@ package com.dnastack.ddap.server;
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
 import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import dam.v1.DamService;
 import org.apache.http.cookie.Cookie;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.util.Base64;
-import java.util.Map;
 
 import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static java.lang.String.format;
-import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.Matchers.not;
 
 public class UserTokenCookieTest extends AbstractBaseE2eTest {
@@ -38,7 +31,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldIncludeMissingAuthStatusInResponseHeader() throws Exception {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()
@@ -56,7 +49,7 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldBeAbleToAccessICWithAppropriateCookie() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         String validPersonaToken = fetchRealPersonaIcToken(TestingPersona.USER_WITH_ACCESS, REALM);
 
         // @formatter:off

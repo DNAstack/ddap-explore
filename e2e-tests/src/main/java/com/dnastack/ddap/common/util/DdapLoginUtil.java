@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_BASE_URL;
 import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -25,11 +24,11 @@ import static org.junit.Assert.assertThat;
 @Slf4j
 public class DdapLoginUtil {
 
-    public static Cookie loginToDdap(String username, String password) throws IOException {
+    public static Cookie loginToDdap(String ddapUrl, String username, String password) throws IOException {
         final CookieStore cookieStore = new BasicCookieStore();
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
-        HttpPost request = new HttpPost(String.format("%s/login", DDAP_BASE_URL));
+        HttpPost request = new HttpPost(String.format("%s/login", ddapUrl));
 
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("username", username));

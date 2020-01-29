@@ -29,7 +29,7 @@ public class ViewsApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldReturnViewForBucket() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()
@@ -51,7 +51,7 @@ public class ViewsApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldNotReturnViewForPartialSubset() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()
@@ -73,7 +73,7 @@ public class ViewsApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldReturnEmptyViewsForNonExistantResource() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()

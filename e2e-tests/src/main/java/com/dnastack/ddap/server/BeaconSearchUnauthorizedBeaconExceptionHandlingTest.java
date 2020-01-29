@@ -66,7 +66,7 @@ public class BeaconSearchUnauthorizedBeaconExceptionHandlingTest extends Abstrac
 
     @Test
     public void shouldGet401InBeaconResponsesWhenUnauthenticated() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         /* Run the aggregate search query on the realm */
         // @formatter:off
         BeaconQueryResult[] allResults = getRequestSpecification()

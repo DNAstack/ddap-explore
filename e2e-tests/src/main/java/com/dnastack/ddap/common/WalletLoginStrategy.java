@@ -48,13 +48,13 @@ public class WalletLoginStrategy implements LoginStrategy {
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(personaName);
-        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_DAM_ADMIN_URL, DDAP_USERNAME, DDAP_PASSWORD);
         final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {
             final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);
-            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", DDAP_BASE_URL, realmName, loginInfo.getEmail(), scopeString));
+            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", DDAP_DAM_ADMIN_URL, realmName, loginInfo.getEmail(), scopeString));
 
             final HttpResponse response = httpclient.execute(request);
             String responseBody = EntityUtils.toString(response.getEntity());
@@ -70,16 +70,17 @@ public class WalletLoginStrategy implements LoginStrategy {
 
     @Override
     public <T extends AnyDdapPage> T performPersonaLogin(WebDriver driver, TestingPersona persona, String realmName, Function<WebDriver, T> pageFactory) throws IOException {
-        final CookieStore cookieStore = performPersonaLogin(persona.getId(), realmName, DEFAULT_SCOPES);
-
+        /*
+         * Can't login to ddap-explore anymore (aside from sandbox credentials)
+         * TODO get rid of this method -- move to somewhere with better name
+         */
         // Need to navigate to site before setting cookie
         driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s", realmName)).toString());
         {
             // Need to add session cookie separately
-            org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+            org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
             WebDriverCookieHelper.addBrowserCookie(driver, session);
         }
-        addCookiesFromStoreToSelenium(cookieStore, driver);
         // Visit again with session cookie
         driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s", realmName)).toString());
 
@@ -89,7 +90,7 @@ public class WalletLoginStrategy implements LoginStrategy {
     @Override
     public <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(persona.getId());
-        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 

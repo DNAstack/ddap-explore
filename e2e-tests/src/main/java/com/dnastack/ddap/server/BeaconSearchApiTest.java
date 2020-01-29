@@ -54,7 +54,7 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldGetTwoResultsForAggregateSearch() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         /* Run the aggregate search query on the realm */
         // @formatter:off
         final Response response = getRequestSpecification()
@@ -90,7 +90,7 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void shouldGetOneResultForSingleResourceSearch() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         // @formatter:off
         getRequestSpecification()
             .log().method()
@@ -122,7 +122,7 @@ public class BeaconSearchApiTest extends AbstractBaseE2eTest {
 
     @Test
     public void missingResourceUiLabel() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         String validPersonaToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
         String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
 

@@ -33,7 +33,7 @@ public class PersonaLoginStrategy implements LoginStrategy {
 
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
-        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_USERNAME, DDAP_PASSWORD);
+        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
         final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);

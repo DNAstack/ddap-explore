@@ -47,27 +47,6 @@ public class UserTokenCookieTest extends AbstractBaseE2eTest {
         // @formatter:on
     }
 
-    @Test
-    public void shouldBeAbleToAccessICWithAppropriateCookie() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-        String validPersonaToken = fetchRealPersonaIcToken(TestingPersona.USER_WITH_ACCESS, REALM);
-
-        // @formatter:off
-        getRequestSpecification()
-            .log().method()
-            .log().cookies()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
-            .cookie("ic_access", validPersonaToken)
-        .when()
-            .get(icViaDdap("/accounts/-"))
-        .then()
-            .log().everything()
-            .contentType(not("text/html"))
-            .statusCode(200);
-        // @formatter:on
-    }
-    
     private String icViaDdap(String path) {
         return format("/identity/v1alpha/%s%s", REALM, path);
     }

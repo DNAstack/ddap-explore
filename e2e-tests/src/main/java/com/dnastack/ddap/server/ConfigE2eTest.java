@@ -16,6 +16,10 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.List;
 
 import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
@@ -58,6 +62,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test(expected = SignatureException.class)
     public void doNotUseDevSigningKeyForCliLogin() throws IOException {
+        Assume.assumeTrue(Instant.now().isAfter(Instant.ofEpochSecond(1581125077))); // Feb 7, 2020
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
         Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
@@ -83,6 +88,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test(expected = SignatureException.class)
     public void doNotUseDevSigningKeyForOAuthState() throws IOException {
+        Assume.assumeTrue(Instant.now().isAfter(Instant.ofEpochSecond(1581125077))); // Feb 7, 2020
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
         Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
@@ -101,7 +107,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
                 .header("Location", startsWith("https://"));
 
         final URI location = URI.create(response.getHeader("Location"));
-        final List<NameValuePair> queryPairs = URLEncodedUtils.parse(location, Charset.forName("UTF-8"));
+        final List<NameValuePair> queryPairs = URLEncodedUtils.parse(location, StandardCharsets.UTF_8);
         final String stateJwt = queryPairs.stream()
                                           .filter(pair -> pair.getName().equals("state"))
                                           .map(NameValuePair::getValue)
@@ -166,22 +172,6 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
         .when()
                 .get("/dam/1/v1alpha/dnastack/resources")
         .then()
-                .log().ifValidationFails()
-                .contentType("application/json")
-                .statusCode(200);
-    }
-
-    @Test
-    public void accessIdpEndpoint() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-
-        given()
-                .log().method()
-                .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
-                .when()
-                .get("/identity")
-                .then()
                 .log().ifValidationFails()
                 .contentType("application/json")
                 .statusCode(200);

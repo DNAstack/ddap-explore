@@ -218,7 +218,7 @@ public abstract class AbstractBaseE2eTest {
     }
 
     protected String fetchRealPersonaDamToken(String personaName, String realmName) throws IOException {
-        return fetchRealPersonaToken(personaName, "ic_identity", realmName);
+        return fetchRealPersonaToken(personaName, "dam_access", realmName);
     }
 
     protected String fetchRealPersonaDamToken(TestingPersona persona, String realmName) throws IOException {
@@ -226,7 +226,7 @@ public abstract class AbstractBaseE2eTest {
     }
 
     protected String fetchRealPersonaRefreshToken(String personaName, String realmName) throws IOException {
-        return fetchRealPersonaToken(personaName, "ic_refresh", realmName);
+        return fetchRealPersonaToken(personaName, "dam_refresh", realmName);
     }
 
     protected String fetchRealPersonaRefreshToken(TestingPersona persona, String realmName) throws IOException {

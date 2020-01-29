@@ -1,21 +1,14 @@
 package com.dnastack.ddap.explore.cli;
 
-import com.dnastack.ddap.common.security.*;
-import com.dnastack.ddap.common.security.UserTokenCookiePackager.TokenKind;
-import com.dnastack.ddap.common.util.http.UriUtil;
-import com.dnastack.ddap.ic.cli.model.CliLoginStatus;
-import com.dnastack.ddap.ic.cli.model.TokenResponse;
-import com.dnastack.ddap.ic.oauth.client.ReactiveIdpOAuthClient;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.security.Keys;
-import lombok.AllArgsConstructor;
+import com.dnastack.ddap.common.config.DamProperties;
+import com.dnastack.ddap.common.security.PlainTextNotDecryptableException;
+import com.dnastack.ddap.common.security.UserTokenCookiePackager;
+import com.dnastack.ddap.explore.dam.client.DamClientFactory;
+import com.dnastack.ddap.explore.security.CartTokenCookieName;
+import dam.v1.DamService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
@@ -26,204 +19,125 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicServices.IC;
-import static java.lang.String.format;
-import static org.springframework.http.HttpHeaders.SET_COOKIE;
+import static com.dnastack.ddap.explore.cli.InMemoryCliSessionStorage.AuthorizeStatus;
 
-/*
- * Temporarily disabling this until we extract all IC dependencies and rework to use DAM OAuth
- */
+
 @Slf4j
+@RestController
+@RequestMapping(value = "/api/v1alpha/realm/{realm}/cli/{cliSessionId}/authorize")
 public class CommandLineAccessController {
-    private static final String DEFAULT_SCOPES = "openid ga4gh_passport_v1 account_admin identities";
 
-    private final ReactiveIdpOAuthClient oAuthClient;
-    private final OAuthStateHandler stateHandler;
-    private Duration tokenTtl;
-    private final Resource cliZip;
     private final UserTokenCookiePackager userTokenCookiePackager;
-    private final JwtHandler jwtHandler;
-
-    /*
-     * IMPORTANT
-     * If we intend to support CLI login in the future, this state must migrate to a data-store (BigTable, Redis, etc.).
-     * This is a quick hack to support this feature in phase 1.
-     */
-    private final ConcurrentMap<String, LoginStatus> loginStatusByCliSessionId = new ConcurrentHashMap<>();
+    private final Map<String, DamProperties> dams;
+    private final DamClientFactory damClientFactory;
 
     @Autowired
-    public CommandLineAccessController(OAuthStateHandler stateHandler,
-                                       ReactiveIdpOAuthClient oAuthClient,
-                                       UserTokenCookiePackager userTokenCookiePackager,
-                                       @Value("${ddap.command-line-service.aud}") String tokenAudience,
-                                       @Value("${ddap.command-line-service.ttl}") Duration tokenTtl,
-                                       @Value("${ddap.command-line-service.signingKey}") String tokenSigningKeyBase64,
-                                       @Value("classpath:/static/ddap-cli.zip") Resource cliZip) {
-        this.oAuthClient = oAuthClient;
-        this.stateHandler = stateHandler;
-        this.tokenTtl = tokenTtl;
-        this.cliZip = cliZip;
-        this.jwtHandler = new JwtHandler(tokenAudience,
-                                         tokenTtl,
-                                         Keys.hmacShaKeyFor(Base64.getMimeDecoder().decode(tokenSigningKeyBase64)));
+    public CommandLineAccessController(UserTokenCookiePackager userTokenCookiePackager,
+                                       Map<String, DamProperties> dams,
+                                       DamClientFactory damClientFactory) {
         this.userTokenCookiePackager = userTokenCookiePackager;
+        this.dams = dams;
+        this.damClientFactory = damClientFactory;
     }
 
-    @GetMapping(produces = "application/zip", path = "/api/v1alpha/cli/download")
-    public Resource downloadCliZip() {
-        return cliZip;
+    @GetMapping(path = "/callback")
+    public Mono<Void> authorizeCallback(
+        ServerHttpRequest request,
+        @PathVariable("realm") String realm,
+        @PathVariable("cliSessionId") String cliSessionId,
+        @RequestParam("resource") String damIdResourcePair
+    ) {
+        List<HttpCookie> cartCookies = request.getCookies()
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .filter((cookie) -> cookie.getName().startsWith("cart_"))
+            .collect(Collectors.toList());
+
+        AuthorizeStatus status = new AuthorizeStatus(damIdResourcePair, cartCookies, Instant.now().plusSeconds(300));
+        InMemoryCliSessionStorage.cartCookies.putIfAbsent(cliSessionId, status);
+
+        return Mono.empty();
     }
 
-    @GetMapping("/api/v1alpha/realm/{realm}/cli/login/{cliSessionId}")
-    public Mono<? extends ResponseEntity<?>> initiateBrowserLogin(ServerHttpRequest request,
-                                                                  @PathVariable String realm,
-                                                                  @PathVariable String cliSessionId,
-                                                                  @RequestParam(required = false) String loginHint) {
-        final LoginStatus loginStatus = loginStatusByCliSessionId.computeIfAbsent(cliSessionId, k -> {
-            throw new CliSessionNotFoundException(cliSessionId);
-        });
-        final String state = stateHandler.generateCommandLineLoginState(cliSessionId, realm);
-        final URI redirectUri = UriUtil.selfLinkToApi(request, "cli/loggedIn");
-        return getActiveLoginUri(realm, loginStatus.getScope(), state, redirectUri, loginHint)
-                .map(webLoginUrl -> ResponseEntity.status(HttpStatus.FOUND)
-                                                  .location(webLoginUrl)
-                                                  .header(SET_COOKIE, userTokenCookiePackager.packageToken(state, IC.cookieName(TokenKind.OAUTH_STATE)).toString())
-                                                  .build());
-    }
-
-    @PostMapping("/api/v1alpha/realm/{realm}/cli/login")
-    public ResponseEntity<?> commandLineLogin(ServerHttpRequest request,
-                                              @PathVariable String realm,
-                                              @RequestParam(defaultValue = DEFAULT_SCOPES) String scope) {
-        final String cliSessionId = UUID.randomUUID().toString();
-        loginStatusByCliSessionId.compute(cliSessionId, (id, monitor) -> {
-            if (monitor == null) {
-                return new LoginStatus(Instant.now().plus(tokenTtl), scope, null);
-            } else {
-                // TODO DISCO-2353 retry regenerating a couple times.
-                throw new RuntimeException("Failed to generate unique CLI session id.");
-            }
-        });
-
-        final URI statusUrl = UriUtil.selfLinkToApi(request, format("cli/login/%s/status", cliSessionId));
-        final URI loginUri = UriUtil.selfLinkToApi(request, realm, format("cli/login/%s", cliSessionId));
-
-        final String bearerToken = jwtHandler.createBuilder(JwtHandler.TokenKind.BEARER)
-                                             .setSubject(cliSessionId)
-                                             .claim("tokenKind", "bearer")
-                                             .claim("webLoginUrl", loginUri)
-                                             .compact();
-
-        return ResponseEntity.status(200)
-                             .location(statusUrl)
-                             .body(new StartLoginResponse(bearerToken));
-    }
-
-    public Mono<URI> getActiveLoginUri(String realm, String scope, String state, URI redirectUri, String loginHint) {
-        final URI webLoginUrl = oAuthClient.getAuthorizeUrl(realm, state, scope, redirectUri, loginHint);
-
-        return oAuthClient.testAuthorizeEndpoint(webLoginUrl)
-                                         .map(status -> {
-                                             if (status.is4xxClientError()) {
-                                                 // For now try the legacy login URI on client error
-                                                 log.info("Authorize endpoint returned [{}] status: Falling back to legacy authorize endpoint", status);
-                                                 return oAuthClient.getLegacyAuthorizeUrl(realm, state, scope, redirectUri, loginHint);
-                                             } else {
-                                                 return webLoginUrl;
-                                             }
-                                         });
-    }
-
-    @GetMapping(path = "/api/v1alpha/cli/login/{cliSessionId}/status")
-    public Mono<CliLoginStatus> loginStatus(@PathVariable("cliSessionId") String cliSessionId,
-                                            @CookieValue("status_token") String token) {
-        final Optional<String> oBearerToken = Optional.ofNullable(token);
-        if (oBearerToken.isPresent()) {
-            final String jwt = oBearerToken.get();
-            final Jws<Claims> jws = jwtHandler.createParser(JwtHandler.TokenKind.BEARER)
-                                              .requireSubject(cliSessionId)
-                                              .parseClaimsJws(jwt);
-            final URI webLoginUrl = URI.create(jws.getBody().get("webLoginUrl", String.class));
-
-            final LoginStatus loginStatus = loginStatusByCliSessionId.get(cliSessionId);
-            final TokenResponse tokenResponse = loginStatus.getTokenResponse();
-            return Mono.just(new CliLoginStatus(tokenResponse, webLoginUrl));
-        } else {
-            return Mono.error(new BadCredentialsException(
-                    "Authorization header was set but did not contain bearer token."));
+    @GetMapping(path = "/status", produces = "application/json")
+    public Mono<DamService.ResourceTokens> authorizeStatus(
+        @PathVariable("realm") String realm,
+        @PathVariable("cliSessionId") String cliSessionId,
+        @RequestParam("resource") String damIdResourcePair
+    ) throws PlainTextNotDecryptableException {
+        if (!InMemoryCliSessionStorage.cartCookies.containsKey(cliSessionId)) {
+            return Mono.empty();
         }
+
+        AuthorizeStatus status = InMemoryCliSessionStorage.cartCookies.get(cliSessionId);
+        if (!status.getResource().equals(damIdResourcePair)) {
+            return Mono.empty();
+        }
+
+        URI resource = getResourceFrom(realm, damIdResourcePair);
+        CartTokenCookieName cartCookieName = new CartTokenCookieName(Set.of(resource));
+        Optional<HttpCookie> cartCookie = status.getCartCookies()
+            .stream()
+            .filter((cookie) -> cookie.getName().equals(cartCookieName.cookieName()))
+            .findFirst();
+        if (cartCookie.isEmpty()) {
+            return Mono.error(CartTokenNotFoundInStorageException::new);
+        }
+
+        String damId = damIdResourcePair.split(";")[0];
+        String plainTextCartCookie = userTokenCookiePackager.decodeToken(cartCookie.get().getValue());
+        return damClientFactory.getDamClient(damId).checkoutCart(plainTextCartCookie);
     }
 
-    @GetMapping(path = "/api/v1alpha/cli/loggedIn")
-    public Mono<? extends ResponseEntity<?>> finishCliLogin(ServerHttpRequest request,
-                                                            @RequestParam("state") String state,
-                                                            @RequestParam("code") String code) {
-        final UserTokenCookiePackager.CookieName cookieName = IC.cookieName(TokenKind.OAUTH_STATE);
-        final OAuthStateHandler.ValidatedState validatedState = stateHandler.parseAndVerify(request, cookieName);
-        final String cliSessionId = validatedState.getCliSession()
-                                                  .orElseThrow(() -> new InvalidOAuthStateException("State does not contain a login session ID", state, cookieName));
-        final String realm = validatedState.getRealm();
-        final LoginStatus loginStatus = loginStatusByCliSessionId.get(cliSessionId);
-        if (loginStatus == null) {
-            return Mono.error(new CliSessionNotFoundException(cliSessionId));
-        } else {
-            return oAuthClient.exchangeAuthorizationCodeForTokens(realm,
-                                                                  UriUtil.selfLinkToApi(request,
-                                                                                        "cli/loggedIn"),
-                                                                  code)
-                           .doOnSuccess(tokenResponse -> {
-                               loginStatusByCliSessionId.compute(cliSessionId, (id, oldStatus) -> {
-                                   if (oldStatus == null) {
-                                       throw new CliSessionNotFoundException(cliSessionId);
-                                   } else {
-                                       return new LoginStatus(oldStatus.getExpiry(),
-                                                              oldStatus.getScope(),
-                                                              new TokenResponse(
-                                                                      userTokenCookiePackager.encodeToken(tokenResponse.getIdToken()),
-                                                                      userTokenCookiePackager.encodeToken(tokenResponse.getAccessToken())
-                                                              ));
-                                   }
-                               });
-                           })
-                           .thenReturn(ResponseEntity.ok().build());
+    /**
+     * Expecting list of strings in form: ${DAM_ID};${RESOURCE_ID}/views/${VIEW_ID}/roles/${ROLE_ID}
+     *
+     * Example:
+     *  1;test/views/test/roles/discovery
+     *
+     * @param realm
+     * @param damIdResourcePair
+     * @return absolute URL pointing to DAM resource
+     */
+    private URI getResourceFrom(String realm, String damIdResourcePair) {
+        String[] pair = damIdResourcePair.split(";");
+        URI damBaseUrl = dams.get(pair[0]).getBaseUrl();
+        return damBaseUrl.resolve("/dam/" + realm + "/resources/" + pair[1]);
+    }
+
+    @PostMapping(path = "/clear", produces = "application/json")
+    public Mono<DamService.ResourceTokens> authorizeClear(
+        @PathVariable("realm") String realm,
+        @PathVariable("cliSessionId") String cliSessionId
+    ) {
+        if (!InMemoryCliSessionStorage.cartCookies.containsKey(cliSessionId)) {
+            return Mono.empty();
         }
+
+        InMemoryCliSessionStorage.cartCookies
+            .remove(cliSessionId);
+
+        return Mono.empty();
     }
 
     @Scheduled(fixedRate = 5*60*1000)
     public void cleanupCliSessions() {
         log.info("Starting cleanup of CLI sessions");
         final Instant start = Instant.now();
-        final List<String> expiredSessionIds = loginStatusByCliSessionId.entrySet()
-                                                                        .stream()
-                                                                        .filter(e -> e.getValue()
-                                                                                      .getExpiry()
-                                                                                      .isBefore(start))
-                                                                        .map(Map.Entry::getKey)
-                                                                        .collect(Collectors.toList());
+        final List<String> expiredSessionIds = InMemoryCliSessionStorage.cartCookies.entrySet()
+            .stream()
+            .filter(entry -> entry.getValue().getExpiresIn().isBefore(start))
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toList());
 
-        expiredSessionIds.forEach(loginStatusByCliSessionId::remove);
+        expiredSessionIds.forEach(InMemoryCliSessionStorage.cartCookies::remove);
         final Instant end = Instant.now();
         final Duration duration = Duration.between(start, end);
-        log.info("Removed {} CLI sessions in {}ms",
-                 expiredSessionIds.size(),
-                 TimeUnit.NANOSECONDS.toMillis(duration.get(ChronoUnit.NANOS)));
+        log.info("Removed {} CLI sessions in {}ms", expiredSessionIds.size(), TimeUnit.NANOSECONDS.toMillis(duration.get(ChronoUnit.NANOS)));
     }
 
-    @lombok.Value
-    private static class LoginStatus {
-        private Instant expiry;
-        private String scope;
-        private TokenResponse tokenResponse;
-    }
-
-    @lombok.Value
-    @AllArgsConstructor
-    static class StartLoginResponse {
-        private String token;
-    }
 }

@@ -24,6 +24,9 @@ dams:
     client-secret: 0000-0000-0000-0000-0000
     ui-url: http://localhost:8087/
 
+ic:
+  ui-url: http://localhost:8086/
+
 dam-facade:
   base-url: ${ddap.public-uri}
   oauth2-url: https://sample-oauth-server/common

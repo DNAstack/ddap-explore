@@ -381,28 +381,17 @@
     }
   },
   "clients": {
-    "dnastack_fe": {
-      "clientId": "b1aed96d-6367-4313-87a1-65eda4962a76",
-      "ui": {
-        "description": "DDAP Front-End",
-        "label": "DNAstack Front-End"
-      }
-    },
-    "test_client": {
-      "clientId": "903cfaeb-57d9-4ef6-5659-04377794ed64",
-      "ui": {
-        "description": "Any other miscellaneous testing or demos",
-        "label": "Test Client"
-      }
-    },
     "this_ddap": {
       "clientId": "$$E2E_CLIENT_ID$$",
+      "scope": "openid ga4gh_passport_v1 account_admin identities profile offline_access",
+      "grant_types": ["authorization_code", "refresh_token"],
+      "response_types": ["code"],
       "ui": {
         "description": "This DDAP under test",
         "label": "DAM DDAP"
       },
       "redirectUris": [
-        "http://localhost:8085/api",
+        "http://localhost:8085",
         "https://ddap-explore.staging.dnastack.com",
         "https://ddap-explore-candidate.staging.dnastack.com",
         "https://ddap-explore.prod.dnastack.com",

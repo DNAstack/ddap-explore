@@ -8,13 +8,11 @@ import com.dnastack.ddap.common.page.DataDetailPage;
 import com.dnastack.ddap.common.page.DataListPage;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
 import org.apache.http.cookie.Cookie;
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URI;
-import java.time.Instant;
 
 import static com.dnastack.ddap.common.TestingPersona.USER_WITHOUT_ACCESS;
 import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
@@ -65,7 +63,6 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void shouldFindWorkingDownloadLink() throws IOException {
-        Assume.assumeTrue(Instant.now().isAfter(Instant.ofEpochSecond(1581125077))); // Feb 7, 2020
         Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
         DataListPage dataListPage = ddapPage.getNavBar().goToData();

@@ -29,7 +29,6 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,10 +44,14 @@ import static org.junit.Assert.fail;
 @Slf4j
 public abstract class AbstractBaseE2eTest {
 
+    public static final String DDAP_BASE_URL = requiredEnv("E2E_BASE_URI");
     public static final String DDAP_USERNAME = optionalEnv("E2E_BASIC_USERNAME",null);
     public static final String DDAP_PASSWORD = optionalEnv("E2E_BASIC_PASSWORD", null);
-    public static final String DDAP_BASE_URL = requiredEnv("E2E_BASE_URI");
-    public static final String DDAP_DAM_ADMIN_URL = requiredEnv("E2E_DDAP_DAM_ADMIN_URI");
+    public static final String DDAP_DAM_BASE_URL = requiredEnv("E2E_DDAP_DAM_BASE_URL");
+    public static final String DDAP_DAM_USERNAME = requiredEnv("E2E_DDAP_DAM_USERNAME");
+    public static final String DDAP_DAM_PASSWORD = requiredEnv("E2E_DDAP_DAM_PASSWORD");
+
+
     public static final String DAM_ID = requiredEnv("E2E_DAM_ID");
     public static final String DDAP_TEST_REALM_NAME_PREFIX = requiredEnv("E2E_TEST_REALM");
     public static final String CLIENT_ID = requiredEnv("E2E_CLIENT_ID");
@@ -166,7 +169,7 @@ public abstract class AbstractBaseE2eTest {
         final CookieStore cookieStore = loginStrategy.performPersonaLogin(persona.getId(), "master");
 
         final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
-        HttpPut request = new HttpPut(format("%s/dam/v1alpha/%s/config", DDAP_DAM_ADMIN_URL, realmName));
+        HttpPut request = new HttpPut(format("%s/dam/v1alpha/%s/config", DDAP_DAM_BASE_URL, realmName));
         request.setEntity(new StringEntity(modificationPayload));
 
         System.out.printf("Sending setup realm request to URI [%s]\n", request.getURI());

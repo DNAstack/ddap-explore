@@ -13,6 +13,7 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -48,13 +49,13 @@ public class WalletLoginStrategy implements LoginStrategy {
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(personaName);
-        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_DAM_ADMIN_URL, DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_DAM_BASE_URL, DDAP_DAM_USERNAME, DDAP_DAM_PASSWORD);
         final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {
             final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);
-            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", DDAP_DAM_ADMIN_URL, realmName, loginInfo.getEmail(), scopeString));
+            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", DDAP_DAM_BASE_URL, realmName, loginInfo.getEmail(), scopeString));
 
             final HttpResponse response = httpclient.execute(request);
             String responseBody = EntityUtils.toString(response.getEntity());
@@ -78,7 +79,7 @@ public class WalletLoginStrategy implements LoginStrategy {
         driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s", realmName)).toString());
         {
             // Need to add session cookie separately
-            org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
+            Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
             WebDriverCookieHelper.addBrowserCookie(driver, session);
         }
         // Visit again with session cookie
@@ -90,7 +91,7 @@ public class WalletLoginStrategy implements LoginStrategy {
     @Override
     public <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(persona.getId());
-        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
@@ -132,7 +133,7 @@ public class WalletLoginStrategy implements LoginStrategy {
         return pageFactory.apply(driver);
     }
 
-    private CookieStore setupCookieStore(org.apache.http.cookie.Cookie sessionCookie) {
+    private CookieStore setupCookieStore(Cookie sessionCookie) {
         final CookieStore cookieStore = new BasicCookieStore();
         cookieStore.addCookie(sessionCookie);
         return cookieStore;

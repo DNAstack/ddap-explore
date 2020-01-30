@@ -16,9 +16,11 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 @Slf4j
@@ -37,10 +39,13 @@ public class DdapLoginUtil {
 
         HttpResponse response = httpclient.execute(request);
         assertThat(response.getStatusLine().getStatusCode(), equalTo(302));
-        return cookieStore.getCookies().stream()
+        assertThat(response.getLastHeader("Location").getValue(), not(equalTo("/login?error")));
+
+        Optional<Cookie> sessionCookie = cookieStore.getCookies().stream()
             .filter((cookie) -> cookie.getName().equals(SESSION_COOKIE_NAME))
-            .findFirst()
-            .get();
+            .findFirst();
+        return sessionCookie
+            .orElseThrow(SessionCookieNotPresentException::new);
     }
 
     private static CloseableHttpClient setupHttpClient(CookieStore cookieStore) {

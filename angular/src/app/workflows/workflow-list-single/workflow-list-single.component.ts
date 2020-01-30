@@ -42,7 +42,7 @@ export class WorkflowListSingleComponent implements OnInit {
         const damIdResourcePathPair = `${damId};${resourcePath}`;
 
         const accessMap = this.resourceAuthStateService.getAccess();
-        if (accessMap) {
+        if (accessMap && Object.keys(accessMap).length > 0) {
           this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(accessMap, resourcePath);
           this.getWorkflows(this.resourceToken['access_token']);
         } else {

@@ -16,6 +16,7 @@ export class DatasetResultsComponent implements OnChanges {
 
   @Output()
   selectionChanged = new EventEmitter();
+
   @Output()
   pageChanged = new EventEmitter();
 
@@ -30,7 +31,7 @@ export class DatasetResultsComponent implements OnChanges {
 
   ngOnChanges(): void {
     if (this.dataset) {
-      this.list = this.dataset.objects;
+      this.list = this.dataset.data;
       this.datasetColumns = this.getDatasetColumns();
       this.columnsToDisplay = this.additionalColumns.concat(this.datasetColumns);
       this.selection.clear();
@@ -70,7 +71,7 @@ export class DatasetResultsComponent implements OnChanges {
 
   private getDatasetColumns() {
     let schemaProperties = {};
-    const schemaObj = this.dataset.schema;
+    const schemaObj = this.dataset.data_model;
     if (schemaObj.hasOwnProperty('schema')) {
       schemaProperties = schemaObj.schema.properties;
     } else {

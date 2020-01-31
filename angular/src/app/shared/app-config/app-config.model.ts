@@ -1,4 +1,4 @@
-export interface AppConfig {
+export interface AppConfigModel {
     title: string;
     sidebarEnabled: boolean;
     featureAdministrationEnabled: boolean;

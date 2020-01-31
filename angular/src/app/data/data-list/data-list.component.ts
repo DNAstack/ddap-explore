@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { EntityModel } from 'ddap-common-lib';
 import { zip } from 'rxjs';
 import { Observable } from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 
+import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { DamInfoService } from '../../shared/dam/dam-info.service';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
 import { DataService } from '../data.service';
@@ -24,11 +26,20 @@ export class DataListComponent implements OnInit {
     private dataService: DataService,
     private route: ActivatedRoute,
     public randomImageRetriever: ImagePlaceholderRetriever,
+    private appConfigService: AppConfigService,
+    private router: Router,
     private damInfoService: DamInfoService
   ) {
   }
 
   ngOnInit() {
+    this.appConfigService.get().subscribe((data: AppConfigModel) => {
+      if (!data.featureExploreDataEnabled) {
+        if (data.featureWorkflowsEnabled) {
+          this.router.navigate(['/aspen/workflows']);
+        }
+      }
+    });
     // FIXME I think this should be a piped Observable and not a subscription
     // Needed to reload the data every time the realm in the URL changes (conditionIndex.e. using the realm selector)
     this.route.parent.params.subscribe(() => {

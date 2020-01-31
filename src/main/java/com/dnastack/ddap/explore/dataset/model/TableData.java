@@ -1,5 +1,6 @@
 package com.dnastack.ddap.explore.dataset.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.util.List;
@@ -10,10 +11,12 @@ import java.util.Map;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-public class DatasetResult {
+public class TableData {
 
-    List<Map<String, Object>> objects;
+    List<Map<String, Object>> data;
     Map<String, String> pagination;
-    Map<String, Object> schema;
+
+    @JsonProperty("data_model")
+    Map<String, Object> dataModel;
 
 }

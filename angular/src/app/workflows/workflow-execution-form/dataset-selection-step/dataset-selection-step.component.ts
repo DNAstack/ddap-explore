@@ -1,15 +1,15 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import _sampleSize from 'lodash.samplesize';
 
+import { dam } from '../../../shared/proto/dam-service';
+import { ResourceAuthStateService } from '../../../shared/resource-auth-state.service';
 import { ResourceService } from '../../../shared/resource/resource.service';
 import { DatasetService } from '../dataset.service';
 import { WorkflowsStateService } from '../workflows-state.service';
 
 import { Dataset } from './dataset.model';
-import { ResourceAuthStateService } from "../../../shared/resource-auth-state.service";
-import { dam } from "../../../shared/proto/dam-service";
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 
 
@@ -85,7 +85,7 @@ export class DatasetSelectionStepComponent {
 
   getFileOnlyColumns() {
     const columns: string[] = this.getDatasetColumns();
-    const samples: object[] = _sampleSize(this.dataset.objects, 15);
+    const samples: object[] = _sampleSize(this.dataset.data, 15);
 
     const fileColumns: string[] = columns.filter((column) => {
       return samples.some((sample) => {
@@ -129,7 +129,7 @@ export class DatasetSelectionStepComponent {
 
   private getDatasetColumns() {
     let schemaProperties = {};
-    const schemaObj = this.dataset.schema;
+    const schemaObj = this.dataset.data_model;
     if (schemaObj.hasOwnProperty('schema')) {
       schemaProperties = schemaObj.schema.properties;
     } else {

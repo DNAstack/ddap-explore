@@ -4,6 +4,7 @@ import { EntityModel, ErrorHandlerService, realmIdPlaceholder } from 'ddap-commo
 import { Observable, of } from 'rxjs';
 import { flatMap, map, pluck, tap } from 'rxjs/operators';
 
+import { AppConfigService } from '../shared/app-config/app-config.service';
 import { DamInfoService } from '../shared/dam/dam-info.service';
 
 @Injectable({
@@ -14,6 +15,7 @@ export class DataService {
   private cache: any = {};
 
   constructor(private http: HttpClient,
+              private appConfigService: AppConfigService,
               private errorHandler: ErrorHandlerService,
               private damInfoService: DamInfoService) {
 

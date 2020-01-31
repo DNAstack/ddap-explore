@@ -1,7 +1,7 @@
 package com.dnastack.ddap.explore.dataset.client;
 
 import com.dnastack.ddap.common.client.LoggingFilter;
-import com.dnastack.ddap.explore.dataset.model.DatasetResult;
+import com.dnastack.ddap.explore.dataset.model.TableData;
 import com.dnastack.ddap.explore.dataset.model.Tuple;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -20,10 +20,10 @@ import java.util.*;
 
 @Slf4j
 @Component
-public class ReactiveDatasetClient {
+public class ReactiveTableClient {
 
     private static final WebClient webClient = WebClient.builder()
-        .filter(ReactiveDatasetClient.modifyContentType())
+        .filter(ReactiveTableClient.modifyContentType())
         .filter(LoggingFilter.logRequest())
         .filter(LoggingFilter.logResponse())
         .build();
@@ -39,7 +39,7 @@ public class ReactiveDatasetClient {
         });
     }
 
-    public Mono<DatasetResult> fetchSingleDataset(String datasetUrl, String viewAccessToken) {
+    public Mono<TableData> fetchSingleDataset(String datasetUrl, String viewAccessToken) {
         log.info("Attempting to fetch dataset {}", datasetUrl);
         return webClient.get()
             .uri(datasetUrl)
@@ -55,33 +55,33 @@ public class ReactiveDatasetClient {
                 log.debug("Received response from dataset request");
                 if (clientResponse.statusCode().is2xxSuccessful()) {
                     log.info("Received 2xx response from dataset request");
-                    return clientResponse.bodyToMono(DatasetResult.class)
+                    return clientResponse.bodyToMono(TableData.class)
                         .flatMap(result -> {
                             log.trace("Content of dataset response: {}", result);
-                            if (result.getSchema() == null) {
-                                return Mono.error(new DatasetErrorException(null, "DatasetModel schema is not defined"));
+                            if (result.getDataModel() == null) {
+                                return Mono.error(new TableErrorException(null, "DatasetModel schema is not defined"));
                             } else {
                                 log.debug("Attempting to in-line schema");
                                 return materializeInLineSchema(datasetUrl, result);
                             }
                         })
-                        .onErrorMap(ex -> new DatasetErrorException(clientResponse.statusCode().value(), ex.getMessage(), ex));
+                        .onErrorMap(ex -> new TableErrorException(clientResponse.statusCode().value(), ex.getMessage(), ex));
                 } else {
                     return clientResponse.bodyToMono(String.class)
                         .flatMap(body -> Mono
-                            .error(new DatasetErrorException(clientResponse.statusCode().value(), body)));
+                            .error(new TableErrorException(clientResponse.statusCode().value(), body)));
                 }
             });
     }
 
 
-    private Mono<DatasetResult> materializeInLineSchema(String datasetUrl, DatasetResult datasetResult) {
-        Map<String, Object> schema = datasetResult.getSchema();
+    private Mono<TableData> materializeInLineSchema(String datasetUrl, TableData tableData) {
+        Map<String, Object> schema = tableData.getDataModel();
         return resolveSchemaObject(URI.create(datasetUrl), schema)
                 .flatMap(resolvedSchema -> {
                     log.trace("Resolved schema: {}", resolvedSchema);
-                    return Mono.just(new DatasetResult(datasetResult.getObjects(),
-                                                       datasetResult.getPagination(),
+                    return Mono.just(new TableData(tableData.getData(),
+                                                       tableData.getPagination(),
                                                        resolvedSchema));
                 }
         );
@@ -173,7 +173,7 @@ public class ReactiveDatasetClient {
                 } else {
                     return clientResponse.bodyToMono(String.class)
                         .flatMap(body -> Mono
-                            .error(new DatasetErrorException(clientResponse.statusCode().value(), body)));
+                            .error(new TableErrorException(clientResponse.statusCode().value(), body)));
                 }
             });
 

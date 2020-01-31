@@ -16,9 +16,10 @@ export class DatasetService {
               private errorHandler: ErrorHandlerService) { }
 
   fetchDataset(url: string, accessToken: string): Observable<Dataset> {
-    return this.http.get<Dataset>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/dataset?dataset_url=${url}&access_token=${accessToken}`)
+    const targetUrl = `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/table?dataset_url=${url}&access_token=${accessToken}`;
+    return this.http.get<Dataset>(targetUrl)
       .pipe(
-        this.errorHandler.notifyOnError(`Can't fetch dataset list.`)
+        this.errorHandler.notifyOnError(`Can't fetch tables.`)
       );
   }
 

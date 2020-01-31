@@ -1,6 +1,6 @@
 export interface Dataset {
-  schema: {[key: string]: any};
-  objects: object[];
+  data_model: {[key: string]: any};
+  data: object[];
   pagination?: {
     previous_page_url?: string;
     prev_page_url?: string;

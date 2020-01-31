@@ -26,11 +26,11 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     private static String datasetUrl = optionalEnv(
             "E2E_DATASET_URL",
-            "https://storage.googleapis.com/ddap-e2etest-objects/dataset/dnastack-internal-subjects-with-objects"
+            "https://storage.googleapis.com/ddap-e2etest-objects/table/dnastack-internal-subjects-with-objects/data"
     );
     private static String securedDatasetUrl = optionalEnv(
         "E2E_SECURED_DATASET_URL",
-        "https://storage.googleapis.com/ddap-e2etest-objects/dataset/subjects-retricted-access"
+        "https://storage.googleapis.com/ddap-e2etest-objects/table/subjects-restricted-access/data"
     );
     private static Integer maxWaitTimeInMinutes = Integer.valueOf(optionalEnv("E2E_WORKFLOW_MAX_WAIT_TIME_IN_MINUTES", "2"));
 

@@ -20,9 +20,9 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
 
     private static final String REALM = generateRealmName(DatasetApiTest.class.getSimpleName());
     private static final String DATASET_URL_WITH_INLINE_SCHEMA = "https://storage.googleapis"
-        + ".com/ddap-e2etest-objects/dataset/subjects";
+        + ".com/ddap-e2etest-objects/table/subjects/data";
     private static final String DATASET_URL_WITH_RESOLVED_SCHEMA = "https://storage.googleapis"
-        + ".com/ddap-e2etest-objects/dataset/subjects-referenced-schema";
+        + ".com/ddap-e2etest-objects/table/subjects-referenced-schema/data";
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
@@ -97,7 +97,7 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
             .cookie(SESSION_COOKIE_NAME, session.getValue())
             .cookie("ic_identity", validPersonaToken)
             .cookie("ic_refresh", refreshToken)
-            .queryParam("dataset_url","https://storage.googleapis.com/ga4gh-dataset-sample/dataset/non-existant")
+            .queryParam("dataset_url","https://storage.googleapis.com/ga4gh-dataset-sample/table/non-existant/data")
         .when()
             .get(format("/api/v1alpha/realm/%s/table",REALM))
             .then()

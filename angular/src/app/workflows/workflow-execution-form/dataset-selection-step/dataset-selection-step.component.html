@@ -5,16 +5,12 @@
     <mat-chip-list>
       <mat-label>Example datasets:</mat-label>
       <mat-chip color="accent"
-                (click)="useExample('http://storage.googleapis.com/ddap-test-objects/table/dnastack-internal-subjects-with-objects/data')">
+                (click)="useExample('https://storage.googleapis.com/ddap-e2etest-objects/table/dnastack-internal-subjects-with-objects/data')">
         With URLs
       </mat-chip>
       <mat-chip color="accent"
-                (click)="useExample('https://storage.googleapis.com/ddap-e2etest-objects/dataset/dnastack-internal-subjects-with-objects')">
-        With URLs (obsolete)
-      </mat-chip>
-      <mat-chip color="accent"
-                (click)="useExample('https://storage.googleapis.com/ddap-e2etest-objects/dataset/subjects-retricted-access')">
-        Secured (obsolete)
+                (click)="useExample('https://storage.googleapis.com/ddap-e2etest-objects/table/subjects-retricted-access/data')">
+        Secured
       </mat-chip>
     </mat-chip-list>
   </div>

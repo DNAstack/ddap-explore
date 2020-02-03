@@ -12,7 +12,6 @@ import java.io.IOException;
 
 import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static java.lang.String.format;
-import static org.hamcrest.Matchers.not;
 
 public class UserTokenCookieTest extends AbstractBaseE2eTest {
 

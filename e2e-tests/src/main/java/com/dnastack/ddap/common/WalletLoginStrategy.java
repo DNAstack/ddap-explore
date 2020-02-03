@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
@@ -27,9 +29,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.dnastack.ddap.common.AbstractBaseE2eTest.*;
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
@@ -40,7 +44,7 @@ public class WalletLoginStrategy implements LoginStrategy {
 
     private static final Pattern STATE_PATTERN = Pattern.compile("\\s*let\\s+state\\s*=\\s*\"([^\"]+)\"");
     private static final Pattern PATH_PATTERN = Pattern.compile("\\s*let\\s+path\\s*=\\s*\"([^\"]+)\"");
-    private static final String[] DEFAULT_SCOPES = new String[] {"openid",  "ga4gh_passport_v1", "account_admin", "identities"};
+    private static final String[] DEFAULT_SCOPES = new String[] {"openid",  "ga4gh_passport_v1", "account_admin", "identities", "offline_access"};
 
     private Map<String, LoginInfo> personalAccessTokens;
     private String walletUrl;
@@ -54,11 +58,15 @@ public class WalletLoginStrategy implements LoginStrategy {
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {
-            final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);
-            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", DDAP_DAM_BASE_URL, realmName, loginInfo.getEmail(), scopeString));
+            final String scopeString = (scopes.length == 0) ? "" : "&scope=" + join("+", scopes);
+            HttpGet request = new HttpGet(format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", DDAP_DAM_BASE_URL, realmName, loginInfo.getEmail(), scopeString));
+            log.info("Sending login request: {}", request);
 
-            final HttpResponse response = httpclient.execute(request);
+            final HttpClientContext context = new HttpClientContext();
+            final HttpResponse response = httpclient.execute(request, context);
             String responseBody = EntityUtils.toString(response.getEntity());
+            context.getRedirectLocations()
+                .forEach(uri -> log.info("Redirect uri {}", uri.toString()));
             assertThat("Response body: " + responseBody, response.getStatusLine().getStatusCode(), is(200));
         }
 
@@ -95,29 +103,19 @@ public class WalletLoginStrategy implements LoginStrategy {
         final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
-        URI loginUrl = null;
-        // Get login url and append login_hint
         {
-            HttpGet request = new HttpGet(authorizeUri);
+            String authorizeUriWithLoginHint = authorizeUri.toASCIIString();
+            authorizeUriWithLoginHint = new StringBuilder(authorizeUriWithLoginHint)
+                .insert(authorizeUriWithLoginHint.indexOf("?") + 1, format("loginHint=wallet:%s&", loginInfo.getEmail()))
+                .toString();
+
+            HttpGet request = new HttpGet(URI.create(authorizeUriWithLoginHint));
+            log.info("Sending login request for resource authorization: {}", request);
 
             HttpClientContext context = HttpClientContext.create();
             final HttpResponse response = httpclient.execute(request, context);
-
-            List<URI> locations = context.getRedirectLocations();
-            if (locations != null) {
-                URI finalUrl = locations.get(locations.size() - 1);
-                loginUrl = URI.create(finalUrl.toString() + "&login_hint=wallet:" + loginInfo.getEmail());
-                log.info("Login url: {}", loginUrl);
-            }
-
-            String responseBody = EntityUtils.toString(response.getEntity());
-            assertThat("Response body: " + responseBody, response.getStatusLine().getStatusCode(), is(200));
-        }
-        // Execute GET login url
-        {
-            HttpGet request = new HttpGet(loginUrl);
-
-            final HttpResponse response = httpclient.execute(request);
+            context.getRedirectLocations()
+                .forEach(uri -> log.info("Redirect uri {}", uri.toString()));
 
             String responseBody = EntityUtils.toString(response.getEntity());
             assertThat("Response body: " + responseBody, response.getStatusLine().getStatusCode(), is(200));
@@ -142,15 +140,25 @@ public class WalletLoginStrategy implements LoginStrategy {
     private HttpClient setupHttpClient(CookieStore cookieStore) {
         return HttpClientBuilder.create()
             .setDefaultCookieStore(cookieStore)
+            .setDefaultRequestConfig(RequestConfig.custom()
+                .setCookieSpec(CookieSpecs.STANDARD)
+                .build())
             .build();
     }
 
     private CsrfToken walletLogin(HttpClient httpClient, LoginInfo loginInfo) throws IOException {
-        final HttpGet request = new HttpGet(String.format("%s/login/token?token=%s", walletUrl, loginInfo.getPersonalAccessToken()));
+        final HttpGet request = new HttpGet(format("%s/login/token?token=%s", walletUrl, loginInfo.getPersonalAccessToken()));
 
-        final HttpResponse response = httpClient.execute(request);
+        final HttpClientContext context = new HttpClientContext();
+        final HttpResponse response = httpClient.execute(request, context);
         String responseBody = EntityUtils.toString(response.getEntity());
-        final String responseMessage = "Headers: " + Arrays.toString(response.getAllHeaders()) + "\nResponse body: " + responseBody;
+        final String responseMessage = format("Redirects:\n%s\n\nHeaders: %s\nResponse body: %s",
+            context.getRedirectLocations()
+                .stream()
+                .map(uri -> "\t" + uri)
+                .collect(Collectors.joining("\n")),
+            Arrays.toString(response.getAllHeaders()),
+            responseBody);
         assertThat(responseMessage, response.getStatusLine().getStatusCode(), is(200));
 
             /*
@@ -168,7 +176,7 @@ public class WalletLoginStrategy implements LoginStrategy {
     }
 
     private URI acceptPermissions(HttpClient httpClient, CsrfToken csrfToken) throws IOException {
-        final HttpGet request = new HttpGet(String.format("%s%s?state=%s&agree=y", icUrl, csrfToken.getPath(), csrfToken.getState()));
+        final HttpGet request = new HttpGet(format("%s%s?state=%s&agree=y", icUrl, csrfToken.getPath(), csrfToken.getState()));
 
         HttpClientContext context = HttpClientContext.create();
         final HttpResponse response = httpClient.execute(request, context);
@@ -187,6 +195,7 @@ public class WalletLoginStrategy implements LoginStrategy {
             if (responseMessage.contains("policy requirements failed")) {
                 throw new PolicyRequirementFailedException(responseMessage);
             }
+            log.info("Response: {}", responseBody);
             throw new IllegalStateException(responseMessage);
         }
 

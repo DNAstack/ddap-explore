@@ -1,6 +1,5 @@
 package com.dnastack.ddap.explore.dam.controller;
 
-import com.dnastack.ddap.common.client.AuthAwareWebClientFactory;
 import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.config.DamProperties;
 import com.dnastack.ddap.common.config.DamsConfig;
@@ -10,9 +9,7 @@ import com.dnastack.ddap.common.security.TokenExchangePurpose;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager.TokenKind;
 import com.dnastack.ddap.common.util.http.UriUtil;
-import com.dnastack.ddap.explore.common.config.DamClientsConfig;
 import com.dnastack.ddap.explore.dam.client.DamClientFactory;
-import com.dnastack.ddap.explore.dam.client.HttpReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.security.CartTokenCookieName;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
@@ -32,7 +29,6 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicServices.DAM;
 import static java.lang.String.format;
@@ -48,22 +44,16 @@ public class ResourceFlowController {
     private final OAuthStateHandler stateHandler;
     private final Map<String, DamProperties> dams;
     private final DamClientFactory damClientFactory;
-    private AuthAwareWebClientFactory webClientFactory;
-    private DamClientsConfig damClientsConfig;
 
     @Autowired
     public ResourceFlowController(DamsConfig damsConfig,
                                   UserTokenCookiePackager cookiePackager,
                                   OAuthStateHandler stateHandler,
-                                  DamClientFactory damClientFactory,
-                                  AuthAwareWebClientFactory webClientFactory,
-                                  DamClientsConfig damClientsConfig) {
+                                  DamClientFactory damClientFactory) {
         this.cookiePackager = cookiePackager;
         this.stateHandler = stateHandler;
         this.dams = Map.copyOf(damsConfig.getStaticDamsConfig());
         this.damClientFactory = damClientFactory;
-        this.webClientFactory = webClientFactory;
-        this.damClientsConfig = damClientsConfig;
     }
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/checkout")
@@ -86,6 +76,7 @@ public class ResourceFlowController {
     @GetMapping("/api/v1alpha/realm/{realm}/resources/authorize")
     public Mono<? extends ResponseEntity<?>> authorizeResources(ServerHttpRequest request,
                                                                 @PathVariable String realm,
+                                                                @RequestParam(required = false) String loginHint,
                                                                 @RequestParam(required = false) URI redirectUri,
                                                                 @RequestParam(required = false) String scope,
                                                                 @RequestParam("resource") List<String> damIdResourcePairs) {
@@ -100,11 +91,12 @@ public class ResourceFlowController {
 
         // FIXME should separate resources by DAM
         final ReactiveDamOAuthClient oAuthClient = damClientFactory.lookupDamOAuthClient(resources);
-        final URI authorizeUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources);
+        final URI authorizeUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources, loginHint);
         return oAuthClient.testAuthorizeEndpoint(authorizeUri)
                           .map(status -> {
                               if (status.is4xxClientError()) {
-                                  return oAuthClient.getLegacyAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources);
+                                  log.info("Authorize endpoint returned [{}] status: Falling back to legacy authorize endpoint", status);
+                                  return oAuthClient.getLegacyAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources, loginHint);
                               } else {
                                   return authorizeUri;
                               }

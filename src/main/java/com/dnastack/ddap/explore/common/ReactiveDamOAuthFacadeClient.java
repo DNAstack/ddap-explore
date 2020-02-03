@@ -30,7 +30,7 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
     }
 
     @Override
-    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources) {
+    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint) {
         var builder = UriComponentsBuilder.fromUri(URI.create(damFacadeConfig.getOauth2Url() + "/oauth2/authorize"))
                 .queryParam("response_type", "code")
                 .queryParam("client_id", damFacadeConfig.getClientId())
@@ -42,12 +42,15 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
         if (scopes != null) {
             builder.queryParam("scope", scopes);
         }
+        if (loginHint != null) {
+            builder.queryParam("login_hint", loginHint);
+        }
 
         return builder.build().toUri();
     }
 
     @Override
-    public URI getLegacyAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources) {
+    public URI getLegacyAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint) {
         throw new UnsupportedOperationException();
     }
 
@@ -102,12 +105,12 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
     }
 
     @Override
-    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri) {
+    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, String loginHint) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public URI getLegacyAuthorizeUrl(String realm, String state, String scopes, URI redirectUri) {
+    public URI getLegacyAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, String loginHint) {
         throw new UnsupportedOperationException();
     }
 

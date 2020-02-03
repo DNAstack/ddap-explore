@@ -60,7 +60,7 @@ public abstract class AbstractBaseE2eTest {
     public static final String TEST_BUCKET = requiredEnv("E2E_TEST_BUCKET");
     public static final String NAMESPACE =  requiredEnv("E2E_TEST_NAMESPACE");
     public static final String TRUSTED_SOURCE =  optionalEnv("E2E_TRUSTED_SOURCE", "https://ddap.test.source.dnastack.com");
-    public static final String PASSPORT_ISSUER = requiredEnv("E2E_PASSPORT_ISSUER");
+    public static final String PASSPORT_ISSUER = stripTrailingSlash(requiredEnv("E2E_PASSPORT_ISSUER"));
     public static final String TEST_WHITELIST_VALUE = optionalEnv("E2E_TEST_WHITELIST_VALUE", stripTrailingSlash(DDAP_BASE_URL).replaceFirst("-candidate\\.", "."));
     public static final String IC_BASE_URL = requiredEnv("E2E_IC_BASE_URL");
     // Current size limit on realm names in DAM
@@ -95,7 +95,7 @@ public abstract class AbstractBaseE2eTest {
                 personalAccessTokens.put(TestingPersona.ADMINISTRATOR.getId(), new LoginInfo(requiredEnv("E2E_ADMIN_USER_EMAIL"), requiredEnv("E2E_ADMIN_USER_TOKEN")));
                 personalAccessTokens.put(TestingPersona.USER_WITH_ACCESS.getId(), new LoginInfo(requiredEnv("E2E_WHITELIST_USER_EMAIL"), requiredEnv("E2E_WHITELIST_USER_TOKEN")));
                 personalAccessTokens.put(TestingPersona.USER_WITHOUT_ACCESS.getId(), new LoginInfo(requiredEnv("E2E_PLAIN_USER_EMAIL"), requiredEnv("E2E_PLAIN_USER_TOKEN")));
-                loginStrategy = new WalletLoginStrategy(personalAccessTokens, requiredEnv("E2E_WALLET_URL"), PASSPORT_ISSUER.replaceAll("/oidc$", ""));
+                loginStrategy = new WalletLoginStrategy(personalAccessTokens, requiredEnv("E2E_WALLET_URL"), PASSPORT_ISSUER);
                 break;
             default:
                 throw new IllegalArgumentException(format("Unrecognized login strategy [%s]", LOGIN_STRATEGY_NAME));

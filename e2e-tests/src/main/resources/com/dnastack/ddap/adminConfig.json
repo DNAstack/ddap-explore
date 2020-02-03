@@ -19,7 +19,7 @@
       }
     },
     "ic_issuer": {
-      "issuer": "$$E2E_PASSPORT_ISSUER$$",
+      "issuer": "$$E2E_PASSPORT_ISSUER$$/",
       "ui": {
         "description": "IC DDAP",
         "label": "IC DDAP"
@@ -663,7 +663,7 @@
     "test_user_with_access": {
       "passport": {
         "standardClaims": {
-          "iss": "$$E2E_PASSPORT_ISSUER$$",
+          "iss": "$$E2E_PASSPORT_ISSUER$$/",
           "email": "test-user-with-access@dnastack.com",
           "picture": "https://pbs.twimg.com/profile_images/3443048571/ef5062acfce64a7aef1d75b4934fbee6_400x400.png"
         },

@@ -17,6 +17,16 @@
         "description": "trusted source for whitelisting users",
         "label": "trusted source for whitelisting users"
       }
+    },
+    "ic_issuer": {
+      "issuer": "$$E2E_PASSPORT_ISSUER$$",
+      "ui": {
+        "description": "IC DDAP",
+        "label": "IC DDAP"
+      },
+      "clientId": "$$E2E_BROKER_ID$$",
+      "authUrl": "$$E2E_PASSPORT_ISSUER$$/oauth2/auth",
+      "tokenUrl": "$$E2E_PASSPORT_ISSUER$$/oauth2/token"
     }
   },
   "trustedSources": {

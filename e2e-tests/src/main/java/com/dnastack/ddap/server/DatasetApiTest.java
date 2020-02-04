@@ -51,8 +51,8 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
             .then()
             .log().ifValidationFails()
             .contentType("application/json")
-            .body("objects.size()",greaterThanOrEqualTo(1))
-            .body("schema.$id",equalTo("ca.personalgenomes.schema.Subject"))
+            .body("data.size()",greaterThanOrEqualTo(1))
+            .body("data_model.$id",equalTo("ca.personalgenomes.schema.Subject"))
             .statusCode(200);
     }
 
@@ -76,10 +76,10 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
             .then()
             .log().ifValidationFails()
             .contentType("application/json")
-            .body("objects.size()",greaterThanOrEqualTo(1))
-            .body("schema.$id",equalTo("ca.personalgenomes.schema.Subject"))
-            .body("schema.properties.blood_type.$id",equalTo("ca.personalgenomes.schemas.BloodType"))
-            .body("schema.properties.sex.$id",equalTo("ca.personalgenomes.schemas.Sex"))
+            .body("data.size()",greaterThanOrEqualTo(1))
+            .body("data_model.$id",equalTo("ca.personalgenomes.schema.Subject"))
+            .body("data_model.properties.blood_type.$id",equalTo("ca.personalgenomes.schemas.BloodType"))
+            .body("data_model.properties.sex.$id",equalTo("ca.personalgenomes.schemas.Sex"))
             .statusCode(200);
     }
 

@@ -74,7 +74,7 @@ public class ResourceFlowController {
     }
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/authorize")
-    public Mono<? extends ResponseEntity<?>> authorizeResources(ServerHttpRequest request,
+    public ResponseEntity<?> authorizeResources(ServerHttpRequest request,
                                                                 @PathVariable String realm,
                                                                 @RequestParam(required = false) String loginHint,
                                                                 @RequestParam(required = false) URI redirectUri,
@@ -92,21 +92,11 @@ public class ResourceFlowController {
         // FIXME should separate resources by DAM
         final ReactiveDamOAuthClient oAuthClient = damClientFactory.lookupDamOAuthClient(resources);
         final URI authorizeUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources, loginHint);
-        return oAuthClient.testAuthorizeEndpoint(authorizeUri)
-                          .map(status -> {
-                              if (status.is4xxClientError()) {
-                                  log.info("Authorize endpoint returned [{}] status: Falling back to legacy authorize endpoint", status);
-                                  return oAuthClient.getLegacyAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources, loginHint);
-                              } else {
-                                  return authorizeUri;
-                              }
-                          })
-                          .map(loginUri -> {
-                              return ResponseEntity.status(TEMPORARY_REDIRECT)
-                                                   .location(loginUri)
-                                                   .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString())
-                                                   .build();
-                          });
+        return ResponseEntity.status(TEMPORARY_REDIRECT)
+                             .location(authorizeUri)
+                             .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString())
+                             .build();
+
     }
 
     private URI getRedirectUri(ServerHttpRequest request) {

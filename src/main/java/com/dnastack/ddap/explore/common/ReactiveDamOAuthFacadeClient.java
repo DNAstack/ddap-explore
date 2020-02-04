@@ -7,7 +7,6 @@ import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -50,11 +49,6 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
     }
 
     @Override
-    public URI getLegacyAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Mono<TokenResponse> exchangeAuthorizationCodeForTokens(String realm, URI redirectUri, String code) {
         // NOTE: Based on BaseReactiveOauthClient
         return WebClientFactory.getWebClient()
@@ -71,26 +65,7 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
     }
 
     @Override
-    public Mono<TokenResponse> legacyExchangeAuthorizationCodeForTokens(String realm, URI redirectUri, String code) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Mono<HttpStatus> testAuthorizeEndpoint(URI uri) {
-        return WebClientFactory.getWebClient()
-                .get()
-                .uri(uri)
-                .exchange()
-                .map(ClientResponse::statusCode);
-    }
-
-    @Override
     public Mono<TokenResponse> refreshAccessToken(String realm, String refreshToken, String scope) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Mono<TokenResponse> legacyRefreshAccessToken(String realm, String refreshToken) {
         throw new UnsupportedOperationException();
     }
 
@@ -100,17 +75,7 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
     }
 
     @Override
-    public Mono<ClientResponse> legacyRevokeRefreshToken(String realm, String refreshToken) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, String loginHint) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public URI getLegacyAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, String loginHint) {
         throw new UnsupportedOperationException();
     }
 

@@ -4,8 +4,10 @@
                   data-se="main-progress-bar">
 </mat-progress-bar>
 <mat-sidenav-container>
+  <!-- [@.disabled]="true" is to disable animation -->
   <mat-sidenav
     *ngIf="appConfig.sidebarEnabled"
+    [@.disabled]="true"
     #sidenav
     mode="side"
     [opened]="true"

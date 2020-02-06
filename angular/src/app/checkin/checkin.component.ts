@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { defaultRealm } from 'ddap-common-lib';
 
@@ -13,8 +12,7 @@ export class CheckinComponent implements OnInit {
   private appConfig: AppConfigModel;
   constructor(private appConfigService: AppConfigService,
               private router: Router,
-              private route: ActivatedRoute,
-              private titleService: Title) {}
+              private route: ActivatedRoute) {}
 
   ngOnInit() {
     const realmId = this.route.root.firstChild.snapshot.params.realmId;
@@ -31,7 +29,6 @@ export class CheckinComponent implements OnInit {
         targetRealm = realmId;
       }
 
-      this.titleService.setTitle(this.appConfig.title);
       this.router.navigate([`/${targetRealm}/${this.appConfig.defaultModule}`]);
     });
   }

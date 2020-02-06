@@ -2,11 +2,20 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { defaultRealm } from 'ddap-common-lib';
 
+import { CheckinComponent } from './checkin/checkin.component';
 import { LayoutComponent } from './layout/layout.component';
 
 const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: `/${defaultRealm}/data` },
-  { path: ':realmId', pathMatch: 'full', redirectTo: `/:realmId/data` },
+  // { path: '', pathMatch: 'full', redirectTo: `/${defaultRealm}/data` },  // handled by CheckinComponent with feature flags
+  // { path: ':realmId', pathMatch: 'full', redirectTo: `/:realmId/data` },  // handled by CheckinComponent with feature flags
+  {
+    path: '',
+    component: CheckinComponent,
+  },
+  {
+    path: ':realmId',
+    component: CheckinComponent,
+  },
   {
     path: ':realmId',
     component: LayoutComponent,

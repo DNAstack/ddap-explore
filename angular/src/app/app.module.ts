@@ -6,6 +6,7 @@ import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { CheckinComponent } from './checkin/checkin.component';
 import { LayoutComponent } from './layout/layout.component';
 import {
   RealmChangeConfirmationDialogComponent
@@ -16,6 +17,7 @@ import { SharedModule } from './shared/shared.module';
   declarations: [
     AppComponent,
     LayoutComponent,
+    CheckinComponent,
   ],
   imports: [
     BrowserModule,

@@ -33,13 +33,17 @@ export class DataListComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      if (!data.featureExploreDataEnabled) {
-        if (data.featureWorkflowsEnabled) {
-          this.router.navigate(['/aspen/workflows']);
-        }
+      if (data.featureExploreDataEnabled) {
+        this.initialize();
+      } else {
+        this.router.navigate(['/']);
       }
     });
+  }
+
+  private initialize() {
     // FIXME I think this should be a piped Observable and not a subscription
     // Needed to reload the data every time the realm in the URL changes (conditionIndex.e. using the realm selector)
     this.route.parent.params.subscribe(() => {

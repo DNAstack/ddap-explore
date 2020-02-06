@@ -8,6 +8,9 @@ server:
 
 ui:
   title: "DDAP"
+  default-module: data
+  in-standalone-mode: ${ddap.dam-facade}
+  authorization-on-init-required: false
   sidebar-enabled: true
   feature-administration-enabled: true
   feature-explore-data-enabled: true

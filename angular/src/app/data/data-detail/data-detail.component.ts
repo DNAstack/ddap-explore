@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { EntityModel } from 'ddap-common-lib';
 import { Observable, of } from 'rxjs';
 
+import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { ResourceBeaconService } from '../../shared/beacon-search/resource-beacon.service';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
 import { DataService } from '../data.service';
@@ -23,10 +25,31 @@ export class DataDetailComponent implements OnInit {
   damId: string;
 
   constructor(private route: ActivatedRoute,
+              private appConfigService: AppConfigService,
+              private router: Router,
               private dataService: DataService) {
   }
 
   ngOnInit() {
+    // Ensure that the user can only access this component when it is enabled.
+    this.appConfigService.get().subscribe((data: AppConfigModel) => {
+      if (data.featureExploreDataEnabled) {
+        this.initialize();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
+  }
+
+  searchOpenedChange($event) {
+    this.searchOpened = $event;
+  }
+
+  toggleLimitSearch() {
+    this.limitSearch = !this.limitSearch;
+  }
+
+  private initialize() {
     const resourceName = this.route.snapshot.params.resourceName;
     const realmId = this.route.root.firstChild.snapshot.params.realmId;
     this.damId = this.route.snapshot.params.damId;
@@ -37,14 +60,6 @@ export class DataDetailComponent implements OnInit {
         this.resourceLabel$ = of(this.resource.dto.ui.label);
         this.views = this.getViews(this.resource);
       });
-  }
-
-  searchOpenedChange($event) {
-    this.searchOpened = $event;
-  }
-
-  toggleLimitSearch() {
-    this.limitSearch = !this.limitSearch;
   }
 
   private getViews(resource: EntityModel): EntityModel[] {

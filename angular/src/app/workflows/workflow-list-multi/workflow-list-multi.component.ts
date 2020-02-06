@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { ResourceService } from '../../shared/resource/resource.service';
 import { SimplifiedWesResourceViews } from '../workflow.model';
 import { WorkflowService } from '../workflows.service';
@@ -15,21 +17,33 @@ export class WorkflowListMultiComponent implements OnInit {
   wesResourceViews: SimplifiedWesResourceViews[];
 
   constructor(private router: Router,
+              private appConfigService: AppConfigService,
               private resourceService: ResourceService,
               private workflowService: WorkflowService) {
   }
 
   ngOnInit(): void {
-    this.workflowService.getAllWesViews()
-      .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
-        this.wesResourceViews = wesResourceViews;
-      });
+    // Ensure that the user can only access this component when it is enabled.
+    this.appConfigService.get().subscribe((data: AppConfigModel) => {
+      if (data.featureWorkflowsEnabled) {
+        this.initialize();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
   }
 
   getResourceAuthUrl(damId: string, view: any) {
     const damIdResourcePathPair = `${damId};${view.resourcePath}`;
     const redirectUri = this.getRedirectUrl(damId, view.name);
     return this.resourceService.getUrlForObtainingAccessToken([damIdResourcePathPair], redirectUri);
+  }
+
+  private initialize() {
+    this.workflowService.getAllWesViews()
+      .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
+        this.wesResourceViews = wesResourceViews;
+      });
   }
 
   private getRedirectUrl(damId: string, viewId: string): string {

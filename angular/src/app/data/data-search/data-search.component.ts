@@ -1,9 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable} from 'rxjs';
+import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs';
-import { filter, flatMap, mergeAll } from "rxjs/operators";
+import { filter, flatMap, mergeAll } from 'rxjs/operators';
 
+import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import IResourceTokens = dam.v1.IResourceTokens;
+import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { BeaconResponse } from '../../shared/beacon-search/beacon-response.model';
 import { BeaconSearchParams } from '../../shared/beacon-search/beacon-search-params.model';
 import { ResourceBeaconService } from '../../shared/beacon-search/resource-beacon.service';
@@ -11,7 +14,6 @@ import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.servic
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
 import { DataService } from '../data.service';
-import IResourceTokens = dam.v1.IResourceTokens;
 
 @Component({
   selector: 'ddap-resource-detail',
@@ -34,6 +36,7 @@ export class DataSearchComponent implements OnDestroy, OnInit {
   private searchParams: BeaconSearchParams;
 
   constructor(private route: ActivatedRoute,
+              private appConfigService: AppConfigService,
               private router: Router,
               private activatedRoute: ActivatedRoute,
               private dataService: DataService,
@@ -42,6 +45,34 @@ export class DataSearchComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit() {
+    // Ensure that the user can only access this component when it is enabled.
+    this.appConfigService.get().subscribe((data: AppConfigModel) => {
+      if (data.featureExploreDataEnabled) {
+        this.initialize();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.queryParamsSubscription.unsubscribe();
+  }
+
+  limitSearchChange($event) {
+    const limitSearch = $event.checked;
+    const searchParams: BeaconSearchParams = {
+      ...this.searchParams,
+       // Don't put a boolean into this map, so that we are always pulling out the limitSearch as a string
+      limitSearch: limitSearch + '',
+    };
+    this.router.navigate(['.'], {
+      relativeTo: this.activatedRoute, replaceUrl: true,
+      queryParams: { ...searchParams },
+    });
+  }
+
+  private initialize() {
     this.queryParamsSubscription = this.route.queryParams
       .subscribe(({ auth, ...searchState }: any) => {
         this.results = [];
@@ -85,23 +116,6 @@ export class DataSearchComponent implements OnDestroy, OnInit {
             this.resourceAuthUrl = this.getUrlForObtainingAccessToken(this.getResourcePathsFrom(allBeaconsResponse));
           });
       });
-  }
-
-  ngOnDestroy() {
-    this.queryParamsSubscription.unsubscribe();
-  }
-
-  limitSearchChange($event) {
-    const limitSearch = $event.checked;
-    const searchParams: BeaconSearchParams = {
-      ...this.searchParams,
-       // Don't put a boolean into this map, so that we are always pulling out the limitSearch as a string
-      limitSearch: limitSearch + '',
-    };
-    this.router.navigate(['.'], {
-      relativeTo: this.activatedRoute, replaceUrl: true,
-      queryParams: { ...searchParams },
-    });
   }
 
   private initializeComponentFields(searchParams: BeaconSearchParams) {

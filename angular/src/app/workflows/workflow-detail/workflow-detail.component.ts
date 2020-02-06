@@ -1,18 +1,20 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, Router } from '@angular/router';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
+import { flatDeep } from 'ddap-common-lib';
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 import { map } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
+import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { JsonEditorDefaults } from '../../shared/jsonEditorDefaults';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
 import { ResourceService } from '../../shared/resource/resource.service';
+import { DatasetService } from '../workflow-execution-form/dataset.service';
 import { SimplifiedWesResourceViews } from '../workflow.model';
 import { WorkflowService } from '../workflows.service';
-import { DatasetService } from "../workflow-execution-form/dataset.service";
-import { flatDeep } from "ddap-common-lib";
 
 @Component({
   selector: 'ddap-workflow-detail',
@@ -31,6 +33,7 @@ export class WorkflowDetailComponent implements OnInit {
   editor: JsonEditorComponent;
 
   constructor(private route: ActivatedRoute,
+              private appConfigService: AppConfigService,
               private router: Router,
               private workflowService: WorkflowService,
               private activatedRoute: ActivatedRoute,
@@ -41,6 +44,17 @@ export class WorkflowDetailComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Ensure that the user can only access this component when it is enabled.
+    this.appConfigService.get().subscribe((data: AppConfigModel) => {
+      if (data.featureWorkflowsEnabled) {
+        this.initialize();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
+  }
+
+  private initialize() {
     const {damId, viewId, runId} = this.activatedRoute.snapshot.params;
     this.workflowService.getAllWesViews()
       .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {

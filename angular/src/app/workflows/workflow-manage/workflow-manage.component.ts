@@ -9,6 +9,8 @@ import { Observable, Subscription, zip } from 'rxjs';
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 import { map } from 'rxjs/operators';
 
+import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
 import { ResourceService } from '../../shared/resource/resource.service';
@@ -74,6 +76,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   executionStep: WorkflowExecutionStepComponent;
 
   constructor(private route: ActivatedRoute,
+              private appConfigService: AppConfigService,
               private router: Router,
               private validationService: FormValidationService,
               private workflowService: WorkflowService,
@@ -84,18 +87,14 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.datasetForm = this.workflowFormBuilder.buildDatasetForm();
-    this.workflowForm = this.workflowFormBuilder.buildWorkflowForm();
-    this.subscribeToFormChanges();
-
-    this.subscriptions.push(this.route.queryParams
-      .subscribe(params => {
-        if (!params.state) {
-          return;
-        }
-        this.workflowId = params.state;
-        this.loadFromStateAndCheckoutAuthorizedResources();
-      }));
+    // Ensure that the user can only access this component when it is enabled.
+    this.appConfigService.get().subscribe((data: AppConfigModel) => {
+      if (data.featureWorkflowsEnabled) {
+        this.initialize();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -170,6 +169,21 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     const { viewId } = this.route.snapshot.params;
     const navigatePath = viewId ? [path] : [path, damId, 'views', wesView, 'runs'];
     this.router.navigate(navigatePath, { relativeTo: this.route, state: { runs } });
+  }
+
+  private initialize() {
+    this.datasetForm = this.workflowFormBuilder.buildDatasetForm();
+    this.workflowForm = this.workflowFormBuilder.buildWorkflowForm();
+    this.subscribeToFormChanges();
+
+    this.subscriptions.push(this.route.queryParams
+      .subscribe(params => {
+        if (!params.state) {
+          return;
+        }
+        this.workflowId = params.state;
+        this.loadFromStateAndCheckoutAuthorizedResources();
+      }));
   }
 
   private loadFromStateAndCheckoutAuthorizedResources() {

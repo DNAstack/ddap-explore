@@ -7,6 +7,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "ui")
 public class AppConfig {
     private String title;
+    private String defaultModule;
+    private boolean inStandaloneMode;
+    private boolean authorizationOnInitRequired;
     private boolean sidebarEnabled;
     private boolean featureAdministrationEnabled;
     private boolean featureExploreDataEnabled;

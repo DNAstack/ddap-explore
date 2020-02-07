@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/v1alpha/icInfo")
+@RequestMapping("/api/v1alpha/identity-concentrator/info")
 public class IcInfoController {
+
     private final String icUiUrl;
 
     @Autowired
@@ -21,4 +22,5 @@ public class IcInfoController {
     public Mono<IcInfo> getIcInfo() {
         return Mono.just(new IcInfo(icUiUrl));
     }
+
 }

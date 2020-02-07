@@ -29,5 +29,4 @@ export class DamInfoStore {
     return this.http.get<DamsInfo>(`${environment.ddapApiUrl}/realm/master/dam`);
   }
 
-
 }

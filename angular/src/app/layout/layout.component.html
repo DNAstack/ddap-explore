@@ -5,13 +5,12 @@
 </mat-progress-bar>
 <mat-sidenav-container>
   <!-- [@.disabled]="true" is to disable animation -->
-  <mat-sidenav
-    *ngIf="appConfig.sidebarEnabled"
-    [@.disabled]="true"
-    #sidenav
-    mode="side"
-    [opened]="true"
-    disableClose>
+  <mat-sidenav *ngIf="appConfig.sidebarEnabled"
+               [@.disabled]="true"
+               #sidenav
+               mode="side"
+               [opened]="true"
+               disableClose>
     <header>
       <h1 class="flex flex--column">
         <span>{{ appConfig.title }}</span>
@@ -55,21 +54,25 @@
                 <span>Administration</span>
               </mat-panel-title>
             </mat-expansion-panel-header>
-            <a [href]="withRealm(icPath)" target="_blank">
-              <mat-list-item data-se="nav-identity-concentrator">
-                <mat-icon class="icon">launch</mat-icon>
-                <h4 mat-line>Identity Concentrator</h4>
-              </mat-list-item>
-            </a>
-            <a *ngFor="let damInfo of damsInfo"
-               [href]="withRealm(damInfo.uiUrl)"
-               target="_blank">
-              <mat-list-item data-se="nav-dam">
-                <mat-icon class="icon">launch</mat-icon>
-                <h4 mat-line>{{damInfo.label}}</h4>
-                <span mat-line>Data Access Manager</span>
-              </mat-list-item>
-            </a>
+            <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">
+              <a [href]="withRealm(identityConcentratorInfo.uiUrl)" target="_blank">
+                <mat-list-item data-se="nav-identity-concentrator">
+                  <mat-icon class="icon">launch</mat-icon>
+                  <h4 mat-line>Identity Concentrator</h4>
+                </mat-list-item>
+              </a>
+            </ng-container>
+            <ng-container *ngIf="dataAccessManagersInfo$ | async as dataAccessManagersInfo">
+              <a *ngFor="let damInfo of dataAccessManagersInfo | keyvalue"
+                 [href]="withRealm(damInfo.value.uiUrl)"
+                 target="_blank">
+                <mat-list-item data-se="nav-dam">
+                  <mat-icon class="icon">launch</mat-icon>
+                  <h4 mat-line>{{damInfo.value.label}}</h4>
+                  <span mat-line>Data Access Manager</span>
+                </mat-list-item>
+              </a>
+            </ng-container>
           </mat-expansion-panel>
         </mat-accordion>
       </div>

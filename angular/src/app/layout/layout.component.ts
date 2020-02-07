@@ -12,7 +12,7 @@ import { Profile } from '../identity/profile.model';
 import { AppConfigModel } from '../shared/app-config/app-config.model';
 import { AppConfigService } from '../shared/app-config/app-config.service';
 import { DamInfoStore } from '../shared/dam/dam-info.store';
-import { DamInfo } from '../shared/dam/dams-info';
+import { DamsInfo } from '../shared/dam/dams-info';
 
 const refreshRepeatTimeoutInMs = 600000;
 
@@ -26,9 +26,10 @@ export class LayoutComponent implements OnInit {
   profile: Profile = null;
   realm: string;
   loginPath: string;
-  damsInfo: DamInfo[] = [];
-  icPath: string;
   appConfig: AppConfigModel = null;
+
+  dataAccessManagersInfo$: Observable<DamsInfo>;
+  identityConcentratorInfo$: Observable<any>;
 
   constructor(public loader: LoadingBarService,
               private titleService: Title,
@@ -47,19 +48,14 @@ export class LayoutComponent implements OnInit {
         this.titleService.setTitle(this.appConfig.title);
       });
 
-    this.damInfoStore.getDamsInfo().subscribe(damsInfo => {
-      for (const damId in damsInfo) {
-        this.damsInfo.push(damsInfo[damId]);
-      }
-    });
     this.identityStore.getIdentity()
       .subscribe(({ account, sandbox }) => {
         this.isSandbox = sandbox;
         this.profile = account.profile;
       });
-    this.identityService.getIcInfo().subscribe(icInfo => {
-      this.icPath = icInfo.uiUrl;
-    });
+
+    this.dataAccessManagersInfo$ = this.damInfoStore.getDamsInfo();
+    this.identityConcentratorInfo$ = this.identityService.getIdentityConcentratorInfo();
 
     this.activatedRoute.root.firstChild.params.subscribe((params) => {
       this.realm = params.realmId;

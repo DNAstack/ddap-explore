@@ -31,8 +31,8 @@ export class IdentityService {
     return this.http.get<any>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/identity/logout`, {params});
   }
 
-  getIcInfo(): Observable<any> {
-    return this.http.get(`${environment.ddapApiUrl}/icInfo`);
+  getIdentityConcentratorInfo(): Observable<any> {
+    return this.http.get(`${environment.ddapApiUrl}/identity-concentrator/info`);
   }
 
 }

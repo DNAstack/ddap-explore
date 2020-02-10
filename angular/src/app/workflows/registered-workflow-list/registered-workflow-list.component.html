@@ -1,0 +1,55 @@
+<ddaplib-header [backLink]="['..']"
+                label="Registered workflows">
+</ddaplib-header>
+
+<ddaplib-main>
+  <div class="section-header">
+    <div class="list-paginator">
+      <button mat-icon-button
+              type="button"
+              [disabled]="pageIndex === 0"
+              (click)="onPagerClick(-1)">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <button mat-icon-button
+              type="button"
+              [disabled]="pageIndex + 1 === getTotalPageNumber()"
+              (click)="onPagerClick(+1)">
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+    <mat-form-field appearance="standard" class="filter-input">
+      <mat-label>Filter by tool name and/or author</mat-label>
+      <input #filter type="text" matInput (keyup)="onFilterUpdate(filter.value)" value="{{ filterTerm }}">
+    </mat-form-field>
+    <div class="action" *ngIf="filter.value">
+      <button mat-icon-button type="reset" color="warn" title="Clear the filter" (click)="onFilterResetClick()"><mat-icon>clear</mat-icon></button>
+    </div>
+    <div class="action">
+      <button mat-icon-button type="button" color="primary" title="Refresh" (click)="onFilterRefreshClick()"><mat-icon>refresh</mat-icon></button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="tools && tools.length == 0">
+    No workflow registered
+  </ng-container>
+
+  <mat-accordion>
+    <mat-expansion-panel *ngFor="let tool of (filteredTools || []).slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)" class="workflow">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ tool.toolname }}</mat-panel-title>
+        <mat-panel-description>{{ tool.author || tool.organization }}</mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="content">
+        <div class="actions">
+          <button
+            mat-raised-button
+            color="primary"
+            [routerLink]="['..', 'run', 'with', tool.url]">Run</button>
+        </div>
+        <div class="description" [innerHTML]="(tool.description || '*No description*') | markdown"></div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</ddaplib-main>

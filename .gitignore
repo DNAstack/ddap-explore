@@ -1,3 +1,4 @@
+.DS_Store
 /target/
 ci/impl/target
 ci/e2e-tests/target

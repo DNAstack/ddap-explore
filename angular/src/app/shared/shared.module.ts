@@ -30,6 +30,7 @@ import { ClipboardModule } from 'ngx-clipboard';
 import { BeaconResultComponent } from './beacon-search/beacon-result/beacon-result.component';
 import { BeaconSearchBarComponent } from './beacon-search/beacon-search-bar/beacon-search-bar.component';
 import { LimitSearchComponent } from './beacon-search/beacon-search-bar/limit-search/limit-search.component';
+import { MarkdownPipe } from './markdown.pipe';
 import { MetadataFilterPipe } from './metadata-list/metadata-filter.pipe';
 import { MetadataListComponent } from './metadata-list/metadata-list.component';
 import { PaginatorComponent } from './paginator/paginator.component';
@@ -54,6 +55,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MetadataListComponent,
     MetadataFilterPipe,
     PaginatorComponent,
+    MarkdownPipe,
   ],
   imports: [
     CommonModule,
@@ -131,6 +133,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MetadataFilterPipe,
     PaginatorComponent,
     RealmInputComponent,
+    MarkdownPipe,
   ],
 })
 export class SharedModule {

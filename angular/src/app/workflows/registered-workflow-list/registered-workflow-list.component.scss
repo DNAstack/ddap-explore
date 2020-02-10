@@ -1,0 +1,32 @@
+//@import '~ddap-common-lib/styles/modules/colors';
+
+.section-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.list-paginator {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  margin-right: 15px;
+}
+
+.workflow {
+  .content {
+    display: flex;
+    justify-content: space-between;
+
+    .description {
+      order: 1;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      order: 2;
+      margin-left: 15px;
+    }
+  }
+}

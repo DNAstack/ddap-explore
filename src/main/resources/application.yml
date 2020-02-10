@@ -15,6 +15,7 @@ ui:
   feature-administration-enabled: true
   feature-explore-data-enabled: true
   feature-workflows-enabled: true
+  feature-workflows-trs-integration-enabled: false
 
 dams:
   1:

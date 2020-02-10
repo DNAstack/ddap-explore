@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
@@ -26,7 +25,6 @@ export class RegisteredWorkflowListComponent implements OnInit {
 
   constructor(private appConfigService: AppConfigService,
               private router: Router,
-              private dialog: MatDialog,
               private trs: TrsService) {
     this.pageIndex = 0;
   }

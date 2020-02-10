@@ -15,7 +15,8 @@ ui:
   feature-administration-enabled: true
   feature-explore-data-enabled: true
   feature-workflows-enabled: true
-  feature-workflows-trs-integration-enabled: true
+  feature-workflows-trs-integration-enabled: false
+  trs-base-url: "https://dockstore.org/api/api/ga4gh/v2"
   trs-accepted-tool-classes: ['Workflow']
   trs-accepted-version-descriptor-types: ['WDL']
   list-page-size: 14

@@ -46,7 +46,8 @@
           <button
             mat-raised-button
             color="primary"
-            [routerLink]="['..', 'run', 'with', tool.url]">Run</button>
+            [routerLink]="['..', 'run', 'with', tool.url]"
+          >Run</button>
         </div>
         <div class="description" [innerHTML]="(tool.description || '*No description*') | markdown"></div>
       </div>

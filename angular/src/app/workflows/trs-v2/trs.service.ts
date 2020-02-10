@@ -8,10 +8,15 @@ import Tool from './tool.model';
   providedIn: 'root',
 })
 export class TrsService {
+  private baseUrl: string;
   constructor(private http: HttpClient) {
   }
 
+  public setBaseUrl(url: string) {
+    this.baseUrl = url;
+  }
+
   public getTools(): Observable<Tool[]> {
-    return this.http.get<Tool[]>('https://dockstore.org/api/api/ga4gh/v2/tools?limit=1000');
+    return this.http.get<Tool[]>(`${this.baseUrl}/tools?limit=1000`);
   }
 }

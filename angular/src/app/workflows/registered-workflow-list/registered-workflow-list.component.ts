@@ -38,12 +38,19 @@ export class RegisteredWorkflowListComponent implements OnInit {
       this.acceptedVersionDescriptorTypes = this.appConfig.trsAcceptedVersionDescriptorTypes;
       this.pageSize = this.appConfig.listPageSize;
 
+      // Reset the base URL for the TRS service.
+      this.trs.setBaseUrl(this.appConfig.trsBaseUrl);
+
       if (this.appConfig.featureWorkflowsEnabled) {
         this.initialize();
       } else {
         this.router.navigate(['/']);
       }
     });
+  }
+
+  onRunClick(tool: Tool) {
+    //
   }
 
   onFilterUpdate(filterTerm: string) {

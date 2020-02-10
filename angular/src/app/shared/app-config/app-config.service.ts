@@ -45,6 +45,11 @@ export class AppConfigService {
       featureAdministrationEnabled: true,
       featureExploreDataEnabled: true,
       featureWorkflowsEnabled: true,
+      featureWorkflowsTrsIntegrationEnabled: true,
+      trsBaseUrl: null,
+      trsAcceptedToolClasses: [],
+      trsAcceptedVersionDescriptorTypes: [],
+      listPageSize: 14,
     };
   }
 }

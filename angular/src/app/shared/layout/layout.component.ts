@@ -3,7 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingBarService } from '@ngx-loading-bar/core';
-import { Observable } from 'rxjs';
+import { AppService, ButtonRoute, ViewControllerService } from 'ddap-common-lib';
+import { interval, Observable } from 'rxjs';
+import { repeatWhen } from 'rxjs/operators';
 
 import { IdentityService } from '../../identity/identity.service';
 import { AccessControlService } from '../access-control.service';
@@ -20,18 +22,20 @@ export class LayoutComponent implements OnInit {
 
   realm: string;
   appConfig: AppConfigModel = null;
+  private apps: AppService[];
 
   dataAccessManagersInfo$: Observable<DamsInfo>;
   identityConcentratorInfo$: Observable<any>;
 
   constructor(public loader: LoadingBarService,
+              public router: Router,
               private titleService: Title,
-              private router: Router,
               private http: HttpClient,
               private activatedRoute: ActivatedRoute,
               private appConfigService: AppConfigService,
               private accessControlService: AccessControlService,
               private identityService: IdentityService,
+              public viewController: ViewControllerService,
               private damInfoStore: DamInfoStore) {
   }
 
@@ -76,6 +80,11 @@ export class LayoutComponent implements OnInit {
       this.changeRealmAndGoToLogin(dialogData.realm);
     }
   }
+
+  toggleLeftSideNav() {
+    this.viewController.toggleLeftSidenav();
+  }
+
 
   private changeRealmAndGoToLogin(realm) {
     this.router.navigate(['/', realm]);

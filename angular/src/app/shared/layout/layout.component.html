@@ -1,88 +1,40 @@
-<mat-progress-bar *ngIf="loader.progress$ | async"
+<div class="full-page" style="display: flex; flex-direction: column">
+  <app-menu [(sitename)]="appConfig.title" [(appname)]="viewController.currentApp.name" *ngIf="router.url != '/home'"></app-menu>
+  <div style="flex:1">
+    <!--<mat-progress-bar *ngIf="loader.progress$ | async"
                   mode="determinate"
                   [value]="loader.progress$ | async"
                   data-se="main-progress-bar">
-</mat-progress-bar>
-<mat-sidenav-container>
-  <!-- [@.disabled]="true" is to disable animation -->
-  <mat-sidenav *ngIf="appConfig.sidebarEnabled"
-               [@.disabled]="true"
-               #sidenav
-               mode="side"
-               [opened]="true"
-               disableClose>
-    <header>
-      <h1 class="flex flex--column">
-        <span>{{ appConfig.title }}</span>
+    </mat-progress-bar>-->
+    <mat-sidenav-container style="height: 100%">
+      <!-- Left Side Navigation -->
+      <mat-sidenav *ngIf="router.url != '/home'"
+        position="start"
+        leftSidenav
+        mode="side"
+        opened="{{viewController.view.leftSidebarOpened}}"
+        style="min-width:300px"
+        class="b-r"
+        >
         <span *ngIf="appConfig.featureRealmInputEnabled"
               class="sandbox-warning"
               matTooltip="This is sandbox testing environment">
           Sandbox environment
         </span>
-      </h1>
-    </header>
+        <app-sidenav-left></app-sidenav-left>
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <!-- Middle Content -->
+        <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
+        <router-outlet></router-outlet>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  </div>
+</div>
 
-    <mat-nav-list>
-      <div *ngIf="appConfig.featureRealmInputEnabled"
-           class="ddap-realm-select">
-        <ddaplib-realm-input (onAcknowledge)="onAcknowledge($event)"
-                             actions="['edit']">
-        </ddaplib-realm-input>
-      </div>
-
-      <mat-list-item [routerLink]="['data']"
-                     [routerLinkActive]="['active-nav-link']"
-                     data-se="nav-data"
-                     *ngIf="appConfig.featureExploreDataEnabled">
-        <mat-icon class="icon icon-explore"></mat-icon>
-        <h4 mat-line>Explore Data</h4>
-      </mat-list-item>
-
-      <mat-list-item [routerLink]="['workflows']"
-                     [routerLinkActive]="['active-nav-link']"
-                     data-se="nav-workflows"
-                     *ngIf="appConfig.featureWorkflowsEnabled">
-        <mat-icon class="icon icon-rules"></mat-icon>
-        <h4 mat-line>Workflows</h4>
-      </mat-list-item>
-
-      <div class="accordion-wrapper"
-           *ngIf="appConfig.featureAdministrationEnabled">
-        <mat-accordion [multi]="false">
-          <mat-expansion-panel [expanded]="false"
-                               data-se="nav-administration-panel">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <span>Administration</span>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">
-              <a [href]="withRealm(identityConcentratorInfo.uiUrl)" target="_blank">
-                <mat-list-item data-se="nav-identity-concentrator">
-                  <mat-icon class="icon">launch</mat-icon>
-                  <h4 mat-line>Identity Concentrator</h4>
-                </mat-list-item>
-              </a>
-            </ng-container>
-            <ng-container *ngIf="dataAccessManagersInfo$ | async as dataAccessManagersInfo">
-              <a *ngFor="let damInfo of dataAccessManagersInfo | keyvalue"
-                 [href]="withRealm(damInfo.value.uiUrl)"
-                 target="_blank">
-                <mat-list-item data-se="nav-dam">
-                  <mat-icon class="icon">launch</mat-icon>
-                  <h4 mat-line>{{damInfo.value.label}}</h4>
-                  <span mat-line>Data Access Manager</span>
-                </mat-list-item>
-              </a>
-            </ng-container>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </div>
-    </mat-nav-list>
-  </mat-sidenav>
-
-  <mat-sidenav-content>
-    <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
-    <router-outlet></router-outlet>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+<!--<div *ngIf="appConfig.featureRealmInputEnabled"-->
+<!--  class="ddap-realm-select">-->
+<!--  <ddaplib-realm-input (onAcknowledge)="onAcknowledge($event)"-->
+<!--    actions="['edit']">-->
+<!--  </ddaplib-realm-input>-->
+<!--</div>-->

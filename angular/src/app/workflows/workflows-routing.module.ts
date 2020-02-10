@@ -8,13 +8,14 @@ import { WorkflowListSingleComponent } from './workflow-list-single/workflow-lis
 import { WorkflowManageComponent } from './workflow-manage/workflow-manage.component';
 
 export const routes: Routes = [
-  { path: '', component: WorkflowListMultiComponent },
+  { path: '', redirectTo: 'run' },
   { path: ':damId/views/:viewId/runs', component: WorkflowListSingleComponent},
   { path: ':damId/views/:viewId/runs/:runId', component: WorkflowDetailComponent},
   { path: ':damId/views/:viewId/runs/manage/add', component: WorkflowManageComponent},
   { path: 'manage/add', pathMatch: 'full', component: WorkflowManageComponent },
   { path: 'run/with', component: WorkflowManageComponent },
   { path: 'store', component: RegisteredWorkflowListComponent },
+  { path: 'run', pathMatch: 'full', component: WorkflowManageComponent },
 ];
 
 @NgModule({

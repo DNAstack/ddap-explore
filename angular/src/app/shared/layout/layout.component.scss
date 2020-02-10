@@ -1,15 +1,7 @@
 @import '../../../../node_modules/ddap-common-lib/styles/modules/colors';
 
-mat-sidenav-content {
-  padding: 0 2rem;
-}
-
 mat-sidenav-container {
   height: 100%;
-}
-
-.mat-drawer-side {
-  border-right: none;
 }
 
 :host {
@@ -41,4 +33,12 @@ mat-sidenav-container {
 .sandbox-warning {
   font-size: 1rem;
   color: $warn-color;
+}
+
+.full-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }

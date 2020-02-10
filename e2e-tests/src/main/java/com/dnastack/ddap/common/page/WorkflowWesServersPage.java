@@ -15,7 +15,7 @@ public class WorkflowWesServersPage extends AnyDdapPage {
         super(driver);
         waitForInflightRequests();
         WebElement pageTitle = driver.findElement(DdapBy.se("page-title"));
-        assertThat(pageTitle.getText(), equalTo("WES Servers"));
+        assertThat(pageTitle.getText(), equalTo("Runs"));
     }
 
     public WorkflowListPage clickViewRuns() {

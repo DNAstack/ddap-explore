@@ -7,7 +7,7 @@ import VersionPickerModel from './version-picker.model';
   selector: 'ddap-registered-workflow-version-picker',
   templateUrl: 'version-picker.component.html',
 })
-export default class VersionPickerComponent {
+export class VersionPickerComponent {
 
   constructor(
     public dialogRef: MatDialogRef<VersionPickerComponent>,

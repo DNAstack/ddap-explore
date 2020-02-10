@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import RegisteredWorkflowListComponent from './registered-workflow-list/registered-workflow-list.component';
+import { RegisteredWorkflowListComponent } from './registered-workflow-list/registered-workflow-list.component';
 import { WorkflowDetailComponent } from './workflow-detail/workflow-detail.component';
 import { WorkflowListMultiComponent } from './workflow-list-multi/workflow-list-multi.component';
 import { WorkflowListSingleComponent } from './workflow-list-single/workflow-list-single.component';

@@ -5,14 +5,14 @@ import { Router } from '@angular/router';
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 import Tool from '../trs-v2/tool.model';
-import TrsService from '../trs-v2/trs.service';
+import { TrsService } from '../trs-v2/trs.service';
 
 @Component({
   selector: 'ddap-registered-workflow-list',
   templateUrl: 'registered-workflow-list.component.html',
   styleUrls: ['registered-workflow-list.component.scss'],
 })
-export default class RegisteredWorkflowListComponent implements OnInit {
+export class RegisteredWorkflowListComponent implements OnInit {
   appConfig: AppConfigModel;
   acceptedToolClasses: string[];
   acceptedVersionDescriptorTypes: string[];

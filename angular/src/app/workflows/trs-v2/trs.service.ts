@@ -7,7 +7,7 @@ import Tool from './tool.model';
 @Injectable({
   providedIn: 'root',
 })
-export default class TrsService {
+export class TrsService {
   constructor(private http: HttpClient) {
   }
 

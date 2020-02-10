@@ -15,7 +15,10 @@ ui:
   feature-administration-enabled: true
   feature-explore-data-enabled: true
   feature-workflows-enabled: true
-  feature-workflows-trs-integration-enabled: false
+  feature-workflows-trs-integration-enabled: true
+  trs-accepted-tool-classes: ['Workflow']
+  trs-accepted-version-descriptor-types: ['WDL']
+  list-page-size: 14
 
 dams:
   1:

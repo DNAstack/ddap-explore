@@ -13,7 +13,7 @@ import { WorkflowService } from '../workflows.service';
   styleUrls: ['./workflow-list-multi.component.scss'],
 })
 export class WorkflowListMultiComponent implements OnInit {
-
+  appConfig: AppConfigModel;
   wesResourceViews: SimplifiedWesResourceViews[];
 
   constructor(private router: Router,
@@ -25,7 +25,8 @@ export class WorkflowListMultiComponent implements OnInit {
   ngOnInit(): void {
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      if (data.featureWorkflowsEnabled) {
+      this.appConfig = data;
+      if (this.appConfig.featureWorkflowsEnabled) {
         this.initialize();
       } else {
         this.router.navigate(['/']);

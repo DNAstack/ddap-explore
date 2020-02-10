@@ -7,26 +7,26 @@
     <div class="list-paginator">
       <button mat-icon-button
               type="button"
-              [disabled]="pageIndex === 0"
+              [disabled]="this.updateInProgress || pageIndex === 0"
               (click)="onPagerClick(-1)">
         <mat-icon>arrow_back</mat-icon>
       </button>
       <button mat-icon-button
               type="button"
-              [disabled]="pageIndex + 1 === getTotalPageNumber()"
+              [disabled]="updateInProgress || pageIndex + 1 === getTotalPageNumber()"
               (click)="onPagerClick(+1)">
         <mat-icon>arrow_forward</mat-icon>
       </button>
     </div>
     <mat-form-field appearance="standard" class="filter-input">
       <mat-label>Filter by tool name and/or author</mat-label>
-      <input #filter type="text" matInput (keyup)="onFilterUpdate(filter.value)" value="{{ filterTerm }}">
+      <input #filter type="text" matInput (keyup)="onFilterUpdate(filter.value)" [disabled]="updateInProgress" value="{{ filterTerm }}">
     </mat-form-field>
     <div class="action" *ngIf="filter.value">
-      <button mat-icon-button type="reset" color="warn" title="Clear the filter" (click)="onFilterResetClick()"><mat-icon>clear</mat-icon></button>
+      <button mat-icon-button type="reset" color="warn" title="Clear the filter" (click)="onFilterResetClick()" [disabled]="updateInProgress"><mat-icon>clear</mat-icon></button>
     </div>
     <div class="action">
-      <button mat-icon-button type="button" color="primary" title="Refresh" (click)="onFilterRefreshClick()"><mat-icon>refresh</mat-icon></button>
+      <button mat-icon-button type="button" color="primary" title="Refresh" (click)="onFilterRefreshClick()" [disabled]="updateInProgress"><mat-icon>refresh</mat-icon></button>
     </div>
   </div>
 

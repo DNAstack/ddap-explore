@@ -7,4 +7,8 @@ export interface AppConfigModel {
     featureAdministrationEnabled: boolean;
     featureExploreDataEnabled: boolean;
     featureWorkflowsEnabled: boolean;
+    featureWorkflowsTrsIntegrationEnabled: boolean;
+    trsAcceptedToolClasses: string[];
+    trsAcceptedVersionDescriptorTypes: string[];
+    listPageSize: number;
 }

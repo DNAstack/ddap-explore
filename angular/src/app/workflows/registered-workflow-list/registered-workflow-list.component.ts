@@ -16,6 +16,7 @@ export class RegisteredWorkflowListComponent implements OnInit {
   appConfig: AppConfigModel;
   acceptedToolClasses: string[];
   acceptedVersionDescriptorTypes: string[];
+  updateInProgress: boolean;
   tools: Tool[];
   filteredTools: Tool[];
   filterTerm: string;
@@ -26,18 +27,18 @@ export class RegisteredWorkflowListComponent implements OnInit {
               private router: Router,
               private dialog: MatDialog,
               private trs: TrsService) {
-    // FIXME Some of these default values must be configurable via the BFF.
-    this.acceptedToolClasses = ['Workflow'];  // TODO ui.trs-accepted.tool-classes
-    this.acceptedVersionDescriptorTypes = ['WDL'];  // TODO ui.trs-accepted-version-descriptor-types
-    this.pageSize = 14;  // TODO ui.list.page-size
-    this.pageIndex = 0;  // NOTE Not configurable
+    this.pageIndex = 0;
   }
 
   ngOnInit(): void {
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
       this.appConfig = data;
-      if (data.featureWorkflowsEnabled) {
+      this.acceptedToolClasses = this.appConfig.trsAcceptedToolClasses;
+      this.acceptedVersionDescriptorTypes = this.appConfig.trsAcceptedVersionDescriptorTypes;
+      this.pageSize = this.appConfig.listPageSize;
+
+      if (this.appConfig.featureWorkflowsEnabled) {
         this.initialize();
       } else {
         this.router.navigate(['/']);
@@ -80,6 +81,7 @@ export class RegisteredWorkflowListComponent implements OnInit {
   }
 
   private load() {
+    this.updateInProgress = true;
     this.trs.getTools().subscribe(tools => {
       this.tools = tools.filter(t => {
         if (this.acceptedToolClasses.indexOf(t.toolclass.name) < 0) {
@@ -98,6 +100,7 @@ export class RegisteredWorkflowListComponent implements OnInit {
       });
 
       this.filteredTools = this.tools;
+      this.updateInProgress = false;
     });
   }
 

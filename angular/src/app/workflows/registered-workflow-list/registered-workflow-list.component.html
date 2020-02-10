@@ -35,21 +35,48 @@
   </ng-container>
 
   <mat-accordion>
-    <mat-expansion-panel *ngFor="let tool of (filteredTools || []).slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)" class="workflow">
+    <mat-expansion-panel *ngFor="let tool of (filteredTools || []).slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)" class="workflow" (expandedChange)="onToolDetailExpandChange()">
       <mat-expansion-panel-header>
         <mat-panel-title>{{ tool.toolname }}</mat-panel-title>
         <mat-panel-description>{{ tool.author || tool.organization }}</mat-panel-description>
       </mat-expansion-panel-header>
 
-      <div class="content">
+      <!-- When there is NO tool selected... -->
+      <div class="content" *ngIf="!selectedTool">
         <div class="actions">
           <button
             mat-raised-button
             color="primary"
-            [routerLink]="['..', 'run', 'with', tool.url]"
+            (click)="onRunClick(tool)"
           >Run</button>
         </div>
         <div class="description" [innerHTML]="(tool.description || '*No description*') | markdown"></div>
+      </div>
+
+      <!-- When there is a tool SELECTED... -->
+      <div class="version-selector" *ngIf="selectedTool">
+        <h3 class="label">Please select one version</h3>
+        <div class="version-list" *ngIf="tool.versions">
+          <mat-card *ngFor="let version of tool.versions">
+            <mat-card-title>
+              {{version.name}}
+              <mat-icon *ngIf="version.verified">check</mat-icon>
+            </mat-card-title>
+            <mat-card-subtitle>{{version.meta_version}}</mat-card-subtitle>
+            <mat-card-content>
+              <mat-chip-list [disabled]="true">
+                <mat-chip *ngFor="let descriptor_type of version.descriptor_type" [disabled]="true">{{ descriptor_type }}</mat-chip>
+              </mat-chip-list>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-flat-button
+                      color="primary"
+                      [routerLink]="['../', 'run', 'with', version.url]"
+              >Run</button>
+            </mat-card-actions>
+          </mat-card>
+          <button mat-stroked-button (click)="onVersionSelectionCancelClick()"><mat-icon>cancel</mat-icon> Cancel</button>
+        </div>
       </div>
     </mat-expansion-panel>
   </mat-accordion>

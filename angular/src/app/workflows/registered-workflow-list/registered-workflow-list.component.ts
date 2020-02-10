@@ -19,6 +19,7 @@ export class RegisteredWorkflowListComponent implements OnInit {
   updateInProgress: boolean;
   tools: Tool[];
   filteredTools: Tool[];
+  selectedTool: Tool;
   filterTerm: string;
   pageSize: number;
   pageIndex: number;
@@ -50,7 +51,7 @@ export class RegisteredWorkflowListComponent implements OnInit {
   }
 
   onRunClick(tool: Tool) {
-    //
+    this.selectedTool = tool;
   }
 
   onFilterUpdate(filterTerm: string) {
@@ -74,6 +75,14 @@ export class RegisteredWorkflowListComponent implements OnInit {
     } else if (this.pageIndex >= this.getTotalPageNumber()) {
       this.pageIndex = this.getTotalPageNumber() - 1;
     }
+  }
+
+  onToolDetailExpandChange() {
+    this.selectedTool = null;
+  }
+
+  onVersionSelectionCancelClick() {
+    this.selectedTool = null;
   }
 
   getTotalPageNumber(): number {

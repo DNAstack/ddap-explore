@@ -8,7 +8,7 @@
         <h3>{{ view.dto.ui.label || view.name }}</h3>
       </mat-panel-title>
       <mat-panel-description class="flex vertical-center">
-        {{ defaultRole }}
+        {{ role }}
       </mat-panel-description>
     </mat-expansion-panel-header>
 
@@ -34,6 +34,22 @@
           <mat-option value="m">minute</mat-option>
           <mat-option value="h">hour</mat-option>
           <mat-option value="d">day</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="flex">
+      <mat-form-field *ngIf="roles.length > 0">
+        <mat-label>Role</mat-label>
+        <mat-select [(value)]="role">
+          <mat-option *ngFor="let role of roles"
+                      [value]="role">{{role}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field *ngIf="interfaces.length > 0">
+        <mat-label>Interface</mat-label>
+        <mat-select [(value)]="interfaceId">
+          <mat-option *ngFor="let interfaceName of interfaces"
+                      [value]="interfaceName">{{interfaceName}}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>

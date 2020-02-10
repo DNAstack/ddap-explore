@@ -38,9 +38,14 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
   resourceToken: IResourceToken;
   url?: string;
 
+  roles: string[];
+  interfaces: string[];
+
   ttlForm = new FormControl(1, Validators.compose([Validators.required, Validators.min(1)]));
   selectedTimeUnit = 'h';
   downloadCliUrl = `${environment.ddapApiUrl}/cli/download`;
+  role: string;
+  interfaceId: string;
 
   constructor(public resourceService: ResourceService,
               private route: ActivatedRoute,
@@ -49,6 +54,11 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const {dto} = this.view;
+    this.roles = Object.keys(dto.roles);
+    this.interfaces = Object.keys(dto.interfaces);
+    this.setDefaults();
+
     this.paramsSubscription = this.route.queryParams
       .subscribe(params => {
         if (!params.checkout) {
@@ -70,7 +80,7 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
   getUrlForObtainingAccessToken(): string {
     const redirectUri = `${this.router.url}?checkout=true`;
     const resource = this.resourceService.getDamResourcePath(
-      this.damId, this.resource.name, this.view.name, this.defaultRole
+      this.damId, this.resource.name, this.view.name, this.role, this.interfaceId
     );
     return this.resourceService.getUrlForObtainingAccessToken([resource], redirectUri);
   }
@@ -92,9 +102,13 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
 
   getAccessTokensForAuthorizedResources() {
     const resource = this.resourceService.getDamResourcePath(
-      this.damId, this.resource.name, this.view.name, this.defaultRole
+      this.damId, this.resource.name, this.view.name, this.role, this.interfaceId
     );
     return this.resourceService.getAccessTokensForAuthorizedResources([resource]);
   }
 
+  private setDefaults() {
+    this.role = this.roles[0];
+    this.interfaceId = this.interfaces[0];
+  }
 }

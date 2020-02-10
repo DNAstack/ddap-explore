@@ -28,8 +28,8 @@ export class ResourceService {
     );
   }
 
-  getDamResourcePath(damId: string, resourceId: string, viewId: string, roleId: string): string {
-    return `${damId};${resourceId}/views/${viewId}/roles/${roleId}`;
+  getDamResourcePath(damId: string, resourceId: string, viewId: string, roleId: string, interfaceId: string): string {
+    return `${damId};${resourceId}/views/${viewId}/roles/${roleId}/interfaces/${interfaceId}`;
   }
 
   getUrlForObtainingAccessToken(damIdResourcePathPairs: string[], redirectUri: string): string {

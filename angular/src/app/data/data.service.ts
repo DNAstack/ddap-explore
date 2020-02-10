@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { EntityModel, ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
 import { Observable, of } from 'rxjs';
 import { flatMap, map, pluck, tap } from 'rxjs/operators';

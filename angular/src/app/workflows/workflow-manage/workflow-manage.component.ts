@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import ResourceTokens = dam.v1.ResourceTokens;
 import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormValidationService } from 'ddap-common-lib';
+import { FormValidationService, ViewControllerService } from 'ddap-common-lib';
 import _isequal from 'lodash.isequal';
 import { observable, Observable, Subscription, zip } from 'rxjs';
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
@@ -85,7 +85,9 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
               private trsService: TrsService,
               private workflowFormBuilder: WorkflowFormBuilder,
               private workflowsStateService: WorkflowsStateService,
-              private resourceAuthStateService: ResourceAuthStateService) {
+              private resourceAuthStateService: ResourceAuthStateService,
+              private viewController: ViewControllerService
+              ) {
   }
 
   ngOnInit() {
@@ -167,6 +169,10 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     zip(...executions.map((execution) =>
         this.workflowService.runWorkflow(damId, wesViewId, execution, wesAccessToken)
       )).subscribe((runs: object[]) => this.navigateUp('../..', runs, damId, wesViewId));
+  }
+
+  toggleLeftSideNav() {
+    this.viewController.toggleLeftSidenav();
   }
 
   protected navigateUp = (path: string, runs: object[], damId, wesView) => {

@@ -19,7 +19,6 @@ import { SharedModule } from './shared/shared.module';
     BrowserAnimationsModule,
     HttpClientModule,
     LoadingBarHttpClientModule,
-
     SharedModule,
     AppRoutingModule,
   ],

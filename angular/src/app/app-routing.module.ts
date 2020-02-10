@@ -26,7 +26,7 @@ const routes: Routes = [
           .then(mod => mod.DataModule),
       },
       {
-        path: 'workflows',
+        path: 'analyze',
         loadChildren: () => import('./workflows/workflows.module')
           .then(mod => mod.WorkflowsModule),
       },

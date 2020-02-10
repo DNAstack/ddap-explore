@@ -1,9 +1,7 @@
-<ddaplib-header [backLink]="['/../..']"
-                label="Execute Workflow">
-
-</ddaplib-header>
+<ddaplib-header icon="play_arrow" label="Run"></ddaplib-header>
 
 <ddaplib-main>
+
   <mat-vertical-stepper #stepper
                         [linear]="true">
     <mat-step [stepControl]="datasetForm"
@@ -16,6 +14,7 @@
       </ddap-dataset-selection-step>
       <div>
         <button mat-button
+                mat-stroked-button
                 matStepperNext
                 data-se="btn-next-to-wdl">
           Next
@@ -31,8 +30,8 @@
                                  [form]="workflowForm">
         </ddap-wdl-selection-step>
         <div>
-          <button mat-button matStepperPrevious>Back</button>
-          <button mat-button
+          <button mat-button mat-stroked-button matStepperPrevious>Back</button>
+          <button mat-button mat-stroked-button
                   matStepperNext
                   data-se="btn-next-to-inputs"
                   (click)="wdlStep.generateForm()">
@@ -53,8 +52,9 @@
           </ddap-inputs-selection-step>
         </ng-container>
         <div>
-          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button mat-stroked-button matStepperPrevious>Back</button>
           <button mat-button
+                  mat-stroked-button
                   matStepperNext
                   data-se="btn-next-to-wes-server">
             Next
@@ -71,8 +71,9 @@
                                         [form]="workflowForm">
         </ddap-wes-server-selection-step>
         <div>
-          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button mat-stroked-button matStepperPrevious>Back</button>
           <button mat-button
+                  mat-stroked-button
                   matStepperNext
                   data-se="btn-next-to-auth">
             Next
@@ -121,8 +122,8 @@
       </ddap-workflow-execution-step>
       <div class="flex stepper-actions">
         <div>
-          <button mat-button matStepperPrevious>Back</button>
-          <button mat-button (click)="resetStepper()">Reset</button>
+          <button mat-button mat-stroked-button matStepperPrevious>Back</button>
+          <button mat-button mat-stroked-button (click)="resetStepper()">Reset</button>
         </div>
         <button mat-flat-button
                 color="primary"

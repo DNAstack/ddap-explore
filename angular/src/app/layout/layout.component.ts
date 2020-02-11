@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { interval, Observable } from 'rxjs';
 import { repeatWhen } from 'rxjs/operators';
@@ -33,6 +33,7 @@ export class LayoutComponent implements OnInit {
 
   constructor(public loader: LoadingBarService,
               private titleService: Title,
+              private router: Router,
               private http: HttpClient,
               private activatedRoute: ActivatedRoute,
               private appConfigService: AppConfigService,
@@ -46,8 +47,12 @@ export class LayoutComponent implements OnInit {
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
         this.appConfig = data;
         this.titleService.setTitle(this.appConfig.title);
-      });
 
+        this.initializeInNormalMode();
+      });
+  }
+
+  initializeInNormalMode() {
     this.identityStore.getIdentity()
       .subscribe(({ account, sandbox }) => {
         this.isSandbox = sandbox;
@@ -59,12 +64,33 @@ export class LayoutComponent implements OnInit {
 
     this.activatedRoute.root.firstChild.params.subscribe((params) => {
       this.realm = params.realmId;
-      this.loginPath = `/api/v1alpha/realm/${this.realm}/identity/login`;
+      this.loginPath = this.getLoginPath(this.realm);
     });
 
     // Workaround to get fresh cookies
     this.periodicallyRefreshTokens()
       .subscribe();
+
+    // TODO Refactoring this to its own service.
+    if (this.appConfig.authorizationOnInitRequired) {
+      const rawResourceTokens = localStorage.getItem('RESOURCE_TOKENS');
+      try {
+        const tokens = JSON.parse(JSON.parse(rawResourceTokens));
+        for (const v of Object.values(tokens)) {
+          const accessToken: string = v['access_token'];
+          const unverifiedClaims: Map<string, any> = JSON.parse(atob(accessToken.split('.')[1]));
+          if (unverifiedClaims['exp'] < (Date.now() / 1000)) {
+            this.redirectToLoginPage();
+          }
+        }
+      } catch {
+        this.redirectToLoginPage();
+      }
+    }
+  }
+
+  redirectToLoginPage() {
+    this.router.navigateByUrl(this.getLoginPath(this.activatedRoute.root.firstChild.snapshot.params.realmId));
   }
 
   logout() {
@@ -80,6 +106,10 @@ export class LayoutComponent implements OnInit {
     } else {
       return uiUrl;
     }
+  }
+
+  private getLoginPath(realmId: string): string {
+    return `/api/v1alpha/realm/${realmId}/identity/login`;
   }
 
   private periodicallyRefreshTokens(): Observable<any> {

@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 
-import { ToolFile } from './tool-file.model';
 import { Tool } from './tool.model';
 
 /**

@@ -1,6 +1,6 @@
 <ddaplib-header icon="rules"
                 label="WES Servers">
-  <ddaplib-header-add-btn *ngIf="appConfig.featureWorkflowsTrsIntegrationEnabled"
+  <ddaplib-header-add-btn *ngIf="appConfig && appConfig.featureWorkflowsTrsIntegrationEnabled"
                           [navigateTo]="['store']"
                           [label]="'explore registered workflows'">
   </ddaplib-header-add-btn>

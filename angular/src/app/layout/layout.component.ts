@@ -80,11 +80,11 @@ export class LayoutComponent implements OnInit {
           const accessToken: string = v['access_token'];
           const unverifiedClaims: Map<string, any> = JSON.parse(atob(accessToken.split('.')[1]));
           if (unverifiedClaims['exp'] < (Date.now() / 1000)) {
-            this.redirectToLoginPage();
+            // this.redirectToLoginPage();
           }
         }
       } catch {
-        this.redirectToLoginPage();
+        // this.redirectToLoginPage();
       }
     }
   }

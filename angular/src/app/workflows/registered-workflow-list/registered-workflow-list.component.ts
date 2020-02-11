@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { observable } from 'rxjs';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
@@ -38,9 +39,6 @@ export class RegisteredWorkflowListComponent implements OnInit {
       this.acceptedToolClasses = this.appConfig.trsAcceptedToolClasses;
       this.acceptedVersionDescriptorTypes = this.appConfig.trsAcceptedVersionDescriptorTypes;
       this.pageSize = this.appConfig.listPageSize;
-
-      // Reset the base URL for the TRS service.
-      this.trs.setBaseUrl(this.appConfig.trsBaseUrl);
 
       if (this.appConfig.featureWorkflowsEnabled) {
         this.initialize();
@@ -105,25 +103,27 @@ export class RegisteredWorkflowListComponent implements OnInit {
 
   private load() {
     this.updateInProgress = true;
-    this.trs.getTools().subscribe(tools => {
-      this.tools = tools.filter(t => {
-        if (this.acceptedToolClasses.indexOf(t.toolclass.name) < 0) {
-          return false;
-        }
+    this.trs.getTools().then(subscription => {
+      subscription.subscribe(tools => {
+        this.tools = tools.filter(t => {
+          if (this.acceptedToolClasses.indexOf(t.toolclass.name) < 0) {
+            return false;
+          }
 
-        for (const version of t.versions) {
-          for (const descriptor_type of version.descriptor_type) {
-            if (this.acceptedVersionDescriptorTypes.indexOf(descriptor_type) < 0) {
-              return false;
+          for (const version of t.versions) {
+            for (const descriptor_type of version.descriptor_type) {
+              if (this.acceptedVersionDescriptorTypes.indexOf(descriptor_type) < 0) {
+                return false;
+              }
             }
           }
-        }
 
-        return true;
+          return true;
+        });
+
+        this.filteredTools = this.tools;
+        this.updateInProgress = false;
       });
-
-      this.filteredTools = this.tools;
-      this.updateInProgress = false;
     });
   }
 

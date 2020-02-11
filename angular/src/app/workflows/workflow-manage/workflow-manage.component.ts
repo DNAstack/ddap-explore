@@ -5,7 +5,7 @@ import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormValidationService } from 'ddap-common-lib';
 import _isequal from 'lodash.isequal';
-import { Observable, Subscription, zip } from 'rxjs';
+import { observable, Observable, Subscription, zip } from 'rxjs';
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 import { map } from 'rxjs/operators';
 
@@ -183,6 +183,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     this.subscriptions.push(this.route.queryParams
       .subscribe(params => {
         if (!params.state) {
+          this.loadPredefinedWorkflowDescription();
           return;
         }
         this.workflowId = params.state;
@@ -207,6 +208,16 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
           this.moveToExecutionStep();
         }
       });
+  }
+
+  private loadPredefinedWorkflowDescription() {
+    const { toolId, versionId, type } = this.route.snapshot.params;
+
+    if (toolId && versionId && type) {
+      this.workflowForm.get('wdl').patchValue('# Loading...');
+      this.trsService.getDescriptor(toolId, versionId, type)
+        .then(subscription => subscription.subscribe(script => this.workflowForm.get('wdl').patchValue(script)));
+    }
   }
 
   private subscribeToFormChanges() {

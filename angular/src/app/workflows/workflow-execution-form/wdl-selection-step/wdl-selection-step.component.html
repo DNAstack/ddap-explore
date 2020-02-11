@@ -2,7 +2,7 @@
       novalidate
       [formGroup]="form">
   <div class="row">
-    <mat-chip-list *ngIf="!loadedScript">
+    <mat-chip-list>
       <mat-label>Example WDLs:</mat-label>
       <mat-chip color="accent"
                 (click)="useExample('md5sum')">
@@ -20,7 +20,6 @@
                   formControlName="wdl"
                   data-se="inp-workflow-wdl"
                   rows="20"
-                  [defaultValue]="loadedScript"
                   required>
         </textarea>
     </mat-form-field>

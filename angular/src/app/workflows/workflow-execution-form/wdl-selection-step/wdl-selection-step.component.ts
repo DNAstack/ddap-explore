@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -14,14 +14,12 @@ import { callDenovo, md5sum } from './example.wdl';
   templateUrl: './wdl-selection-step.component.html',
   styleUrls: ['./wdl-selection-step.component.scss'],
 })
-export class WdlSelectionStepComponent implements OnInit {
+export class WdlSelectionStepComponent {
 
   @Input()
   workflowId: string;
   @Input()
   form: FormGroup;
-
-  loadedScript: string | null;
 
   inputSchema;
 
@@ -43,15 +41,6 @@ export class WdlSelectionStepComponent implements OnInit {
       this.form.get('wdl').patchValue(md5sum);
     } else if (exampleId === 'callDenovo') {
       this.form.get('wdl').patchValue(callDenovo);
-    }
-  }
-
-  ngOnInit(): void {
-    const { toolId, versionId, type } = this.route.snapshot.params;
-
-    if (toolId && versionId && type) {
-      this.trsService.getDescriptor(toolId, versionId, type)
-        .subscribe(script => this.loadedScript = script);
     }
   }
 

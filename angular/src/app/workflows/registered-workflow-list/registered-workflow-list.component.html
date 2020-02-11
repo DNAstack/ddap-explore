@@ -54,7 +54,7 @@
       </div>
 
       <!-- When there is a tool SELECTED... -->
-      <div class="version-selector" *ngIf="selectedTool">
+      <div class="version-selector" *ngIf="selectedTool ">
         <h3 class="label">Please select one version</h3>
         <div class="version-list" *ngIf="tool.versions">
           <mat-card *ngFor="let version of tool.versions">
@@ -63,16 +63,12 @@
               <mat-icon *ngIf="version.verified">check</mat-icon>
             </mat-card-title>
             <mat-card-subtitle>{{version.meta_version}}</mat-card-subtitle>
-            <mat-card-content>
-              <mat-chip-list [disabled]="true">
-                <mat-chip *ngFor="let descriptor_type of version.descriptor_type" [disabled]="true">{{ descriptor_type }}</mat-chip>
-              </mat-chip-list>
-            </mat-card-content>
             <mat-card-actions>
               <button mat-flat-button
+                      *ngFor="let descriptor_type of version.descriptor_type"
                       color="primary"
-                      [routerLink]="['../', 'run', 'with', version.url]"
-              >Run</button>
+                      (click)="onVersionSelectionSelectClick(version, descriptor_type)"
+              >{{ descriptor_type }}</button>
             </mat-card-actions>
           </mat-card>
           <button mat-stroked-button (click)="onVersionSelectionCancelClick()"><mat-icon>cancel</mat-icon> Cancel</button>

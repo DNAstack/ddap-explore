@@ -1,10 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
+import { TrsService } from '../../trs-v2/trs.service';
 import { WorkflowService } from '../../workflows.service';
+import { WorkflowsStateService } from '../workflows-state.service';
 
 import { callDenovo, md5sum } from './example.wdl';
-import { WorkflowsStateService } from "../workflows-state.service";
 
 
 @Component({
@@ -12,16 +14,20 @@ import { WorkflowsStateService } from "../workflows-state.service";
   templateUrl: './wdl-selection-step.component.html',
   styleUrls: ['./wdl-selection-step.component.scss'],
 })
-export class WdlSelectionStepComponent {
+export class WdlSelectionStepComponent implements OnInit {
 
   @Input()
   workflowId: string;
   @Input()
   form: FormGroup;
 
+  loadedScript: string | null;
+
   inputSchema;
 
   constructor(private workflowService: WorkflowService,
+              private route: ActivatedRoute,
+              private trsService: TrsService,
               private workflowsStateService: WorkflowsStateService) {
   }
 
@@ -37,6 +43,15 @@ export class WdlSelectionStepComponent {
       this.form.get('wdl').patchValue(md5sum);
     } else if (exampleId === 'callDenovo') {
       this.form.get('wdl').patchValue(callDenovo);
+    }
+  }
+
+  ngOnInit(): void {
+    const { toolId, versionId, type } = this.route.snapshot.params;
+
+    if (toolId && versionId && type) {
+      this.trsService.getDescriptor(toolId, versionId, type)
+        .subscribe(script => this.loadedScript = script);
     }
   }
 

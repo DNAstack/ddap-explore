@@ -14,6 +14,7 @@ import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
 import { ResourceService } from '../../shared/resource/resource.service';
+import { TrsService } from '../trs-v2/trs.service';
 import {
   ResourceAuthorizationStepComponent
 } from '../workflow-execution-form/resource-authorization-step/resource-authorization-step.component';
@@ -81,16 +82,19 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
               private validationService: FormValidationService,
               private workflowService: WorkflowService,
               private resourceService: ResourceService,
+              private trsService: TrsService,
               private workflowFormBuilder: WorkflowFormBuilder,
               private workflowsStateService: WorkflowsStateService,
               private resourceAuthStateService: ResourceAuthStateService) {
   }
 
   ngOnInit() {
+    this.initialize();
+
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
       if (data.featureWorkflowsEnabled) {
-        this.initialize();
+        // NOOP
       } else {
         this.router.navigate(['/']);
       }

@@ -1,4 +1,4 @@
-export default interface ToolVersion {
+export interface ToolVersion {
   name: string;
   url: string;
   id: string;

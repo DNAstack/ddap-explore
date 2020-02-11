@@ -1,8 +1,8 @@
-import ToolClass from './tool-class.model';
-import ToolVersion from './tool-version.model';
+import { ToolClass } from './tool-class.model';
+import { ToolVersion } from './tool-version.model';
 
 
-export default interface Tool {
+export interface Tool {
   url: string;
   id: string;
   aliases: string[];

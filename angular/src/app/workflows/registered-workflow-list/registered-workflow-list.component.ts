@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
-import Tool from '../trs-v2/tool.model';
+import { ToolVersion } from '../trs-v2/tool-version.model';
+import { Tool } from '../trs-v2/tool.model';
 import { TrsService } from '../trs-v2/trs.service';
 
 @Component({
@@ -23,7 +24,8 @@ export class RegisteredWorkflowListComponent implements OnInit {
   pageSize: number;
   pageIndex: number;
 
-  constructor(private appConfigService: AppConfigService,
+  constructor(private route: ActivatedRoute,
+              private appConfigService: AppConfigService,
               private router: Router,
               private trs: TrsService) {
     this.pageIndex = 0;
@@ -77,6 +79,13 @@ export class RegisteredWorkflowListComponent implements OnInit {
 
   onToolDetailExpandChange() {
     this.selectedTool = null;
+  }
+
+  onVersionSelectionSelectClick(version: ToolVersion, type: string) {
+    this.router.navigate(
+      ['..', 'run', 'with', this.selectedTool.id, version.name, type],
+      {relativeTo: this.route}
+      );
   }
 
   onVersionSelectionCancelClick() {

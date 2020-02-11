@@ -80,8 +80,9 @@ export class RegisteredWorkflowListComponent implements OnInit {
   }
 
   onVersionSelectionSelectClick(version: ToolVersion, type: string) {
+    const sourceUrl = `${version.url}/${type}/descriptor`;
     this.router.navigate(
-      ['..', 'run', 'with', this.selectedTool.id, version.name, type],
+      ['..', 'run', 'with', sourceUrl],
       {relativeTo: this.route}
       );
   }

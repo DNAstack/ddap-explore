@@ -14,7 +14,7 @@ import { Tool } from './tool.model';
  *
  * WARNING: This implementation is only tested to work with DDAP Explore in the standalone mode.
  *
- * NOTE: The reason that all endpoints are a promise of an observable is because the service need to wait until the base
+ * NOTE: The reason that some endpoints are promises of an observable is because the service need to wait until the base
  *       URL has been set properly. This is to avoid the client to unintentionally send a request to an unintended server.
  */
 @Injectable({
@@ -34,23 +34,11 @@ export class TrsService {
   }
 
   public async getTools(): Promise<Observable<Tool[]>> {
-    const baseUrl = await this.getBaseUrl();
-    return this.http.get<Tool[]>(`${baseUrl}/tools?limit=1000`);
+    return this.http.get<Tool[]>(`${await this.getBaseUrl()}/tools?limit=1000`);
   }
 
-  public async getFileList(id: string, versionId: string, type: string): Promise<Observable<ToolFile[]>> {
-    return this.http.get<ToolFile[]>(await this.buildToolVersionUrl(id, versionId, type, 'files'));
-  }
-
-  public async getDescriptor(id: string, versionId: string, type: string): Promise<Observable<any>> {
-    return this.http.get(await this.buildToolVersionUrl(id, versionId, type, 'descriptor'), {responseType: 'text'});
-  }
-
-  public async buildToolVersionUrl(id: string, version: string, type: string, subtype: string): Promise<string> {
-    const encodedToolId = encodeURIComponent(id);
-    const encodedVersionId = encodeURIComponent(version);
-    const baseUrl = await this.getBaseUrl();
-    return `${baseUrl}/tools/${encodedToolId}/versions/${encodedVersionId}/${type}/${subtype}`;
+  public getDescriptorFrom(url: string): Observable<any> {
+    return this.http.get(url, {responseType: 'text'});
   }
 
   private async getBaseUrl(): Promise<string> {

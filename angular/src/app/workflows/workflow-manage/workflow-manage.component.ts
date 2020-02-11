@@ -211,12 +211,12 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   }
 
   private loadPredefinedWorkflowDescription() {
-    const { toolId, versionId, type } = this.route.snapshot.params;
+    const { sourceUrl } = this.route.snapshot.params;
 
-    if (toolId && versionId && type) {
+    if (sourceUrl) {
       this.workflowForm.get('wdl').patchValue('# Loading...');
-      this.trsService.getDescriptor(toolId, versionId, type)
-        .then(subscription => subscription.subscribe(script => this.workflowForm.get('wdl').patchValue(script)));
+      this.trsService.getDescriptorFrom(sourceUrl)
+        .subscribe(script => this.workflowForm.get('wdl').patchValue(script));
     }
   }
 

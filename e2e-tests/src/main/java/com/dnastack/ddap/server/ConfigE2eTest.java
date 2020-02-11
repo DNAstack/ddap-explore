@@ -1,6 +1,7 @@
 package com.dnastack.ddap.server;
 
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
+import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureException;
@@ -11,6 +12,8 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
 import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -28,6 +31,14 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class ConfigE2eTest extends AbstractBaseE2eTest {
+
+    private static final String REALM = generateRealmName(ConfigE2eTest.class.getSimpleName());
+
+    @BeforeClass
+    public static void oneTimeSetup() throws IOException {
+        final String damConfig = loadTemplate("/com/dnastack/ddap/adminConfig.json");
+        setupRealmConfig(TestingPersona.ADMINISTRATOR, damConfig, "1", REALM);
+    }
 
     @Test
     public void doNotAcceptDevCookieEncryptorCredentials() {
@@ -60,9 +71,10 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
             .body("html.head.title", containsString("Please sign in"));
     }
 
+    @Ignore
     @Test(expected = SignatureException.class)
     public void doNotUseDevSigningKeyForCliLogin() throws IOException {
-        Assume.assumeTrue(Instant.now().isAfter(Instant.ofEpochSecond(1581125077))); // Feb 7, 2020
+        Assume.assumeTrue(Instant.now().isAfter(Instant.ofEpochSecond(1581125077))); // Feb 7, 2020 DISCO-2695
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
         Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
@@ -99,7 +111,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
                 .redirects().follow(false)
             .cookie(SESSION_COOKIE_NAME, session.getValue())
                 .when()
-                .get("/api/v1alpha/realm/dnastack/identity/login");
+                .get(String.format("/api/v1alpha/realm/%s/resources/authorize?resource=1;thousand-genomes/views/discovery-access/roles/discovery", REALM));
         response
                 .then()
                 .log().ifValidationFails()

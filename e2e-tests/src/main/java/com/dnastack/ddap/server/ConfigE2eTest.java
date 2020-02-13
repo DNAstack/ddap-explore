@@ -18,7 +18,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
@@ -69,7 +70,11 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test(expected = SignatureException.class)
     public void doNotUseDevSigningKeyForOAuthState() throws IOException {
-        Assume.assumeTrue(Instant.now().isAfter(Instant.ofEpochSecond(1581125077))); // Feb 7, 2020
+        // FIXME: DISCO-2698
+        Assume.assumeTrue(ZonedDateTime.now().isAfter(ZonedDateTime.of(
+            2020, 2, 29, 12, 0, 0,0,
+            ZoneId.of("America/Toronto"))
+        ));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
         Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);

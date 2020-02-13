@@ -35,12 +35,14 @@ public class RealmE2eTest extends AbstractFrontendE2eTest {
         ddapPage = doBrowserLogin(REALM, ADMINISTRATOR, AdminDdapPage::new);
     }
 
+    // FIXME: DISCO-2699
     @Test
     @Ignore
     public void realmSelectorShouldShowCurrentRealm() {
         assertThat(ddapPage.getNavBar().getRealm(), is(REALM));
     }
 
+    // FIXME: DISCO-2699
     @Test
     @Ignore
     public void testRealmChangeAndCancelConfirmationDialog() {

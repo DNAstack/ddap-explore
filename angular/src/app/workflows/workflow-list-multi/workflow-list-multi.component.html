@@ -20,13 +20,21 @@
         {{ view.url }}
       </mat-card-content>
       <mat-card-actions align="end">
-        <a [href]="getResourceAuthUrl(resourceViews.damId, view)"
+        <a mat-button
+           *ngIf="!accessControlService.isUserAuthorized()"
+           color="primary"
+           class="uppercase"
+           [href]="getResourceAuthUrl(resourceViews.damId, view)"
            data-se="btn-authorize">
-          <button mat-button
-                  color="primary"
-                  class="uppercase">
             Authorize To View Runs
-          </button>
+        </a>
+        <a mat-button
+           *ngIf="accessControlService.isUserAuthorized()"
+           color="primary"
+           class="uppercase"
+           [routerLink]="getRedirectUrl(resourceViews.damId, view.name)"
+           data-se="btn-authorize">
+          View Runs
         </a>
       </mat-card-actions>
     </mat-card>

@@ -9,6 +9,7 @@ import { repeatWhen } from 'rxjs/operators';
 import { IdentityService } from '../identity/identity.service';
 import { IdentityStore } from '../identity/identity.store';
 import { Profile } from '../identity/profile.model';
+import { AccessControlService } from '../shared/access-control.service';
 import { AppConfigModel } from '../shared/app-config/app-config.model';
 import { AppConfigService } from '../shared/app-config/app-config.service';
 import { DamInfoStore } from '../shared/dam/dam-info.store';
@@ -37,6 +38,7 @@ export class LayoutComponent implements OnInit {
               private http: HttpClient,
               private activatedRoute: ActivatedRoute,
               private appConfigService: AppConfigService,
+              private accessControlService: AccessControlService,
               private identityService: IdentityService,
               private identityStore: IdentityStore,
               private damInfoStore: DamInfoStore) {
@@ -45,16 +47,16 @@ export class LayoutComponent implements OnInit {
   ngOnInit() {
     this.appConfig = this.appConfigService.getDefault();
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
-        this.appConfig = data;
-        this.titleService.setTitle(this.appConfig.title);
+      this.appConfig = data;
+      this.titleService.setTitle(this.appConfig.title);
 
-        this.initializeInNormalMode();
-      });
+      this.initializeInNormalMode();
+    });
   }
 
   initializeInNormalMode() {
     this.identityStore.getIdentity()
-      .subscribe(({ account, sandbox }) => {
+      .subscribe(({account, sandbox}) => {
         this.isSandbox = sandbox;
         this.profile = account.profile;
       });
@@ -65,32 +67,16 @@ export class LayoutComponent implements OnInit {
     this.activatedRoute.root.firstChild.params.subscribe((params) => {
       this.realm = params.realmId;
       this.loginPath = this.getLoginPath(this.realm);
+
+      this.dataAccessManagersInfo$.subscribe(
+        damsInfo => this.accessControlService
+          .enforceAuthorizationOnInitIfRequired(Object.keys(damsInfo).map(id => id)))
+      ;
     });
 
     // Workaround to get fresh cookies
     this.periodicallyRefreshTokens()
       .subscribe();
-
-    // TODO Refactoring this to its own service.
-    if (this.appConfig.authorizationOnInitRequired) {
-      const rawResourceTokens = localStorage.getItem('RESOURCE_TOKENS');
-      try {
-        const tokens = JSON.parse(JSON.parse(rawResourceTokens));
-        for (const v of Object.values(tokens)) {
-          const accessToken: string = v['access_token'];
-          const unverifiedClaims: Map<string, any> = JSON.parse(atob(accessToken.split('.')[1]));
-          if (unverifiedClaims['exp'] < (Date.now() / 1000)) {
-            // this.redirectToLoginPage();
-          }
-        }
-      } catch {
-        // this.redirectToLoginPage();
-      }
-    }
-  }
-
-  redirectToLoginPage() {
-    this.router.navigateByUrl(this.getLoginPath(this.activatedRoute.root.firstChild.snapshot.params.realmId));
   }
 
   logout() {

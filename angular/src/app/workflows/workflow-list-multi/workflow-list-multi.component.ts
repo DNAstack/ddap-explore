@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { AccessControlService } from '../../shared/access-control.service';
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { ResourceService } from '../../shared/resource/resource.service';
@@ -19,6 +20,7 @@ export class WorkflowListMultiComponent implements OnInit {
   constructor(private router: Router,
               private appConfigService: AppConfigService,
               private resourceService: ResourceService,
+              public accessControlService: AccessControlService,
               private workflowService: WorkflowService) {
   }
 
@@ -40,15 +42,15 @@ export class WorkflowListMultiComponent implements OnInit {
     return this.resourceService.getUrlForObtainingAccessToken([damIdResourcePathPair], redirectUri);
   }
 
+  getRedirectUrl(damId: string, viewId: string): string {
+    return `${this.router.url}/${damId}/views/${viewId}/runs`;
+  }
+
   private initialize() {
     this.workflowService.getAllWesViews()
       .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
         this.wesResourceViews = wesResourceViews;
       });
-  }
-
-  private getRedirectUrl(damId: string, viewId: string): string {
-    return `${this.router.url}/${damId}/views/${viewId}/runs`;
   }
 
 }

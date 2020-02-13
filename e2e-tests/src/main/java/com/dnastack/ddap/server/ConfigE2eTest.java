@@ -13,16 +13,12 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.temporal.TemporalAccessor;
 import java.util.List;
 
 import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
@@ -69,33 +65,6 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
             .log().ifValidationFails()
             .statusCode(200)
             .body("html.head.title", containsString("Please sign in"));
-    }
-
-    @Ignore
-    @Test(expected = SignatureException.class)
-    public void doNotUseDevSigningKeyForCliLogin() throws IOException {
-        Assume.assumeTrue(Instant.now().isAfter(Instant.ofEpochSecond(1581125077))); // Feb 7, 2020 DISCO-2695
-        Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
-        Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://host.docker.internal:"));
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-
-        final Response response = given()
-                .log().method()
-                .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
-                .when()
-                .post("/api/v1alpha/realm/dnastack/cli/login");
-        response
-                .then()
-                .log().ifValidationFails()
-                .statusCode(200)
-                .body("token", not(isEmptyOrNullString()));
-
-        final String jwt = response.body().as(CliLoginResponse.class).getToken();
-        final String base64EncodedDevSigningKey = "VGhlcmUgb25jZSB3YXMgYSBsYW5ndWFnZSBjYWxsZWQgYmFzaApJdCdzIHNlbWFudGljcyB3ZXJlIG9mdGVuIHF1aXRlIHJhc2gKQnV0IGl0IHdvcmtlZCwgbW9yZSBvciBsZXNzCkV2ZW4gdGhvdWdoIGl0J3MgYSBtZXNzClNvIEkgZ3Vlc3MgaXQgc3RheXMgb3V0IG9mIHRoZSB0cmFzaAo=";
-        Jwts.parser()
-            .setSigningKey(base64EncodedDevSigningKey)
-            .parseClaimsJws(jwt);
     }
 
     @Test(expected = SignatureException.class)

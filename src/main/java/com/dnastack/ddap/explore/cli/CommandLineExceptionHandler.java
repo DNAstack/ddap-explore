@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Slf4j
 @ControllerAdvice
-public class CommandlineExceptionHandler {
+public class CommandLineExceptionHandler {
 
     @Autowired
     private UserTokenCookiePackager cookiePackager;

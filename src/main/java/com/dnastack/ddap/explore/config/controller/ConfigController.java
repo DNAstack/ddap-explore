@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/v1alpha/config")
 public class ConfigController {
+
     private final AppConfig appConfig;
 
     @Autowired

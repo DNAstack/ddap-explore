@@ -6,7 +6,6 @@ import com.dnastack.ddap.common.page.AdminDdapPage;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -14,12 +13,8 @@ import java.io.IOException;
 
 import static com.dnastack.ddap.common.TestingPersona.ADMINISTRATOR;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 
-/*
- * FIXME removed login, but need to fix realms so that shows even without login
- */
 @SuppressWarnings("Duplicates")
 public class RealmE2eTest extends AbstractFrontendE2eTest {
 
@@ -35,29 +30,26 @@ public class RealmE2eTest extends AbstractFrontendE2eTest {
         ddapPage = doBrowserLogin(REALM, ADMINISTRATOR, AdminDdapPage::new);
     }
 
-    // FIXME: DISCO-2699
     @Test
-    @Ignore
-    public void realmSelectorShouldShowCurrentRealm() {
+    public void testRealmChange() {
+        // Make sure that it is current realm
         assertThat(ddapPage.getNavBar().getRealm(), is(REALM));
-    }
 
-    // FIXME: DISCO-2699
-    @Test
-    @Ignore
-    public void testRealmChangeAndCancelConfirmationDialog() {
-        String otherRealm = "test_other_realm_" + System.currentTimeMillis();
+        String otherRealm = "test_other_realm_1";
         assertThat("this test is pointless unless we start on a different realm than we're going to!",
             ddapPage.getNavBar().getRealm(), is(not(otherRealm)));
 
+        // Change realm
         ConfirmationRealmChangeDialog confirmationRealmChangeDialog = ddapPage.getNavBar().setRealm(otherRealm);
-        AnyDdapPage ddapPage = confirmationRealmChangeDialog.cancelChangeRealmDialog();
+        AnyDdapPage ddapPage = confirmationRealmChangeDialog.confirmChangeRealmDialog();
 
         // Wrap this with large timeout because redirect to IC and back happens here
         new WebDriverWait(driver, 10)
             .ignoring(AssertionError.class)
             .until(d -> {
-                assertThat(ddapPage.getNavBar().getRealm(), is(not(otherRealm)));
+                // Make sure that it is changed realm
+                assertThat(driver.getCurrentUrl(), containsString(otherRealm));
+                assertThat(ddapPage.getNavBar().getRealm(), is(otherRealm));
                 return true;
             });
     }

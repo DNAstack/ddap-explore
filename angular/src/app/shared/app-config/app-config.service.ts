@@ -42,6 +42,7 @@ export class AppConfigService {
       inStandaloneMode: false,
       authorizationOnInitRequired: false,
       sidebarEnabled: true,
+      featureRealmInputEnabled: true,
       featureAdministrationEnabled: true,
       featureExploreDataEnabled: true,
       featureWorkflowsEnabled: true,

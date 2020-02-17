@@ -12,6 +12,7 @@ ui:
   in-standalone-mode: ${ddap.dam-facade}
   authorization-on-init-required: false
   sidebar-enabled: true
+  feature-realm-input-enabled: true
   feature-administration-enabled: true
   feature-explore-data-enabled: true
   feature-workflows-enabled: true

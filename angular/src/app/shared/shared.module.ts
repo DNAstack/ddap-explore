@@ -34,10 +34,6 @@ import { MarkdownPipe } from './markdown.pipe';
 import { MetadataFilterPipe } from './metadata-list/metadata-filter.pipe';
 import { MetadataListComponent } from './metadata-list/metadata-list.component';
 import { PaginatorComponent } from './paginator/paginator.component';
-import {
-  RealmChangeConfirmationDialogComponent
-} from './realm/realm-change-confirmation-dialog/realm-change-confirmation-dialog.component';
-import { RealmInputComponent } from './realm/realm-input/realm-input.component';
 import { ResourceLogoComponent } from './resource/resource-logo/resource-logo.component';
 import { ResourceViewItemComponent } from './resource/resource-view-item/resource-view-item.component';
 import { ViewAccessComponent } from './view-access/view-access.component';
@@ -50,8 +46,6 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     BeaconSearchBarComponent,
     BeaconResultComponent,
     LimitSearchComponent,
-    RealmInputComponent,
-    RealmChangeConfirmationDialogComponent,
     MetadataListComponent,
     MetadataFilterPipe,
     PaginatorComponent,
@@ -132,7 +126,6 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MetadataListComponent,
     MetadataFilterPipe,
     PaginatorComponent,
-    RealmInputComponent,
     MarkdownPipe,
   ],
 })

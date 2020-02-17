@@ -14,7 +14,7 @@
     <header>
       <h1 class="flex flex--column">
         <span>{{ appConfig.title }}</span>
-        <span *ngIf="isSandbox"
+        <span *ngIf="appConfig.featureRealmInputEnabled"
               class="sandbox-warning"
               matTooltip="This is sandbox testing environment">
           Sandbox environment
@@ -23,9 +23,11 @@
     </header>
 
     <mat-nav-list>
-      <div *ngIf="isSandbox"
+      <div *ngIf="appConfig.featureRealmInputEnabled"
            class="ddap-realm-select">
-        <ddap-realm-input></ddap-realm-input>
+        <ddaplib-realm-input (onAcknowledge)="onAcknowledge($event)"
+                             actions="['edit']">
+        </ddaplib-realm-input>
       </div>
 
       <mat-list-item [routerLink]="['data']"
@@ -80,7 +82,7 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <ddaplib-sandbox-banner *ngIf="isSandbox"></ddaplib-sandbox-banner>
+    <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

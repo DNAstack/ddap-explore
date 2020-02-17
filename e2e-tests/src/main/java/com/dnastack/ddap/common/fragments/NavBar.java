@@ -89,7 +89,12 @@ public class NavBar {
 
     public ConfirmationRealmChangeDialog setRealm(String targetRealm) {
         WebElement realmInput = getRealmInput();
-
+        new WebDriverWait(driver, 5)
+            .until(ExpectedConditions.elementToBeClickable(driver.findElement(DdapBy.se("realm-menu"))));
+        driver.findElement(DdapBy.se("realm-menu")).click();
+        new WebDriverWait(driver, 5)
+            .until(ExpectedConditions.elementToBeClickable(driver.findElement(DdapBy.se("edit-realm"))));
+        driver.findElement(DdapBy.se("edit-realm")).click();
         realmInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         realmInput.sendKeys(targetRealm, Keys.RETURN);
 

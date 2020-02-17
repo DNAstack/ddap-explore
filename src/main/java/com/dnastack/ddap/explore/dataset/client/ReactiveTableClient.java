@@ -42,7 +42,7 @@ public class ReactiveTableClient {
     public Mono<TableData> fetchSingleDataset(String datasetUrl, String viewAccessToken) {
         log.info("Attempting to fetch dataset {}", datasetUrl);
         return webClient.get()
-            .uri(datasetUrl)
+            .uri(URI.create(datasetUrl))
             .headers(h -> {
                 if (viewAccessToken != null && !viewAccessToken.isEmpty()) {
                     log.info("Attaching bearer token to dataset request");

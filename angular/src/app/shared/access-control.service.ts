@@ -23,7 +23,9 @@ enum UserAccessGrantStatus {
   ON_DEMAND,  // The user authorization is on demand and there is no need to enforce the authorization on initialization.
 }
 
-@Injectable({providedIn: 'root'})
+@Injectable({
+  providedIn: 'root',
+})
 export class AccessControlService {
   userAccessGrantState: UserAccessGrantStatus = UserAccessGrantStatus.UNCHECKED;
 

@@ -2,7 +2,9 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import showdown from 'showdown';
 
-@Pipe({name: 'markdown'})
+@Pipe({
+  name: 'markdown',
+})
 export class MarkdownPipe implements PipeTransform {
   constructor(protected sanitizer: DomSanitizer) {}
 

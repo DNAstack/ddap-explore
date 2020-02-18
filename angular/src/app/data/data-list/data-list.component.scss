@@ -27,6 +27,11 @@
     float: right;
     margin-right: 0.5rem;
   }
+
+  mat-card-content {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
 }
 
 @media (max-width: 1600px) {

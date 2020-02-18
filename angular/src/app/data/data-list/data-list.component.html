@@ -3,7 +3,7 @@
                            [searchable]="true">
   <ddap-beacon-search-bar></ddap-beacon-search-bar>
 </ddaplib-searchable-header>
-<ddaplib-main class="ddap-data-pane">
+<ddaplib-main>
   <mat-card class="ddap-card"
             *ngFor="let qualified of (qualifiedResources$ | async)">
     <mat-card-header>

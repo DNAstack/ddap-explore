@@ -4,6 +4,29 @@ mat-sidenav-container {
   height: 100%;
 }
 
+.link-to-external-app {
+  display: flex;
+  align-items: center;
+
+  .dam-info {
+    span.dam-info-label {
+      display: block;
+      margin-top: -1rem;
+    }
+    span.dam-info-sublabel {
+      display: block;
+      font-size: 0.75rem;
+      color: $color-grey;
+      line-height: 1rem;
+      margin-top: -1rem;
+    }
+  }
+
+  &:hover {
+    color: black;
+  }
+}
+
 :host {
   .ddap-realm-select {
     background-color: $navbar-expanded-background;

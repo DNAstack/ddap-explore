@@ -6,7 +6,7 @@ import { TrsService } from '../../trs-v2/trs.service';
 import { WorkflowService } from '../../workflows.service';
 import { WorkflowsStateService } from '../workflows-state.service';
 
-import { callDenovo, md5sum } from './example.wdl';
+import { callDenovo, helloWorld, md5sum } from './example.wdl';
 
 
 @Component({
@@ -41,6 +41,8 @@ export class WdlSelectionStepComponent {
       this.form.get('wdl').patchValue(md5sum);
     } else if (exampleId === 'callDenovo') {
       this.form.get('wdl').patchValue(callDenovo);
+    } else if (exampleId === 'helloWorld') {
+      this.form.get('wdl').patchValue(helloWorld);
     }
   }
 

@@ -346,3 +346,39 @@ task snpSift {
 \t}\t
 }
 `;
+
+export const helloWorld = `version 1.0
+
+workflow hello {
+\tinput {
+\t\tString name
+\t}
+
+\tcall sayHello {
+\t\tinput:
+\t\t\tname = name
+\t}
+
+\toutput {
+\t\tString greeting = sayHello.greeting
+\t}
+}
+
+task sayHello {
+\tinput {
+\t\tString name
+\t}
+
+\tcommand {
+\t\techo "Hello ~{name}"
+\t}
+
+\toutput {
+\t\tString greeting = read_string(stdout())
+\t}
+
+\truntime {
+\t\tdocker: "ubuntu:xenial"
+\t}
+}
+`;

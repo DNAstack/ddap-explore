@@ -20,7 +20,7 @@ ui:
   trs-base-url: "https://dockstore.org/api/api/ga4gh/v2"
   trs-accepted-tool-classes: ['Workflow']
   trs-accepted-version-descriptor-types: ['WDL']
-  list-page-size: 14
+  list-page-size: 20
 
 dams:
   1:

@@ -44,9 +44,12 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void testSingleWorkflowExecutionWithTokens() throws IOException {
-        WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
-                .goToWorkflows();
-        WorkflowManagePage managePage = workflowWesServersPage.clickManage();
+//        WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
+//                .goToWorkflows();
+//        WorkflowManagePage managePage = workflowWesServersPage.clickManage();
+        ddapPage.getNavBar().goToApp("product-app-menu-analytics");
+        // FIXME Assert that the right app is present
+        WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
 
         log.info("Workflow Execution Step: Dataset import");
         managePage.fetchDatasetResult(datasetUrl);
@@ -79,9 +82,12 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void testMultipleWorkflowExecutionWithTokens() throws IOException {
-        WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
-            .goToWorkflows();
-        WorkflowManagePage managePage = workflowWesServersPage.clickManage();
+//        WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
+//            .goToWorkflows();
+//        WorkflowManagePage managePage = workflowWesServersPage.clickManage();
+        ddapPage.getNavBar().goToApp("product-app-menu-analytics");
+        // FIXME Assert that the right app is present
+        WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
 
         log.info("Workflow Execution Step: Dataset import");
         managePage.fetchDatasetResult(datasetUrl);
@@ -116,9 +122,12 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void testSingleWorkflowExecutionWithTokensFromSecuredDataset() throws IOException {
-        WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
-            .goToWorkflows();
-        WorkflowManagePage managePage = workflowWesServersPage.clickManage();
+//        WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
+//            .goToWorkflows();
+//        WorkflowManagePage managePage = workflowWesServersPage.clickManage();
+        ddapPage.getNavBar().goToApp("product-app-menu-analytics");
+        // FIXME Assert that the right app is present
+        WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
 
         log.info("Workflow Execution Step: Dataset import");
         // Try to fetch without access token

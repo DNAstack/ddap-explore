@@ -1,4 +1,4 @@
-<div class="site-container">
+<div class="site-container {{viewController.view.leftSidebarOpened ? '' : 'zen-mode'}}">
   <ddaplib-main-header [siteName]="appConfig.title"
                        *ngIf="router.url != '/home'">
     <ng-container *ngIf="appConfig.featureAdministrationEnabled">
@@ -39,12 +39,10 @@
 
   <mat-sidenav-container>
     <!-- Left Side Navigation -->
-    <mat-sidenav *ngIf="router.url != '/home'"
+    <mat-sidenav
       position="start"
-      leftSidenav
       mode="side"
-      opened="{{viewController.view.leftSidebarOpened}}"
-      class="b-r"
+      [opened]="true"
       >
       <!-- The inline CSS for this <span> is an exception as this is for testing. -->
       <span *ngIf="appConfig.featureRealmInputEnabled"

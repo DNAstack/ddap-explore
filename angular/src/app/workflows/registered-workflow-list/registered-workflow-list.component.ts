@@ -124,6 +124,8 @@ export class RegisteredWorkflowListComponent implements OnInit {
 
         this.filteredTools = this.tools;
         this.updateInProgress = false;
+
+        this.reApplyFilter();
       });
     });
   }

@@ -13,7 +13,7 @@ public class DataListPage extends AnyDdapPage {
     public DataListPage(WebDriver driver) {
         super(driver);
         WebElement pageTitle = driver.findElement(DdapBy.se("page-title"));
-        assertThat(pageTitle.getText(), equalTo("Explore Data"));
+        assertThat(pageTitle.getText(), equalTo("Collections"));
     }
 
     public DataListItem findDataByName(String resourceName) {

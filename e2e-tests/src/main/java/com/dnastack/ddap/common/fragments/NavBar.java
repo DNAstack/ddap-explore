@@ -32,11 +32,11 @@ public class NavBar {
     }
 
     public static NavLink dataLink() {
-        return new NavLink("Explore Data", DdapBy.se("nav-data"), null);
+        return new NavLink("Collections", DdapBy.se("nav-data-collections"), null);
     }
 
     public static NavLink workflowLink() {
-        return new NavLink("Workflows", DdapBy.se("nav-workflows"), null);
+        return new NavLink("Run", DdapBy.se("nav-analytics-run"), null);
     }
 
     public NavBar(WebDriver driver) {
@@ -72,15 +72,29 @@ public class NavBar {
     }
 
     public DataListPage goToData() {
+        driver.findElement(DdapBy.se("product-app-menu")).click();
+        driver.findElement(DdapBy.se("product-app-menu-data")).click();
         driver.findElement(dataLink().getSelector()).click();
 
         return new DataListPage(driver);
     }
 
     public WorkflowWesServersPage goToWorkflows() {
+        driver.findElement(DdapBy.se("product-app-menu")).click();
+        driver.findElement(DdapBy.se("product-app-menu-analytics")).click();
         driver.findElement(workflowLink().getSelector()).click();
 
         return new WorkflowWesServersPage(driver);
+    }
+
+    public void goToApp(String appSelector) {
+        driver.findElement(DdapBy.se("product-app-menu")).click();
+        driver.findElement(DdapBy.se(appSelector)).click();
+    }
+
+    public WorkflowManagePage goToRun() {
+        driver.findElement(workflowLink().getSelector()).click();
+        return new WorkflowManagePage(driver);
     }
 
     private WebElement getRealmInput() {

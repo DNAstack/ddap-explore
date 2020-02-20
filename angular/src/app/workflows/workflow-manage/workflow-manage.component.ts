@@ -168,7 +168,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
 
     zip(...executions.map((execution) =>
         this.workflowService.runWorkflow(damId, wesViewId, execution, wesAccessToken)
-      )).subscribe((runs: object[]) => this.navigateUp('../..', runs, damId, wesViewId));
+      )).subscribe((runs: object[]) => this.navigateUp('../operations', runs, damId, wesViewId));
   }
 
   toggleLeftSideNav() {

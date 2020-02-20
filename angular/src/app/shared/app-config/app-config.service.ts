@@ -100,7 +100,7 @@ export class AppConfigService {
         key: 'analytics-operations',
         name: 'Operations',
         iconName: 'sync',
-        routerLink: 'analyze',
+        routerLink: 'analyze/operations',
         parentKey: 'analytics',
         isApp: false,
       })

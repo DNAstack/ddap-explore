@@ -97,10 +97,10 @@ export class AppConfigService {
         isApp: true,
       })
       .registerModule({
-        key: 'analytics-run',
-        name: 'Run',
-        iconName: 'play_arrow',
-        routerLink: 'analyze/run',
+        key: 'analytics-operations',
+        name: 'Operations',
+        iconName: 'sync',
+        routerLink: 'analyze',
         parentKey: 'analytics',
         isApp: false,
       })
@@ -113,12 +113,13 @@ export class AppConfigService {
         isApp: false,
       })
       .registerModule({
-        key: 'analytics-operations',
-        name: 'Operations',
-        iconName: 'sync',
-        routerLink: 'analyze/operations',
+        key: 'analytics-run',
+        name: 'Run',
+        iconName: 'play_arrow',
+        routerLink: 'analyze/run',
         parentKey: 'analytics',
         isApp: false,
-      });
+      })
+    ;
   }
 }

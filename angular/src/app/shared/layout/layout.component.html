@@ -1,4 +1,4 @@
-<div class="full-page" style="display: flex; flex-direction: column">
+<div class="site-container">
   <ddaplib-main-header [siteName]="appConfig.title"
                        *ngIf="router.url != '/home'">
     <ng-container *ngIf="appConfig.featureAdministrationEnabled">
@@ -30,37 +30,37 @@
     </ng-container>
   </ddaplib-main-header>
 
-  <div style="flex:1"><!--  ⃪ FIXME deal with this inline "flex" -->
-    <mat-progress-bar *ngIf="loader.progress$ | async"
-                  mode="determinate"
-                  [value]="loader.progress$ | async"
-                  data-se="main-progress-bar">
-    </mat-progress-bar>
-    <mat-sidenav-container>
-      <!-- Left Side Navigation -->
-      <mat-sidenav *ngIf="router.url != '/home'"
-        position="start"
-        leftSidenav
-        mode="side"
-        opened="{{viewController.view.leftSidebarOpened}}"
-        class="b-r"
-        >
-        <!-- The inline CSS for this <span> is an exception as this is for testing. -->
-        <span *ngIf="appConfig.featureRealmInputEnabled"
-              class="sandbox-warning"
-              style="position: absolute; left: 1rem; font-size: 0.75rem;"
-              matTooltip="This is sandbox testing environment">
-          Sandbox environment
-        </span>
-        <app-sidenav-left></app-sidenav-left>
-      </mat-sidenav>
-      <mat-sidenav-content>
-        <!-- Middle Content -->
-        <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
-        <router-outlet></router-outlet>
-      </mat-sidenav-content>
-    </mat-sidenav-container>
-  </div>
+  <mat-progress-bar *ngIf="loader.progress$ | async"
+    mode="determinate"
+    color="accent"
+    [value]="loader.progress$ | async"
+    data-se="main-progress-bar">
+  </mat-progress-bar>
+
+  <mat-sidenav-container>
+    <!-- Left Side Navigation -->
+    <mat-sidenav *ngIf="router.url != '/home'"
+      position="start"
+      leftSidenav
+      mode="side"
+      opened="{{viewController.view.leftSidebarOpened}}"
+      class="b-r"
+      >
+      <!-- The inline CSS for this <span> is an exception as this is for testing. -->
+      <span *ngIf="appConfig.featureRealmInputEnabled"
+            class="sandbox-warning"
+            style="position: absolute; left: 1rem; font-size: 0.75rem;"
+            matTooltip="This is sandbox testing environment">
+        Sandbox environment
+      </span>
+      <app-sidenav-left></app-sidenav-left>
+    </mat-sidenav>
+    <mat-sidenav-content>
+      <!-- Middle Content -->
+      <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div>
 
 <!--<div *ngIf="appConfig.featureRealmInputEnabled"-->

@@ -3,14 +3,6 @@
                        *ngIf="router.url != '/home'">
     <ng-container *ngIf="appConfig.featureAdministrationEnabled">
       <div class="app-menu-section-title">Administration</div>
-<!--      <button-->
-<!--        routerLink="/{{viewController.getRealmId()}}/{{app.routerLink}}"-->
-<!--        routerLinkActive="active"-->
-<!--        tabindex="-1"-->
-<!--        mat-menu-item>-->
-<!--        <mat-icon class="{{ app.iconClasses }}">{{app.iconName}}</mat-icon>-->
-<!--        <span>{{app.name}}</span>-->
-<!--      </button>-->
       <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">
         <a [href]="withRealm(identityConcentratorInfo.uiUrl)"
           mat-menu-item
@@ -39,11 +31,11 @@
   </ddaplib-main-header>
 
   <div style="flex:1"><!--  ⃪ FIXME deal with this inline "flex" -->
-    <!--<mat-progress-bar *ngIf="loader.progress$ | async"
+    <mat-progress-bar *ngIf="loader.progress$ | async"
                   mode="determinate"
                   [value]="loader.progress$ | async"
                   data-se="main-progress-bar">
-    </mat-progress-bar>-->
+    </mat-progress-bar>
     <mat-sidenav-container>
       <!-- Left Side Navigation -->
       <mat-sidenav *ngIf="router.url != '/home'"

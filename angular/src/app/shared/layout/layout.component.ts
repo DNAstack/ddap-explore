@@ -5,12 +5,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { Observable } from 'rxjs';
 
-import { IdentityService } from '../identity/identity.service';
-import { AccessControlService } from '../shared/access-control.service';
-import { AppConfigModel } from '../shared/app-config/app-config.model';
-import { AppConfigService } from '../shared/app-config/app-config.service';
-import { DamInfoStore } from '../shared/dam/dam-info.store';
-import { DamsInfo } from '../shared/dam/dams-info';
+import { IdentityService } from '../../identity/identity.service';
+import { AccessControlService } from '../access-control.service';
+import { AppConfigModel } from '../app-config/app-config.model';
+import { AppConfigService } from '../app-config/app-config.service';
+import { DamInfoStore } from '../dam/dam-info.store';
+import { DamsInfo } from '../dam/dams-info';
 
 @Component({
   templateUrl: './layout.component.html',

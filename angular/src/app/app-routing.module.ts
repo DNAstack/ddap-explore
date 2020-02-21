@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { defaultRealm } from 'ddap-common-lib';
 
 import { CheckinComponent } from './checkin/checkin.component';
-import { LayoutComponent } from './layout/layout.component';
+import { LayoutComponent } from './shared/layout/layout.component';
 
 const routes: Routes = [
   // { path: '', pathMatch: 'full', redirectTo: `/${defaultRealm}/data` },  // handled by CheckinComponent with feature flags

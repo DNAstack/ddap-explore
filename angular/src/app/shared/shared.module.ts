@@ -30,6 +30,7 @@ import { ClipboardModule } from 'ngx-clipboard';
 import { BeaconResultComponent } from './beacon-search/beacon-result/beacon-result.component';
 import { BeaconSearchBarComponent } from './beacon-search/beacon-search-bar/beacon-search-bar.component';
 import { LimitSearchComponent } from './beacon-search/beacon-search-bar/limit-search/limit-search.component';
+import { LayoutComponent } from './layout/layout.component';
 import { MarkdownPipe } from './markdown.pipe';
 import { MetadataFilterPipe } from './metadata-list/metadata-filter.pipe';
 import { MetadataListComponent } from './metadata-list/metadata-list.component';
@@ -40,6 +41,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
 
 @NgModule({
   declarations: [
+    LayoutComponent,
     ResourceLogoComponent,
     ResourceViewItemComponent,
     ViewAccessComponent,

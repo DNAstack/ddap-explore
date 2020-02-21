@@ -1,4 +1,4 @@
-//@import '~ddap-common-lib/styles/modules/colors';
+@import '~ddap-common-lib/styles/modules/colors';
 
 .section-header {
   display: flex;
@@ -18,16 +18,17 @@
     display: flex;
     justify-content: space-between;
     padding-top: 15px;
-    border-top: 1px dashed #d3d3d3;
+    border-top: 1px dashed $color-faded-grey;
 
     .description {
       order: 1;
 
       code {
-        background-color: #e0e0e0;
+        background-color: $color-grey-light;
         display: inline-block;
-        text-wrap: none;
+        white-space: nowrap;
         padding: 0 2px;
+        border-radius: 2px;
       }
     }
 
@@ -41,14 +42,63 @@
 
   .version-selector {
     padding-top: 15px;
-    border-top: 1px dashed #d3d3d3;
+    border-top: 1px dashed $color-faded-grey;
 
     .version-list {
       display: flex;
+      overflow: auto;
 
-      mat-card {
-        margin-right: 15px;
+      .version {
+        background-color: whitesmoke;
+        padding: 14px 16px;
+        margin-right: 1px;
+
+        .name {
+          font-weight: 700;
+          font-size: 1.25rem;
+          cursor: default;
+        }
+
+        .meta-version {
+          color: $color-grey;
+          white-space: nowrap;
+          cursor: default;
+        }
+
+        .descriptor-type-list {
+          list-style: none;
+          padding: 0;
+          margin: 1rem 0 0 0;
+        }
+      }
+
+      .cancel-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: $warn-background-color-alert;
+        padding: 14px 16px;
+        color: $warn-color;
+
+        mat-icon {
+          margin-right: 5px;
+        }
       }
     }
+  }
+}
+
+mat-panel-title,
+mat-panel-description {
+  position: relative;
+  min-height: 2rem;
+
+  span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: absolute;
+    width: 100%;
+    white-space: nowrap;
   }
 }

@@ -18,13 +18,28 @@
     </div>
     <mat-form-field appearance="standard" class="filter-input">
       <mat-label>Filter by tool name and/or author</mat-label>
-      <input #filter type="text" matInput (keyup)="onFilterUpdate(filter.value)" [disabled]="updateInProgress" value="{{ filterTerm }}">
+      <input matInput
+             #filter
+             type="text"
+             (keyup)="onFilterUpdate(filter.value)"
+             [disabled]="updateInProgress"
+             value="{{ filterTerm }}"/>
     </mat-form-field>
     <div class="action" *ngIf="filter.value">
-      <button mat-icon-button type="reset" color="warn" title="Clear the filter" (click)="onFilterResetClick()" [disabled]="updateInProgress"><mat-icon>clear</mat-icon></button>
+      <button mat-icon-button
+              type="reset"
+              color="warn"
+              title="Clear the filter"
+              (click)="onFilterResetClick()"
+              [disabled]="updateInProgress"><mat-icon>clear</mat-icon></button>
     </div>
     <div class="action">
-      <button mat-icon-button type="button" color="primary" title="Refresh" (click)="onFilterRefreshClick()" [disabled]="updateInProgress"><mat-icon>refresh</mat-icon></button>
+      <button mat-icon-button
+              type="button"
+              color="primary"
+              title="Refresh"
+              (click)="onFilterRefreshClick()"
+              [disabled]="updateInProgress"><mat-icon>refresh</mat-icon></button>
     </div>
   </div>
 
@@ -35,8 +50,8 @@
   <mat-accordion>
     <mat-expansion-panel *ngFor="let tool of (filteredTools || []).slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)" class="workflow" (expandedChange)="onToolDetailExpandChange()">
       <mat-expansion-panel-header>
-        <mat-panel-title>{{ tool.toolname }}</mat-panel-title>
-        <mat-panel-description>{{ tool.author || tool.organization }}</mat-panel-description>
+        <mat-panel-title><span>{{ tool.toolname }}</span></mat-panel-title>
+        <mat-panel-description><span>{{ tool.author || tool.organization }}</span></mat-panel-description>
       </mat-expansion-panel-header>
 
       <!-- When there is NO tool selected... -->
@@ -52,24 +67,28 @@
       </div>
 
       <!-- When there is a tool SELECTED... -->
-      <div class="version-selector" *ngIf="selectedTool ">
+      <div class="version-selector" *ngIf="selectedTool">
         <h3 class="label">Please select one version</h3>
         <div class="version-list" *ngIf="tool.versions">
-          <mat-card *ngFor="let version of tool.versions">
-            <mat-card-title>
+          <div class="version" *ngFor="let version of tool.versions">
+            <div class="name">
               {{version.name}}
               <mat-icon *ngIf="version.verified">check</mat-icon>
-            </mat-card-title>
-            <mat-card-subtitle>{{version.meta_version}}</mat-card-subtitle>
-            <mat-card-actions>
-              <button mat-flat-button
-                      *ngFor="let descriptor_type of version.descriptor_type"
-                      color="primary"
-                      (click)="onVersionSelectionSelectClick(version, descriptor_type)"
-              >{{ descriptor_type }}</button>
-            </mat-card-actions>
-          </mat-card>
-          <button mat-stroked-button (click)="onVersionSelectionCancelClick()"><mat-icon>cancel</mat-icon> Cancel</button>
+            </div>
+            <div class="meta-version">{{version.meta_version}}</div>
+            <ul class="descriptor-type-list">
+              <li *ngFor="let descriptor_type of version.descriptor_type">
+                <button mat-raised-button
+                        (click)="onVersionSelectionSelectClick(version, descriptor_type)">
+                  {{ descriptor_type }}
+                </button>
+              </li>
+            </ul>
+          </div>
+          <a class="cancel-button"
+             (click)="onVersionSelectionCancelClick()">
+            <mat-icon>cancel</mat-icon> <span>Cancel</span>
+          </a>
         </div>
       </div>
     </mat-expansion-panel>

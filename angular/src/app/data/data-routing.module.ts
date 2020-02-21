@@ -6,10 +6,10 @@ import { DataListComponent } from './data-list/data-list.component';
 import { DataSearchComponent } from './data-search/data-search.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'collections' },
   { path: 'collections', component: DataListComponent },
   { path: 'collections/search', component: DataSearchComponent },
   { path: 'collections/:damId/:resourceName', component: DataDetailComponent },
+  { path: '', redirectTo: 'collections' },
 ];
 
 @NgModule({

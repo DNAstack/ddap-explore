@@ -102,7 +102,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
         searchPage.clickBack();
 
-        driver.findElement(DdapBy.text("Explore Data","h2"));
+        driver.findElement(DdapBy.text("Collections","h2"));
     }
 
     @Test
@@ -213,7 +213,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.waitForInflightRequests();
         searchPage.clickBack();
 
-        driver.findElement(DdapBy.text("Explore Data","h2"));
+        driver.findElement(DdapBy.text("Collections","h2"));
     }
 
     @Test

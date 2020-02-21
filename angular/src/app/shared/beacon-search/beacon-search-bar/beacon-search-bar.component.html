@@ -3,7 +3,7 @@
       (ngSubmit)="onSubmit(searchForm)"
       [formGroup]="searchForm">
   <mat-form-field class="input-select" appearance="outline">
-    <mat-select class="mbat-button-wrapper"
+    <mat-select class="mat-button-wrapper"
                 name="assembly"
                 formControlName="assembly">
       <mat-option *ngFor="let assemblyId of assemblyIds"
@@ -20,7 +20,12 @@
            [placeholder]="searchForm.get('query').value ? '' : placeholder"
            data-se="search-input">
   </mat-form-field>
-  <button mat-button mat-stroked-button color="accent" type="submit">
-    <mat-icon>search</mat-icon>Search
+  <span class="fill-space"></span>
+  <button mat-button
+          mat-stroked-button
+          color="accent"
+          class="uppercase"
+          type="submit">
+    Search
   </button>
 </form>

@@ -1,5 +1,8 @@
 <div class="site-container {{viewController.view.leftSidebarOpened ? '' : 'zen-mode'}}">
   <ddaplib-main-header [siteName]="appConfig.title"
+                       [showRealmInput]="appConfig.featureRealmInputEnabled"
+                       [realmActions]="['edit']"
+                       (realmChangeAcknowledge)="onAcknowledge($event)"
                        *ngIf="router.url != '/home'">
     <ng-container *ngIf="appConfig.featureAdministrationEnabled">
       <div class="app-menu-section-title">Administration</div>

@@ -101,23 +101,21 @@ public class NavBar {
         return driver.findElement(DdapBy.se("realm-input"));
     }
 
-    public ConfirmationRealmChangeDialog setRealm(String targetRealm) {
-        WebElement realmInput = getRealmInput();
+    public void setRealm(String targetRealm) {
         new WebDriverWait(driver, 5)
             .until(ExpectedConditions.elementToBeClickable(driver.findElement(DdapBy.se("realm-menu"))));
         driver.findElement(DdapBy.se("realm-menu")).click();
         new WebDriverWait(driver, 5)
             .until(ExpectedConditions.elementToBeClickable(driver.findElement(DdapBy.se("edit-realm"))));
         driver.findElement(DdapBy.se("edit-realm")).click();
-        realmInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
-        realmInput.sendKeys(targetRealm, Keys.RETURN);
-
-        return new ConfirmationRealmChangeDialog(driver);
+        WebElement realmInput = getRealmInput();
+        realmInput.clear();
+        realmInput.sendKeys(targetRealm);
+        driver.findElement(DdapBy.se("update-realm")).click();
     }
 
     public String getRealm() {
-        WebElement realmInput = getRealmInput();
-        return realmInput.getAttribute("value");
+        return driver.findElement(DdapBy.se("realm-name")).getText();
     }
 
     public ICLoginPage logOut() {

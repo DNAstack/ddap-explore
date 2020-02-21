@@ -40,8 +40,9 @@ public class RealmE2eTest extends AbstractFrontendE2eTest {
             ddapPage.getNavBar().getRealm(), is(not(otherRealm)));
 
         // Change realm
-        ConfirmationRealmChangeDialog confirmationRealmChangeDialog = ddapPage.getNavBar().setRealm(otherRealm);
-        AnyDdapPage ddapPage = confirmationRealmChangeDialog.confirmChangeRealmDialog();
+        ddapPage.getNavBar().setRealm(otherRealm);
+        ddapPage.waitForInflightRequests();
+        assertThat(ddapPage.getNavBar().getRealm(), is(otherRealm));
 
         // Wrap this with large timeout because redirect to IC and back happens here
         new WebDriverWait(driver, 10)

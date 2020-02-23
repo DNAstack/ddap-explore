@@ -72,7 +72,11 @@ public class NavBar {
     }
 
     public DataListPage goToData() {
+        new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.elementToBeClickable(DdapBy.se("product-app-menu")));
         driver.findElement(DdapBy.se("product-app-menu")).click();
+        new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.elementToBeClickable(DdapBy.se("product-app-menu-data")));
         driver.findElement(DdapBy.se("product-app-menu-data")).click();
         driver.findElement(dataLink().getSelector()).click();
 
@@ -88,7 +92,11 @@ public class NavBar {
     }
 
     public void goToApp(String appSelector) {
+        new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.elementToBeClickable(DdapBy.se("product-app-menu")));
         driver.findElement(DdapBy.se("product-app-menu")).click();
+        new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.elementToBeClickable(DdapBy.se(appSelector)));
         driver.findElement(DdapBy.se(appSelector)).click();
     }
 

@@ -41,20 +41,28 @@ export class WorkflowExecutionStepComponent {
   }
 
   getWorkflowExecutionModels(): WorkflowExecution[] {
-    const wdl = this.form.get('wdl').value;
-    const tokens = JSON.stringify(this.getTokensModel());
+    if (!this.selectedRows) {
+      return [];  // Default value
+    }
 
     return this.selectedRows
       .map((row) => {
         const inputs = _cloneDeep(this.form.get('inputs').value);
         this.substituteColumnNamesWithValues(inputs, row);
 
-        return {
-          wdl,
-          inputsJson: JSON.stringify(inputs),
-          tokensJson: tokens,
-        };
+        return this.createWorkflowExecutionModel(inputs);
       });
+  }
+
+  createWorkflowExecutionModel(inputs: any): WorkflowExecution {
+    const wdl = this.form.get('wdl').value;
+    const tokens = JSON.stringify(this.getTokensModel());
+
+    return {
+      wdl,
+      inputsJson: JSON.stringify(inputs),
+      tokensJson: tokens,
+    };
   }
 
   private substituteColumnNamesWithValues(object: object, row: object) {

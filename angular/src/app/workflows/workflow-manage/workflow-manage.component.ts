@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import ResourceTokens = dam.v1.ResourceTokens;
 import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormValidationService, ViewControllerService } from 'ddap-common-lib';
+import { ErrorHandlerService, FormValidationService, ViewControllerService } from 'ddap-common-lib';
 import _isequal from 'lodash.isequal';
 import { observable, Observable, Subscription, zip } from 'rxjs';
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
@@ -86,6 +86,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
               private workflowFormBuilder: WorkflowFormBuilder,
               private workflowsStateService: WorkflowsStateService,
               private resourceAuthStateService: ResourceAuthStateService,
+              private errorHandler: ErrorHandlerService,
               private viewController: ViewControllerService
               ) {
   }
@@ -166,9 +167,17 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     const wesAccessToken = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceTokens, wesResourcePath)['access_token'];
     const executions: WorkflowExecution[] = this.executionStep.getWorkflowExecutionModels();
 
+    // When no rows have been selected, the execution list from the execution step will be empty. In this case, we will
+    // generate the execution based on the workflow form data instead.
+    if (executions.length === 0) {
+      executions.push(this.executionStep.createWorkflowExecutionModel(this.workflowForm.getRawValue().inputs));
+    }
+
     zip(...executions.map((execution) =>
         this.workflowService.runWorkflow(damId, wesViewId, execution, wesAccessToken)
-      )).subscribe((runs: object[]) => this.navigateUp('../operations', runs, damId, wesViewId));
+      ))
+      .subscribe((runs: object[]) => this.navigateUp('../operations', runs, damId, wesViewId))
+    ;
   }
 
   toggleLeftSideNav() {

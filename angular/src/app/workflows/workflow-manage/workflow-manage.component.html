@@ -6,6 +6,7 @@
                         [linear]="true">
     <mat-step [stepControl]="datasetForm"
               [completed]="readyToExecute"
+              [optional]="true"
               [editable]="!readyToExecute">
       <ng-template matStepLabel>Import dataset and select data</ng-template>
       <ddap-dataset-selection-step [form]="datasetForm"
@@ -122,7 +123,7 @@
       </ddap-workflow-execution-step>
       <div class="flex stepper-actions">
         <div>
-          <button mat-button mat-stroked-button matStepperPrevious>Back</button>
+          <!--<button mat-button mat-stroked-button matStepperPrevious>Back</button>-->
           <button mat-button mat-stroked-button (click)="resetStepper()">Reset</button>
         </div>
         <button mat-flat-button

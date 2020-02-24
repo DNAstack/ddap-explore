@@ -7,3 +7,7 @@
 .mat-step-header .mat-step-icon {
   color: white !important;
 }
+
+.mat-button + .mat-button {
+  margin-left: 5px;
+}

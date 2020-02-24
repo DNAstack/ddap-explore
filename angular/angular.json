@@ -30,7 +30,8 @@
             "styles": [
               "src/styles/core.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "crossOrigin": "use-credentials"
           },
           "configurations": {
             "production": {

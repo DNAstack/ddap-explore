@@ -1,20 +1,15 @@
 <ddaplib-header [backLink]="['..']"
-             label="Workflow Detail">
-  <a *ngIf="fileResourceAuthUrl as resourceAuthUrl"
-     [href]="resourceAuthUrl"
-     data-se="btn-authorize">
-    <button mat-flat-button
-            color="primary"
-            class="uppercase">
-      Authorize
-    </button>
-  </a>
+                label="Workflow Detail">
 </ddaplib-header>
-<mat-card class="workflow-card">
-  <mat-card-header>Status: {{ runDetails?.state }}</mat-card-header>
-  <mat-card-content data-se="run-json-editor">
-    <json-editor [options]="editorOptions"
-                 [data]="runDetails">
-    </json-editor>
-  </mat-card-content>
-</mat-card>
+<ddaplib-main>
+  <!-- When viewAccessible is null, the UI is still determining whether the user has access to the data. -->
+  <ddap-access-denied-screen *ngIf="viewAccessible === false" [authorizationUrl]="fileResourceAuthUrl"></ddap-access-denied-screen>
+  <mat-card class="workflow-card" *ngIf="viewAccessible === true">
+    <mat-card-header>Status: {{ runDetails?.state }}</mat-card-header>
+    <mat-card-content data-se="run-json-editor">
+      <json-editor [options]="editorOptions"
+                   [data]="runDetails">
+      </json-editor>
+    </mat-card-content>
+  </mat-card>
+</ddaplib-main>

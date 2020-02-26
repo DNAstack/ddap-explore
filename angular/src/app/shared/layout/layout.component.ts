@@ -4,10 +4,10 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { ViewControllerService } from 'ddap-common-lib';
-import { interval, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { IdentityService } from '../../identity/identity.service';
-import { AccessControlService } from '../access-control.service';
+import { AccessControlService, UserAccessGrantStatus } from '../access-control.service';
 import { AppConfigModel } from '../app-config/app-config.model';
 import { AppConfigService } from '../app-config/app-config.service';
 import { DamInfoStore } from '../dam/dam-info.store';
@@ -21,6 +21,8 @@ export class LayoutComponent implements OnInit {
 
   realm: string;
   appConfig: AppConfigModel = null;
+
+  userIsAuthorized: boolean = null;  // "null" means undecided or on-demand.
 
   dataAccessManagersInfo$: Observable<DamsInfo>;
   identityConcentratorInfo$: Observable<any>;
@@ -43,11 +45,11 @@ export class LayoutComponent implements OnInit {
       this.appConfig = data;
       this.titleService.setTitle(this.appConfig.title);
 
-      this.initializeInNormalMode();
+      this.initialize();
     });
   }
 
-  initializeInNormalMode() {
+  initialize() {
     this.dataAccessManagersInfo$ = this.damInfoStore.getDamsInfo();
     this.identityConcentratorInfo$ = this.identityService.getIdentityConcentratorInfo();
 
@@ -55,9 +57,17 @@ export class LayoutComponent implements OnInit {
       this.realm = params.realmId;
 
       this.dataAccessManagersInfo$.subscribe(
-        damsInfo => this.accessControlService
-          .enforceAuthorizationOnInitIfRequired(Object.keys(damsInfo).map(id => id)))
-      ;
+        damsInfo => {
+          this.accessControlService
+            .enforceAuthorizationOnInitIfRequired(Object.keys(damsInfo).map(id => id))
+            .then(userAccessGrantState => {
+              if (userAccessGrantState === UserAccessGrantStatus.AUTHORIZED) {
+                this.userIsAuthorized = true;
+              } else if (userAccessGrantState === UserAccessGrantStatus.NOT_AUTHORIZED) {
+                this.userIsAuthorized = false;
+              }
+            });
+        });
     });
   }
 
@@ -82,7 +92,6 @@ export class LayoutComponent implements OnInit {
   toggleLeftSideNav() {
     this.viewController.toggleLeftSidenav();
   }
-
 
   private changeRealmAndGoToLogin(realm) {
     this.router.navigate(['/', realm]);

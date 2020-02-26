@@ -9,6 +9,7 @@ import { observable, Observable, Subscription, zip } from 'rxjs';
 import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 import { map } from 'rxjs/operators';
 
+import { AccessControlService } from '../../shared/access-control.service';
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { dam } from '../../shared/proto/dam-service';
@@ -78,6 +79,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
 
   constructor(private route: ActivatedRoute,
               private appConfigService: AppConfigService,
+              private accessControl: AccessControlService,
               private router: Router,
               private validationService: FormValidationService,
               private workflowService: WorkflowService,

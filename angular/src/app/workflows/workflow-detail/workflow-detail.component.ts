@@ -6,6 +6,7 @@ import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
 import { map } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
+import { AccessControlService } from '../../shared/access-control.service';
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { JsonEditorDefaults } from '../../shared/jsonEditorDefaults';
@@ -28,6 +29,8 @@ export class WorkflowDetailComponent implements OnInit {
   editorOptions: JsonEditorOptions | any;
   resourceToken: IResourceToken;
   fileResourceAuthUrl: string;
+
+  viewAccessible: boolean;
 
   @ViewChild(JsonEditorComponent, { static: false })
   editor: JsonEditorComponent;
@@ -62,10 +65,17 @@ export class WorkflowDetailComponent implements OnInit {
         const resourceTokens = this.resourceAuthStateService.getAccess();
         this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, resourcePath);
 
+        if (!this.resourceToken) {
+          this.viewAccessible = false;
+          return;
+        }
+
         this.workflowService.workflowRunDetail(damId, viewId, runId, this.resourceToken['access_token'])
           .subscribe(runDetails => {
             this.runDetails = this.runDetailsResponse = runDetails;
-            const gcsUrl = this.getFlatValues(runDetails).find((value: string) => value.includes('gs://'));
+            const gcsUrl = this.getFlatValues(runDetails)
+              .filter(value => value !== undefined)
+              .find((value: string) => value.includes('gs://'));
             this.datasetService.getViews([gcsUrl])
               .subscribe((views) => {
                 if (!views) {
@@ -73,6 +83,7 @@ export class WorkflowDetailComponent implements OnInit {
                 }
                 const damIdResourcePathPairs: string[] = Object.values(views);
                 this.fileResourceAuthUrl = this.getUrlForObtainingAccessToken(damIdResourcePathPairs);
+                this.viewAccessible = true;
               });
           });
       });
@@ -103,7 +114,8 @@ export class WorkflowDetailComponent implements OnInit {
         if (typeof runDetails[key] === 'string') {
           return runDetails[key];
         }
-      }));
+      })
+    );
   }
 
   private transformResponse(runDetails: any) {

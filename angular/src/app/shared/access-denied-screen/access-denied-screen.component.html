@@ -1,0 +1,21 @@
+<div class="access-denied">
+  <div class="icon-side">
+    <mat-icon>warning</mat-icon>
+  </div>
+  <div class="message-side">
+    <p>
+      You need to re-authorize this session before proceeding.
+    </p>
+
+    <ng-container *ngIf="authorizationUrl; else noAuthorizationUrl">
+      <p>
+        <a mat-stroked-button
+           color="primary"
+           [href]="authorizationUrl">Authorize</a>
+      </p>
+    </ng-container>
+
+    <ng-template #noAuthorizationUrl>
+    </ng-template>
+  </div>
+</div>

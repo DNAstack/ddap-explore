@@ -63,7 +63,8 @@ export class ResourceService {
     }
     const resourceKey = Object.keys(accessMap)
       .find((key) => key.includes(resourcePath));
-    return accessMap[resourceKey];
+    const resourceToken: IResourceToken = accessMap[resourceKey];
+    return this.validateResourceToken(resourceToken) ? resourceToken : null;
   }
 
   toResourceAccessMap(resourceTokens: IResourceTokens): {[key: string]: IResourceToken} {
@@ -73,6 +74,18 @@ export class ResourceService {
         accessMap[resource] = resourceTokens.access[value.access];
       });
     return accessMap;
+  }
+
+  validateResourceToken(resourceToken: IResourceToken): boolean {
+    return this.validateResourceTokenAsOf(resourceToken, Math.floor((new Date()).getTime() / 1000));
+  }
+
+  validateResourceTokenAsOf(resourceToken: IResourceToken, referenceUnixTimestampInSecond: number): boolean {
+    if (!resourceToken || !resourceToken['access_token']) {
+      return false;
+    }
+    const claims = JSON.parse(atob(resourceToken['access_token'].split('.')[1]));
+    return claims.exp > referenceUnixTimestampInSecond;
   }
 
   private lookupResourceTokenDescriptor(resourceTokens: IResourceTokens, resourcePath: string): ResourceTokens.IDescriptor {

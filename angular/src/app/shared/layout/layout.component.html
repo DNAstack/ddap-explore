@@ -1,9 +1,9 @@
 <div class="site-container {{viewController.view.leftSidebarOpened ? '' : 'zen-mode'}}">
   <ddaplib-main-header [siteName]="appConfig.title"
-                       [showRealmInput]="appConfig.featureRealmInputEnabled"
-                       [realmActions]="['edit']"
-                       (realmChangeAcknowledge)="onAcknowledge($event)"
-                       *ngIf="router.url != '/home'">
+    [showRealmInput]="appConfig.featureRealmInputEnabled"
+    [realmActions]="['edit']"
+    (realmChangeAcknowledge)="onAcknowledge($event)"
+    *ngIf="router.url != '/home'">
     <ddaplib-menu-apps [accessibleApps]="viewController.getAccessibleApps()"
       [realmId]="viewController.getRealmId()">
       <ng-container *ngIf="appConfig.featureAdministrationEnabled">
@@ -34,7 +34,12 @@
         </ng-container>
       </ng-container>
     </ddaplib-menu-apps>
-    <ddaplib-menu-profile *ngIf="appConfig.authorizationOnInitRequired"></ddaplib-menu-profile>
+    <ddaplib-menu-profile *ngIf="appConfig.authorizationOnInitRequired">
+      <button mat-menu-item *ngIf="userIsAuthorized">
+        <mat-icon>exit_to_app</mat-icon>
+        <span>Sign out</span>
+      </button>
+    </ddaplib-menu-profile>
   </ddaplib-main-header>
 
   <mat-progress-bar *ngIf="loader.progress$ | async"
@@ -50,12 +55,12 @@
       position="start"
       mode="side"
       [opened]="true"
-      >
+    >
       <!-- The inline CSS for this <span> is an exception as this is for testing. -->
       <span *ngIf="appConfig.featureRealmInputEnabled"
-            class="sandbox-warning"
-            style="position: absolute; left: 1rem; font-size: 0.75rem;"
-            matTooltip="This is sandbox testing environment">
+        class="sandbox-warning"
+        style="position: absolute; left: 1rem; font-size: 0.75rem;"
+        matTooltip="This is sandbox testing environment">
         Sandbox environment
       </span>
       <app-sidenav-left></app-sidenav-left>

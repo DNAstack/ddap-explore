@@ -1,6 +1,8 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { PaginationTypes } from '../../shared/paginator/pagination-type.enum';
 import { dam } from '../../shared/proto/dam-service';
@@ -21,6 +23,7 @@ export class WorkflowListSingleComponent implements OnInit {
   workflowRunsResponse: WorkflowRunsResponse;
   newlyCreatedWorkflows?: any[];
   paginationType = PaginationTypes.unidirectional;
+  viewAccessible: boolean;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -37,23 +40,36 @@ export class WorkflowListSingleComponent implements OnInit {
     const { damId, viewId } = this.route.snapshot.params;
 
     this.workflowService.getAllWesViews()
+      .pipe(
+        catchError((response: HttpErrorResponse) => {
+          this.viewAccessible = false;
+          return throwError(`Unable to fetch the WES views`);
+        })
+      )
       .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
         const resourcePath = this.workflowService.getResourcePathForView(damId, viewId, wesResourceViews);
         const damIdResourcePathPair = `${damId};${resourcePath}`;
 
         const accessMap = this.resourceAuthStateService.getAccess();
+
         if (accessMap && Object.keys(accessMap).length > 0) {
           this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(accessMap, resourcePath);
           this.getWorkflows(this.resourceToken['access_token']);
+          this.viewAccessible = true;
         } else {
           this.getAccessTokensForAuthorizedResources(damIdResourcePathPair)
             .pipe(
+              catchError((response: HttpErrorResponse) => {
+                this.viewAccessible = false;
+                return throwError(`Unable to check out the necessary access tokens`);
+              }),
               map(this.resourceService.toResourceAccessMap)
             )
             .subscribe((response) => {
               this.resourceAuthStateService.storeAccess(response);
               this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(response, resourcePath);
               this.getWorkflows(this.resourceToken['access_token']);
+              this.viewAccessible = true;
             });
         }
       });

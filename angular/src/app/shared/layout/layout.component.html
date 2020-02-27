@@ -2,8 +2,7 @@
   <ddaplib-main-header [siteName]="appConfig.title"
     [showRealmInput]="appConfig.featureRealmInputEnabled"
     [realmActions]="['edit']"
-    (realmChangeAcknowledge)="onAcknowledge($event)"
-    *ngIf="router.url != '/home'">
+    (realmChangeAcknowledge)="onAcknowledge($event)">
     <ddaplib-menu-apps [accessibleApps]="viewController.getAccessibleApps()"
       [realmId]="viewController.getRealmId()">
       <ng-container *ngIf="appConfig.featureAdministrationEnabled">
@@ -34,8 +33,9 @@
         </ng-container>
       </ng-container>
     </ddaplib-menu-apps>
-    <ddaplib-menu-profile *ngIf="appConfig.authorizationOnInitRequired">
-      <button mat-menu-item *ngIf="userIsAuthorized">
+    <ddaplib-menu-profile *ngIf="appConfig.authorizationOnInitRequired && accessControlService.isUserAuthorized()">
+      <button mat-menu-item
+        (click)="onSignOut()">
         <mat-icon>exit_to_app</mat-icon>
         <span>Sign out</span>
       </button>

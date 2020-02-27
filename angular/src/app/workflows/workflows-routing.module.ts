@@ -13,7 +13,7 @@ export const routes: Routes = [
   { path: 'operations/:damId/views/:viewId/runs/:runId', component: WorkflowDetailComponent},
   { path: 'operations/:damId/views/:viewId/runs/manage/add', component: WorkflowManageComponent},
   { path: 'run', pathMatch: 'full', component: WorkflowManageComponent },
-  { path: 'run/with', component: WorkflowManageComponent },
+  { path: 'run/:sourceUrl', component: WorkflowManageComponent },
   { path: 'workflows', component: RegisteredWorkflowListComponent },
   { path: 'operations', component: WorkflowListMultiComponent },
 ];

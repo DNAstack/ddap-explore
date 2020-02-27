@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
-import { Observable, throwError, zip } from 'rxjs';
+import { observable, Observable, throwError, zip } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { SimplifiedWesResourceViews } from '../workflows/workflow.model';
@@ -30,7 +30,7 @@ export enum UserAccessGrantStatus {
 export class AccessControlService {
   userAccessGrantState: UserAccessGrantStatus = UserAccessGrantStatus.UNCHECKED;
 
-  private cachedDamIdList: string[];
+  private latestDamIdList: string[];
   private finalStatusList: UserAccessGrantStatus[] = [
     UserAccessGrantStatus.AUTHORIZED,
     UserAccessGrantStatus.INITIATED_AUTHORIZATION,
@@ -49,12 +49,16 @@ export class AccessControlService {
   }
 
   enforceAuthorizationOnInitIfRequired(damIdList: string[]): Promise<UserAccessGrantStatus> {
+    return this.assertAuthorizationOnInit(damIdList, true);
+  }
+
+  assertAuthorizationOnInit(damIdList: string[], initiateAuthorizationFlowIfRequired: boolean): Promise<UserAccessGrantStatus> {
     if (!damIdList) {
-      damIdList = this.cachedDamIdList;
+      damIdList = this.latestDamIdList;
     }
 
     return new Promise<UserAccessGrantStatus>((resolve => {
-      this.cachedDamIdList = damIdList;
+      this.latestDamIdList = damIdList;
 
       this.appConfigService.get().subscribe((data: AppConfigModel) => {
         if (this.userAccessGrantState !== UserAccessGrantStatus.UNCHECKED) {
@@ -65,7 +69,7 @@ export class AccessControlService {
         this.userAccessGrantState = UserAccessGrantStatus.CHECKING;
 
         if (data.authorizationOnInitRequired) {
-          this.enforceAuthorization(damIdList, resolve);
+          this.enforceAuthorization(damIdList, resolve, initiateAuthorizationFlowIfRequired);
         } else {
           this.userAccessGrantState = UserAccessGrantStatus.ON_DEMAND;
           resolve(this.userAccessGrantState);
@@ -74,7 +78,16 @@ export class AccessControlService {
     }));
   }
 
-  initiateAuthorizationFlow(damIdResourcePathPairList: string[]) {
+  purgeSession() {
+    // TODO clear cookie too.
+    this.storage.clear();
+  }
+
+  isUserAuthorized() {
+    return this.userAccessGrantState === UserAccessGrantStatus.AUTHORIZED;
+  }
+
+  private initiateAuthorizationFlow(damIdResourcePathPairList: string[]) {
     this.resourceService.getAccessTokensForAuthorizedResources(damIdResourcePathPairList)
       .pipe(
         map(this.resourceService.toResourceAccessMap),
@@ -98,15 +111,11 @@ export class AccessControlService {
       });
   }
 
-  redirectToLoginPage(damIdResourcePathPairList: string[]) {
+  private redirectToLoginPage(damIdResourcePathPairList: string[]) {
     window.location.href = this.resourceService.getUrlForObtainingAccessToken(
       damIdResourcePathPairList,
       this.router.routerState.snapshot.url
     );
-  }
-
-  isUserAuthorized() {
-    return this.userAccessGrantState === UserAccessGrantStatus.AUTHORIZED;
   }
 
   private watchForFinalState(callback: any) {
@@ -117,7 +126,7 @@ export class AccessControlService {
     }
   }
 
-  private enforceAuthorization(damIdList: string[], resolve: any) {
+  private enforceAuthorization(damIdList: string[], resolve: any, initiateAuthorizationFlowIfRequired: boolean) {
     const currentTime = Math.floor(Date.now() / 1000);
 
     // Fetch the list of potentially required resources.
@@ -134,9 +143,10 @@ export class AccessControlService {
 
         // Get the access map
         const accessMap = this.resourceAuthStateService.getAccess();
+        let authorizationRequired = false;
 
         if (Object.keys(accessMap).length === 0) {
-          this.initiateAuthorizationFlow(damIdResourcePathPairList);
+          authorizationRequired = true;
         } else {
           let numberOfValidTokens = 0;
 
@@ -144,13 +154,22 @@ export class AccessControlService {
             numberOfValidTokens += this.resourceService.validateResourceTokenAsOf(access, currentTime) ? 1 : 0;
           });
 
-          if (damIdResourcePathPairList.length > numberOfValidTokens) {
-            this.initiateAuthorizationFlow(damIdResourcePathPairList);
-            // this.redirectToLoginPage(damIdResourcePathPairList);
+          if (damIdResourcePathPairList.length >= numberOfValidTokens) {
+            authorizationRequired = true;
           } else {
             this.userAccessGrantState = UserAccessGrantStatus.AUTHORIZED;
             resolve(this.userAccessGrantState);
           }
+        }
+
+        if (authorizationRequired) {
+          if (initiateAuthorizationFlowIfRequired) {
+            this.initiateAuthorizationFlow(damIdResourcePathPairList);
+          } else {
+            this.userAccessGrantState = UserAccessGrantStatus.AUTHORIZED;
+          }
+
+          resolve(this.userAccessGrantState);
         }
       });
   }

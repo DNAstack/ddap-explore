@@ -93,6 +93,12 @@ export class LayoutComponent implements OnInit {
     this.viewController.toggleLeftSidenav();
   }
 
+  onSignOut() {
+    const realmId = this.activatedRoute.snapshot.params.realmId;
+    this.accessControlService.purgeSession();
+    this.router.navigate(['/', realmId, 'lobby'], {queryParams: {after: 'deauthorization'}});
+  }
+
   private changeRealmAndGoToLogin(realm) {
     this.router.navigate(['/', realm]);
   }

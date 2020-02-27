@@ -13,6 +13,7 @@ import { AppFilterService } from './app-filter.service';
   providedIn: 'root',
 })
 export class AppConfigService {
+  private inflight = false;
   private cachedConfig: AppConfigModel;
 
   constructor(private http: HttpClient,
@@ -30,9 +31,31 @@ export class AppConfigService {
       });
     }
 
+    if (this.inflight) {
+      const self = this;
+      return new Observable<AppConfigModel>(subscriber => {
+        function watchForCompletion() {
+          if (!self.cachedConfig) {
+            setTimeout(watchForCompletion, 1000);
+
+            return;
+          }
+
+          subscriber.next(self.cachedConfig);
+          subscriber.complete();
+        }
+
+        subscriber.next(this.getDefault());
+        watchForCompletion();
+      });
+    }
+
+    this.inflight = true;
+
     return this.http.get<AppConfigModel>(`${environment.ddapApiUrl}/config`)
       .pipe(
         map(config => {
+          this.inflight = false;
           this.cachedConfig = config;
           this.viewController.addFilter(new AppFilterService(this.cachedConfig));
           return config;

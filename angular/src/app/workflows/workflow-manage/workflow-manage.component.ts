@@ -37,7 +37,6 @@ import { WorkflowService } from '../workflows.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class WorkflowManageComponent implements OnInit, OnDestroy {
-
   get wdlForm() {
     return this.workflowForm.get('wdl') as FormGroup;
   }
@@ -178,7 +177,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     zip(...executions.map((execution) =>
         this.workflowService.runWorkflow(damId, wesViewId, execution, wesAccessToken)
       ))
-      .subscribe((runs: object[]) => this.navigateUp('../operations', runs, damId, wesViewId))
+      .subscribe((runs: object[]) => this.navigateUp('operations', runs, damId, wesViewId))
     ;
   }
 
@@ -186,9 +185,20 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     this.viewController.toggleLeftSidenav();
   }
 
+  protected getSourceUrl(): string {
+    const { sourceUrl } = this.route.snapshot.params;
+
+    if (!sourceUrl) {
+      return null;
+    }
+
+    return atob(sourceUrl);
+  }
+
   protected navigateUp = (path: string, runs: object[], damId, wesView) => {
+    const actualPath = (this.getSourceUrl() ? '../..' : '..') + '/' + path;
     const { viewId } = this.route.snapshot.params;
-    const navigatePath = viewId ? [path] : [path, damId, 'views', wesView, 'runs'];
+    const navigatePath = viewId ? [actualPath] : [actualPath, damId, 'views', wesView, 'runs'];
     this.router.navigate(navigatePath, { relativeTo: this.route, state: { runs } });
   }
 
@@ -228,11 +238,11 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   }
 
   private loadPredefinedWorkflowDescription() {
-    const { sourceUrl } = this.route.snapshot.params;
+    const sourceUrl = this.getSourceUrl();
 
     if (sourceUrl) {
       this.workflowForm.get('wdl').patchValue('# Loading...');
-      this.trsService.getDescriptorFrom(decodeURIComponent(sourceUrl))
+      this.trsService.getDescriptorFrom(sourceUrl)
         .subscribe(script => this.workflowForm.get('wdl').patchValue(script));
     }
   }

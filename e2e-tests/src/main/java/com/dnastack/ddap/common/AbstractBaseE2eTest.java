@@ -23,6 +23,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.util.EntityUtils;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -43,6 +44,7 @@ import static org.junit.Assert.fail;
 @SuppressWarnings("Duplicates")
 @Slf4j
 public abstract class AbstractBaseE2eTest {
+    public static final String DDAP_E2E_TEST_MODE = optionalEnv("E2E_TEST_MODE", "normal");
 
     public static final String DDAP_BASE_URL = requiredEnv("E2E_BASE_URI");
     public static final String DDAP_USERNAME = optionalEnv("E2E_BASIC_USERNAME",null);
@@ -86,6 +88,9 @@ public abstract class AbstractBaseE2eTest {
 
     @BeforeClass
     public static void staticSetup() {
+        log.debug("Test Mode: {}", DDAP_E2E_TEST_MODE);
+        Assume.assumeThat(DDAP_E2E_TEST_MODE, equalTo("normal"));
+
         switch (LOGIN_STRATEGY_NAME) {
             case PERSONA_LOGIN_STRATEGY:
                 loginStrategy = new PersonaLoginStrategy();

@@ -35,14 +35,15 @@ export class ResourceService {
   getUrlForObtainingAccessToken(damIdResourcePathPairs: string[], redirectUri: string): string {
     const realmId = _get(this.activatedRoute, 'root.firstChild.snapshot.params.realmId', this.realmStateService.getRealm());
     const resources = damIdResourcePathPairs.map((resource) => {
-      return `resource=${resource}`;
+      return `resource=${encodeURIComponent(resource)}`;
     });
-    return `${environment.ddapApiUrl}/realm/${realmId}/resources/authorize?${resources.join('&')}&redirectUri=${redirectUri}`;
+    return `${environment.ddapApiUrl}/realm/${realmId}/resources/authorize?${resources.join('&')}`
+      + `&redirectUri=${encodeURIComponent(redirectUri)}`;
   }
 
   getAccessTokensForAuthorizedResources(damIdResourcePathPairs: string[]): Observable<IResourceTokens> {
     const resources = damIdResourcePathPairs.map((resource) => {
-      return `resource=${resource}`;
+      return `resource=${encodeURIComponent(resource)}`;
     });
     return this.http.get<IResourceTokens>(
       `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/resources/checkout?${resources.join('&')}`

@@ -33,7 +33,7 @@ export class LayoutComponent implements OnInit {
               private http: HttpClient,
               private activatedRoute: ActivatedRoute,
               public appConfigService: AppConfigService,
-              private accessControlService: AccessControlService,
+              public accessControlService: AccessControlService,
               private identityService: IdentityService,
               public viewController: ViewControllerService,
               private damInfoStore: DamInfoStore) {

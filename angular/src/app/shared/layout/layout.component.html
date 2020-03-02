@@ -1,6 +1,6 @@
 <div class="site-container {{viewController.view.leftSidebarOpened ? '' : 'zen-mode'}}">
   <ddaplib-main-header [siteName]="appConfig.title"
-    [showRealmInput]="appConfig.featureRealmInputEnabled"
+    [isSandbox]="appConfig.featureRealmInputEnabled"
     [realmActions]="['edit']"
     (realmChangeAcknowledge)="onAcknowledge($event)">
     <ddaplib-menu-apps [accessibleApps]="viewController.getAccessibleApps()"
@@ -56,13 +56,6 @@
       mode="side"
       [opened]="true"
     >
-      <!-- The inline CSS for this <span> is an exception as this is for testing. -->
-      <span *ngIf="appConfig.featureRealmInputEnabled"
-        class="sandbox-warning"
-        style="position: absolute; left: 1rem; font-size: 0.75rem;"
-        matTooltip="This is sandbox testing environment">
-        Sandbox environment
-      </span>
       <app-sidenav-left></app-sidenav-left>
     </mat-sidenav>
     <mat-sidenav-content>
@@ -72,10 +65,3 @@
     </mat-sidenav-content>
   </mat-sidenav-container>
 </div>
-
-<!--<div *ngIf="appConfig.featureRealmInputEnabled"-->
-<!--  class="ddap-realm-select">-->
-<!--  <ddaplib-realm-input (onAcknowledge)="onAcknowledge($event)"-->
-<!--    actions="['edit']">-->
-<!--  </ddaplib-realm-input>-->
-<!--</div>-->

@@ -51,6 +51,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void searchBeaconWithValidQuery() throws IOException {
+        ddapPage.getNavBar().goToApp("product-app-menu-data");
         ddapPage.getNavBar()
             .goTo(dataLink());
 
@@ -71,6 +72,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void searchBeaconWithInvalidQuery() throws IOException {
+        ddapPage.getNavBar().goToApp("product-app-menu-data");
         ddapPage.getNavBar()
             .goTo(dataLink());
 
@@ -92,6 +94,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void backLinkFromDataList() {
+        ddapPage.getNavBar().goToApp("product-app-menu-data");
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -107,6 +110,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void backLinkFromDataDetails() {
+        ddapPage.getNavBar().goToApp("product-app-menu-data");
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -127,6 +131,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void limitSearchFromDataDetails() throws IOException {
+        ddapPage.getNavBar().goToApp("product-app-menu-data");
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -153,6 +158,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void limitSearchOnSearchPage() throws IOException {
+        ddapPage.getNavBar().goToApp("product-app-menu-data");
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -179,6 +185,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void changeQueryOnSearchPageAndGoBack() throws IOException {
+        ddapPage.getNavBar().goToApp("product-app-menu-data");
         ddapPage.getNavBar()
                 .goTo(dataLink());
 
@@ -218,6 +225,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void testBRCA2SearchLink() throws IOException {
+        ddapPage.getNavBar().goToApp("product-app-menu-data");
         ddapPage.getNavBar()
                 .goTo(dataLink());
 

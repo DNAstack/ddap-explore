@@ -30,7 +30,7 @@
     "ang-jsoneditor": "1.8.3",
     "angular7-json-schema-form": "^1.0.4",
     "dayjs": "^1.8.16",
-    "ddap-common-lib": "0.0.19-54-g1bc367a",
+    "ddap-common-lib": "0.0.19-57-g6b99c7e",
     "hammerjs": "^2.0.8",
     "jsoneditor": "^7.0.4",
     "lodash.clonedeep": "^4.5.0",

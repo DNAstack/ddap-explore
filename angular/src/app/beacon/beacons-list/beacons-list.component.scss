@@ -1,0 +1,16 @@
+@import '~ddap-common-lib/styles/modules/colors';
+
+ddaplib-header ddaplib-header-add-btn {
+  margin-left: 5px;
+}
+
+::ng-deep mat-card {
+  margin: 1rem 0;
+  mat-card-content {
+    padding: 0 1rem;
+  }
+  mat-card-actions {
+    margin-left: 0;
+  }
+}
+

@@ -1,0 +1,45 @@
+<div>
+    <div class="m-b-sm">
+        <div class="h5">{{filter.name}}</div>
+    </div>
+    <div *ngIf="filter.type == 'string'">
+        <mat-form-field floatLabel="never" style="width: 100%">
+            <input matInput [(ngModel)]="filter.value">
+        </mat-form-field>
+    </div>
+    <div *ngIf="filter.type == 'number'">
+        <mat-form-field floatLabel="never" style="width: 100%">
+            <input matInput type="number" [(ngModel)]="filter.value">
+        </mat-form-field>
+    </div>
+    <div *ngIf="filter.type == 'boolean'">
+        <mat-checkbox [(ngModel)]="filter.value"></mat-checkbox>
+    </div>
+    <div *ngIf="filter.suggestions && filter.value">
+        <div *ngFor="let suggestion of filter.suggestions(filter.value)">
+            {{suggestion}}
+        </div>
+    </div>
+    <div *ngIf="filter.type == 'enum'">
+        <span *ngIf="filter.exclusive">
+            <mat-radio-group value="{{filter.value}}">
+                <div *ngFor="let option of filter.options">
+                    <mat-radio-button color="accent" class="m-r" value="{{option}}">{{option}}</mat-radio-button>
+                </div>
+            </mat-radio-group>
+        </span>
+        <div *ngIf="!filter.exclusive">
+            <div class="m-b-sm" >
+                <button class="m-r" mat-button color="accent" (click)="selectAll(filter)">
+                    All
+                </button>
+                <button mat-button color="accent" (click)="selectNone(filter)">
+                    None
+                </button>
+            </div>
+            <div *ngFor="let option of filter.options">
+                <mat-checkbox>{{option}}</mat-checkbox>
+            </div>
+        </div>
+    </div>
+</div>

@@ -32,6 +32,11 @@ const routes: Routes = [
         loadChildren: () => import('./workflows/workflows.module')
           .then(mod => mod.WorkflowsModule),
       },
+      {
+        path: 'beacon',
+        loadChildren: () => import('./beacon/beacon.module')
+          .then(mod => mod.BeaconModule),
+      },
     ],
   },
 ];

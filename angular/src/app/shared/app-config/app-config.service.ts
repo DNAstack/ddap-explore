@@ -84,6 +84,7 @@ export class AppConfigService {
       featureRealmInputEnabled: true,
       featureAdministrationEnabled: true,
       featureExploreDataEnabled: true,
+      featureBeaconsEnabled: true,
       featureWorkflowsEnabled: true,
       featureWorkflowsTrsIntegrationEnabled: true,
       trsBaseUrl: null,
@@ -104,6 +105,14 @@ export class AppConfigService {
         isApp: true,
       })
       .registerModule({
+        key: 'data-explorer',
+        name: 'Explorer',
+        iconName: 'navigation',
+        routerLink: 'data/explorer',
+        parentKey: 'data',
+        isApp: false,
+      })
+      .registerModule({
         key: 'data-collections',
         name: 'Collections',
         iconName: 'collections_bookmark',
@@ -120,7 +129,31 @@ export class AppConfigService {
         isApp: false,
         isExperimental: true,
       });
-
+      this.viewController
+      .registerModule({
+        key: 'beacon',
+        name: 'Beacon',
+        iconClasses: 'icon icon-explore',
+        requiredFeatureFlags: ['featureBeaconsEnabled'],
+        routerLink: 'beacon',
+        isApp: true,
+      })
+      .registerModule({
+        key: 'network',
+        name: 'Network',
+        iconName: 'wifi_tethering',
+        routerLink: 'beacon/network',
+        parentKey: 'beacon',
+        isApp: false,
+      })
+      .registerModule({
+        key: 'search',
+        name: 'Search',
+        iconName: 'search',
+        routerLink: 'beacon/search',
+        parentKey: 'beacon',
+        isApp: false,
+      });
     this.viewController
       .registerModule({
         key: 'analytics',

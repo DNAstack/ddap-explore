@@ -1,0 +1,99 @@
+<ddaplib-header icon="search" label="Search">
+</ddaplib-header>
+
+<ddaplib-main style="padding:0">
+  <mat-drawer-container style="height:100%" [autosize]="true">
+          <mat-drawer mode="side" [(opened)]="view.showQuery" style="min-width:400px; max-width:400px">
+              <mat-toolbar class="tertiary-toolbar"
+                  style="height: 64px; position:absolute; top: 0;">
+                  <mat-toolbar-row>
+                      <div>Query</div>
+                      <span class="fill-space"></span>
+                      <button tabindex="-1" mat-icon-button (click)="refreshBeacons()" matTooltip="Refresh">
+                          <mat-icon>refresh</mat-icon>
+                      </button>
+                      <button tabindex="-1" mat-icon-button (click)="closeTables()" matTooltip="Close Query">
+                          <mat-icon>close</mat-icon>
+                      </button>
+                  </mat-toolbar-row>
+              </mat-toolbar>
+              <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
+                  <mat-progress-bar *ngIf="view.isSearching" mode="indeterminate" color="accent"></mat-progress-bar>
+                  <cover-message style="flex-grow: 1" *ngIf="view.errorLoadingBeacons" message="Error Loading Beacons" icon="error_outline"></cover-message>
+                  <cover-message style="flex-grow: 1" *ngIf="!view.isRefreshingBeacons && (!registries || registries.length == 0)" message="No Registries" icon="not_interested"></cover-message>
+                  <div style="flex:1; height:100%;" *ngIf="registries && registries.length > 0" class="p-a">
+                    <form class="beacon-query-form">
+                      <mat-form-field>
+                        <mat-label>Network <span *ngIf="registries">({{ registries.length }})</span></mat-label>
+                        <mat-select name="registry" [(ngModel)]="registry" (selectionChange)="refreshBeacons()">
+                          <mat-option *ngFor="let r of registries" [value]="r">{{r.name}}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      <mat-form-field *ngIf="registry">
+                        <mat-label>Beacon <span *ngIf="beacons">({{ beacons.length }})</span></mat-label>
+                        <mat-select name="beacon" [(ngModel)]="beacon" (selectionChange)="refreshAssemblies()">
+                          <mat-option *ngFor="let b of beacons" [value]="b">{{b.name}}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      <mat-form-field *ngIf="beacon">
+                        <mat-label>Assembly <span *ngIf="assemblies">({{ assemblies.length }})</span></mat-label>
+                        <mat-select name="assembly" [(ngModel)]="query.reference">
+                          <mat-option *ngFor="let a of assemblies" [value]="a">{{a}}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Chromosome</mat-label>
+                        <input matInput name="chromosome" [(ngModel)]="query.chromosome">
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Position</mat-label>
+                        <input matInput name="position" [(ngModel)]="query.position">
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Reference</mat-label>
+                        <input matInput name="reference" [(ngModel)]="query.referenceAllele">
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Alternate</mat-label>
+                        <input matInput name="alternate" [(ngModel)]="query.allele">
+                      </mat-form-field>
+                    </form>
+                    <button (click)="doSearch()" mat-stroked-button color="accent">
+                      Search
+                    </button>
+                  </div>
+              </div>
+          </mat-drawer>
+          <mat-drawer-content>
+            <div style="display:flex; flex: 1; flex-direction: column;" class="p-a">
+              <div *ngIf="beaconResponses" class="mat-table" style="width:100%">
+                <div class="mat-header-row">
+                    <div class="mat-header-cell">
+                      Beacon
+                    </div>
+                    <div class="mat-header-cell">
+                      Organization
+                    </div>
+                    <div class="mat-header-cell">
+                      Exists
+                    </div>
+                </div>
+                <div class="mat-row" *ngFor="let beaconResponse of beaconResponses">
+                    <div class="mat-cell"
+                        [ngClass]="{'no-wrap': !view.wrapTableContent}">
+                        {{beaconResponse.beacon.name}}
+                    </div>
+                    <div class="mat-cell"
+                        [ngClass]="{'no-wrap': !view.wrapTableContent}" >
+                        {{beaconResponse.beacon.organization}}
+                    </div>
+                    <div class="mat-cell"
+                        [ngClass]="{'no-wrap': !view.wrapTableContent}" >
+                        {{beaconResponse.response}}
+                    </div>
+                </div>
+              </div>
+            </div>
+          </mat-drawer-content>
+  </mat-drawer-container>
+</ddaplib-main>

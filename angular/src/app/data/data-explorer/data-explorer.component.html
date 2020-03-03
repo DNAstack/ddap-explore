@@ -1,0 +1,36 @@
+<ddaplib-header icon="navigation" label="Explorer">
+</ddaplib-header>
+<ddaplib-main>
+    <div style="display:flex; flex-direction:column;">
+        <!--<mat-progress-bar mode="indeterminate"></mat-progress-bar>-->
+        <cover-message style="flex-grow: 1" *ngIf="collections.length == 0" message="No Collections"
+            icon="not_interested"></cover-message>
+        <div style="display:flex; flex-direction:row; flex-wrap: wrap;" *ngIf="collections.length > 0">
+            <div class="b-a m-b m-r" style="width:400px; display: flex; flex-direction: column" *ngFor="let collection of collections">
+                <div class="p-a bg-white" style="display: flex; flex-direction: column;"> 
+                    <div style="display: flex; flex-direction: column;">
+                        <div class="m-b" style="height:150px; text-align: center;">
+                            <img class="m-r" *ngIf="collection.imgUrl" src="{{collection.imgUrl}}"
+                                style="max-height:150px; width:100%; object-fit: cover" />
+                            <div style="flex-grow: 1"></div>
+                        </div>
+                        <div>
+                            <div class="h2 m-b-sm">{{collection.name}}</div>
+                            <div class="text-muted m-b-sm">{{collection.description}}</div>
+                            <div><a target="_blank" href="{{collection.organization.contact.url}}">{{collection.organization.name}}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white" style="flex-grow: 1"></div>
+                <mat-divider></mat-divider>
+                <div style="display: flex; flex-shrink: 0;" class="p-a">
+                    <span class="fill-space"></span>
+                    <button routerLink="./{{collection.id}}" mat-stroked-button color="accent">
+                        Explore
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ddaplib-main>

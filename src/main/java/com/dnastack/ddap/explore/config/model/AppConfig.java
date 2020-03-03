@@ -18,6 +18,7 @@ public class AppConfig {
     private boolean featureAdministrationEnabled;
     private boolean featureExploreDataEnabled;
     private boolean featureWorkflowsEnabled;
+    private boolean featureBeaconsEnabled;
     private boolean featureWorkflowsTrsIntegrationEnabled;
     private String trsBaseUrl;
     private List<String> trsAcceptedToolClasses;

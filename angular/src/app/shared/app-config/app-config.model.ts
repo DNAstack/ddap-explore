@@ -7,6 +7,7 @@ export interface AppConfigModel {
   featureRealmInputEnabled: boolean;
   featureAdministrationEnabled: boolean;
   featureExploreDataEnabled: boolean;
+  featureBeaconsEnabled: boolean;
   featureWorkflowsEnabled: boolean;
   featureWorkflowsTrsIntegrationEnabled: boolean; // deprecated/obsolete
   trsBaseUrl: string;

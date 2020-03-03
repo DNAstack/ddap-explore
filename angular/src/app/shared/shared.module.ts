@@ -84,10 +84,8 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MatTableModule,
     MatTooltipModule,
     MatSlideToggleModule,
-
     DdapLayoutModule,
     DdapFormModule,
-
     MenuModule,
   ],
   exports: [
@@ -119,10 +117,8 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MatTableModule,
     MatTooltipModule,
     MatSlideToggleModule,
-
     DdapLayoutModule,
     DdapFormModule,
-
     BeaconSearchBarComponent,
     BeaconResultComponent,
     ResourceLogoComponent,

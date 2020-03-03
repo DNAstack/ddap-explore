@@ -18,11 +18,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -165,13 +167,19 @@ public abstract class AbstractBaseE2eTest {
         DamService.DamConfig.Builder damConfigBuilder = DamService.DamConfig.newBuilder();
         validateProtoBuf(config, damConfigBuilder);
 
-        final String modificationPayload = format("{ \"item\": %s }", config);
         /*
          Use the master realm because some tests break the ability to reset realms in future runs.
          In particular, tests that reset the IC config can change the 'ga4gh_dam` client ID which needs
          to be a particular value (configured in master) for passport tokens to have a validatable audience
          */
         final CookieStore cookieStore = loginStrategy.performPersonaLogin(persona.getId(), "master");
+
+        // There is logic in the DAM and IC that syncs client information in Hydra based on the state in the DAM/IC config.
+        // Unfortunately, it does this based on whatever realm it runs from,
+        // meaning you can wipe out a client accidentally while running the e2e tests.
+        String damConfig = appendMaterRealmClientsToExistingClientsInConfig(cookieStore, config);
+
+        final String modificationPayload = format("{ \"item\": %s }", damConfig);
 
         final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
         HttpPut request = new HttpPut(format("%s/dam/v1alpha/%s/config", DDAP_DAM_BASE_URL, realmName));
@@ -185,6 +193,39 @@ public abstract class AbstractBaseE2eTest {
         assertThat(format("Unable to set realm config. Response:\n%s\nConfig:\n%s", responseBody, config),
                    response.getStatusLine().getStatusCode(),
                    allOf(greaterThanOrEqualTo(200), lessThan(300)));
+    }
+
+    private static JSONObject getClientsFromMasterRealm(CookieStore cookieStore) throws IOException {
+        HttpClient httpclient = HttpClientBuilder.create()
+            .setDefaultCookieStore(cookieStore)
+            .build();
+
+        HttpGet request = new HttpGet(format("%s/dam/v1alpha/master/config", DDAP_DAM_BASE_URL));
+        HttpResponse response = httpclient.execute(request);
+        String responseBody = EntityUtils.toString(response.getEntity());
+
+        JSONObject damConfig = new JSONObject(responseBody);
+        JSONObject clients = damConfig.getJSONObject("clients");
+
+        log.debug("Parsed clients from master realm: {}", clients);
+
+        return clients;
+    }
+
+    private static String appendMaterRealmClientsToExistingClientsInConfig(CookieStore cookieStore, String damConfig) throws IOException {
+        JSONObject damConfigClients = new JSONObject(damConfig).getJSONObject("clients");
+        JSONObject masterRealmClients = getClientsFromMasterRealm(cookieStore);
+        masterRealmClients.keySet()
+            .forEach((masterRealmClient) -> {
+                damConfigClients.put(masterRealmClient, masterRealmClients.get(masterRealmClient));
+            });
+
+        JSONObject newDamConfig = new JSONObject(damConfig);
+        newDamConfig.put("clients", damConfigClients);
+
+        log.debug("DAM Config was altered to include master realm clients: {}", newDamConfig);
+
+        return newDamConfig.toString();
     }
 
     protected static String loadTemplate(String resourcePath) {

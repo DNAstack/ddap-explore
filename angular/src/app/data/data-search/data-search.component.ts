@@ -136,7 +136,7 @@ export class DataSearchComponent implements OnDestroy, OnInit {
 
   private getUrlForObtainingAccessToken(damIdResourcePathPairs: string[] = []): string {
     const redirectUri = this.getRedirectUrl();
-    return this.resourceService.getUrlForObtainingAccessToken(damIdResourcePathPairs, encodeURIComponent(redirectUri));
+    return this.resourceService.getUrlForObtainingAccessToken(damIdResourcePathPairs, redirectUri);
   }
 
   private getRedirectUrl(): string {

@@ -85,8 +85,14 @@ export class ResourceService {
     if (!resourceToken || !resourceToken['access_token']) {
       return false;
     }
-    const claims = JSON.parse(atob(resourceToken['access_token'].split('.')[1]));
-    return claims.exp > referenceUnixTimestampInSecond;
+    try {
+      const claims = JSON.parse(atob(resourceToken['access_token'].split('.')[1]));
+      return claims.exp > referenceUnixTimestampInSecond;
+    } catch (e) {
+      // TODO returning true for non-jwt access tokens
+      console.warn('Token cannot be validated');
+      return true;
+    }
   }
 
   private lookupResourceTokenDescriptor(resourceTokens: IResourceTokens, resourcePath: string): ResourceTokens.IDescriptor {

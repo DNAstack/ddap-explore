@@ -14,3 +14,7 @@ div.flex {
 .input-select {
   width: 9rem;
 }
+
+:host(ddap-beacon-search-bar) {
+  flex: 1;
+}

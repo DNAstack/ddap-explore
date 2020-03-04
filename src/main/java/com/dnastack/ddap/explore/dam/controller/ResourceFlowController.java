@@ -17,6 +17,7 @@ import com.dnastack.ddap.ic.oauth.model.TokenResponse;
 import dam.v1.DamService.ResourceTokens;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -34,6 +35,7 @@ import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicSer
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
 
 @Slf4j
@@ -96,6 +98,34 @@ public class ResourceFlowController {
                              .location(authorizeUri)
                              .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString())
                              .build();
+
+    }
+
+    @GetMapping("/api/v1alpha/realm/{realm}/resources/deauthorize")
+    public ResponseEntity<?> deauthorizeResources(ServerHttpRequest request,
+                                                  @PathVariable String realm,
+                                                  @RequestParam(required = false) URI redirectUri) {
+        URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
+
+        // Nuke all cookies
+        // This is to deal with stale cart checkout tokens.
+        HttpHeaders headers = new HttpHeaders();
+        request.getCookies().forEach((name, cookies) -> headers.set(SET_COOKIE, format("%s=; Max-Age=0; Path=/", name)));
+
+        var needRedirection = redirectUri != null;
+        var responseBuilder = ResponseEntity.status(needRedirection ? TEMPORARY_REDIRECT : OK)
+                .headers(headers)
+                .header(SET_COOKIE,
+                        cookiePackager.packageToken("",
+                                cookieDomainPath.getHost(),
+                                DAM.cookieName(TokenKind.OAUTH_STATE)).toString()
+                );
+
+        if (needRedirection) {
+            responseBuilder = responseBuilder.location(redirectUri);
+        }
+
+        return responseBuilder.build();
 
     }
 

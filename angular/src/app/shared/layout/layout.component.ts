@@ -89,14 +89,13 @@ export class LayoutComponent implements OnInit {
     }
   }
 
-  toggleLeftSideNav() {
-    this.viewController.toggleLeftSidenav();
-  }
-
   onSignOut() {
     const realmId = this.activatedRoute.snapshot.params.realmId;
-    this.accessControlService.purgeSession();
-    this.router.navigate(['/', realmId, 'lobby'], {queryParams: {after: 'deauthorization'}});
+    this.http.get(`/api/v1alpha/realm/${realmId}/resources/deauthorize`)
+      .subscribe(observer => {
+        this.accessControlService.purgeSession();
+        this.router.navigate(['/', realmId, 'lobby'], {queryParams: {after: 'deauthorization'}});
+      });
   }
 
   private changeRealmAndGoToLogin(realm) {

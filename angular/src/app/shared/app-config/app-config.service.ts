@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ErrorHandlerService, ViewControllerService } from 'ddap-common-lib';
+import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -9,6 +11,7 @@ import { environment } from '../../../environments/environment';
 import { AppConfigModel } from './app-config.model';
 import { AppFilterService } from './app-filter.service';
 
+const EXP_FLAG = 'exp_flag';
 @Injectable({
   providedIn: 'root',
 })
@@ -18,8 +21,15 @@ export class AppConfigService {
 
   constructor(private http: HttpClient,
               private errorHandler: ErrorHandlerService,
-              private viewController: ViewControllerService
+              private viewController: ViewControllerService,
+              private route: ActivatedRoute,
+              @Inject(LOCAL_STORAGE) private storage: StorageService
   ) {
+    const expFlag = this.route.snapshot.queryParams[EXP_FLAG];
+    if (expFlag !== undefined) {
+      this.storage.set(EXP_FLAG, expFlag);
+    }
+    this.viewController.setExperimentalFlag(this.storage.get(EXP_FLAG));
     this.registerModules();
   }
 
@@ -108,6 +118,7 @@ export class AppConfigService {
         routerLink: 'data/saved',
         parentKey: 'data',
         isApp: false,
+        isExperimental: true,
       });
 
     this.viewController

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AgGridModule } from 'ag-grid-angular';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
@@ -23,6 +24,13 @@ export class BeaconListComponent implements OnInit {
     errorLoadingBeacons: boolean,
     wrapTableContent: boolean
   };
+  grid: any;
+
+  columnDefs: any[];
+  rowData: any[];
+
+  private gridApi;
+  private gridColumnApi;
 
   constructor(private router: Router,
               private appConfigService: AppConfigService,
@@ -35,6 +43,29 @@ export class BeaconListComponent implements OnInit {
                   errorLoadingBeacons : false,
                   wrapTableContent : false,
                 };
+
+                this.grid = {
+                  animateRows: true,
+                  multiSortKey: 'ctrl',
+                  defaultColumnDefinition: {
+                    sortable: true,
+                    resizable: true,
+                    filter: true,
+                  },
+                  floatingFilter: true,
+                  paginationAutoPageSize: true,
+                  makeFullWidth: true,
+                  pagination: false,
+                  domLayout: 'domLayout',
+                  suppressCellSelection: true,
+                };
+
+                this.columnDefs = [
+                  {field: 'name'},
+                  {field: 'organization'},
+                ];
+
+                this.rowData = [];
   }
 
   ngOnInit(): void {
@@ -47,6 +78,19 @@ export class BeaconListComponent implements OnInit {
         this.router.navigate(['/']);
       }
     });
+  }
+
+  onGridReady(params) {
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+    if (this.grid.makeFullWidth) {
+      params.api.sizeColumnsToFit();
+      window.addEventListener('resize', function() {
+        setTimeout(function() {
+          params.api.sizeColumnsToFit();
+        });
+      });
+    }
   }
 
   private initialize() {
@@ -65,6 +109,17 @@ export class BeaconListComponent implements OnInit {
     this.view.isRefreshingBeacons = true;
     this.beaconNetworkService.getBeacons().then(
       data => {
+        const results = [];
+        for (let i = 0; i < data.length; i++) {
+          const row = {
+            name : data[i]['name'],
+            organization : data[i]['organization'],
+          };
+          results.push(row);
+        }
+        this.rowData = results;
+        this.gridApi.setRowData(results);
+
         this.beacons = data;
         this.view.isRefreshingBeacons = false;
       },

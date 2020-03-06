@@ -23,6 +23,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { AgGridModule } from 'ag-grid-angular';
 import { DdapFormModule, DdapLayoutModule, MenuModule, ViewControllerService } from 'ddap-common-lib';
 import { TagInputModule } from 'ngx-chips';
 import { ClipboardModule } from 'ngx-clipboard';
@@ -60,7 +61,6 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     ClipboardModule,
     ReactiveFormsModule,
     TagInputModule,
-
     MatAutocompleteModule,
     MatCardModule,
     MatCheckboxModule,
@@ -85,6 +85,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     DdapLayoutModule,
     DdapFormModule,
     MenuModule,
+    AgGridModule.withComponents([]),
   ],
   exports: [
     CommonModule,

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { Router } from '@angular/router';
+import { AgGridModule } from 'ag-grid-angular';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
@@ -35,11 +36,34 @@ export class BeaconSearchComponent implements OnInit {
     showQuery: boolean
   };
 
+  grid: any;
+
+  columnDefs: any[];
+  rowData: any[];
+
+  private gridApi;
+  private gridColumnApi;
+
   constructor(private router: Router,
               private appConfigService: AppConfigService,
               private beaconConfigService: BeaconConfigService,
               private beaconNetworkService: BeaconNetworkService
               ) {
+
+                this.grid = {
+                  animateRows: true,
+                  multiSortKey: 'ctrl',
+                  defaultColumnDefinition: {
+                    sortable: true,
+                    resizable: true,
+                    filter: true,
+                  },
+                  makeFullWidth: true,
+                  pagination: false,
+                  domLayout: 'autoHeight',
+                  enableStatusBar: true,
+                  suppressCellSelection: true,
+                };
 
                 this.beaconResponses = [];
 
@@ -51,6 +75,15 @@ export class BeaconSearchComponent implements OnInit {
                   wrapTableContent : false,
                   showQuery: true,
                 };
+
+
+                this.columnDefs = [
+                  {field: 'beacon'},
+                  {field: 'organization'},
+                  {field: 'exists'},
+                ];
+
+                this.rowData = [];
   }
 
   ngOnInit(): void {
@@ -79,6 +112,18 @@ export class BeaconSearchComponent implements OnInit {
       this.query.position - 1, // UI is 1-based, API is 0-based
       this.query.reference, this.query.referenceAllele).then(
       data => {
+
+        const results = [];
+        for (let i = 0; i < data.length; i++) {
+          const row = {
+            beacon : data[i]['beacon']['name'],
+            organization : data[i]['beacon']['organization'],
+            exists : data[i]['response'],
+          };
+          results.push(row);
+        }
+        this.rowData = results;
+        this.gridApi.setRowData(results);
         this.beaconResponses = data;
         this.view.isSearching = false;
       },
@@ -87,6 +132,19 @@ export class BeaconSearchComponent implements OnInit {
         this.view.isSearching = false;
       }
     );
+  }
+
+  onGridReady(params) {
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+    if (this.grid.makeFullWidth) {
+      params.api.sizeColumnsToFit();
+      window.addEventListener('resize', function() {
+        setTimeout(function() {
+          params.api.sizeColumnsToFit();
+        });
+      });
+    }
   }
 
   private initialize() {

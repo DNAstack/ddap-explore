@@ -27,6 +27,8 @@
     "@angular/router": "^8.2.14",
     "@ngx-loading-bar/core": "^4.2.0",
     "@ngx-loading-bar/http-client": "^4.2.0",
+    "ag-grid-angular": "^22.1.1",
+    "ag-grid-community": "^22.1.1",
     "ang-jsoneditor": "1.8.3",
     "angular7-json-schema-form": "^1.0.4",
     "dayjs": "^1.8.21",

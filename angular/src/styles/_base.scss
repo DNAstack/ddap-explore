@@ -1,5 +1,11 @@
 @import "modules/colors";
 
+// Ag Grid
+// TODO: move to a seperate file
+@import "~ag-grid-community/dist/styles/ag-grid.css";
+@import "~ag-grid-community/dist/styles/ag-theme-balham.css";
+@import "~ag-grid-community/dist/styles/ag-theme-material.css";
+
 @import '~@angular/material/theming';
 // Plus imports for other components in your app.
 
@@ -252,4 +258,13 @@ html {
 
 .font-bold {
   font-weight: bold;
+}
+
+/** Grids **/
+.ag-theme-material .ag-row.ag-row-last {
+    border-bottom: none !important;
+}
+
+.ag-theme-material .ag-header {
+    font-size: inherit;
 }

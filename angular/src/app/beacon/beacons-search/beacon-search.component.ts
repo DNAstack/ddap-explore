@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AgGridModule } from 'ag-grid-angular';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
@@ -36,6 +36,9 @@ export class BeaconSearchComponent implements OnInit {
     showQuery: boolean
   };
 
+  selectedRegistryId: string;
+  selectedBeaconId: string;
+
   grid: any;
 
   columnDefs: any[];
@@ -44,10 +47,13 @@ export class BeaconSearchComponent implements OnInit {
   private gridApi;
   private gridColumnApi;
 
+  private queryParameters: any;
+
   constructor(private router: Router,
               private appConfigService: AppConfigService,
               private beaconConfigService: BeaconConfigService,
-              private beaconNetworkService: BeaconNetworkService
+              private beaconNetworkService: BeaconNetworkService,
+              private route: ActivatedRoute
               ) {
 
                 this.grid = {
@@ -108,6 +114,8 @@ export class BeaconSearchComponent implements OnInit {
 
   doSearch() {
 
+    const that = this;
+
     this.beaconNetworkService.searchBeacon(this.beacon.id, this.query.allele, this.query.chromosome,
       this.query.position - 1, // UI is 1-based, API is 0-based
       this.query.reference, this.query.referenceAllele).then(
@@ -122,14 +130,14 @@ export class BeaconSearchComponent implements OnInit {
           };
           results.push(row);
         }
-        this.rowData = results;
-        this.gridApi.setRowData(results);
-        this.beaconResponses = data;
-        this.view.isSearching = false;
+        that.rowData = results;
+        that.gridApi.setRowData(results);
+        that.beaconResponses = data;
+        that.view.isSearching = false;
       },
       error => {
-        this.view.errorSearching = true;
-        this.view.isSearching = false;
+        that.view.errorSearching = true;
+        that.view.isSearching = false;
       }
     );
   }
@@ -148,19 +156,33 @@ export class BeaconSearchComponent implements OnInit {
   }
 
   private initialize() {
-    this.registries = this.beaconConfigService.getRegistries();
-    if (this.registries.length > 0) {
-      this.setRegistry(this.registries[0]);
-    }
 
     this.query = new BeaconQuery();
     this.query.chromosome = '1';
     this.query.position = 1;
     this.query.allele = 'A';
     this.query.referenceAllele = 'A';
+
+    this.selectedRegistryId = this.route.snapshot.queryParamMap.get('network');
+    this.selectedBeaconId = this.route.snapshot.queryParamMap.get('beacon');
+
+    this.registries = this.beaconConfigService.getRegistries();
+    if (this.registries.length > 0) {
+
+      if (this.selectedRegistryId == null || this.selectedBeaconId.length === 0) {
+        this.setRegistry(this.registries[0]);
+      } else {
+        for (let i = 0; i < this.registries.length; i++) {
+          if (this.registries[i].id === this.selectedRegistryId) {
+            this.setRegistry(this.registries[i]);
+          }
+        }
+      }
+    }
   }
 
   private setRegistry(r: BeaconRegistry) {
+
     this.registry = r;
     this.beaconNetworkService.setApiUrl(r.apiUrl);
 
@@ -171,8 +193,15 @@ export class BeaconSearchComponent implements OnInit {
       data => {
         this.beacons = data;
         this.view.isRefreshingBeacons = false;
-        if (this.beacons.length > 0) {
+
+        if (this.selectedBeaconId == null || this.selectedBeaconId.length === 0) {
           this.setBeacon(this.beacons[0]);
+        } else {
+          for (let i = 0; i < this.beacons.length; i++) {
+            if (this.beacons[i].id === this.selectedBeaconId) {
+              this.setBeacon(this.beacons[i]);
+            }
+          }
         }
       },
       error => {
@@ -183,10 +212,25 @@ export class BeaconSearchComponent implements OnInit {
   }
 
   private setBeacon(b: Beacon) {
+
     this.beacon = b;
+    this.setQueryParameters();
     this.assemblies = this.beacon.supportedReferences;
     if (this.assemblies.length > 0) {
       this.query.reference = this.assemblies[0];
     }
+  }
+
+  private setQueryParameters() {
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.route,
+        queryParams: {
+          network : this.registry.id,
+          beacon: this.beacon.id,
+        },
+        queryParamsHandling: 'merge', // remove to replace all query params by provided
+      });
   }
 }

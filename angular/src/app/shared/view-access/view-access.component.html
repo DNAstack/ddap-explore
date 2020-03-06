@@ -5,33 +5,33 @@
              readonly
              type="text"
              [placeholder]="'Account'"
-             [value]="access.account">
+             [value]="access.credentials?.account">
     </mat-form-field>
     <button mat-flat-button
             matSuffix
             mat-icon-button
             ngxClipboard
-            [cbContent]="access.account"
+            [cbContent]="access.credentials?.account"
             matTooltip="Copy to clipboard"
             aria-label="Copy to clipboard">
       <mat-icon class="icon icon-copy"></mat-icon>
     </button>
   </div>
   <div class="flex"
-       *ngIf="access['access_token']">
+       *ngIf="access.credentials['access_token']">
     <mat-form-field class="stretch">
       <input matInput
              readonly
              type="text"
              data-se="access-token"
              [placeholder]="'Access token'"
-             [value]="access['access_token']">
+             [value]="access.credentials['access_token']">
     </mat-form-field>
     <button mat-flat-button
             matSuffix
             mat-icon-button
             ngxClipboard
-            [cbContent]="access['access_token'] || url"
+            [cbContent]="access.credentials['access_token'] || url"
             matTooltip="Copy to clipboard"
             aria-label="Copy to clipboard">
       <mat-icon class="icon icon-copy"></mat-icon>

@@ -14,7 +14,7 @@ import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.security.CartTokenCookieName;
 import com.dnastack.ddap.ic.oauth.client.TokenExchangeException;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
-import dam.v1.DamService.ResourceTokens;
+import dam.v1.DamService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -59,9 +59,9 @@ public class ResourceFlowController {
     }
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/checkout")
-    public Mono<ResponseEntity<ResourceTokens>> checkout(ServerHttpRequest request,
-                                                         @PathVariable String realm,
-                                                         @RequestParam("resource") List<String> damIdResourcePairs) {
+    public Mono<ResponseEntity<DamService.ResourceResults>> checkout(ServerHttpRequest request,
+                                                                     @PathVariable String realm,
+                                                                     @RequestParam("resource") List<String> damIdResourcePairs) {
         final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
 
         final ReactiveDamClient damClient = lookupDamClient(resources);

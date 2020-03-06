@@ -1,18 +1,14 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { EntityModel } from 'ddap-common-lib';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {FormControl, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {EntityModel} from 'ddap-common-lib';
 import _get from 'lodash.get';
-import { Subscription } from 'rxjs';
+import {Subscription} from 'rxjs';
 
-import { environment } from '../../../../environments/environment';
-import { dam } from '../../proto/dam-service';
-import { ResourceService } from '../resource.service';
-import ResourceTokens = dam.v1.ResourceTokens;
-import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
-import IResourceTokens = dam.v1.IResourceTokens;
-
-
+import {environment} from '../../../../environments/environment';
+import {ResourceService} from '../resource.service';
+import {dam} from "../../proto/dam-service";
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
   selector: 'ddap-resource-view-item',
@@ -35,7 +31,7 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
 
   paramsSubscription: Subscription;
   accessSubscription: Subscription;
-  resourceToken: IResourceToken;
+  resourceAccess: IResourceAccess;
   url?: string;
 
   roles: string[];
@@ -67,7 +63,7 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
         this.accessSubscription = this.getAccessTokensForAuthorizedResources()
           .subscribe((access) => {
             const resourcePath = `${this.resource.name}/views/${this.view.name}/roles/${this.defaultRole}`;
-            this.resourceToken = this.resourceService.lookupResourceToken(access, resourcePath);
+            this.resourceAccess = this.resourceService.lookupResourceToken(access, resourcePath);
             this.url = this.getUrlIfApplicable();
           });
       });
@@ -97,7 +93,7 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
 
     const viewAccessUrl = _get(interfaces, `[${httpInterfaces[0]}].uri[0]`);
 
-    return `${viewAccessUrl}/o?access_token=${this.resourceToken['access_token']}`;
+    return `${viewAccessUrl}/o?access_token=${this.resourceAccess.credentials['access_token']}`;
   }
 
   getAccessTokensForAuthorizedResources() {

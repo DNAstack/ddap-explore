@@ -54,9 +54,9 @@
       </mat-form-field>
     </div>
 
-    <div *ngIf="resourceToken"
+    <div *ngIf="resourceAccess"
          class="expansion-footer-content">
-      <ddap-view-access [access]="resourceToken"
+      <ddap-view-access [access]="resourceAccess"
                         [url]="url">
       </ddap-view-access>
     </div>
@@ -73,7 +73,7 @@
           View
         </button>
       </a>
-      <a *ngIf="!resourceToken"
+      <a *ngIf="!resourceAccess"
          [href]="getUrlForObtainingAccessToken()"
          class="stretch"
          data-se="get-access-btn">

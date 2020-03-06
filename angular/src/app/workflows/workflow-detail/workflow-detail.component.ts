@@ -1,21 +1,18 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
-import { flatDeep } from 'ddap-common-lib';
-import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
-import { map } from 'rxjs/operators';
-
-import { environment } from '../../../environments/environment';
-import { AccessControlService } from '../../shared/access-control.service';
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
-import { JsonEditorDefaults } from '../../shared/jsonEditorDefaults';
-import { dam } from '../../shared/proto/dam-service';
-import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
-import { ResourceService } from '../../shared/resource/resource.service';
-import { DatasetService } from '../workflow-execution-form/dataset.service';
-import { SimplifiedWesResourceViews } from '../workflow.model';
-import { WorkflowService } from '../workflows.service';
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {JsonEditorComponent, JsonEditorOptions} from 'ang-jsoneditor';
+import {flatDeep} from 'ddap-common-lib';
+import {map} from 'rxjs/operators';
+import {AppConfigModel} from '../../shared/app-config/app-config.model';
+import {AppConfigService} from '../../shared/app-config/app-config.service';
+import {JsonEditorDefaults} from '../../shared/jsonEditorDefaults';
+import {dam} from '../../shared/proto/dam-service';
+import {ResourceAuthStateService} from '../../shared/resource-auth-state.service';
+import {ResourceService} from '../../shared/resource/resource.service';
+import {DatasetService} from '../workflow-execution-form/dataset.service';
+import {SimplifiedWesResourceViews} from '../workflow.model';
+import {WorkflowService} from '../workflows.service';
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
   selector: 'ddap-workflow-detail',
@@ -27,7 +24,7 @@ export class WorkflowDetailComponent implements OnInit {
   runDetails;
   runDetailsResponse;
   editorOptions: JsonEditorOptions | any;
-  resourceToken: IResourceToken;
+  resourceAccess: IResourceAccess;
   fileResourceAuthUrl: string;
 
   viewAccessible: boolean;
@@ -63,14 +60,14 @@ export class WorkflowDetailComponent implements OnInit {
       .subscribe((wesResourceViews: SimplifiedWesResourceViews[]) => {
         const resourcePath = this.workflowService.getResourcePathForView(damId, viewId, wesResourceViews);
         const resourceTokens = this.resourceAuthStateService.getAccess();
-        this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, resourcePath);
+        this.resourceAccess = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, resourcePath);
 
-        if (!this.resourceToken) {
+        if (!this.resourceAccess) {
           this.viewAccessible = false;
           return;
         }
 
-        this.workflowService.workflowRunDetail(damId, viewId, runId, this.resourceToken['access_token'])
+        this.workflowService.workflowRunDetail(damId, viewId, runId, this.resourceAccess.credentials['access_token'])
           .subscribe(runDetails => {
             this.runDetails = this.runDetailsResponse = runDetails;
             const gcsUrl = this.getFlatValues(runDetails)
@@ -99,7 +96,7 @@ export class WorkflowDetailComponent implements OnInit {
             map(this.resourceService.toResourceAccessMap)
           )
           .subscribe((access) => {
-            this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(access, damIdResourcePathPair.split(';')[1]);
+            this.resourceAccess = this.resourceService.lookupResourceTokenFromAccessMap(access, damIdResourcePathPair.split(';')[1]);
             this.runDetails = this.transformResponse(this.runDetailsResponse);
           });
       });
@@ -127,7 +124,7 @@ export class WorkflowDetailComponent implements OnInit {
         const gcsBaseUrl = 'https://storage.cloud.google.com/';
         runDetails[key] = runDetails[key].replace('gs://', gcsBaseUrl);
         if (runDetails[key].includes(gcsBaseUrl)) {
-          runDetails[key] = `${runDetails[key]}/o?access_token=${this.resourceToken['access_token']}`;
+          runDetails[key] = `${runDetails[key]}/o?access_token=${this.resourceAccess.credentials['access_token']}`;
         }
       }
     });

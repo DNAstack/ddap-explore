@@ -37,7 +37,7 @@
         </mat-expansion-panel-header>
         <mat-action-row>
           <a [routerLink]="[run.run_id]"
-             [state]="{ wesAccessToken: resourceToken['access_token'] }">
+             [state]="{ wesAccessToken: resourceAccess.credentials['access_token'] }">
             <button mat-button
                     color="primary"
                     class="uppercase"
@@ -51,7 +51,7 @@
     <ddap-paginator *ngIf="workflowRunsResponse.next_page_token"
                     [nextPage]="workflowRunsResponse.next_page_token"
                     [paginationType]="paginationType"
-                    (pageChangeRequested)="getWorkflows(resourceToken['access_token'], $event)">
+                    (pageChangeRequested)="getWorkflows(resourceAccess.credentials['access_token'], $event)">
     </ddap-paginator>
   </ng-container>
 </ddaplib-main>

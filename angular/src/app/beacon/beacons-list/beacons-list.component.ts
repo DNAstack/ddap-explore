@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AgGridModule } from 'ag-grid-angular';
+import { ViewControllerService } from 'ddap-common-lib';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
@@ -35,7 +36,8 @@ export class BeaconListComponent implements OnInit {
   constructor(private router: Router,
               private appConfigService: AppConfigService,
               private beaconConfigService: BeaconConfigService,
-              private beaconNetworkService: BeaconNetworkService
+              private beaconNetworkService: BeaconNetworkService,
+              private viewController: ViewControllerService
               ) {
 
                 this.view = {
@@ -56,7 +58,7 @@ export class BeaconListComponent implements OnInit {
                   paginationAutoPageSize: true,
                   makeFullWidth: true,
                   pagination: false,
-                  domLayout: 'domLayout',
+                  domLayout: 'normal',
                   suppressCellSelection: true,
                 };
 
@@ -78,6 +80,17 @@ export class BeaconListComponent implements OnInit {
         this.router.navigate(['/']);
       }
     });
+  }
+
+  onRowClicked(event) {
+    const index = event.rowIndex;
+    const selectedBeacon = this.beacons[index];
+    this.goToSearchPageForBeacon(selectedBeacon.id);
+  }
+
+  goToSearchPageForBeacon(beaconId: string) {
+    this.router.navigate([this.viewController.getRealmId(), 'beacon', 'search'],
+    { queryParams: { network: this.registry.id, beacon: beaconId } });
   }
 
   onGridReady(params) {
@@ -107,6 +120,9 @@ export class BeaconListComponent implements OnInit {
     // Refresh Beacons
     this.view.errorLoadingBeacons = false;
     this.view.isRefreshingBeacons = true;
+
+    const that = this;
+
     this.beaconNetworkService.getBeacons().then(
       data => {
         const results = [];
@@ -117,15 +133,14 @@ export class BeaconListComponent implements OnInit {
           };
           results.push(row);
         }
-        this.rowData = results;
-        this.gridApi.setRowData(results);
-
-        this.beacons = data;
-        this.view.isRefreshingBeacons = false;
+        that.rowData = results;
+        that.gridApi.setRowData(results);
+        that.beacons = data;
+        that.view.isRefreshingBeacons = false;
       },
       error => {
-        this.view.errorLoadingBeacons = true;
-        this.view.isRefreshingBeacons = false;
+        that.view.errorLoadingBeacons = true;
+        that.view.isRefreshingBeacons = false;
       }
     );
   }

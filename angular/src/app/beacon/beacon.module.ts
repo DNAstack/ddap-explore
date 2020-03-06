@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { MatToolbarModule } from '@angular/material';
+import { AgGridModule } from 'ag-grid-angular';
 
 import { SharedModule } from '../shared/shared.module';
 
@@ -16,6 +17,7 @@ import { BeaconSearchComponent } from './beacons-search/beacon-search.component'
       SharedModule,
       BeaconsRoutingModule,
       MatToolbarModule,
+      AgGridModule.withComponents([]),
     ],
 })
 export class BeaconModule { }

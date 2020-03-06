@@ -65,34 +65,24 @@
               </div>
           </mat-drawer>
           <mat-drawer-content>
-            <div style="display:flex; flex: 1; flex-direction: column;" class="p-a">
-              <div *ngIf="beaconResponses" class="mat-table" style="width:100%">
-                <div class="mat-header-row">
-                    <div class="mat-header-cell">
-                      Beacon
-                    </div>
-                    <div class="mat-header-cell">
-                      Organization
-                    </div>
-                    <div class="mat-header-cell">
-                      Exists
-                    </div>
-                </div>
-                <div class="mat-row" *ngFor="let beaconResponse of beaconResponses">
-                    <div class="mat-cell"
-                        [ngClass]="{'no-wrap': !view.wrapTableContent}">
-                        {{beaconResponse.beacon.name}}
-                    </div>
-                    <div class="mat-cell"
-                        [ngClass]="{'no-wrap': !view.wrapTableContent}" >
-                        {{beaconResponse.beacon.organization}}
-                    </div>
-                    <div class="mat-cell"
-                        [ngClass]="{'no-wrap': !view.wrapTableContent}" >
-                        {{beaconResponse.response}}
-                    </div>
-                </div>
-              </div>
+            <cover-message *ngIf="rowData.length == 0" style="flex-grow: 1" message="No Results" icon="error_outline"></cover-message>
+            <div *ngIf="rowData.length > 0" style="display:flex; flex: 1; flex-direction: column;" class="p-a">
+                <ag-grid-angular
+                    *ngIf="beaconResponses" 
+                    style="width: 100%;"
+                    #agGrid
+                    class="ag-theme-material b-a"
+                    [defaultColDef]="grid.defaultColumnDefinition"
+                    [multiSortKey]="grid.multiSortKey"
+                    [animateRows]="grid.animateRows"
+                    [pagination]="grid.pagination"
+                    [floatingFilter]="grid.floatingFilter"
+                    [suppressCellSelection]="grid.suppressCellSelection"
+                    [(rowData)]="rowData"
+                    [columnDefs]="columnDefs"
+                    [domLayout]="grid.domLayout"
+                    (gridReady)="onGridReady($event)">
+                </ag-grid-angular>
             </div>
           </mat-drawer-content>
   </mat-drawer-container>

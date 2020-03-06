@@ -40,6 +40,8 @@
     "lodash.set": "^4.3.2",
     "lodash.startcase": "^4.4.0",
     "lodash.uniq": "^4.5.0",
+    "monaco-editor": "0.18.1",
+    "@materia-ui/ngx-monaco-editor": "4.0.1",
     "ngx-chips": "^2.0.2",
     "ngx-clipboard": "^12.2.0",
     "ngx-webstorage-service": "^4.1.0",

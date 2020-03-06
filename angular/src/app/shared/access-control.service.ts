@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
@@ -40,11 +40,13 @@ export class AccessControlService {
 
   constructor(
     @Inject(LOCAL_STORAGE) private storage: StorageService,
+    private activatedRoute: ActivatedRoute,
     private router: Router,
     private appConfigService: AppConfigService,
     private resourceService: ResourceService,
     private resourceAuthStateService: ResourceAuthStateService,
-    private workflowService: WorkflowService
+    private workflowService: WorkflowService,
+    private http: HttpClient
   ) {
   }
 
@@ -78,9 +80,15 @@ export class AccessControlService {
     }));
   }
 
-  purgeSession() {
-    // TODO clear cookie too.
-    this.storage.clear();
+  purgeSession(issueRedirection: boolean) {
+    const realmId = this.activatedRoute.snapshot.params.realmId;
+    this.http.get(`/api/v1alpha/realm/${realmId}/resources/deauthorize`)
+      .subscribe(observer => {
+        this.storage.clear();
+        if (issueRedirection) {
+          this.router.navigate([`/${realmId}`, 'lobby'], {queryParams: {after: 'deauthorization'}});
+        }
+      });
   }
 
   isUserAuthorized() {

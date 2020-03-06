@@ -181,10 +181,6 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     ;
   }
 
-  toggleLeftSideNav() {
-    this.viewController.toggleLeftSidenav();
-  }
-
   protected getSourceUrl(): string {
     const { sourceUrl } = this.route.snapshot.params;
 

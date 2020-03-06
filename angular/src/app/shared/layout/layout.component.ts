@@ -90,12 +90,7 @@ export class LayoutComponent implements OnInit {
   }
 
   onSignOut() {
-    const realmId = this.activatedRoute.snapshot.params.realmId;
-    this.http.get(`/api/v1alpha/realm/${realmId}/resources/deauthorize`)
-      .subscribe(observer => {
-        this.accessControlService.purgeSession();
-        this.router.navigate(['/', realmId, 'lobby'], {queryParams: {after: 'deauthorization'}});
-      });
+    this.accessControlService.purgeSession(true);
   }
 
   private changeRealmAndGoToLogin(realm) {

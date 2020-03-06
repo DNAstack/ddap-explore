@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 import { NgJsonEditorModule } from 'ang-jsoneditor';
 import { MaterialDesignFrameworkModule } from 'angular7-json-schema-form';
 
@@ -47,6 +48,7 @@ import { WorkflowsRoutingModule } from './workflows-routing.module';
       MaterialDesignFrameworkModule,
       WorkflowsRoutingModule,
       MatStepperModule,
+      MonacoEditorModule,
     ],
 })
 export class WorkflowsModule { }

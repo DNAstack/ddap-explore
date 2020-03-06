@@ -3,19 +3,27 @@
     <mat-icon>warning</mat-icon>
   </div>
   <div class="message-side">
-    <p>
-      You need to re-authorize this session before proceeding.
-    </p>
-
     <ng-container *ngIf="authorizationUrl; else noAuthorizationUrl">
       <p>
-        <a mat-stroked-button
-           color="primary"
+        You need to authorize this session before proceeding.
+      </p>
+
+      <p>
+        <a mat-raised-button
+           color="accent"
            [href]="authorizationUrl">Authorize</a>
       </p>
     </ng-container>
 
     <ng-template #noAuthorizationUrl>
+      <p>
+        You session seems to be expired.
+      </p>
+      <p>
+        <a mat-raised-button
+           color="accent"
+           (click)="onReauthorizeClick()">Re-authorize</a>
+      </p>
     </ng-template>
   </div>
 </div>

@@ -27,6 +27,13 @@
       "clientId": "$$E2E_BROKER_ID$$",
       "authUrl": "$$E2E_PASSPORT_ISSUER$$/oauth2/auth",
       "tokenUrl": "$$E2E_PASSPORT_ISSUER$$/oauth2/token"
+    },
+    "ic_visa_issuer": {
+      "issuer": "$$E2E_PASSPORT_ISSUER$$/visas",
+      "ui": {
+        "description": "IC DDAP",
+        "label": "IC DDAP"
+      }
     }
   },
   "trustedSources": {

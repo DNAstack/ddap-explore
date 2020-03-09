@@ -33,8 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static java.lang.Math.min;
@@ -52,8 +52,8 @@ public abstract class AbstractBaseE2eTest {
     public static final String DDAP_USERNAME = optionalEnv("E2E_BASIC_USERNAME",null);
     public static final String DDAP_PASSWORD = optionalEnv("E2E_BASIC_PASSWORD", null);
     public static final String DDAP_DAM_BASE_URL = requiredEnv("E2E_DDAP_DAM_BASE_URL");
-    public static final String DDAP_DAM_USERNAME = requiredEnv("E2E_DDAP_DAM_USERNAME");
-    public static final String DDAP_DAM_PASSWORD = requiredEnv("E2E_DDAP_DAM_PASSWORD");
+    public static final String DDAP_DAM_USERNAME = requiredEnv("E2E_DDAP_DAM_USERNAME", "E2E_BASIC_USERNAME");
+    public static final String DDAP_DAM_PASSWORD = requiredEnv("E2E_DDAP_DAM_PASSWORD", "E2E_BASIC_PASSWORD");
 
 
     public static final String DAM_ID = requiredEnv("E2E_DAM_ID");
@@ -126,12 +126,19 @@ public abstract class AbstractBaseE2eTest {
         return given();
     }
 
-    protected static String requiredEnv(String name) {
-        String val = System.getenv(name);
-        if (val == null) {
-            fail("Environnment variable `" + name + "` is required");
-        }
-        return val;
+    protected static String requiredEnv(String name, String... backups) {
+        final List<String> allNames = new ArrayList<>(backups.length + 1);
+        allNames.add(name);
+        allNames.addAll(Arrays.asList(backups));
+
+        final String failMsg = backups.length == 0 ?
+                "Environnment variable `" + name + "` is required" :
+                "Must specify one of these environment variables: " + allNames;
+        return Stream.concat(Stream.of(name), Stream.of(backups))
+                     .map(var -> Optional.ofNullable(System.getenv(var)))
+                     .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
+                     .findFirst()
+                     .orElseThrow(() -> new AssertionError(failMsg));
     }
 
     public static String optionalEnv(String name, String defaultValue) {

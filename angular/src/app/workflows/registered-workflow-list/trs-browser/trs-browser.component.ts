@@ -1,9 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ToolVersion } from '../../trs-v2/tool-version.model';
 import { Tool } from '../../trs-v2/tool.model';
 import { Client, TrsService } from '../../trs-v2/trs.service';
+import { TrsDescriptorComponent } from '../trs-descriptor/trs-descriptor.component';
 
 export interface Config {
   client: Client;
@@ -28,8 +30,11 @@ export class TrsBrowserComponent implements OnInit {
   filteredTools: Tool[];
   filterTerm: string;
 
+  descriptorDialog: MatDialogRef<TrsDescriptorComponent>;
+
   constructor(private route: ActivatedRoute,
-              private router: Router) {
+              private router: Router,
+              public dialog: MatDialog) {
     this.pageIndex = 0;
   }
 
@@ -70,6 +75,18 @@ export class TrsBrowserComponent implements OnInit {
     // );
 
     // TODO Open a modal dialog for code editing
+
+    this.descriptorDialog = this.dialog.open(
+      TrsDescriptorComponent,
+      {
+        width: '80vw',
+        data: {
+          client: this.config.client,
+          version: version,
+          type: type,
+        },
+      }
+    );
   }
 
   onNewVersionClick() {

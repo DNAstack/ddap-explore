@@ -8,6 +8,7 @@ import { SharedModule } from '../shared/shared.module';
 
 import { RegisteredWorkflowListComponent } from './registered-workflow-list/registered-workflow-list.component';
 import { TrsBrowserComponent } from './registered-workflow-list/trs-browser/trs-browser.component';
+import { TrsDescriptorComponent } from './registered-workflow-list/trs-descriptor/trs-descriptor.component';
 import { WorkflowDetailComponent } from './workflow-detail/workflow-detail.component';
 import { DatasetResultsComponent } from './workflow-execution-form/dataset-selection-step/dataset-results/dataset-results.component';
 import { DatasetSelectionStepComponent } from './workflow-execution-form/dataset-selection-step/dataset-selection-step.component';
@@ -23,6 +24,7 @@ import { WorkflowListMultiComponent } from './workflow-list-multi/workflow-list-
 import { WorkflowListSingleComponent } from './workflow-list-single/workflow-list-single.component';
 import { WorkflowManageComponent } from './workflow-manage/workflow-manage.component';
 import { WorkflowsRoutingModule } from './workflows-routing.module';
+import { MonacoEditorModule } from "ngx-monaco-editor";
 
 @NgModule({
   declarations: [
@@ -41,14 +43,20 @@ import { WorkflowsRoutingModule } from './workflows-routing.module';
     WorkflowExecutionStepComponent,
     RegisteredWorkflowListComponent,
     TrsBrowserComponent,
+    TrsDescriptorComponent,
   ],
-    imports: [
-      SharedModule,
-      NgJsonEditorModule,
-      FlexLayoutModule,
-      MaterialDesignFrameworkModule,
-      WorkflowsRoutingModule,
-      MatStepperModule,
-    ],
+  imports: [
+    SharedModule,
+    NgJsonEditorModule,
+    FlexLayoutModule,
+    MaterialDesignFrameworkModule,
+    WorkflowsRoutingModule,
+    MatStepperModule,
+    MonacoEditorModule,
+  ],
+  entryComponents: [
+    TrsDescriptorComponent,
+  ],
 })
-export class WorkflowsModule { }
+export class WorkflowsModule {
+}

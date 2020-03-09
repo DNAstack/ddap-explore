@@ -1,0 +1,7 @@
+<h1>Version <span class="version-name">{{ data.version.name }}</span> / {{ data.type }}</h1>
+
+<div class="code-editor">
+  <ngx-monaco-editor [options]="editorConfig"
+                     [(ngModel)]="descriptorContent" (init)="onEditorInit($event)">
+  </ngx-monaco-editor>
+</div>

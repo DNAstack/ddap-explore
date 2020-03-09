@@ -21,6 +21,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { DdapFormModule, DdapLayoutModule, MenuModule, ViewControllerService } from 'ddap-common-lib';
@@ -84,6 +85,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MatTableModule,
     MatTooltipModule,
     MatSlideToggleModule,
+    MatTabsModule,
 
     DdapLayoutModule,
     DdapFormModule,
@@ -119,6 +121,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MatTableModule,
     MatTooltipModule,
     MatSlideToggleModule,
+    MatTabsModule,
 
     DdapLayoutModule,
     DdapFormModule,
@@ -136,7 +139,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MenuModule,
     AccessDeniedScreenComponent,
   ],
-  providers : [
+  providers: [
     ViewControllerService,
   ],
 })

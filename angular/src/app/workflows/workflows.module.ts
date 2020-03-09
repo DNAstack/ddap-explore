@@ -7,6 +7,7 @@ import { MaterialDesignFrameworkModule } from 'angular7-json-schema-form';
 import { SharedModule } from '../shared/shared.module';
 
 import { RegisteredWorkflowListComponent } from './registered-workflow-list/registered-workflow-list.component';
+import { TrsBrowserComponent } from './registered-workflow-list/trs-browser/trs-browser.component';
 import { WorkflowDetailComponent } from './workflow-detail/workflow-detail.component';
 import { DatasetResultsComponent } from './workflow-execution-form/dataset-selection-step/dataset-results/dataset-results.component';
 import { DatasetSelectionStepComponent } from './workflow-execution-form/dataset-selection-step/dataset-selection-step.component';
@@ -39,6 +40,7 @@ import { WorkflowsRoutingModule } from './workflows-routing.module';
     ResourceAuthorizationStepComponent,
     WorkflowExecutionStepComponent,
     RegisteredWorkflowListComponent,
+    TrsBrowserComponent,
   ],
     imports: [
       SharedModule,

@@ -238,7 +238,8 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
 
     if (sourceUrl) {
       this.workflowForm.get('wdl').patchValue('# Loading...');
-      this.trsService.getDescriptorFrom(sourceUrl)
+      this.trsService.reverseLookup(sourceUrl)
+        .getDescriptorFrom(sourceUrl)
         .subscribe(script => this.workflowForm.get('wdl').patchValue(script));
     }
   }

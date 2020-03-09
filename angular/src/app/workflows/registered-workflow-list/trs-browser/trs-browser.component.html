@@ -1,0 +1,91 @@
+<div class="section-header">
+  <div class="list-paginator">
+    <button mat-icon-button
+            type="button"
+            [disabled]="this.updateInProgress || pageIndex === 0"
+            (click)="onPagerClick(-1)">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <button mat-icon-button
+            type="button"
+            [disabled]="updateInProgress || pageIndex + 1 === getTotalPageNumber()"
+            (click)="onPagerClick(+1)">
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  </div>
+  <mat-form-field appearance="standard" class="filter-input">
+    <mat-label>Filter by tool name and/or author</mat-label>
+    <input matInput
+           #filter
+           type="text"
+           (keyup)="onFilterUpdate(filter.value)"
+           [disabled]="updateInProgress"
+           value="{{ filterTerm }}"/>
+  </mat-form-field>
+  <div class="action" *ngIf="filter.value">
+    <button mat-icon-button
+            type="reset"
+            color="warn"
+            title="Clear the filter"
+            (click)="onFilterResetClick()"
+            [disabled]="updateInProgress"><mat-icon>clear</mat-icon></button>
+  </div>
+  <div class="action">
+    <button mat-icon-button
+            type="button"
+            color="primary"
+            title="Refresh"
+            (click)="onFilterRefreshClick()"
+            [disabled]="updateInProgress"><mat-icon>refresh</mat-icon></button>
+  </div>
+</div>
+
+<ng-container *ngIf="!updateInProgress && tools && tools.length == 0">
+  <div class="tool-filter-results">No workflow registered</div>
+</ng-container>
+
+<div class="tool-filter-results">
+  <mat-accordion>
+    <mat-expansion-panel *ngFor="let tool of (filteredTools || []).slice(pageIndex * config.pageSize, (pageIndex + 1) * config.pageSize)" class="workflow">
+      <mat-expansion-panel-header>
+        <mat-panel-title><span>{{ tool.toolname }}</span></mat-panel-title>
+        <mat-panel-description><span>{{ tool.author || tool.organization }}</span></mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <mat-tab-group>
+        <mat-tab label="Description" *ngIf="tool.description">
+          <div class="content">
+            <div class="description" [innerHTML]="tool.description | markdown"></div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Versions">
+          <div class="version-selector">
+            <h3 class="label">Please select one version</h3>
+            <div class="version-list" *ngIf="tool.versions">
+              <div class="version" *ngFor="let version of tool.versions">
+                <div class="name">
+                  {{version.name}}
+                  <mat-icon *ngIf="version.verified">check</mat-icon>
+                </div>
+                <div class="meta-version">{{version.meta_version}}</div>
+                <ul class="descriptor-type-list">
+                  <li *ngFor="let descriptor_type of version.descriptor_type">
+                    <button mat-raised-button
+                            (click)="onVersionSelectionSelectClick(version, descriptor_type)">
+                      {{ descriptor_type }}
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              <a class="new-version-button"
+                 (click)="onNewVersionClick()">
+                <mat-icon>add</mat-icon> <span>Add new version</span>
+              </a>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

@@ -1,10 +1,10 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { editor } from 'monaco-editor';
+import { ActivatedRoute, Router } from '@angular/router';
 
+import { CodeEditorEnhancerService } from '../../../shared/code-editor-enhancer.service';
 import { ToolVersion } from '../../trs-v2/tool-version.model';
 import { Client } from '../../trs-v2/trs.service';
-import ICodeEditor = editor.ICodeEditor;
 
 @Component({
   selector: 'ddap-trs-descriptor',
@@ -12,139 +12,106 @@ import ICodeEditor = editor.ICodeEditor;
   styleUrls: ['./trs-descriptor.component.scss'],
 })
 export class TrsDescriptorComponent implements OnInit {
-  sample = 'task md5 {\n' +
-    '  File inputFile\n' +
-    '\n' +
-    '  command {\n' +
-    '    /bin/my_md5sum ${inputFile}\n' +
-    '  }\n' +
-    '\n' +
-    ' output {\n' +
-    '    File value = "md5sum.txt"\n' +
-    ' }\n' +
-    '\n' +
-    ' runtime {\n' +
-    '   docker: "quay.io/briandoconnor/dockstore-tool-md5sum:1.0.2"\n' +
-    '   cpu: 1\n' +
-    '   memory: "512 MB"\n' +
-    ' }\n' +
-    '}\n' +
-    '\n' +
-    'workflow ga4ghMd5 {\n' +
-    ' File inputFile\n' +
-    ' call md5 { input: inputFile=inputFile }\n' +
-    '}\n';
-  editor: ICodeEditor;
   descriptorContent: string;
-  editorConfig = {
-    language: 'wdl',
-    theme: 'vs-dark',
-    minimap: {enabled: false},
-  };
+  originalDescriptorContent: string;
+  feedbackList: FeedbackItem[];
+  private feedbackLastId: number;
 
   constructor(public dialogRef: MatDialogRef<TrsDescriptorComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: DialogData) {
+              @Inject(MAT_DIALOG_DATA) public data: DialogData,
+              private router: Router,
+              private route: ActivatedRoute,
+              public codeEditorEnhancer: CodeEditorEnhancerService) {
+    this.feedbackList = [];
+  }
+
+  hasFeedback(): boolean {
+    return !this.data.editable || this.feedbackList.length > 0;
+  }
+
+  canSave(): boolean {
+    return this.data.editable && (this.descriptorContent !== this.originalDescriptorContent);
+  }
+
+  canRun(): boolean {
+    return !this.canSave();
+  }
+
+  getEditableConfig() {
+    return {
+      language: 'wdl',
+      theme: this.data.editable ? 'vs' : 'vs-dark',
+      minimap: {enabled: true},
+      readOnly: !this.data.editable,
+    };
+  }
+
+  addFeedback(feedback: FeedbackItem) {
+    feedback.id = ++this.feedbackLastId;
+    this.feedbackList.push(feedback);
+  }
+
+  clearAllFeedback() {
+    this.feedbackList = [];
+  }
+
+  getSourceUrl() {
+    return `${this.data.version.url}/${this.data.type}/descriptor`;
   }
 
   ngOnInit() {
-    this.descriptorContent = this.sample;
-    // const sourceUrl = `${this.data.version.url}/${this.data.type}/descriptor`;
-    // this.data.client.getDescriptorFrom(sourceUrl).subscribe(content => {
-    //   this.descriptorContent = content;
-    // });
+    this.data.client.getDescriptorFrom(this.getSourceUrl()).subscribe(content => {
+      this.descriptorContent = content;
+      this.originalDescriptorContent = content;
+    });
   }
 
-  onEditorInit(codeEditor: ICodeEditor) {
-    this.editor = codeEditor;
+  onSaveButtonClick() {
+    if (!this.data.editable) {
+      this.addFeedback({
+        message: 'Saving is disabled.',
+        level: 'error',
+      });
+      return;
+    }
 
-    const monaco = (<any> window).monaco;
-    monaco.languages.register({id: 'wdl'});
-    monaco.languages.setLanguageConfiguration('wdl', {
-      brackets: [
-        ['{', '}'],
-        ['[', ']'],
-        ['(', ')'],
-      ],
-      comments: {
-        lineComment: '#',
-      },
-      wordPattern: /(-?\d*\.\d\w*)|([^\`\~\!\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g,
+    this.addFeedback({
+      message: 'Saving is not currently supported.',
+      level: 'warn',
     });
-    monaco.languages.setMonarchTokensProvider('wdl', {
-      keywords: [
-        'task',
-        'input',
-        'command',
-        'runtime',
-        'output',
-        'workflow',
-        'call',
-      ],
+  }
 
-      symbols: /[=><!~?:&|+\-*\/\^%]+/,
-      digits: /\d+(_+\d+)*/,
-      escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
-
-      brackets: [
-        {open: '{', close: '}', token: 'delimiter.curly'},
-        {open: '[', close: ']', token: 'delimiter.bracket'},
-        {open: '(', close: ')', token: 'delimiter.parenthesis'},
-      ],
-
-      tokenizer: {
-        root: [
-          {include: '@whitespace'},
-          {include: '@strings'},
-          {include: '@numbers'},
-          [/[,:;]/, 'delimiter'],
-          [/[{}\[\]()]/, '@brackets'],
-          [/[a-zA-Z_]\w*/, {
-            cases: {
-              '@keywords': 'keyword',
-              '@default': 'identifier',
-            },
-          }],
-        ],
-
-        numbers: [
-          [/-?0x([abcdef]|[ABCDEF]|\d)+[lL]?/, 'number.hex'],
-          [/-?(\d*\.)?\d+([eE][+\-]?\d+)?[jJ]?[lL]?/, 'number'],
-        ],
-
-        strings: [
-          [/'$/, 'string.escape', '@popall'],
-          [/'/, 'string.escape', '@stringBody'],
-          [/"$/, 'string.escape', '@popall'],
-          [/"/, 'string.escape', '@dblStringBody'],
-        ],
-
-        whitespace: [
-          [/\s+/, 'white'],
-          [/(^#.*$)/, 'comment'],
-        ],
-
-        stringBody: [
-          [/[^\\']+$/, 'string', '@popall'],
-          [/[^\\']+/, 'string'],
-          [/\\./, 'string'],
-          [/'/, 'string.escape', '@popall'],
-          [/\\$/, 'string'],
-        ],
-
-        dblStringBody: [
-          [/[^\\"]+$/, 'string', '@popall'],
-          [/[^\\"]+/, 'string'],
-          [/\\./, 'string'],
-          [/"/, 'string.escape', '@popall'],
-          [/\\$/, 'string'],
-        ],
-      },
+  onRunButtonClick() {
+    this.addFeedback({
+      message: 'One second...',
+      level: 'info',
     });
+
+    setTimeout(() => {
+      this.dialogRef.close({
+        sourceUrl: this.getSourceUrl(),
+      });
+    }, 1000);
+  }
+
+  onIndividualFeedbackClearButtonClick() {
+    this.feedbackList = [];
+  }
+
+  onCloseButtonClick() {
+    this.dialogRef.close();
   }
 }
 
-interface DialogData {
+interface FeedbackItem {
+  id?: number;
+  message: string;
+  level: string;
+}
+
+export interface DialogData {
   client: Client;
   version: ToolVersion;
   type: string;
+  editable: boolean;
 }

@@ -26,7 +26,7 @@ export class TrsService {
     this.clientMap = new Map<string, TrsClientContext>();
   }
 
-  public from(url: string): Client {
+  public endpoint(url: string): Client {
     if (!url) {
       return null;
     }
@@ -43,14 +43,22 @@ export class TrsService {
     return this.clientMap.get(url).client;
   }
 
-  public reverseLookup(destinationUrl: string): Client {
-    for (const baseUrl in this.clientMap) {
-      if (destinationUrl.startsWith(baseUrl)) {
-        return this.clientMap[baseUrl];
+  public reverseLookup(destinationUrl: string): Promise<Client> {
+    return new Promise<Client>(((resolve, reject) => {
+      if (this.clientMap.size === 0) {
+        reject({code: 'no_endpoint_defined'});
+        return;
       }
-    }
 
-    throw new Error('Unable to find a client capable to handle the destination URL');
+      for (const baseUrl of this.clientMap.keys()) {
+        if (destinationUrl.startsWith(baseUrl)) {
+          resolve(this.clientMap.get(baseUrl).client);
+          return;
+        }
+      }
+
+      reject({code: 'reverse_lookup_failed', url: destinationUrl});
+    }));
   }
 }
 

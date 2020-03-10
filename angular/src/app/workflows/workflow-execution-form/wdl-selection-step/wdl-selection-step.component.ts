@@ -1,10 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 
-import { TrsService } from '../../trs-v2/trs.service';
+import { CodeEditorEnhancerService } from '../../../shared/code-editor-enhancer.service';
 import { WorkflowService } from '../../workflows.service';
-import { WorkflowsStateService } from '../workflows-state.service';
 
 import { callDenovo, helloWorld, md5sum } from './example.wdl';
 
@@ -23,10 +21,31 @@ export class WdlSelectionStepComponent {
 
   inputSchema;
 
+  wdlCurrentContent: string;
+
   constructor(private workflowService: WorkflowService,
-              private route: ActivatedRoute,
-              private trsService: TrsService,
-              private workflowsStateService: WorkflowsStateService) {
+              public codeEditorEnhancer: CodeEditorEnhancerService) {
+  }
+
+  ngOnInit(): void {
+    this.form.statusChanges.subscribe(observer => {
+      this.wdlCurrentContent = this.form.get('wdl').value;
+    });
+  }
+
+  onEditorUpdated() {
+    this.form.get('wdl').patchValue(this.wdlCurrentContent);
+  }
+
+  computeEditorStyle() {
+    const topPadding = 0;
+    const minHeight = 100;
+    const maxHeight = 500;
+    const lineHeight = 18;
+    const expectedHeight = this.wdlCurrentContent.split(/\n/).length * lineHeight;
+    return {
+      height: (Math.min(Math.max(minHeight, expectedHeight), maxHeight) + topPadding) + 'px',
+    };
   }
 
   generateForm() {

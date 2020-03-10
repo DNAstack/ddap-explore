@@ -1,10 +1,10 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
-import {Router} from '@angular/router';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Router } from '@angular/router';
+import { flatten } from 'ddap-common-lib';
 
-import {ResourceService} from '../../../shared/resource/resource.service';
-import {DatasetService} from '../dataset.service';
-import {WorkflowsStateService} from '../workflows-state.service';
-import {flatten} from "ddap-common-lib";
+import { ResourceService } from '../../../shared/resource/resource.service';
+import { DatasetService } from '../dataset.service';
+import { WorkflowsStateService } from '../workflows-state.service';
 
 
 @Component({
@@ -66,9 +66,16 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
 
   private getRedirectUrl(): string {
     let currentUrl = this.router.url;
+    // const matcher = /\/run\/.+$/;
+    //
+    // if (currentUrl.match(matcher)) {
+    //   currentUrl = currentUrl.replace(matcher, '/run');
+    // }
+
     if (currentUrl.includes('?state=')) {
       currentUrl = currentUrl.split('?')[0];
     }
+
     return `${currentUrl}?state=${this.workflowId}`;
   }
 

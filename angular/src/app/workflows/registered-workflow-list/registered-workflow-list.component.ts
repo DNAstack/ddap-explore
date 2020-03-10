@@ -33,10 +33,11 @@ export class RegisteredWorkflowListComponent implements OnInit {
 
       if (this.appConfig.featureWorkflowsEnabled) {
         this.publicBrowserConfig = {
-          client: this.trs.from(this.appConfig.trsBaseUrl),
+          client: this.trs.endpoint(this.appConfig.trsBaseUrl),
           acceptedToolClasses: this.appConfig.trsAcceptedToolClasses,
           acceptedVersionDescriptorTypes: this.appConfig.trsAcceptedVersionDescriptorTypes,
           pageSize: this.appConfig.listPageSize,
+          editable: false,
         };
       } else {
         this.router.navigate(['/']);

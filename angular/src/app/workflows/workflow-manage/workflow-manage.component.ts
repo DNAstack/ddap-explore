@@ -59,15 +59,15 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   workflowId = Math.random().toString(36).substring(7);
   readyToExecute = false;
 
-  @ViewChild('stepper', { static: false })
+  @ViewChild('stepper', {static: false})
   stepper: MatStepper;
-  @ViewChild(WdlSelectionStepComponent, { static: false })
+  @ViewChild(WdlSelectionStepComponent, {static: false})
   wdlStep: WdlSelectionStepComponent;
-  @ViewChild(WesServerSelectionStepComponent, { static: false })
+  @ViewChild(WesServerSelectionStepComponent, {static: false})
   wesStep: WesServerSelectionStepComponent;
-  @ViewChild(ResourceAuthorizationStepComponent, { static: false })
+  @ViewChild(ResourceAuthorizationStepComponent, {static: false})
   resourceAuthorizationStep: ResourceAuthorizationStepComponent;
-  @ViewChild(WorkflowExecutionStepComponent, { static: false })
+  @ViewChild(WorkflowExecutionStepComponent, {static: false})
   executionStep: WorkflowExecutionStepComponent;
 
   constructor(private route: ActivatedRoute,
@@ -83,16 +83,20 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
               private resourceAuthStateService: ResourceAuthStateService,
               private errorHandler: ErrorHandlerService,
               private viewController: ViewControllerService
-              ) {
+  ) {
   }
 
   ngOnInit() {
-    this.initialize();
+    this.preInitialize();
 
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
       if (data.featureWorkflowsEnabled) {
-        // NOOP
+        // Register TRS endpoints.
+        this.trsService.endpoint(data.trsBaseUrl);
+
+        // Start the component initialization.
+        this.initialize();
       } else {
         this.router.navigate(['/']);
       }
@@ -171,8 +175,8 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     }
 
     zip(...executions.map((execution) =>
-        this.workflowService.runWorkflow(damId, wesViewId, execution, wesAccessToken)
-      ))
+      this.workflowService.runWorkflow(damId, wesViewId, execution, wesAccessToken)
+    ))
       .subscribe((runs: object[]) => this.navigateUp('operations', runs, damId, wesViewId))
     ;
   }
@@ -182,7 +186,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   }
 
   protected getSourceUrl(): string {
-    const { sourceUrl } = this.route.snapshot.params;
+    const {sourceUrl} = this.route.snapshot.params;
 
     if (!sourceUrl) {
       return null;
@@ -193,16 +197,18 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
 
   protected navigateUp = (path: string, runs: object[], damId, wesView) => {
     const actualPath = (this.getSourceUrl() ? '../..' : '..') + '/' + path;
-    const { viewId } = this.route.snapshot.params;
+    const {viewId} = this.route.snapshot.params;
     const navigatePath = viewId ? [actualPath] : [actualPath, damId, 'views', wesView, 'runs'];
-    this.router.navigate(navigatePath, { relativeTo: this.route, state: { runs } });
+    this.router.navigate(navigatePath, {relativeTo: this.route, state: {runs}});
   }
 
-  private initialize() {
+  private preInitialize() {
     this.datasetForm = this.workflowFormBuilder.buildDatasetForm();
     this.workflowForm = this.workflowFormBuilder.buildWorkflowForm();
     this.subscribeToFormChanges();
+  }
 
+  private initialize() {
     this.subscriptions.push(this.route.queryParams
       .subscribe(params => {
         if (!params.state) {
@@ -215,7 +221,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   }
 
   private loadFromStateAndCheckoutAuthorizedResources() {
-    const { datasetForm, workflowForm } = this.workflowsStateService.getWorkflowForm(this.workflowId);
+    const {datasetForm, workflowForm} = this.workflowsStateService.getWorkflowForm(this.workflowId);
     this.datasetForm = this.workflowFormBuilder.buildDatasetForm(datasetForm);
     this.workflowForm = this.workflowFormBuilder.buildWorkflowForm(workflowForm);
 
@@ -225,7 +231,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
       .subscribe((access) => {
         this.resourceAccesses = access;
         this.resourceAuthStateService.storeAccess(access);
-        const { wesView, wesViewResourcePath, wdl, inputs } = this.workflowForm.value;
+        const {wesView, wesViewResourcePath, wdl, inputs} = this.workflowForm.value;
         if (wesView && wesViewResourcePath && wdl && inputs) {
           this.readyToExecute = true;
           this.moveToExecutionStep();
@@ -239,8 +245,27 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     if (sourceUrl) {
       this.workflowForm.get('wdl').patchValue('# Loading...');
       this.trsService.reverseLookup(sourceUrl)
-        .getDescriptorFrom(sourceUrl)
-        .subscribe(script => this.workflowForm.get('wdl').patchValue(script));
+        .then(client => {
+          client.getDescriptorFrom(sourceUrl)
+            .subscribe(script => {
+              this.workflowForm.get('wdl').patchValue(script);
+            });
+        })
+        .catch(reason => {
+          if (!reason.code) {
+            throw new Error(`Panic (${reason.code})`);
+          }
+
+          switch (reason.code) {
+            case 'no_endpoint_defined':
+              console.warn('No endpoint has been defined.');
+              break;
+            case 'reverse_lookup_failed':
+              throw new Error(`Unable to find the client to fetch the descriptor from ${reason.url}`);
+            default:
+              throw new Error(`Unexpected error (${reason.code})`);
+          }
+        });
     }
   }
 

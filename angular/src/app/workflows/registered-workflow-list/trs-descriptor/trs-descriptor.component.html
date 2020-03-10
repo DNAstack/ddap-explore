@@ -1,7 +1,49 @@
-<h1>Version <span class="version-name">{{ data.version.name }}</span> / {{ data.type }}</h1>
+<div class="code-editor-header">
+  <h1>Version <span class="version-name">{{ data.version.name }}</span> / {{ data.type }}</h1>
+  <div class="code-actions">
+    <button mat-button
+            color="accent"
+            (click)="onSaveButtonClick()"
+            *ngIf="canSave()">
+      <mat-icon>cloud_upload</mat-icon>
+      Save
+    </button>
+    <button mat-button
+            color="accent"
+            (click)="onRunButtonClick()"
+            *ngIf="canRun()">
+      <mat-icon>play_arrow</mat-icon>
+      Run
+    </button>
+    <div class="code-action-divider"></div>
+    <button mat-icon-button (click)="onCloseButtonClick()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>
+
+<ul class="code-editor-feedback" *ngIf="hasFeedback()">
+  <li *ngIf="!data.editable">
+    <mat-icon>cloud_off</mat-icon>
+    This is a readonly copy.
+  </li>
+  <li *ngFor="let item of feedbackList">
+    <ng-container [ngSwitch]="item.level">
+      <mat-icon *ngSwitchCase="'error'">error</mat-icon>
+      <mat-icon *ngSwitchCase="'warn'">warning</mat-icon>
+      <mat-icon *ngSwitchCase="'warning'">warning</mat-icon>
+      <mat-icon *ngSwitchCase="'info'">info</mat-icon>
+      <mat-icon *ngSwitchDefault>report</mat-icon>
+    </ng-container>
+    {{ item.message }}
+    <div class="fill-space"></div>
+    <button mat-icon-button (click)="onIndividualFeedbackClearButtonClick()"><mat-icon>close</mat-icon></button>
+  </li>
+</ul>
 
 <div class="code-editor">
-  <ngx-monaco-editor [options]="editorConfig"
-                     [(ngModel)]="descriptorContent" (init)="onEditorInit($event)">
+  <ngx-monaco-editor [options]="getEditableConfig()"
+                     [(ngModel)]="descriptorContent"
+                     (init)="codeEditorEnhancer.configure('wdl')">
   </ngx-monaco-editor>
 </div>

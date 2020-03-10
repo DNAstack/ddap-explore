@@ -12,6 +12,7 @@ export interface Config {
   acceptedToolClasses: string[];
   acceptedVersionDescriptorTypes: string[];
   pageSize: number;
+  editable?: boolean;
 }
 
 @Component({
@@ -66,16 +67,6 @@ export class TrsBrowserComponent implements OnInit {
   }
 
   onVersionSelectionSelectClick(version: ToolVersion, type: string) {
-    // const sourceUrl = `${version.url}/${type}/descriptor`;
-    // this.router.navigate(
-    //   ['..', 'run', btoa(sourceUrl)],
-    //   {
-    //     relativeTo: this.route,
-    //   }
-    // );
-
-    // TODO Open a modal dialog for code editing
-
     this.descriptorDialog = this.dialog.open(
       TrsDescriptorComponent,
       {
@@ -84,9 +75,22 @@ export class TrsBrowserComponent implements OnInit {
           client: this.config.client,
           version: version,
           type: type,
+          editable: this.config.editable,
         },
       }
     );
+
+    this.descriptorDialog.afterClosed()
+      .subscribe(result => {
+        if (result.sourceUrl) {
+          this.router.navigate(
+            ['..', 'run', btoa(result.sourceUrl)],
+            {
+              relativeTo: this.route,
+            }
+          );
+        }
+      });
   }
 
   onNewVersionClick() {

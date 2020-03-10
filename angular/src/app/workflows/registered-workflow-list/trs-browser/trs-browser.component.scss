@@ -51,6 +51,7 @@ ddaplib-main {
     .version-list {
       display: flex;
       overflow: auto;
+      margin: 10px 0;
 
       .version {
         background-color: whitesmoke;
@@ -81,15 +82,6 @@ ddaplib-main {
         justify-content: center;
         align-items: center;
         padding: 14px 16px;
-        color: $primary-color;
-
-        mat-icon {
-          margin-right: 5px;
-        }
-
-        span {
-          padding-right: 10px;
-        }
       }
     }
   }

@@ -28,7 +28,9 @@
             color="warn"
             title="Clear the filter"
             (click)="onFilterResetClick()"
-            [disabled]="updateInProgress"><mat-icon>clear</mat-icon></button>
+            [disabled]="updateInProgress">
+      <mat-icon>clear</mat-icon>
+    </button>
   </div>
   <div class="action">
     <button mat-icon-button
@@ -36,7 +38,9 @@
             color="primary"
             title="Refresh"
             (click)="onFilterRefreshClick()"
-            [disabled]="updateInProgress"><mat-icon>refresh</mat-icon></button>
+            [disabled]="updateInProgress">
+      <mat-icon>refresh</mat-icon>
+    </button>
   </div>
 </div>
 
@@ -46,7 +50,9 @@
 
 <div class="tool-filter-results">
   <mat-accordion>
-    <mat-expansion-panel *ngFor="let tool of (filteredTools || []).slice(pageIndex * config.pageSize, (pageIndex + 1) * config.pageSize)" class="workflow">
+    <mat-expansion-panel
+      *ngFor="let tool of (filteredTools || []).slice(pageIndex * config.pageSize, (pageIndex + 1) * config.pageSize)"
+      class="workflow">
       <mat-expansion-panel-header>
         <mat-panel-title><span>{{ tool.toolname }}</span></mat-panel-title>
         <mat-panel-description><span>{{ tool.author || tool.organization }}</span></mat-panel-description>
@@ -61,7 +67,6 @@
 
         <mat-tab label="Versions">
           <div class="version-selector">
-            <h3 class="label">Please select one version</h3>
             <div class="version-list" *ngIf="tool.versions">
               <div class="version" *ngFor="let version of tool.versions">
                 <div class="name">
@@ -78,10 +83,13 @@
                   </li>
                 </ul>
               </div>
-              <a class="new-version-button"
-                 (click)="onNewVersionClick()">
-                <mat-icon>add</mat-icon> <span>Add new version</span>
-              </a>
+              <div class="new-version-button">
+                <button mat-mini-fab
+                   color="accent"
+                   (click)="onNewVersionClick()">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
             </div>
           </div>
         </mat-tab>

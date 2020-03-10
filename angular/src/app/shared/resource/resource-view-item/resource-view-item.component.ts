@@ -1,14 +1,15 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {FormControl, Validators} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
-import {EntityModel} from 'ddap-common-lib';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { EntityModel } from 'ddap-common-lib';
 import _get from 'lodash.get';
-import {Subscription} from 'rxjs';
-
-import {environment} from '../../../../environments/environment';
-import {ResourceService} from '../resource.service';
-import {dam} from "../../proto/dam-service";
+import { Subscription } from 'rxjs';
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
+import { shareReplay } from 'rxjs/operators';
+
+import { environment } from '../../../../environments/environment';
+import { dam } from '../../proto/dam-service';
+import { ResourceService } from '../resource.service';
 
 @Component({
   selector: 'ddap-resource-view-item',
@@ -100,7 +101,15 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
     const resource = this.resourceService.getDamResourcePath(
       this.damId, this.resource.name, this.view.name, this.role, this.interfaceId
     );
-    return this.resourceService.getAccessTokensForAuthorizedResources([resource]);
+    return this.resourceService
+      .getAccessTokensForAuthorizedResources([resource])
+      .pipe(
+        /*
+         * The template will end up making this request twice on a page load,
+         * which causes timing issues in e2e tests
+         */
+        shareReplay(1)
+      );
   }
 
   private setDefaults() {

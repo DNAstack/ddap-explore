@@ -2,7 +2,7 @@
   <mat-expansion-panel>
     <mat-expansion-panel-header collapsedHeight="4rem">
       <mat-progress-bar mode="indeterminate"
-                        *ngIf="accessSubscription && !accessSubscription.closed">
+                        *ngIf="pending">
       </mat-progress-bar>
       <mat-panel-title>
         <h3>{{ view.dto.ui.label || view.name }}</h3>
@@ -54,16 +54,16 @@
       </mat-form-field>
     </div>
 
-    <div *ngIf="resourceAccess"
+    <div *ngIf="resourceAccess && (resourceAccess | async)"
          class="expansion-footer-content">
-      <ddap-view-access [access]="resourceAccess"
-                        [url]="url">
+      <ddap-view-access [access]="(resourceAccess | async)"
+                        [url]="url | async">
       </ddap-view-access>
     </div>
 
     <mat-action-row>
-      <a *ngIf="url"
-         href="{{ url }}"
+      <a *ngIf="(resourceAccess | async) && (url | async)"
+         href="{{ url | async }}"
          data-se="access-btn"
          target='_blank'
          rel='noopener noreferrer'>
@@ -73,7 +73,7 @@
           View
         </button>
       </a>
-      <a *ngIf="!resourceAccess"
+      <a *ngIf="!(resourceAccess | async)"
          [href]="getUrlForObtainingAccessToken()"
          class="stretch"
          data-se="get-access-btn">

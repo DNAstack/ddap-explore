@@ -43,4 +43,8 @@ public class ExpandedAccessibleViewItem {
     public String getDownloadLink() {
         return view.findElement(DdapBy.se("download-cli-button")).getAttribute("href");
     }
+
+    public boolean isExpanded() {
+        return view.findElement(DdapBy.se("download-cli-button")).isDisplayed();
+    }
 }

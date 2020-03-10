@@ -33,7 +33,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
     }
 
     @Test
-    public void testRequestAccessForBeaconDiscoveryExpectSuccess() throws IOException {
+    public void testRequestAccessForBeaconDiscoveryExpectSuccess() throws IOException, InterruptedException {
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage thousandGenomesDetailPage = dataListPage
                 .findDataByName("1000 Genomes")
@@ -44,6 +44,11 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
         URI authorizeUrl = beaconDiscoveryView.requestAccess();
         thousandGenomesDetailPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, DataDetailPage::new);
 
+        /*
+         FIXME DISCO-2743 something that loads on this page causes the expansion panel to collapse
+               after it is clicked!
+         */
+        Thread.sleep(2000);
         beaconDiscoveryView = thousandGenomesDetailPage.expandViewItem(viewId);
         beaconDiscoveryView.assertHasAccessToken();
     }

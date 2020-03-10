@@ -2,26 +2,23 @@
       novalidate
       [formGroup]="form">
   <div class="row">
-    <div class="editor-extras">
-      <mat-chip-list>
-        <mat-label>Example WDLs:</mat-label>
-        <mat-chip color="accent"
-                  (click)="useExample('md5sum')">
-          md5sum
-        </mat-chip>
-        <mat-chip color="accent"
-                  (click)="useExample('callDenovo')">
-          callDenovo
-        </mat-chip>
-        <mat-chip color="accent"
-                  (click)="useExample('helloWorld')">
-          Hello World
-        </mat-chip>
-      </mat-chip-list>
-    </div>
+    <mat-chip-list>
+      <mat-label>Example WDLs:</mat-label>
+      <mat-chip color="accent"
+                (click)="useExample('md5sum')">
+        md5sum
+      </mat-chip>
+      <mat-chip color="accent"
+                (click)="useExample('callDenovo')">
+        callDenovo
+      </mat-chip>
+      <mat-chip color="accent"
+                (click)="useExample('helloWorld')">
+        Hello World
+      </mat-chip>
+    </mat-chip-list>
   </div>
-  <!-- We keep this to sync the editor with the form object. -->
-  <div class="row" [ngStyle]="{display: 'none'}">
+  <div class="row">
     <mat-form-field class="col">
         <textarea matInput
                   formControlName="wdl"
@@ -30,15 +27,5 @@
                   required>
         </textarea>
     </mat-form-field>
-  </div>
-  <div class="row">
-    <div [class]="'editor-container'"
-         [ngStyle]="computeEditorStyle()">
-      <ngx-monaco-editor [options]="{language: 'shell', minimap: {enabled: true}}"
-                         [(ngModel)]="wdlCurrentContent"
-                         [ngModelOptions]="{standalone: true}"
-                         (ngModelChange)="onEditorUpdated()">
-      </ngx-monaco-editor>
-    </div>
   </div>
 </form>

@@ -2,16 +2,14 @@
 
 .access-denied {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .icon-side {
-  padding-top: 16px;
-  padding-right: 16px;
-
   mat-icon {
-    display: inline-block;
-    font-size: 2rem;
+    font-size: 3rem;
+    width: 3rem;
+    margin-right: 5px;
     color: $warn-color;
   }
 }

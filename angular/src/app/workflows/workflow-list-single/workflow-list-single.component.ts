@@ -54,12 +54,8 @@ export class WorkflowListSingleComponent implements OnInit {
 
         if (accessMap && Object.keys(accessMap).length > 0) {
           this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(accessMap, resourcePath);
-          if (this.resourceToken) {
-            this.getWorkflows(this.resourceToken['access_token']);
-            this.viewAccessible = true;
-          } else {
-            this.viewAccessible = false;
-          }
+          this.getWorkflows(this.resourceToken['access_token']);
+          this.viewAccessible = true;
         } else {
           this.getAccessTokensForAuthorizedResources(damIdResourcePathPair)
             .pipe(

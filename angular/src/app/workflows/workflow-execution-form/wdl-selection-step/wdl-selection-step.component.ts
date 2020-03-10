@@ -1,8 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
-import { AppConfigService } from '../../../shared/app-config/app-config.service';
+import { TrsService } from '../../trs-v2/trs.service';
 import { WorkflowService } from '../../workflows.service';
+import { WorkflowsStateService } from '../workflows-state.service';
 
 import { callDenovo, helloWorld, md5sum } from './example.wdl';
 
@@ -12,39 +14,19 @@ import { callDenovo, helloWorld, md5sum } from './example.wdl';
   templateUrl: './wdl-selection-step.component.html',
   styleUrls: ['./wdl-selection-step.component.scss'],
 })
-export class WdlSelectionStepComponent implements OnInit {
+export class WdlSelectionStepComponent {
+
   @Input()
   workflowId: string;
-
   @Input()
   form: FormGroup;
 
   inputSchema;
 
-  wdlCurrentContent = '';
-
-  constructor(private workflowService: WorkflowService) {
-  }
-
-  ngOnInit(): void {
-    this.form.statusChanges.subscribe(observer => {
-      this.wdlCurrentContent = this.form.get('wdl').value;
-    });
-  }
-
-  onEditorUpdated() {
-    this.form.get('wdl').patchValue(this.wdlCurrentContent);
-  }
-
-  computeEditorStyle() {
-    const topPadding = 0;
-    const minHeight = 100;
-    const maxHeight = 500;
-    const lineHeight = 18;
-    const expectedHeight = this.wdlCurrentContent.split(/\n/).length * lineHeight;
-    return {
-      height: (Math.min(Math.max(minHeight, expectedHeight), maxHeight) + topPadding) + 'px',
-    };
+  constructor(private workflowService: WorkflowService,
+              private route: ActivatedRoute,
+              private trsService: TrsService,
+              private workflowsStateService: WorkflowsStateService) {
   }
 
   generateForm() {

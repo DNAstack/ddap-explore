@@ -34,8 +34,6 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
     @Test
     public void shouldGetSingleDatasetFromFetch() throws IOException {
         Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-        String validPersonaToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
-        String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
 
         // @formatter:off
         getRequestSpecification()
@@ -43,8 +41,6 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
             .log().cookies()
             .log().uri()
             .cookie(SESSION_COOKIE_NAME, session.getValue())
-            .cookie("ic_identity", validPersonaToken)
-            .cookie("ic_refresh", refreshToken)
             .queryParam("dataset_url",DATASET_URL_WITH_INLINE_SCHEMA)
         .when()
             .get(format("/api/v1alpha/realm/%s/table",REALM))
@@ -59,8 +55,6 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
     @Test
     public void shouldGetSingleDatasetFromFetchAndResolveRemoteSchema() throws IOException {
         Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-        String validPersonaToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
-        String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
 
         // @formatter:off
         getRequestSpecification()
@@ -68,8 +62,6 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
             .log().cookies()
             .log().uri()
             .cookie(SESSION_COOKIE_NAME, session.getValue())
-            .cookie("ic_identity", validPersonaToken)
-            .cookie("ic_refresh", refreshToken)
             .queryParam("dataset_url",DATASET_URL_WITH_RESOLVED_SCHEMA)
         .when()
             .get(format("/api/v1alpha/realm/%s/table",REALM))
@@ -86,8 +78,6 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
     @Test
     public void shouldGetErrorMessageFromNonexistantDataset() throws IOException {
         Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-        String validPersonaToken = fetchRealPersonaDamToken(TestingPersona.USER_WITH_ACCESS, REALM);
-        String refreshToken = fetchRealPersonaRefreshToken(TestingPersona.USER_WITH_ACCESS, REALM);
 
         // @formatter:off
         getRequestSpecification()
@@ -95,8 +85,6 @@ public class DatasetApiTest extends AbstractBaseE2eTest {
             .log().cookies()
             .log().uri()
             .cookie(SESSION_COOKIE_NAME, session.getValue())
-            .cookie("ic_identity", validPersonaToken)
-            .cookie("ic_refresh", refreshToken)
             .queryParam("dataset_url","https://storage.googleapis.com/ga4gh-dataset-sample/table/non-existant/data")
         .when()
             .get(format("/api/v1alpha/realm/%s/table",REALM))

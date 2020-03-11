@@ -1,15 +1,15 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {Router} from '@angular/router';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import _sampleSize from 'lodash.samplesize';
 
-import {dam} from '../../../shared/proto/dam-service';
-import {ResourceAuthStateService} from '../../../shared/resource-auth-state.service';
-import {ResourceService} from '../../../shared/resource/resource.service';
-import {DatasetService} from '../dataset.service';
-import {WorkflowsStateService} from '../workflows-state.service';
+import { dam } from '../../../shared/proto/dam-service';
+import { ResourceAuthStateService } from '../../../shared/resource-auth-state.service';
+import { ResourceService } from '../../../shared/resource/resource.service';
+import { DatasetService } from '../dataset.service';
+import { WorkflowsStateService } from '../workflows-state.service';
 
-import {Dataset} from './dataset.model';
+import { Dataset } from './dataset.model';
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
@@ -109,7 +109,7 @@ export class DatasetSelectionStepComponent {
     const { datasetDamIdResourcePathPairs } = this.workflowsStateService.getMetaInfoForWorkflow(this.workflowId);
     if (datasetDamIdResourcePathPairs) {
       const resourceTokens = this.resourceAuthStateService.getAccess();
-      const datasetResourcePath = datasetDamIdResourcePathPairs[0][0].split(';')[1];
+      const datasetResourcePath = datasetDamIdResourcePathPairs[0].split(';')[1];
       this.resourceAccess = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, datasetResourcePath);
     }
   }

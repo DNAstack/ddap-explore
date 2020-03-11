@@ -12,7 +12,7 @@ export interface Config {
   acceptedToolClasses: string[];
   acceptedVersionDescriptorTypes: string[];
   pageSize: number;
-  editable?: boolean;
+  editable: boolean;
 }
 
 @Component({

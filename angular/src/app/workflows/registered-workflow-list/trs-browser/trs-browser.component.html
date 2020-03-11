@@ -83,7 +83,7 @@
                   </li>
                 </ul>
               </div>
-              <div class="new-version-button">
+              <div class="new-version-button" *ngIf="config.editable">
                 <button mat-mini-fab
                    color="accent"
                    (click)="onNewVersionClick()">

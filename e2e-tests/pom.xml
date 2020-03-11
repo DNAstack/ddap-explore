@@ -143,6 +143,9 @@
                             <inputDirectories>
                                 <include>../shared/protos</include>
                             </inputDirectories>
+                            <includeDirectories>
+                                <directory>../shared/protos</directory>
+                            </includeDirectories>
                         </configuration>
                     </execution>
                 </executions>

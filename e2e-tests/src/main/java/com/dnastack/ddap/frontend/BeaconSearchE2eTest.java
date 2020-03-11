@@ -60,14 +60,16 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.openSearchInput();
         searchPage.submitSearchQuery(query);
 
-        List<WebElement> results = searchPage.getSearchResults(2);
-        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        searchPage.getSearchResults(2, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        });
 
         URI authorizeUrl = searchPage.requestAccess();
         searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
 
-        results = searchPage.getSearchResults(2);
-        assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
+        searchPage.getSearchResults(2, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
+        });
     }
 
     @Test
@@ -81,15 +83,17 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.openSearchInput();
         searchPage.submitSearchQuery(query);
 
-        List<WebElement> results = searchPage.getSearchResults(2);
-        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        searchPage.getSearchResults(2, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        });
 
         URI authorizeUrl = searchPage.requestAccess();
         searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
 
-        results = searchPage.getSearchResults(2);
-        assertFalse(findFirstElementByCssClass(results, "match-success").isPresent());
-        assertTrue(findFirstElementByCssClass(results, "match-failure").isPresent());
+        searchPage.getSearchResults(2, results -> {
+            assertFalse(findFirstElementByCssClass(results, "match-success").isPresent());
+            assertTrue(findFirstElementByCssClass(results, "match-failure").isPresent());
+        });
     }
 
     @Test
@@ -146,14 +150,16 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.clickLimitSearch();
         searchPage.submitSearchQuery(query);
 
-        List<WebElement> results = searchPage.getSearchResults(1);
-        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        searchPage.getSearchResults(1, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        });
 
         URI authorizeUrl = searchPage.requestAccess();
         searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
 
-        results = searchPage.getSearchResults(1);
-        assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
+        searchPage.getSearchResults(1, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
+        });
     }
 
     @Test
@@ -173,14 +179,16 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.clickLimitSearch();
         searchPage.submitSearchQuery(query);
 
-        List<WebElement> results = searchPage.getSearchResults(1);
-        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        searchPage.getSearchResults(1, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        });
 
         URI authorizeUrl = searchPage.requestAccess();
         searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
 
-        results = searchPage.getSearchResults(1);
-        assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
+        searchPage.getSearchResults(1, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
+        });
     }
 
     @Test
@@ -196,23 +204,26 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
         // Start with a valid search
 
-        List<WebElement> results = searchPage.getSearchResults(2);
-        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        searchPage.getSearchResults(2, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        });
 
         URI authorizeUrl = searchPage.requestAccess();
         searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
 
-        results = searchPage.getSearchResults(2);
-        assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
+        searchPage.getSearchResults(2, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
+        });
 
         // Continue with invalid search
 
         query = "1 : 1 T > C";
         searchPage.submitSearchQuery(query);
 
-        results = searchPage.getSearchResults(2);
-        assertFalse(findFirstElementByCssClass(results, "match-success").isPresent());
-        assertTrue(findFirstElementByCssClass(results, "match-failure").isPresent());
+        searchPage.getSearchResults(2, results -> {
+            assertFalse(findFirstElementByCssClass(results, "match-success").isPresent());
+            assertTrue(findFirstElementByCssClass(results, "match-failure").isPresent());
+        });
 
         // Go back to data list page
 
@@ -240,20 +251,23 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
         searchPage.clickLimitSearch();
         searchPage.submitSearchQuery(query);
 
-        List<WebElement> results = searchPage.getSearchResults(0);
-        assertThat(results.size(), is(0));
+        searchPage.getSearchResults(0, results -> {
+            assertThat(results.size(), is(0));
+        });
 
         searchPage.clickBRCA2();
 
-        results = searchPage.getSearchResults(2);
-        assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        searchPage.getSearchResults(2, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-error").isPresent());
+        });
 
         URI authorizeUrl = searchPage.requestAccess();
         searchPage = loginStrategy.authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, SearchPage::new);
 
-        results = searchPage.getSearchResults(2);
-        assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
-        assertFalse(findFirstElementByCssClass(results, "match-failure").isPresent());
+        searchPage.getSearchResults(2, results -> {
+            assertTrue(findFirstElementByCssClass(results, "match-success").isPresent());
+            assertFalse(findFirstElementByCssClass(results, "match-failure").isPresent());
+        });
     }
 
     private Optional<WebElement> findFirstElementByCssClass(List<WebElement> results, String cssClass) {

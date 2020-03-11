@@ -1,10 +1,10 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Router} from '@angular/router';
 
-import { ResourceService } from '../../../shared/resource/resource.service';
-import { DatasetService } from '../dataset.service';
-import { WorkflowsStateService } from '../workflows-state.service';
-import { flatten } from "ddap-common-lib";
+import {ResourceService} from '../../../shared/resource/resource.service';
+import {DatasetService} from '../dataset.service';
+import {WorkflowsStateService} from '../workflows-state.service';
+import {flatten} from "ddap-common-lib";
 
 
 @Component({
@@ -43,8 +43,8 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
 
     const columnData: string[] = this.extractColumnData(this.selectedRows, this.selectedColumns);
     this.datasetService.getViews(columnData)
-      .subscribe((views) => {
-        const resourcePaths: string[] = Object.values(views);
+      .subscribe((views: { [p: string]: string[] }) => {
+        const resourcePaths: string[] = Object.values(views).reduce((l, r) => l.concat(r));
         this.workflowsStateService.storeMetaInfoForWorkflow(this.workflowId, {
           columnDataMappedToViews: views,
         });

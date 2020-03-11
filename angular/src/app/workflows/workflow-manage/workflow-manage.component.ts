@@ -125,7 +125,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     const inputsStepCompleted = this.workflowForm.get('inputs').value;
     const damIdResourcePathPairs: string[] = [];
     if (columnDataMappedToViews) {
-      const pairs: string[] = Object.values(columnDataMappedToViews);
+      const pairs: string[] = Object.values(columnDataMappedToViews).reduce((l, r) => l.concat(r));
       damIdResourcePathPairs.push(...pairs);
     }
     if (damIdWesResourcePathPair && inputsStepCompleted) {

@@ -78,7 +78,8 @@ export class WorkflowDetailComponent implements OnInit {
                 if (!views) {
                   return;
                 }
-                const damIdResourcePathPairs: string[] = Object.values(views);
+                const damIdResourcePathPairs: string[] = Object.values(views)
+                  .reduce((l, r) => l.concat(r));
                 this.fileResourceAuthUrl = this.getUrlForObtainingAccessToken(damIdResourcePathPairs);
                 this.viewAccessible = true;
               });

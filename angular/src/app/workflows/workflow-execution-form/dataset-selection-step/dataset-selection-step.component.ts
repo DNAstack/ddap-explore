@@ -62,7 +62,8 @@ export class DatasetSelectionStepComponent {
               if (!views) {
                 this.error.message = 'No views associated with dataset';
               }
-              const damIdResourcePathPairs: string[] = Object.values(views);
+              const damIdResourcePathPairs: string[] = Object.values(views)
+                .reduce((l, r) => l.concat(r));
               const workflowMetaInfo = this.workflowsStateService.getMetaInfoForWorkflow(this.workflowId);
               workflowMetaInfo.datasetDamIdResourcePathPairs = damIdResourcePathPairs;
               this.workflowsStateService.storeMetaInfoForWorkflow(this.workflowId, workflowMetaInfo);

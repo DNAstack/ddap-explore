@@ -508,7 +508,8 @@
       "serviceName": "gcs",
       "interfaces": {
         "gcp:gs": "gs://${bucket}",
-        "http:gcp:gs": "https://www.googleapis.com/storage/v1/b/${bucket}"
+        "http:gcp:gs": "https://www.googleapis.com/storage/v1/b/${bucket}",
+        "http:gcp:http": "https://storage.googleapis.com/${bucket}"
       },
       "roles": {
         "creator": {

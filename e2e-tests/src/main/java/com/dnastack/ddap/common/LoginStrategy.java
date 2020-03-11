@@ -14,4 +14,12 @@ public interface LoginStrategy {
     <T extends AnyDdapPage> T performPersonaLogin(WebDriver driver, TestingPersona persona, String realmName, Function<WebDriver, T> pageFactory) throws IOException;
     <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException;
 
+    default boolean isDataAccessManagerRequired() {
+        return true;
+    }
+
+    default boolean isIdentityConcentratorRequired() {
+        return true;
+    }
+
 }

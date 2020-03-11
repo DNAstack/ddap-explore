@@ -32,6 +32,7 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Stream;
@@ -74,6 +75,7 @@ public abstract class AbstractBaseE2eTest {
 
     public static final String PERSONA_LOGIN_STRATEGY = "PersonaLoginStrategy";
     public static final String WALLET_LOGIN_STRATEGY = "WalletLoginStrategy";
+    public static final String STANDALONE_MODE_LOGIN_STRATEGY = "StandaloneModeLoginStrategy";
     public static final String LOGIN_STRATEGY_NAME = optionalEnv("E2E_LOGIN_STRATEGY", PERSONA_LOGIN_STRATEGY);
     public static final String DDAP_COOKIES_ENCRYPTOR_PASSWORD = optionalEnv("E2E_COOKIES_ENCRYPTOR_PASSWORD", "abcdefghijk");
     public static final String DDAP_COOKIES_ENCRYPTOR_SALT = optionalEnv("E2E_COOKIES_ENCRYPTOR_SALT", "598953e322");
@@ -90,8 +92,8 @@ public abstract class AbstractBaseE2eTest {
 
     @BeforeClass
     public static void staticSetup() {
-        log.debug("Test Mode: {}", DDAP_E2E_TEST_MODE);
-        Assume.assumeThat(DDAP_E2E_TEST_MODE, equalTo("normal"));
+        // log.debug("Test Mode: {}", DDAP_E2E_TEST_MODE);
+        // Assume.assumeThat(DDAP_E2E_TEST_MODE, equalTo("normal"));
 
         switch (LOGIN_STRATEGY_NAME) {
             case PERSONA_LOGIN_STRATEGY:
@@ -104,6 +106,9 @@ public abstract class AbstractBaseE2eTest {
                 personalAccessTokens.put(TestingPersona.USER_WITHOUT_ACCESS.getId(), new LoginInfo(requiredEnv("E2E_PLAIN_USER_EMAIL"), requiredEnv("E2E_PLAIN_USER_TOKEN")));
                 loginStrategy = new WalletLoginStrategy(personalAccessTokens, requiredEnv("E2E_WALLET_URL"), PASSPORT_ISSUER);
                 break;
+            case STANDALONE_MODE_LOGIN_STRATEGY:
+                loginStrategy = new StandaloneModeLoginStrategy(URI.create("http://localhost:8085"));
+                 break;
             default:
                 throw new IllegalArgumentException(format("Unrecognized login strategy [%s]", LOGIN_STRATEGY_NAME));
         }
@@ -171,6 +176,11 @@ public abstract class AbstractBaseE2eTest {
     }
 
     protected static void setupRealmConfig(TestingPersona persona, String config, String damId, String realmName) throws IOException {
+        if (!loginStrategy.isDataAccessManagerRequired()) {
+            log.warn("As this login strategy does not require Data Access Manager, the realm setup will be ignored.");
+            return;
+        }
+
         DamService.DamConfig.Builder damConfigBuilder = DamService.DamConfig.newBuilder();
         validateProtoBuf(config, damConfigBuilder);
 

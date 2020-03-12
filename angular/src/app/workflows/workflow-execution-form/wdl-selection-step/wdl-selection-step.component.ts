@@ -39,7 +39,7 @@ export class WdlSelectionStepComponent {
 
   computeEditorStyle() {
     const topPadding = 0;
-    const minHeight = 100;
+    const minHeight = 300;
     const maxHeight = 500;
     const lineHeight = 18;
     const expectedHeight = this.wdlCurrentContent.split(/\n/).length * lineHeight;

@@ -4,7 +4,6 @@ import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.WorkflowListPage;
 import com.dnastack.ddap.common.page.WorkflowManagePage;
-import com.dnastack.ddap.common.page.WorkflowWesServersPage;
 import com.dnastack.ddap.common.util.DdapBy;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
@@ -58,8 +57,14 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.selectColumn("bam_file");
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
-        managePage.fillField(DdapBy.se("inp-workflow-wdl"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
+        String content = loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl");
+        managePage.typeInEditor(By.cssSelector("ngx-monaco-editor .monaco-editor textarea"), content);
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
+        try {
+            Thread.sleep(3000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("The user interaction with the code editor has been cancelled while filling in the blank");
+        }
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
         managePage.fillFieldFromDropdown(By.name("md5Sum.inputFile"), "bam_file");

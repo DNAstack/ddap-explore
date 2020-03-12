@@ -17,10 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 @Slf4j
 public class DamConfigStrategy implements ConfigStrategy {
@@ -57,7 +59,9 @@ public class DamConfigStrategy implements ConfigStrategy {
         final CookieStore cookieStore = StrategyFactory.getLoginStrategy()
             .performPersonaLogin(TestingPersona.ADMINISTRATOR.getId(), "master");
 
-        final String modificationPayload = format("{ \"item\": %s }", damConfig);
+        damRealmJson = appendMaterRealmClientsToExistingClientsInConfig(cookieStore,damRealmJson);
+
+        final String modificationPayload = format("{ \"item\": %s }", damRealmJson);
 
         final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
         HttpPut request = new HttpPut(format("%s/dam/v1alpha/%s/config", damConfig
@@ -74,6 +78,39 @@ public class DamConfigStrategy implements ConfigStrategy {
             allOf(greaterThanOrEqualTo(200), lessThan(300)));
     }
 
+
+    private JSONObject getClientsFromMasterRealm(CookieStore cookieStore) throws IOException {
+        HttpClient httpclient = HttpClientBuilder.create()
+            .setDefaultCookieStore(cookieStore)
+            .build();
+
+        HttpGet request = new HttpGet(format("%s/dam/v1alpha/master/config", damConfig.getDamBaseUrl()));
+        HttpResponse response = httpclient.execute(request);
+        String responseBody = EntityUtils.toString(response.getEntity());
+
+        JSONObject damConfig = new JSONObject(responseBody);
+        JSONObject clients = damConfig.getJSONObject("clients");
+
+        log.debug("Parsed clients from master realm: {}", clients);
+
+        return clients;
+    }
+
+    private String appendMaterRealmClientsToExistingClientsInConfig(CookieStore cookieStore, String damConfig) throws IOException {
+        JSONObject damConfigClients = new JSONObject(damConfig).getJSONObject("clients");
+        JSONObject masterRealmClients = getClientsFromMasterRealm(cookieStore);
+        masterRealmClients.keySet()
+            .forEach((masterRealmClient) -> {
+                damConfigClients.put(masterRealmClient, masterRealmClients.get(masterRealmClient));
+            });
+
+        JSONObject newDamConfig = new JSONObject(damConfig);
+        newDamConfig.put("clients", damConfigClients);
+
+        log.debug("DAM Config was altered to include master realm clients: {}", newDamConfig);
+
+        return newDamConfig.toString();
+    }
 
     private static void validateProtoBuf(String resourceJsonString, Message.Builder builder) {
         try {

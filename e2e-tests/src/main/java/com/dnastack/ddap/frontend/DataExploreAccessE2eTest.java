@@ -22,13 +22,8 @@ import static io.restassured.RestAssured.given;
 @SuppressWarnings("Duplicates")
 public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
 
-    private static final String REALM = generateRealmName(DataExploreAccessE2eTest.class.getSimpleName());
-
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
-        final String damConfig = loadTemplate("/com/dnastack/ddap/adminConfig.json");
-        setupRealmConfig(TestingPersona.ADMINISTRATOR, damConfig, "1", REALM);
-
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }
 

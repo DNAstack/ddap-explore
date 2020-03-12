@@ -1,11 +1,22 @@
 package com.dnastack.ddap.frontend;
 
+import static java.lang.String.format;
+
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
 import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.page.AnyDdapPage;
+import com.dnastack.ddap.common.util.EnvUtil;
 import com.dnastack.ddap.common.util.RetryRule;
 import com.dnastack.ddap.common.util.ScreenshotUtil;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -17,21 +28,10 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogEntries;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.lang.String.format;
-
 @Slf4j
 public abstract class AbstractFrontendE2eTest extends AbstractBaseE2eTest {
 
-    protected static final boolean HEADLESS = Boolean.parseBoolean(optionalEnv("HEADLESS", "true"));
+    protected static final boolean HEADLESS = Boolean.parseBoolean(EnvUtil.optionalEnv("HEADLESS", "true"));
     protected static final Pattern URL_PARSE_PATTERN = Pattern.compile("^(https?)://(.*)$");
     protected static WebDriver driver;
     protected static AnyDdapPage ddapPage;
@@ -39,13 +39,20 @@ public abstract class AbstractFrontendE2eTest extends AbstractBaseE2eTest {
     @Rule
     public TestName name = new TestName();
     @Rule
-    public RetryRule retry = new RetryRule(Integer.parseInt(optionalEnv("E2E_TEST_RETRIES", "3")));
+    public RetryRule retry = new RetryRule(Integer.parseInt(EnvUtil.optionalEnv("E2E_TEST_RETRIES", "3")));
 
     @BeforeClass
     public static void driverSetup() {
         WebDriverManager.chromedriver().setup();
         driver = getChromeDriver();
         driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+
+    }
+
+    @BeforeClass
+    public static void doOneTimeSetup() {
+        log.info("Performing one time setup");
+        configStrategy.doOnetimeSetup();
     }
 
     private static ChromeDriver getChromeDriver() {
@@ -88,14 +95,15 @@ public abstract class AbstractFrontendE2eTest extends AbstractBaseE2eTest {
     private void writeBrowserConsoleLog() {
         LogEntries logs = driver.manage().logs().get("browser");
         logs.getAll().forEach((logEntry) -> {
-            LocalTime loggedAt = Instant.ofEpochMilli(logEntry.getTimestamp()).atZone(ZoneId.systemDefault()).toLocalTime();
+            LocalTime loggedAt = Instant.ofEpochMilli(logEntry.getTimestamp()).atZone(ZoneId.systemDefault())
+                .toLocalTime();
             log.info("Browser's console log: {} {} {}", loggedAt, logEntry.getLevel(), logEntry.getMessage());
         });
     }
 
     protected static String getUrlWithBasicCredentials(String original) {
         final Matcher matcher = URL_PARSE_PATTERN.matcher(original);
-        if(DDAP_USERNAME == null && DDAP_PASSWORD == null){
+        if (DDAP_USERNAME == null && DDAP_PASSWORD == null) {
             return original;
         }
         if (matcher.find()) {

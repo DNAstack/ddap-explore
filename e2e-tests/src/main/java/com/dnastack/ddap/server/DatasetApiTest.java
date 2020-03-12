@@ -1,35 +1,24 @@
 package com.dnastack.ddap.server;
 
-import com.dnastack.ddap.common.AbstractBaseE2eTest;
-import com.dnastack.ddap.common.TestingPersona;
-import com.dnastack.ddap.common.util.DdapLoginUtil;
-import dam.v1.DamService;
-import org.apache.http.cookie.Cookie;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.IOException;
-
 import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
+import com.dnastack.ddap.common.AbstractBaseE2eTest;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
+import java.io.IOException;
+import org.apache.http.cookie.Cookie;
+import org.junit.Test;
+
 public class DatasetApiTest extends AbstractBaseE2eTest {
 
-    private static final String REALM = generateRealmName(DatasetApiTest.class.getSimpleName());
     private static final String DATASET_URL_WITH_INLINE_SCHEMA = "https://storage.googleapis"
         + ".com/ddap-e2etest-objects/table/subjects/data";
     private static final String DATASET_URL_WITH_RESOLVED_SCHEMA = "https://storage.googleapis"
         + ".com/ddap-e2etest-objects/table/subjects-referenced-schema/data";
 
-    @BeforeClass
-    public static void oneTimeSetup() throws IOException {
-        final String damConfig = loadTemplate("/com/dnastack/ddap/adminConfig.json");
-        validateProtoBuf(damConfig, DamService.DamConfig.newBuilder());
-        setupRealmConfig(TestingPersona.ADMINISTRATOR, damConfig, "1", REALM);
-    }
 
     @Test
     public void shouldGetSingleDatasetFromFetch() throws IOException {

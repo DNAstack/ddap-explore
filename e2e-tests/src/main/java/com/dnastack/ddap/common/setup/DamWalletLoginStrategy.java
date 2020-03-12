@@ -1,8 +1,30 @@
-package com.dnastack.ddap.common;
+package com.dnastack.ddap.common.setup;
 
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_BASE_URL;
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_PASSWORD;
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_USERNAME;
+import static java.lang.String.format;
+import static java.lang.String.join;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertTrue;
+
+import com.dnastack.ddap.common.PolicyRequirementFailedException;
+import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
+import com.dnastack.ddap.common.util.EnvUtil;
 import com.dnastack.ddap.common.util.WebDriverCookieHelper;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,45 +43,47 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.openqa.selenium.WebDriver;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static com.dnastack.ddap.common.AbstractBaseE2eTest.*;
-import static java.lang.String.format;
-import static java.lang.String.join;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertTrue;
-
 @Slf4j
-@AllArgsConstructor
-public class WalletLoginStrategy implements LoginStrategy {
+public class DamWalletLoginStrategy implements LoginStrategy {
 
     private static final Pattern STATE_PATTERN = Pattern.compile("\\s*var\\s+state\\s*=\\s*\'([^\']+)\'");
     private static final Pattern PATH_PATTERN = Pattern.compile("\\s*var\\s+path\\s*=\\s*\'([^\']+)\'");
-    private static final String[] DEFAULT_SCOPES = new String[] {"openid",  "ga4gh_passport_v1", "account_admin", "identities", "offline_access"};
+    private static final String[] DEFAULT_SCOPES = new String[]{"openid", "ga4gh_passport_v1", "account_admin",
+        "identities", "offline_access"};
 
     private Map<String, LoginInfo> personalAccessTokens;
-    private String walletUrl;
-    private String icUrl;
+    private WalletConfig walletConfig;
+    private DamConfig damConfig;
+
+
+    public DamWalletLoginStrategy() {
+
+        walletConfig = EnvUtil.requiredEnvConfig("E2E_WALLET_CONFIG", WalletConfig.class);
+        damConfig = EnvUtil.requiredEnvConfig("E2E_DAM_CONFIG", DamConfig.class);
+
+        personalAccessTokens = new HashMap<>();
+        personalAccessTokens
+            .put(TestingPersona.ADMINISTRATOR.getId(), new LoginInfo(walletConfig.getAdminUserEmail(), walletConfig
+                .getAdminUserToken()));
+        personalAccessTokens.put(TestingPersona.USER_WITH_ACCESS.getId(), new LoginInfo(walletConfig
+            .getWhitelistUserEmail(), walletConfig.getWhitelistUserToken()));
+        personalAccessTokens.put(TestingPersona.USER_WITHOUT_ACCESS.getId(), new LoginInfo(walletConfig
+            .getPlainUserEmail(), walletConfig.getPlainUserToken()));
+    }
 
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(personaName);
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_DAM_BASE_URL, DDAP_DAM_USERNAME, DDAP_DAM_PASSWORD);
+        Cookie session = DdapLoginUtil
+            .loginToDdap(damConfig.getDamBaseUrl(), damConfig.getDamUsername(), damConfig.getDamPassword());
         final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {
             final String scopeString = (scopes.length == 0) ? "" : "&scope=" + join("+", scopes);
-            HttpGet request = new HttpGet(format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", DDAP_DAM_BASE_URL, realmName, loginInfo.getEmail(), scopeString));
+            HttpGet request = new HttpGet(format("%s/api/v1alpha/realm/%s/identity/login?loginHint=wallet:%s%s", damConfig
+                .getDamBaseUrl(), realmName, loginInfo
+                .getEmail(), scopeString));
             log.info("Sending login request: {}", request);
 
             final HttpClientContext context = new HttpClientContext();
@@ -106,7 +130,8 @@ public class WalletLoginStrategy implements LoginStrategy {
         {
             String authorizeUriWithLoginHint = authorizeUri.toASCIIString();
             authorizeUriWithLoginHint = new StringBuilder(authorizeUriWithLoginHint)
-                .insert(authorizeUriWithLoginHint.indexOf("?") + 1, format("loginHint=wallet:%s&", loginInfo.getEmail()))
+                .insert(
+                    authorizeUriWithLoginHint.indexOf("?") + 1, format("loginHint=wallet:%s&", loginInfo.getEmail()))
                 .toString();
 
             HttpGet request = new HttpGet(URI.create(authorizeUriWithLoginHint));
@@ -147,7 +172,8 @@ public class WalletLoginStrategy implements LoginStrategy {
     }
 
     private CsrfToken walletLogin(HttpClient httpClient, LoginInfo loginInfo) throws IOException {
-        final HttpGet request = new HttpGet(format("%s/login/token?token=%s", walletUrl, loginInfo.getPersonalAccessToken()));
+        final HttpGet request = new HttpGet(format("%s/login/token?token=%s", walletConfig.getWalletUrl(), loginInfo
+            .getPersonalAccessToken()));
 
         final HttpClientContext context = new HttpClientContext();
         final HttpResponse response = httpClient.execute(request, context);
@@ -176,7 +202,9 @@ public class WalletLoginStrategy implements LoginStrategy {
     }
 
     private URI acceptPermissions(HttpClient httpClient, CsrfToken csrfToken) throws IOException {
-        final HttpGet request = new HttpGet(format("%s%s?state=%s&agree=y", icUrl, csrfToken.getPath(), csrfToken.getState()));
+        final HttpGet request = new HttpGet(format("%s%s?state=%s&agree=y", walletConfig.getPassportIssuer(), csrfToken
+            .getPath(), csrfToken
+            .getState()));
 
         HttpClientContext context = HttpClientContext.create();
         final HttpResponse response = httpClient.execute(request, context);
@@ -189,7 +217,8 @@ public class WalletLoginStrategy implements LoginStrategy {
         }
 
         String responseBody = EntityUtils.toString(response.getEntity());
-        final String responseMessage = "Headers: " + Arrays.toString(response.getAllHeaders()) + "\nResponse body: " + responseBody;
+        final String responseMessage =
+            "Headers: " + Arrays.toString(response.getAllHeaders()) + "\nResponse body: " + responseBody;
 
         if (response.getStatusLine().getStatusCode() != 200) {
             if (responseMessage.contains("policy requirements failed")) {
@@ -205,7 +234,10 @@ public class WalletLoginStrategy implements LoginStrategy {
     private void addCookiesFromStoreToSelenium(CookieStore cookieStore, WebDriver driver) {
         cookieStore.getCookies()
             .forEach(cookie -> {
-                System.out.printf("Adding cookie to selenium: Cookie(name=%s, domain=%s, path=%s, expiry=%s, secure=%b" + System.lineSeparator(), cookie.getName(), cookie.getDomain(), cookie.getPath(), cookie.getExpiryDate(), cookie.isSecure());
+                System.out.printf(
+                    "Adding cookie to selenium: Cookie(name=%s, domain=%s, path=%s, expiry=%s, secure=%b" + System
+                        .lineSeparator(), cookie.getName(), cookie.getDomain(), cookie.getPath(), cookie
+                        .getExpiryDate(), cookie.isSecure());
                 WebDriverCookieHelper.addBrowserCookie(driver, cookie);
             });
     }
@@ -214,12 +246,14 @@ public class WalletLoginStrategy implements LoginStrategy {
     @NoArgsConstructor
     @AllArgsConstructor
     static class CsrfToken {
+
         private String path;
         private String state;
     }
 
     @Value
     static class LoginInfo {
+
         String email;
         String personalAccessToken;
     }

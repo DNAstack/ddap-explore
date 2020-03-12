@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { CodeEditorEnhancerService } from '../../../shared/code-editor-enhancer.service';
@@ -12,7 +12,7 @@ import { callDenovo, helloWorld, md5sum } from './example.wdl';
   templateUrl: './wdl-selection-step.component.html',
   styleUrls: ['./wdl-selection-step.component.scss'],
 })
-export class WdlSelectionStepComponent {
+export class WdlSelectionStepComponent implements OnInit {
 
   @Input()
   workflowId: string;
@@ -28,6 +28,7 @@ export class WdlSelectionStepComponent {
   }
 
   ngOnInit(): void {
+    // TODO This will be deprecated in favour of the integration with Monaco Editor.
     this.form.statusChanges.subscribe(observer => {
       this.wdlCurrentContent = this.form.get('wdl').value;
     });
@@ -42,7 +43,7 @@ export class WdlSelectionStepComponent {
     const minHeight = 300;
     const maxHeight = 500;
     const lineHeight = 18;
-    const expectedHeight = this.wdlCurrentContent.split(/\n/).length * lineHeight;
+    const expectedHeight = (this.wdlCurrentContent || '').split(/\n/).length * lineHeight;
     return {
       height: (Math.min(Math.max(minHeight, expectedHeight), maxHeight) + topPadding) + 'px',
     };

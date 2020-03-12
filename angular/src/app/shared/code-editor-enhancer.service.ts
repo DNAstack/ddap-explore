@@ -4,6 +4,9 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class CodeEditorEnhancerService {
+  constructor() {
+  }
+
   configure(language: string) {
     const monaco = (<any> window).monaco;
 

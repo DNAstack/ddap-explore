@@ -19,9 +19,13 @@ export class WorkflowService {
               private errorHandler: ErrorHandlerService) {
   }
 
-  public getWorkflowRuns(damId: string, view: String, wesAccessToken: string, nextPage: string = ''): Observable<WorkflowRunsResponse> {
+  public getWorkflowRuns(damId: string, viewId: String, wesAccessToken: string, nextPage: string = ''): Observable<WorkflowRunsResponse> {
+    if (!wesAccessToken) {
+      throw new Error('Undefined Access Token');
+    }
+
     return this.http.get<WorkflowRunsResponse>(
-      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs?nextPage=${nextPage}&accessToken=${wesAccessToken}`
+      this.resolveUrl(`${damId}/views/${viewId}/runs`, {accessToken: wesAccessToken, nextPage: nextPage})
     );
   }
 
@@ -34,23 +38,31 @@ export class WorkflowService {
       );
   }
 
-  public runWorkflow(damId: string, view: String, model: WorkflowExecution, wesAccessToken: string): Observable<any> {
+  public runWorkflow(damId: string, viewId: String, model: WorkflowExecution, wesAccessToken: string): Observable<any> {
+    if (!wesAccessToken) {
+      throw new Error('Undefined Access Token');
+    }
+
     return this.http.post(
-      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/${damId}/views/${view}/runs?accessToken=${wesAccessToken}`,
+      this.resolveUrl(`${damId}/views/${viewId}/runs`, {accessToken: wesAccessToken}),
       { ...model }
     );
   }
 
   public workflowRunDetail(damId: string, viewId: string, runId: string, wesAccessToken: string): Observable<any> {
+    if (!wesAccessToken) {
+      throw new Error('Undefined Access Token');
+    }
+
     return this.http.get(
-      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/${damId}/views/${viewId}/runs/${runId}?accessToken=${wesAccessToken}`
+      this.resolveUrl(`${damId}/views/${viewId}/runs/${runId}`, {accessToken: wesAccessToken})
     ).pipe(
       this.errorHandler.notifyOnError()
     );
   }
 
   public getJsonSchemaFromWdl(wdl: string): Observable<any> {
-    return this.http.post(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/describe`,
+    return this.http.post(this.resolveUrl('describe'),
       wdl
     ).pipe(
       this.errorHandler.notifyOnError()
@@ -69,6 +81,20 @@ export class WorkflowService {
         }
       });
     return resourcePaths[0];
+  }
+
+  private getBaseUrl(): string {
+    return `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes`;
+  }
+
+  private resolveUrl(path: string, queryStringMap?: any) {
+    const url = `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/${path}`;
+
+    if (queryStringMap) {
+      return url + '?' + Object.keys(queryStringMap).map(key => `${key}=${queryStringMap[key]}`).join('&');
+    }
+
+    return url;
   }
 
 }

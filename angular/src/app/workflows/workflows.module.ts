@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 import { NgJsonEditorModule } from 'ang-jsoneditor';
 import { MaterialDesignFrameworkModule } from 'angular7-json-schema-form';
 
@@ -24,7 +25,6 @@ import { WorkflowListMultiComponent } from './workflow-list-multi/workflow-list-
 import { WorkflowListSingleComponent } from './workflow-list-single/workflow-list-single.component';
 import { WorkflowManageComponent } from './workflow-manage/workflow-manage.component';
 import { WorkflowsRoutingModule } from './workflows-routing.module';
-import { MonacoEditorModule } from "ngx-monaco-editor";
 
 @NgModule({
   declarations: [

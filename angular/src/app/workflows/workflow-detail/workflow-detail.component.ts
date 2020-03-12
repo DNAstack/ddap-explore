@@ -1,17 +1,18 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {JsonEditorComponent, JsonEditorOptions} from 'ang-jsoneditor';
-import {flatDeep} from 'ddap-common-lib';
-import {map} from 'rxjs/operators';
-import {AppConfigModel} from '../../shared/app-config/app-config.model';
-import {AppConfigService} from '../../shared/app-config/app-config.service';
-import {JsonEditorDefaults} from '../../shared/jsonEditorDefaults';
-import {dam} from '../../shared/proto/dam-service';
-import {ResourceAuthStateService} from '../../shared/resource-auth-state.service';
-import {ResourceService} from '../../shared/resource/resource.service';
-import {DatasetService} from '../workflow-execution-form/dataset.service';
-import {SimplifiedWesResourceViews} from '../workflow.model';
-import {WorkflowService} from '../workflows.service';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
+import { flatDeep } from 'ddap-common-lib';
+import { map } from 'rxjs/operators';
+
+import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../shared/app-config/app-config.service';
+import { JsonEditorDefaults } from '../../shared/jsonEditorDefaults';
+import { dam } from '../../shared/proto/dam-service';
+import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
+import { ResourceService } from '../../shared/resource/resource.service';
+import { DatasetService } from '../workflow-execution-form/dataset.service';
+import { SimplifiedWesResourceViews } from '../workflow.model';
+import { WorkflowService } from '../workflows.service';
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
@@ -78,10 +79,17 @@ export class WorkflowDetailComponent implements OnInit {
                 if (!views) {
                   return;
                 }
-                const damIdResourcePathPairs: string[] = Object.values(views)
-                  .reduce((l, r) => l.concat(r));
-                this.fileResourceAuthUrl = this.getUrlForObtainingAccessToken(damIdResourcePathPairs);
+
                 this.viewAccessible = true;
+
+                const uniqueViews = Object.values(views);
+
+                if (uniqueViews.length === 0) {
+                  return;
+                }
+
+                const damIdResourcePathPairs: string[] = uniqueViews.reduce((l, r) => l.concat(r));
+                this.fileResourceAuthUrl = this.getUrlForObtainingAccessToken(damIdResourcePathPairs);
               });
           });
       });

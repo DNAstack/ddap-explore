@@ -19,16 +19,6 @@
     </mat-chip-list>
   </div>
   <div class="row">
-    <mat-form-field class="col">
-        <textarea matInput
-                  formControlName="wdl"
-                  data-se="inp-workflow-wdl"
-                  rows="20"
-                  required>
-        </textarea>
-    </mat-form-field>
-  </div>
-  <div class="row">
     <div [class]="'editor-container'"
          [ngStyle]="computeEditorStyle()">
       <ngx-monaco-editor [options]="{language: 'wdl', minimap: {enabled: true}}"

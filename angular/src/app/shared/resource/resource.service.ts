@@ -1,12 +1,12 @@
-import {HttpClient} from '@angular/common/http';
-import {Injectable} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {realmIdPlaceholder, RealmStateService} from 'ddap-common-lib';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { realmIdPlaceholder, RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
-import {Observable} from 'rxjs';
+import { Observable } from 'rxjs';
 
-import {environment} from '../../../environments/environment';
-import {dam} from '../proto/dam-service';
+import { environment } from '../../../environments/environment';
+import { dam } from '../proto/dam-service';
 import IView = dam.v1.IView;
 import IResourceResults = dam.v1.IResourceResults;
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
@@ -60,12 +60,19 @@ export class ResourceService {
 
   lookupResourceTokenFromAccessMap(accessMap: {[key: string]: IResourceAccess}, resourcePath: string): IResourceAccess {
     if (!accessMap) {
-      return;
+      console.warn('No access map');
+      return null;
     }
     const resourceKey = Object.keys(accessMap)
       .find((key) => key.includes(resourcePath));
     const resourceToken: IResourceAccess = accessMap[resourceKey];
-    return this.validateResourceToken(resourceToken) ? resourceToken : null;
+
+    if (!this.validateResourceToken(resourceToken)) {
+      console.warn('Detected the token but it is not valid');
+      return null;
+    }
+
+    return resourceToken;
   }
 
   toResourceAccessMap(resourceTokens: IResourceResults): {[key: string]: IResourceAccess} {
@@ -89,7 +96,7 @@ export class ResourceService {
       const claims = JSON.parse(atob(resourceToken.credentials['access_token'].split('.')[1]));
       return claims.exp > referenceUnixTimestampInSecond;
     } catch (e) {
-      // TODO returning true for non-jwt access tokens
+      // Returning true for non-jwt access tokens
       console.warn('Token cannot be validated');
       return true;
     }

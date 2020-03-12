@@ -1,15 +1,15 @@
-import {HttpErrorResponse} from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {throwError} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
-import {PaginationTypes} from '../../shared/paginator/pagination-type.enum';
-import {dam} from '../../shared/proto/dam-service';
-import {ResourceAuthStateService} from '../../shared/resource-auth-state.service';
-import {ResourceService} from '../../shared/resource/resource.service';
-import {SimplifiedWesResourceViews, WorkflowRunsResponse} from '../workflow.model';
-import {WorkflowService} from '../workflows.service';
+import { PaginationTypes } from '../../shared/paginator/pagination-type.enum';
+import { dam } from '../../shared/proto/dam-service';
+import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
+import { ResourceService } from '../../shared/resource/resource.service';
+import { SimplifiedWesResourceViews, WorkflowRunsResponse } from '../workflow.model';
+import { WorkflowService } from '../workflows.service';
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
@@ -68,7 +68,7 @@ export class WorkflowListSingleComponent implements OnInit {
             .subscribe((response) => {
               this.resourceAuthStateService.storeAccess(response);
               this.resourceAccess = this.resourceService.lookupResourceTokenFromAccessMap(response, resourcePath);
-              this.getWorkflows(this.resourceAccess.credentials['access_token']);
+              this.getWorkflows(this.resourceAccess['access_token']);
               this.viewAccessible = true;
             });
         }

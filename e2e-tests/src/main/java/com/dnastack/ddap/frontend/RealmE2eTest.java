@@ -1,32 +1,27 @@
 package com.dnastack.ddap.frontend;
 
-import com.dnastack.ddap.common.TestingPersona;
-import com.dnastack.ddap.common.fragments.ConfirmationRealmChangeDialog;
+import static com.dnastack.ddap.common.TestingPersona.ADMINISTRATOR;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+
 import com.dnastack.ddap.common.page.AdminDdapPage;
-import com.dnastack.ddap.common.page.AnyDdapPage;
+import com.dnastack.ddap.common.util.EnvUtil;
+import java.io.IOException;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.IOException;
-
-import static com.dnastack.ddap.common.TestingPersona.ADMINISTRATOR;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
 @SuppressWarnings("Duplicates")
 public class RealmE2eTest extends AbstractFrontendE2eTest {
 
-    private static final String REALM = generateRealmName(RealmE2eTest.class.getSimpleName());
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
-        boolean isSandbox = Boolean.parseBoolean(optionalEnv("E2E_SANDBOX", "false"));
+        boolean isSandbox = Boolean.parseBoolean(EnvUtil.optionalEnv("E2E_SANDBOX", "false"));
         Assume.assumeTrue(isSandbox);
-        final String testConfig = loadTemplate("/com/dnastack/ddap/adminConfig.json");
-        setupRealmConfig(TestingPersona.ADMINISTRATOR, testConfig, "1", REALM);
-
         ddapPage = doBrowserLogin(REALM, ADMINISTRATOR, AdminDdapPage::new);
     }
 

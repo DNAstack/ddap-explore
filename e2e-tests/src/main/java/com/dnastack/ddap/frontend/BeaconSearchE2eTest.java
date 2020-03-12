@@ -32,13 +32,8 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("Duplicates")
 public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
-    private static final String REALM = generateRealmName(BeaconSearchE2eTest.class.getSimpleName());
-
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
-        final String damConfig = loadTemplate("/com/dnastack/ddap/adminConfig.json");
-        setupRealmConfig(TestingPersona.ADMINISTRATOR, damConfig, "1", REALM);
-
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AdminDdapPage::new);
     }
 

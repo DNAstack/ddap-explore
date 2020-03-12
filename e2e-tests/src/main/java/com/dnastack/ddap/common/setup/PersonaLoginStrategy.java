@@ -1,8 +1,10 @@
-package com.dnastack.ddap.common;
+package com.dnastack.ddap.common.setup;
 
+import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.ICLoginPage;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
+import com.dnastack.ddap.common.util.EnvUtil;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
@@ -31,6 +33,13 @@ public class PersonaLoginStrategy implements LoginStrategy {
     private static final Pattern STATE_PATTERN = Pattern.compile("\\s*let\\s+state\\s*=\\s*\"([^\"]+)\"");
     private static final Pattern PATH_PATTERN = Pattern.compile("\\s*let\\s+path\\s*=\\s*\"([^\"]+)\"");
 
+    private String icBaseUrl;
+
+    public PersonaLoginStrategy(){
+        icBaseUrl = EnvUtil.requiredEnv("E2E_IC_BASE_URL");
+    }
+
+
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
@@ -58,7 +67,7 @@ public class PersonaLoginStrategy implements LoginStrategy {
         }
 
         {
-            final HttpGet request = new HttpGet(String.format("%s%s?state=%s&agree=y", IC_BASE_URL, path, state));
+            final HttpGet request = new HttpGet(String.format("%s%s?state=%s&agree=y", icBaseUrl, path, state));
 
             final HttpResponse response = httpclient.execute(request);
             String responseBody = EntityUtils.toString(response.getEntity());

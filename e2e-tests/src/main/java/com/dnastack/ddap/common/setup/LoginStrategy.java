@@ -1,5 +1,6 @@
-package com.dnastack.ddap.common;
+package com.dnastack.ddap.common.setup;
 
+import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import org.apache.http.client.CookieStore;
 import org.openqa.selenium.WebDriver;

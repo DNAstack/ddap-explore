@@ -1,238 +1,81 @@
 package com.dnastack.ddap.common;
 
-import com.dnastack.ddap.common.WalletLoginStrategy.LoginInfo;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+
+import com.dnastack.ddap.common.setup.ConfigStrategy;
+import com.dnastack.ddap.common.setup.LoginStrategy;
+import com.dnastack.ddap.common.setup.StrategyFactory;
+import com.dnastack.ddap.common.util.EnvUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.Message;
-import com.google.protobuf.util.JsonFormat;
-import dam.v1.DamService;
 import io.restassured.RestAssured;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.specification.RequestSpecification;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.BeforeClass;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static io.restassured.RestAssured.given;
-import static java.lang.Math.min;
-import static java.lang.String.format;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.fail;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
 @SuppressWarnings("Duplicates")
 @Slf4j
 public abstract class AbstractBaseE2eTest {
-    public static final String DDAP_E2E_TEST_MODE = optionalEnv("E2E_TEST_MODE", "normal");
 
-    public static final String DDAP_BASE_URL = requiredEnv("E2E_BASE_URI");
-    public static final String DDAP_USERNAME = optionalEnv("E2E_BASIC_USERNAME",null);
-    public static final String DDAP_PASSWORD = optionalEnv("E2E_BASIC_PASSWORD", null);
-    public static final String DDAP_DAM_BASE_URL = requiredEnv("E2E_DDAP_DAM_BASE_URL");
-    public static final String DDAP_DAM_USERNAME = requiredEnv("E2E_DDAP_DAM_USERNAME", "E2E_BASIC_USERNAME");
-    public static final String DDAP_DAM_PASSWORD = requiredEnv("E2E_DDAP_DAM_PASSWORD", "E2E_BASIC_PASSWORD");
-
-
-    public static final String DAM_ID = requiredEnv("E2E_DAM_ID");
-    public static final String DDAP_TEST_REALM_NAME_PREFIX = requiredEnv("E2E_TEST_REALM");
-    public static final String CLIENT_ID = requiredEnv("E2E_CLIENT_ID");
-    public static final String BROKER_ID = requiredEnv("E2E_BROKER_ID");
-    public static final String TEST_PROJECT = requiredEnv("E2E_TEST_PROJECT");
-    public static final String TEST_BUCKET = requiredEnv("E2E_TEST_BUCKET");
-    public static final String NAMESPACE =  requiredEnv("E2E_TEST_NAMESPACE");
-    public static final String TRUSTED_SOURCE =  optionalEnv("E2E_TRUSTED_SOURCE", "https://ddap.test.source.dnastack.com");
-    public static final String PASSPORT_ISSUER = stripTrailingSlash(requiredEnv("E2E_PASSPORT_ISSUER"));
-    public static final String TEST_WHITELIST_VALUE = optionalEnv("E2E_TEST_WHITELIST_VALUE", stripTrailingSlash(DDAP_BASE_URL).replaceFirst("-candidate\\.", "."));
-    public static final String IC_BASE_URL = requiredEnv("E2E_IC_BASE_URL");
-    // Current size limit on realm names in DAM
-    public static final int REALM_NAME_LIMIT = 40;
-    public static final String SERVICE_ACCOUNT_PROJECT = requiredEnv("E2E_SERVICE_ACCOUNT_PROJECT");
-
-
-    public static final String PERSONA_LOGIN_STRATEGY = "PersonaLoginStrategy";
-    public static final String WALLET_LOGIN_STRATEGY = "WalletLoginStrategy";
-    public static final String LOGIN_STRATEGY_NAME = optionalEnv("E2E_LOGIN_STRATEGY", PERSONA_LOGIN_STRATEGY);
-    public static final String DDAP_COOKIES_ENCRYPTOR_PASSWORD = optionalEnv("E2E_COOKIES_ENCRYPTOR_PASSWORD", "abcdefghijk");
-    public static final String DDAP_COOKIES_ENCRYPTOR_SALT = optionalEnv("E2E_COOKIES_ENCRYPTOR_SALT", "598953e322");
+    public static final String DDAP_E2E_TEST_MODE = EnvUtil.optionalEnv("E2E_TEST_MODE", "normal");
+    public static final String DDAP_BASE_URL = EnvUtil.requiredEnv("E2E_BASE_URI");
+    public static final String DDAP_USERNAME = EnvUtil.optionalEnv("E2E_BASIC_USERNAME", null);
+    public static final String DDAP_PASSWORD = EnvUtil.optionalEnv("E2E_BASIC_PASSWORD", null);
+    public static final String DDAP_COOKIES_ENCRYPTOR_PASSWORD = EnvUtil
+        .optionalEnv("E2E_COOKIES_ENCRYPTOR_PASSWORD", "abcdefghijk");
+    public static final String DDAP_COOKIES_ENCRYPTOR_SALT = EnvUtil
+        .optionalEnv("E2E_COOKIES_ENCRYPTOR_SALT", "598953e322");
+    public static final String REALM = EnvUtil.requiredEnv("E2E_TEST_REALM");
 
     protected static LoginStrategy loginStrategy;
+    protected static ConfigStrategy configStrategy;
 
-    protected static String generateRealmName(String testClassName) {
-        /*
-         * Temporarily removed randomness to avoid service account quotas. See DISCO-2416
-         */
-        final String nameWithoutStamp = DDAP_TEST_REALM_NAME_PREFIX + "_" + testClassName;
-        return nameWithoutStamp.substring(0, min(REALM_NAME_LIMIT, nameWithoutStamp.length()));
-    }
 
     @BeforeClass
     public static void staticSetup() {
         log.debug("Test Mode: {}", DDAP_E2E_TEST_MODE);
         Assume.assumeThat(DDAP_E2E_TEST_MODE, equalTo("normal"));
 
-        switch (LOGIN_STRATEGY_NAME) {
-            case PERSONA_LOGIN_STRATEGY:
-                loginStrategy = new PersonaLoginStrategy();
-                break;
-            case WALLET_LOGIN_STRATEGY:
-                final Map<String, LoginInfo> personalAccessTokens = new HashMap<>();
-                personalAccessTokens.put(TestingPersona.ADMINISTRATOR.getId(), new LoginInfo(requiredEnv("E2E_ADMIN_USER_EMAIL"), requiredEnv("E2E_ADMIN_USER_TOKEN")));
-                personalAccessTokens.put(TestingPersona.USER_WITH_ACCESS.getId(), new LoginInfo(requiredEnv("E2E_WHITELIST_USER_EMAIL"), requiredEnv("E2E_WHITELIST_USER_TOKEN")));
-                personalAccessTokens.put(TestingPersona.USER_WITHOUT_ACCESS.getId(), new LoginInfo(requiredEnv("E2E_PLAIN_USER_EMAIL"), requiredEnv("E2E_PLAIN_USER_TOKEN")));
-                loginStrategy = new WalletLoginStrategy(personalAccessTokens, requiredEnv("E2E_WALLET_URL"), PASSPORT_ISSUER);
-                break;
-            default:
-                throw new IllegalArgumentException(format("Unrecognized login strategy [%s]", LOGIN_STRATEGY_NAME));
+        try {
+            loginStrategy = StrategyFactory.getLoginStrategy();
+            configStrategy = StrategyFactory.getConfigStrategy();
+        } catch (Exception e){
+            log.error(e.getMessage(),e);
         }
-        RestAssured.config = RestAssuredConfig.config()
-                .objectMapperConfig(new ObjectMapperConfig().jackson2ObjectMapperFactory(
-                        (cls, charset) -> {
-                            ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
-                            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                            return mapper;
-                        }
-                ));
+        setupRestassured();
     }
+
+    private static void setupRestassured() {
+        RestAssured.config = RestAssuredConfig.config()
+            .objectMapperConfig(new ObjectMapperConfig().jackson2ObjectMapperFactory(
+                (cls, charset) -> {
+                    ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    return mapper;
+                }
+            ));
+    }
+
 
     @Before
     public void setUp() {
         RestAssured.baseURI = DDAP_BASE_URL;
     }
 
-    protected static RequestSpecification getRequestSpecification(){
+    protected static RequestSpecification getRequestSpecification() {
         return given();
-    }
-
-    protected static String requiredEnv(String name, String... backups) {
-        final List<String> allNames = new ArrayList<>(backups.length + 1);
-        allNames.add(name);
-        allNames.addAll(Arrays.asList(backups));
-
-        final String failMsg = backups.length == 0 ?
-                "Environnment variable `" + name + "` is required" :
-                "Must specify one of these environment variables: " + allNames;
-        return Stream.concat(Stream.of(name), Stream.of(backups))
-                     .map(var -> Optional.ofNullable(System.getenv(var)))
-                     .flatMap(o -> o.map(Stream::of).orElse(Stream.empty()))
-                     .findFirst()
-                     .orElseThrow(() -> new AssertionError(failMsg));
-    }
-
-    public static String optionalEnv(String name, String defaultValue) {
-        String val = System.getenv(name);
-        if (val == null) {
-            return defaultValue;
-        }
-        return val;
-    }
-
-    protected static void validateProtoBuf(String resourceJsonString, Message.Builder builder) {
-        try {
-            JsonFormat.parser().ignoringUnknownFields().merge(resourceJsonString, builder);
-        } catch(Exception e) {
-            throw new IllegalStateException("Failed to parse proto", e);
-        }
-    }
-
-    @Data
-    static class IcConfig {
-        @JsonAnySetter
-        private Map<String, Object> others = new HashMap<>();
-
-        private Map<String, Map<String, Object>> identityProviders;
-
-        @JsonAnyGetter
-        public Map<String, Object> getOthers() {
-            return others;
-        }
-    }
-
-    protected static void setupRealmConfig(TestingPersona persona, String config, String damId, String realmName) throws IOException {
-        DamService.DamConfig.Builder damConfigBuilder = DamService.DamConfig.newBuilder();
-        validateProtoBuf(config, damConfigBuilder);
-
-        /*
-         Use the master realm because some tests break the ability to reset realms in future runs.
-         In particular, tests that reset the IC config can change the 'ga4gh_dam` client ID which needs
-         to be a particular value (configured in master) for passport tokens to have a validatable audience
-         */
-        final CookieStore cookieStore = loginStrategy.performPersonaLogin(persona.getId(), "master");
-
-        // There is logic in the DAM and IC that syncs client information in Hydra based on the state in the DAM/IC config.
-        // Unfortunately, it does this based on whatever realm it runs from,
-        // meaning you can wipe out a client accidentally while running the e2e tests.
-        String damConfig = appendMaterRealmClientsToExistingClientsInConfig(cookieStore, config);
-
-        final String modificationPayload = format("{ \"item\": %s }", damConfig);
-
-        final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
-        HttpPut request = new HttpPut(format("%s/dam/v1alpha/%s/config", DDAP_DAM_BASE_URL, realmName));
-        request.setEntity(new StringEntity(modificationPayload));
-
-        System.out.printf("Sending setup realm request to URI [%s]\n", request.getURI());
-
-        final HttpResponse response = httpclient.execute(request);
-        String responseBody = EntityUtils.toString(response.getEntity());
-
-        assertThat(format("Unable to set realm config. Response:\n%s\nConfig:\n%s", responseBody, config),
-                   response.getStatusLine().getStatusCode(),
-                   allOf(greaterThanOrEqualTo(200), lessThan(300)));
-    }
-
-    private static JSONObject getClientsFromMasterRealm(CookieStore cookieStore) throws IOException {
-        HttpClient httpclient = HttpClientBuilder.create()
-            .setDefaultCookieStore(cookieStore)
-            .build();
-
-        HttpGet request = new HttpGet(format("%s/dam/v1alpha/master/config", DDAP_DAM_BASE_URL));
-        HttpResponse response = httpclient.execute(request);
-        String responseBody = EntityUtils.toString(response.getEntity());
-
-        JSONObject damConfig = new JSONObject(responseBody);
-        JSONObject clients = damConfig.getJSONObject("clients");
-
-        log.debug("Parsed clients from master realm: {}", clients);
-
-        return clients;
-    }
-
-    private static String appendMaterRealmClientsToExistingClientsInConfig(CookieStore cookieStore, String damConfig) throws IOException {
-        JSONObject damConfigClients = new JSONObject(damConfig).getJSONObject("clients");
-        JSONObject masterRealmClients = getClientsFromMasterRealm(cookieStore);
-        masterRealmClients.keySet()
-            .forEach((masterRealmClient) -> {
-                damConfigClients.put(masterRealmClient, masterRealmClients.get(masterRealmClient));
-            });
-
-        JSONObject newDamConfig = new JSONObject(damConfig);
-        newDamConfig.put("clients", damConfigClients);
-
-        log.debug("DAM Config was altered to include master realm clients: {}", newDamConfig);
-
-        return newDamConfig.toString();
     }
 
     protected static String loadTemplate(String resourcePath) {
@@ -241,74 +84,16 @@ public abstract class AbstractBaseE2eTest {
         try (InputStream is = AbstractBaseE2eTest.class.getResourceAsStream(resourcePath)) {
             final StringWriter writer = new StringWriter();
             IOUtils.copy(is, writer, StandardCharsets.UTF_8);
-            resourceTemplate = writer.toString();
+            return writer.toString();
         } catch (IOException e) {
             throw new RuntimeException("Unable to load test resource template.", e);
         }
-        return resourceTemplate
-                .replace("$$E2E_BASE_URI$$", stripTrailingSlash(DDAP_BASE_URL))
-                .replace("$$E2E_CLIENT_ID$$", CLIENT_ID)
-                .replace("$$E2E_BROKER_ID$$", BROKER_ID)
-                .replace("$$E2E_SERVICE_ACCOUNT_PROJECT$$", SERVICE_ACCOUNT_PROJECT)
-                .replace("$$E2E_PASSPORT_ISSUER$$", PASSPORT_ISSUER)
-                .replace("$$E2E_TEST_BUCKET$$", TEST_BUCKET)
-                .replace("$$E2E_TEST_PROJECT$$",TEST_PROJECT)
-                .replace("$$E2E_TEST_NAMESPACE$$", NAMESPACE)
-                .replace("$$E2E_TRUSTED_SOURCE$$", TRUSTED_SOURCE)
-                .replace("$$E2E_TEST_WHITELIST_VALUE$$", TEST_WHITELIST_VALUE)
-                .replace("$$E2E_IC_BASE_URL$$", IC_BASE_URL);
     }
 
     private static String stripTrailingSlash(String url) {
         return (url.endsWith("/"))
-                ? url.substring(0, url.length() - 1)
-                : url;
-    }
-
-    protected String fetchRealPersonaIcToken(String personaName, String realmName, String ... scopes) throws IOException {
-        return fetchRealPersonaToken(personaName, "dam_identity", realmName, scopes);
-    }
-
-    protected String fetchRealPersonaIcToken(TestingPersona persona, String realmName, String ... scopes) throws IOException {
-        return fetchRealPersonaIcToken(persona.getId(), realmName, scopes);
-    }
-
-    protected String fetchRealPersonaDamToken(String personaName, String realmName) throws IOException {
-        return fetchRealPersonaToken(personaName, "dam_access", realmName);
-    }
-
-    protected String fetchRealPersonaDamToken(TestingPersona persona, String realmName) throws IOException {
-        return fetchRealPersonaDamToken(persona.getId(), realmName);
-    }
-
-    protected String fetchRealPersonaRefreshToken(String personaName, String realmName) throws IOException {
-        return fetchRealPersonaToken(personaName, "dam_refresh", realmName);
-    }
-
-    protected String fetchRealPersonaRefreshToken(TestingPersona persona, String realmName) throws IOException {
-        return fetchRealPersonaRefreshToken(persona.getId(), realmName);
-    }
-
-    private String fetchRealPersonaToken(String personaName, String tokenCookieName, String realmName, String ... scopes) throws IOException {
-        final CookieStore cookieStore = loginStrategy.performPersonaLogin(personaName, realmName, scopes);
-
-        BasicClientCookie tokenCookie = (BasicClientCookie) cookieStore.getCookies().stream()
-                .filter(c -> tokenCookieName.equals(c.getName()))
-                .findFirst()
-                .orElse(null);
-
-        assertThat("Found cookies: " + cookieStore.getCookies(), tokenCookie, notNullValue());
-
-        // Require cookies to be marked as secure unless we're testing on localhost
-        if (!(DDAP_BASE_URL.startsWith("http://localhost:") || DDAP_BASE_URL.startsWith("http://host.docker.internal:"))) {
-            assertThat("It looks like DDAP_COOKIES_SECURE=true isn't set on this deployment", tokenCookie.containsAttribute("secure"), is(true));
-            assertThat(tokenCookie.getAttribute("secure"), nullValue());
-        }
-
-        assertThat(tokenCookie.containsAttribute("httponly"), is(true));
-        assertThat(tokenCookie.getAttribute("httponly"), nullValue());
-
-        return tokenCookie.getValue();
+            ? url.substring(0, url.length() - 1)
+            : url;
     }
 
 }

@@ -1,18 +1,15 @@
 package com.dnastack.ddap.common.util;
 
+import java.io.File;
+import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
-import java.io.File;
-import java.io.IOException;
-
-import static com.dnastack.ddap.common.AbstractBaseE2eTest.optionalEnv;
-
 public class ScreenshotUtil {
 
-    protected static final String SCREENSHOT_DIR = optionalEnv("E2E_SCREENSHOT_DIR", "target");
+    protected static final String SCREENSHOT_DIR = EnvUtil.optionalEnv("E2E_SCREENSHOT_DIR", "target");
 
     public static void capture(String filename, WebDriver driver) {
         try {

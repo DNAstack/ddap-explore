@@ -1,7 +1,7 @@
-import {Inject, Injectable} from '@angular/core';
-import {LOCAL_STORAGE, StorageService} from 'ngx-webstorage-service';
+import { Inject, Injectable } from '@angular/core';
+import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
 
-import {dam} from './proto/dam-service';
+import { dam } from './proto/dam-service';
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 import IResourceResults = dam.v1.IResourceResults;
 

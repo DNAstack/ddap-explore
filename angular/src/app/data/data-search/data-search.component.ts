@@ -1,17 +1,17 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Observable, Subscription} from 'rxjs';
-import {filter, flatMap, mergeAll} from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
+import { filter, flatMap, mergeAll } from 'rxjs/operators';
 
-import {AppConfigModel} from '../../shared/app-config/app-config.model';
-import {AppConfigService} from '../../shared/app-config/app-config.service';
-import {BeaconResponse} from '../../shared/beacon-search/beacon-response.model';
-import {BeaconSearchParams} from '../../shared/beacon-search/beacon-search-params.model';
-import {ResourceBeaconService} from '../../shared/beacon-search/resource-beacon.service';
-import {ImagePlaceholderRetriever} from '../../shared/image-placeholder.service';
-import {dam} from '../../shared/proto/dam-service';
-import {ResourceService} from '../../shared/resource/resource.service';
-import {DataService} from '../data.service';
+import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../shared/app-config/app-config.service';
+import { BeaconResponse } from '../../shared/beacon-search/beacon-response.model';
+import { BeaconSearchParams } from '../../shared/beacon-search/beacon-search-params.model';
+import { ResourceBeaconService } from '../../shared/beacon-search/resource-beacon.service';
+import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
+import { dam } from '../../shared/proto/dam-service';
+import { ResourceService } from '../../shared/resource/resource.service';
+import { DataService } from '../data.service';
 import IResourceResults = dam.v1.IResourceResults;
 
 @Component({

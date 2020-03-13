@@ -1,17 +1,17 @@
-import {HttpErrorResponse} from '@angular/common/http';
-import {Inject, Injectable} from '@angular/core';
-import {Router} from '@angular/router';
-import {LOCAL_STORAGE, StorageService} from 'ngx-webstorage-service';
-import {throwError} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
+import { throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
-import {SimplifiedWesResourceViews} from '../workflows/workflow.model';
-import {WorkflowService} from '../workflows/workflows.service';
+import { SimplifiedWesResourceViews } from '../workflows/workflow.model';
+import { WorkflowService } from '../workflows/workflows.service';
 
-import {AppConfigModel} from './app-config/app-config.model';
-import {AppConfigService} from './app-config/app-config.service';
-import {ResourceAuthStateService} from './resource-auth-state.service';
-import {ResourceService} from './resource/resource.service';
+import { AppConfigModel } from './app-config/app-config.model';
+import { AppConfigService } from './app-config/app-config.service';
+import { ResourceAuthStateService } from './resource-auth-state.service';
+import { ResourceService } from './resource/resource.service';
 
 export enum UserAccessGrantStatus {
   UNCHECKED, // The user authorization is unknown.

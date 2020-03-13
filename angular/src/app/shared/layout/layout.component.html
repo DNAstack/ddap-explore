@@ -4,7 +4,8 @@
     [realmActions]="['edit']"
     (realmChangeAcknowledge)="onAcknowledge($event)">
     <ddaplib-menu-apps [accessibleApps]="viewController.getAccessibleApps()"
-      [realmId]="viewController.getRealmId()">
+                       [realmId]="viewController.getRealmId()"
+                       *ngIf="viewController.getAccessibleApps().length > 1">
       <ng-container *ngIf="appConfig.featureAdministrationEnabled">
         <div class="app-menu-section-title">Administration</div>
         <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">

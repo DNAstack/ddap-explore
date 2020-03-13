@@ -60,11 +60,6 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         String content = loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl");
         managePage.typeInEditor(By.cssSelector("ngx-monaco-editor .monaco-editor textarea"), content);
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
-        try {
-            Thread.sleep(3000L);
-        } catch (InterruptedException e) {
-            throw new RuntimeException("The user interaction with the code editor has been cancelled while filling in the blank");
-        }
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
         managePage.fillFieldFromDropdown(By.name("md5Sum.inputFile"), "bam_file");

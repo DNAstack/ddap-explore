@@ -44,6 +44,10 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
     const columnData: string[] = this.extractColumnData(this.selectedRows, this.selectedColumns);
     this.datasetService.getViews(columnData)
       .subscribe((views: { [p: string]: string[] }) => {
+        if (Object.values(views).length === 0) {
+          console.warn('No views associated to the selected columns');
+          return;
+        }
         const resourcePaths: string[] = Object.values(views).reduce((l, r) => l.concat(r));
         this.workflowsStateService.storeMetaInfoForWorkflow(this.workflowId, {
           columnDataMappedToViews: views,
@@ -66,11 +70,6 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
 
   private getRedirectUrl(): string {
     let currentUrl = this.router.url;
-    // const matcher = /\/run\/.+$/;
-    //
-    // if (currentUrl.match(matcher)) {
-    //   currentUrl = currentUrl.replace(matcher, '/run');
-    // }
 
     if (currentUrl.includes('?state=')) {
       currentUrl = currentUrl.split('?')[0];

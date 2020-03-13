@@ -1,5 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { MonacoEditorComponent } from '@materia-ui/ngx-monaco-editor';
+import { catchError, map } from 'rxjs/operators';
 
 import { CodeEditorEnhancerService } from '../../../shared/code-editor-enhancer.service';
 import { WorkflowService } from '../../workflows.service';
@@ -13,11 +15,13 @@ import { callDenovo, helloWorld, md5sum } from './example.wdl';
   styleUrls: ['./wdl-selection-step.component.scss'],
 })
 export class WdlSelectionStepComponent implements OnInit {
-
   @Input()
   workflowId: string;
+
   @Input()
   form: FormGroup;
+
+  @ViewChild('editor', {static: true}) editorComponent: MonacoEditorComponent;
 
   inputSchema;
 
@@ -28,7 +32,7 @@ export class WdlSelectionStepComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // TODO This will be deprecated in favour of the integration with Monaco Editor.
+    // TODO This will be deprecated in favour of the direct integration with Monaco Editor.
     this.form.statusChanges.subscribe(observer => {
       this.wdlCurrentContent = this.form.get('wdl').value;
     });
@@ -50,8 +54,24 @@ export class WdlSelectionStepComponent implements OnInit {
   }
 
   generateForm() {
+    console.warn('generateForm: invoked');
     this.workflowService.getJsonSchemaFromWdl(this.form.get('wdl').value)
+      .pipe(
+        catchError(e => {
+          console.error('Failed while trying to get the script validated:', e);
+
+          throw new Error(e);
+        }),
+        map(response => {
+          if (response.valid !== undefined && response.valid === false) {
+            console.error('Fallback: Failed while trying to get the script validated:', response.errors);
+          }
+
+          return response;
+        })
+      )
       .subscribe(({ input_schema: inputSchema }) => {
+        console.warn('generateForm: workflowService.getJsonSchemaFromWdl: inputSchema=', inputSchema);
         this.inputSchema = this.getInputSchemaModel(inputSchema);
       });
   }

@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import LanguageConfiguration = monaco.languages.LanguageConfiguration;
+import IMonarchLanguage = monaco.languages.IMonarchLanguage;
 
 @Injectable({
   providedIn: 'root',
@@ -7,25 +9,32 @@ export class CodeEditorEnhancerService {
   constructor() {
   }
 
-  configure(language: string) {
+  configure(config: Configuration) {
     const monaco = (<any> window).monaco;
+    let languageConfig: LanguageConfiguration = null;
+    let languageDefinition: any = null;
 
     // Based on https://github.com/microsoft/monaco-languages/tree/master/src
 
-    if (language === 'wdl') {
-      monaco.languages.register({id: 'wdl'});
-      monaco.languages.setLanguageConfiguration('wdl', {
-        brackets: [
-          ['{', '}'],
-          ['[', ']'],
-          ['(', ')'],
-        ],
+    if (config === 'wdl') {
+      languageConfig = {
         comments: {
           lineComment: '#',
         },
         wordPattern: /(-?\d*\.\d\w*)|([^\`\~\!\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g,
-      });
-      monaco.languages.setMonarchTokensProvider('wdl', {
+      };
+
+      // NOTE When this feature is off, auto-indentation is also off for some reasons.
+      if (config.autoClosingPairs) {
+        languageConfig.brackets = [
+          ['{', '}'],
+          ['[', ']'],
+          ['(', ')'],
+        ];
+      }
+
+      // FIXME Properly implement WDL language spec.
+      languageDefinition = {
         defaultToken: '',
         tokenPostfix: '.wdl',
 
@@ -76,6 +85,8 @@ export class CodeEditorEnhancerService {
             [/'/, 'string.escape', '@stringBody'],
             [/"$/, 'string.escape', '@popall'],
             [/"/, 'string.escape', '@dblStringBody'],
+            // [/>>>$/, 'string.escape', '@popall'],
+            // [/<<</, 'string.escape', '@tripleStringBody'],
           ],
 
           whitespace: [
@@ -98,8 +109,25 @@ export class CodeEditorEnhancerService {
             [/"/, 'string.escape', '@popall'],
             [/\\$/, 'string'],
           ],
+
+          // tripleStringBody: [
+          //   [/.+/, 'string'],
+          //   [/>>>$/, 'string.escape', '@popall'],
+          // ],
         },
-      });
+      };
+
     }
+
+    monaco.languages.register({id: 'wdl'});
+    monaco.languages.setLanguageConfiguration('wdl', languageConfig);
+    monaco.languages.setMonarchTokensProvider('wdl', languageDefinition);
   }
+}
+
+export interface Configuration {
+  language?: string;
+  autoClosingPairs?: boolean;
+  // FIXME ↑ On the UI, the user can choose to turn this feature on and stored the preference in the local storage.
+  //  By default, it is off to accommodate Selenium WebDriver.
 }

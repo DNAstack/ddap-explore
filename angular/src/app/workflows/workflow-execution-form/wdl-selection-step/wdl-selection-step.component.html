@@ -18,13 +18,24 @@
       </mat-chip>
     </mat-chip-list>
   </div>
+<!--  <div class="row">-->
+<!--    <mat-form-field class="col">-->
+<!--        <textarea matInput-->
+<!--                  formControlName="wdl"-->
+<!--                  data-se="inp-workflow-wdl"-->
+<!--                  rows="20"-->
+<!--                  required>-->
+<!--        </textarea>-->
+<!--    </mat-form-field>-->
+<!--  </div>-->
   <div class="row">
-    <div [class]="'editor-container'"
+    <div [class]="'wdl-editor-container'"
          [ngStyle]="computeEditorStyle()">
-      <ngx-monaco-editor [options]="{language: 'wdl', minimap: {enabled: true}}"
+      <ngx-monaco-editor #editor
+                         [options]="{language: 'wdl', minimap: {enabled: true}}"
                          [(ngModel)]="wdlCurrentContent"
                          [ngModelOptions]="{standalone: true}"
-                         (init)="codeEditorEnhancer.configure('wdl')"
+                         (init)="codeEditorEnhancer.configure({language: 'wdl'})"
                          (ngModelChange)="onEditorUpdated()">
       </ngx-monaco-editor>
     </div>

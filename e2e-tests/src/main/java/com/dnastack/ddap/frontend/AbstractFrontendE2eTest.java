@@ -54,6 +54,7 @@ public abstract class AbstractFrontendE2eTest extends AbstractBaseE2eTest {
             options.addArguments("headless");
         }
         options.addArguments("--disable-gpu");
+        // options.addArguments("--auto-open-devtools-for-tabs");
         options.addArguments("window-size=1200x600");
         options.addArguments("incognito");
 

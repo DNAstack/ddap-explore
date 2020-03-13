@@ -1,36 +1,45 @@
 <div class="site-container {{viewController.view.leftSidebarOpened ? '' : 'zen-mode'}}">
   <ddaplib-main-header [siteName]="appConfig.title"
-                       [showRealmInput]="appConfig.featureRealmInputEnabled"
-                       [realmActions]="['edit']"
-                       (realmChangeAcknowledge)="onAcknowledge($event)"
-                       *ngIf="router.url != '/home'">
-    <ng-container *ngIf="appConfig.featureAdministrationEnabled">
-      <div class="app-menu-section-title">Administration</div>
-      <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">
-        <a [href]="withRealm(identityConcentratorInfo.uiUrl)"
-          mat-menu-item
-          class="link-to-external-app"
-          data-se="nav-identity-concentrator"
-          target="_blank">
-          <mat-icon class="icon">launch</mat-icon>
-          <span>Identity Concentrator</span>
-        </a>
-      </ng-container>
+    [isSandbox]="appConfig.featureRealmInputEnabled"
+    [realmActions]="['edit']"
+    (realmChangeAcknowledge)="onAcknowledge($event)">
+    <ddaplib-menu-apps [accessibleApps]="viewController.getAccessibleApps()"
+      [realmId]="viewController.getRealmId()">
+      <ng-container *ngIf="appConfig.featureAdministrationEnabled">
+        <div class="app-menu-section-title">Administration</div>
+        <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">
+          <a [href]="withRealm(identityConcentratorInfo.uiUrl)"
+            mat-menu-item
+            class="link-to-external-app"
+            data-se="nav-identity-concentrator"
+            target="_blank">
+            <mat-icon class="icon">launch</mat-icon>
+            <span>Identity Concentrator</span>
+          </a>
+        </ng-container>
 
-      <ng-container *ngIf="dataAccessManagersInfo$ | async as dataAccessManagersInfo">
-        <a *ngFor="let damInfo of dataAccessManagersInfo | keyvalue"
-          [href]="withRealm(damInfo.value.uiUrl)"
-          mat-menu-item
-          class="link-to-external-app"
-          target="_blank">
-          <mat-icon class="icon">launch</mat-icon>
-          <span class="dam-info">
-            <span class="dam-info-label">{{damInfo.value.label}}</span>
-            <span class="dam-info-sublabel">Data Access Manager</span>
-          </span>
-        </a>
+        <ng-container *ngIf="dataAccessManagersInfo$ | async as dataAccessManagersInfo">
+          <a *ngFor="let damInfo of dataAccessManagersInfo | keyvalue"
+            [href]="withRealm(damInfo.value.uiUrl)"
+            mat-menu-item
+            class="link-to-external-app"
+            target="_blank">
+            <mat-icon class="icon">launch</mat-icon>
+            <span class="dam-info">
+              <span class="dam-info-label">{{damInfo.value.label}}</span>
+              <span class="dam-info-sublabel">Data Access Manager</span>
+            </span>
+          </a>
+        </ng-container>
       </ng-container>
-    </ng-container>
+    </ddaplib-menu-apps>
+    <ddaplib-menu-profile *ngIf="appConfig.authorizationOnInitRequired && accessControlService.isUserAuthorized()">
+      <button mat-menu-item
+        (click)="onSignOut()">
+        <mat-icon>exit_to_app</mat-icon>
+        <span>Sign out</span>
+      </button>
+    </ddaplib-menu-profile>
   </ddaplib-main-header>
 
   <mat-progress-bar *ngIf="loader.progress$ | async"
@@ -48,14 +57,7 @@
       position="start"
       mode="side"
       [opened]="true"
-      >
-      <!-- The inline CSS for this <span> is an exception as this is for testing. -->
-      <span *ngIf="appConfig.featureRealmInputEnabled"
-            class="sandbox-warning"
-            style="position: absolute; left: 1rem; font-size: 0.75rem;"
-            matTooltip="This is sandbox testing environment">
-        Sandbox environment
-      </span>
+    >
       <app-sidenav-left></app-sidenav-left>
     </mat-sidenav>
     <mat-sidenav-content>
@@ -64,10 +66,3 @@
     </mat-sidenav-content>
   </mat-sidenav-container>
 </div>
-
-<!--<div *ngIf="appConfig.featureRealmInputEnabled"-->
-<!--  class="ddap-realm-select">-->
-<!--  <ddaplib-realm-input (onAcknowledge)="onAcknowledge($event)"-->
-<!--    actions="['edit']">-->
-<!--  </ddaplib-realm-input>-->
-<!--</div>-->

@@ -1,15 +1,22 @@
 package com.dnastack.ddap.common.page;
 
 import com.dnastack.ddap.common.util.DdapBy;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.*;
+import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfElementsToBeMoreThan;
 
 public class SearchPage extends AnyDdapPage {
 
@@ -31,10 +38,18 @@ public class SearchPage extends AnyDdapPage {
         searchQueryInput.sendKeys(query + Keys.ENTER);
     }
 
-    public List<WebElement> getSearchResults(Integer expectedNumberOfResults) {
-        new WebDriverWait(getDriver(), 15)
-                .until(ExpectedConditions.numberOfElementsToBeMoreThan(By.tagName("ddap-beacon-result"), --expectedNumberOfResults));
-        return getDriver().findElements(By.tagName("ddap-beacon-result"));
+    public List<WebElement> getSearchResults(int expectedNumberOfResults, Consumer<List<WebElement>> assertions) {
+        return new WebDriverWait(getDriver(), 15)
+                .ignoring(StaleElementReferenceException.class)
+                .ignoring(AssertionError.class)
+                .until(d -> {
+                    final List<WebElement> foundResults = d.findElements(By.tagName("ddap-beacon-result"));
+                    assertThat(foundResults, hasSize(greaterThanOrEqualTo(expectedNumberOfResults)));
+
+                    assertions.accept(foundResults);
+
+                    return foundResults;
+                });
     }
 
     public void clickBack() {

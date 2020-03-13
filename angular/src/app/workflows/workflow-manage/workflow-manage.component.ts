@@ -1,33 +1,28 @@
-import { Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-import ResourceTokens = dam.v1.ResourceTokens;
-import { MatStepper } from '@angular/material/stepper';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormValidationService, ViewControllerService } from 'ddap-common-lib';
+import {Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
+import {FormGroup} from '@angular/forms';
+import {MatStepper} from '@angular/material/stepper';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ErrorHandlerService, FormValidationService, ViewControllerService} from 'ddap-common-lib';
 import _isequal from 'lodash.isequal';
-import { observable, Observable, Subscription, zip } from 'rxjs';
-import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
-import { map } from 'rxjs/operators';
+import {Observable, Subscription, zip} from 'rxjs';
+import {map} from 'rxjs/operators';
 
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
-import { dam } from '../../shared/proto/dam-service';
-import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
-import { ResourceService } from '../../shared/resource/resource.service';
-import { TrsService } from '../trs-v2/trs.service';
-import {
-  ResourceAuthorizationStepComponent
-} from '../workflow-execution-form/resource-authorization-step/resource-authorization-step.component';
-import { WdlSelectionStepComponent } from '../workflow-execution-form/wdl-selection-step/wdl-selection-step.component';
-import IResourceTokens = dam.v1.IResourceTokens;
-import { WesServerSelectionStepComponent } from '../workflow-execution-form/wes-server-selection-step/wes-server-selection-step.component';
-import {
-  WorkflowExecutionStepComponent
-} from '../workflow-execution-form/workflow-execution-step/workflow-execution-step.component';
-import { WorkflowExecution } from '../workflow-execution-form/workflow-execution-step/workflow-execution.model';
-import { WorkflowFormBuilder } from '../workflow-execution-form/workflow-form-builder.service';
-import { WorkflowsStateService } from '../workflow-execution-form/workflows-state.service';
-import { WorkflowService } from '../workflows.service';
+import {AccessControlService} from '../../shared/access-control.service';
+import {AppConfigModel} from '../../shared/app-config/app-config.model';
+import {AppConfigService} from '../../shared/app-config/app-config.service';
+import {dam} from '../../shared/proto/dam-service';
+import {ResourceAuthStateService} from '../../shared/resource-auth-state.service';
+import {ResourceService} from '../../shared/resource/resource.service';
+import {TrsService} from '../trs-v2/trs.service';
+import {ResourceAuthorizationStepComponent} from '../workflow-execution-form/resource-authorization-step/resource-authorization-step.component';
+import {WdlSelectionStepComponent} from '../workflow-execution-form/wdl-selection-step/wdl-selection-step.component';
+import {WesServerSelectionStepComponent} from '../workflow-execution-form/wes-server-selection-step/wes-server-selection-step.component';
+import {WorkflowExecutionStepComponent} from '../workflow-execution-form/workflow-execution-step/workflow-execution-step.component';
+import {WorkflowExecution} from '../workflow-execution-form/workflow-execution-step/workflow-execution.model';
+import {WorkflowFormBuilder} from '../workflow-execution-form/workflow-form-builder.service';
+import {WorkflowsStateService} from '../workflow-execution-form/workflows-state.service';
+import {WorkflowService} from '../workflows.service';
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
   selector: 'ddap-workflow-manage',
@@ -36,7 +31,6 @@ import { WorkflowService } from '../workflows.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class WorkflowManageComponent implements OnInit, OnDestroy {
-
   get wdlForm() {
     return this.workflowForm.get('wdl') as FormGroup;
   }
@@ -61,7 +55,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   workflowForm: FormGroup;
   datasetColumns: string[];
   subscriptions: Subscription[] = [];
-  resourceTokens: {[key: string]: IResourceToken};
+  resourceAccesses: {[key: string]: IResourceAccess};
   workflowId = Math.random().toString(36).substring(7);
   readyToExecute = false;
 
@@ -78,6 +72,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
 
   constructor(private route: ActivatedRoute,
               private appConfigService: AppConfigService,
+              private accessControl: AccessControlService,
               private router: Router,
               private validationService: FormValidationService,
               private workflowService: WorkflowService,
@@ -86,6 +81,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
               private workflowFormBuilder: WorkflowFormBuilder,
               private workflowsStateService: WorkflowsStateService,
               private resourceAuthStateService: ResourceAuthStateService,
+              private errorHandler: ErrorHandlerService,
               private viewController: ViewControllerService
               ) {
   }
@@ -123,13 +119,13 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     }
   }
 
-  getAccessTokensForAuthorizedResources(workflowId: string): Observable<{[key: string]: IResourceToken}> {
+  getAccessTokensForAuthorizedResources(workflowId: string): Observable<{[key: string]: IResourceAccess}> {
     const { columnDataMappedToViews, datasetDamIdResourcePathPairs } = this.workflowsStateService.getMetaInfoForWorkflow(workflowId);
     const damIdWesResourcePathPair = this.workflowForm.get('wesViewResourcePath').value;
     const inputsStepCompleted = this.workflowForm.get('inputs').value;
     const damIdResourcePathPairs: string[] = [];
     if (columnDataMappedToViews) {
-      const pairs: string[] = Object.values(columnDataMappedToViews);
+      const pairs: string[] = Object.values(columnDataMappedToViews).reduce((l, r) => l.concat(r));
       damIdResourcePathPairs.push(...pairs);
     }
     if (damIdWesResourcePathPair && inputsStepCompleted) {
@@ -163,21 +159,42 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     const damId = this.wesStep.getDamId();
     const wesViewId = this.workflowForm.get('wesView').value;
     const wesResourcePath = this.workflowForm.get('wesViewResourcePath').value.split(';')[1];
-    const wesAccessToken = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceTokens, wesResourcePath)['access_token'];
+    const wesAccessToken = this.resourceService
+      .lookupResourceTokenFromAccessMap(this.resourceAccesses, wesResourcePath)
+      .credentials['access_token'];
     const executions: WorkflowExecution[] = this.executionStep.getWorkflowExecutionModels();
+
+    // When no rows have been selected, the execution list from the execution step will be empty. In this case, we will
+    // generate the execution based on the workflow form data instead.
+    if (executions.length === 0) {
+      executions.push(this.executionStep.createWorkflowExecutionModel(this.workflowForm.getRawValue().inputs));
+    }
 
     zip(...executions.map((execution) =>
         this.workflowService.runWorkflow(damId, wesViewId, execution, wesAccessToken)
-      )).subscribe((runs: object[]) => this.navigateUp('../operations', runs, damId, wesViewId));
+      ))
+      .subscribe((runs: object[]) => this.navigateUp('operations', runs, damId, wesViewId))
+    ;
   }
 
   toggleLeftSideNav() {
     this.viewController.toggleLeftSidenav();
   }
 
+  protected getSourceUrl(): string {
+    const { sourceUrl } = this.route.snapshot.params;
+
+    if (!sourceUrl) {
+      return null;
+    }
+
+    return atob(sourceUrl);
+  }
+
   protected navigateUp = (path: string, runs: object[], damId, wesView) => {
+    const actualPath = (this.getSourceUrl() ? '../..' : '..') + '/' + path;
     const { viewId } = this.route.snapshot.params;
-    const navigatePath = viewId ? [path] : [path, damId, 'views', wesView, 'runs'];
+    const navigatePath = viewId ? [actualPath] : [actualPath, damId, 'views', wesView, 'runs'];
     this.router.navigate(navigatePath, { relativeTo: this.route, state: { runs } });
   }
 
@@ -206,7 +223,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
 
     this.getAccessTokensForAuthorizedResources(this.workflowId)
       .subscribe((access) => {
-        this.resourceTokens = access;
+        this.resourceAccesses = access;
         this.resourceAuthStateService.storeAccess(access);
         const { wesView, wesViewResourcePath, wdl, inputs } = this.workflowForm.value;
         if (wesView && wesViewResourcePath && wdl && inputs) {
@@ -217,11 +234,11 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   }
 
   private loadPredefinedWorkflowDescription() {
-    const { sourceUrl } = this.route.snapshot.params;
+    const sourceUrl = this.getSourceUrl();
 
     if (sourceUrl) {
       this.workflowForm.get('wdl').patchValue('# Loading...');
-      this.trsService.getDescriptorFrom(decodeURIComponent(sourceUrl))
+      this.trsService.getDescriptorFrom(sourceUrl)
         .subscribe(script => this.workflowForm.get('wdl').patchValue(script));
     }
   }

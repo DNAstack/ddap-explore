@@ -41,7 +41,9 @@ public class BeaconSearchUnauthorizedBeaconExceptionHandlingTest extends Abstrac
          */
         String badAccessRoleName = "discovery";
         JSONObject badAccessRole = new JSONObject()
-                .put("targetScopes", new JSONArray().put("fakeScope"))
+                .put("serviceArgs", new JSONObject()
+                                    .put("scopes", new JSONObject()
+                                            .put("values", new JSONArray().put("fakeScope"))))
                 .put("damRoleCategories", new JSONArray().put("metadata"))
                 .put("ui", new JSONObject()
                         .put("label", "Role That Will Give a 403")

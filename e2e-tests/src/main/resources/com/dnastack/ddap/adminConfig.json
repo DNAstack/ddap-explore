@@ -2,7 +2,7 @@
   "version": "v0",
   "revision": "1",
   "commitTime": 1544824316,
-  "trustedPassportIssuers": {
+  "trustedIssuers": {
     "nih": {
       "issuer": "https://login.nih.gov/oidc",
       "translateUsing": "dbgap_translator",
@@ -27,6 +27,13 @@
       "clientId": "$$E2E_BROKER_ID$$",
       "authUrl": "$$E2E_PASSPORT_ISSUER$$/oauth2/auth",
       "tokenUrl": "$$E2E_PASSPORT_ISSUER$$/oauth2/token"
+    },
+    "ic_visa_issuer": {
+      "issuer": "$$E2E_PASSPORT_ISSUER$$/visas",
+      "ui": {
+        "description": "IC DDAP",
+        "label": "IC DDAP"
+      }
     }
   },
   "trustedSources": {
@@ -34,7 +41,7 @@
       "sources": [
         "$$E2E_TRUSTED_SOURCE$$"
       ],
-      "claims": [
+      "visaTypes": [
         "testing.only.Whitelist"
       ],
       "ui": {
@@ -171,11 +178,13 @@
       "views": {
         "discovery-access": {
           "serviceTemplate": "beacon",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "discovery",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
+          "labels": {
+            "version": "Phase 3",
+            "topic": "variants",
+            "partition": "all",
+            "fidelity": "discovery",
+            "geoLocation": "gcp:na/us/us-central1/us-central1-a"
+          },
           "contentTypes": [
             "application/bam"
           ],
@@ -190,12 +199,12 @@
           },
           "items": [
             {
-              "vars": {
-                "url": "https://gatekeeper-cafe-variome.$$E2E_TEST_NAMESPACE$$.dnastack.com/beacon/query"
+              "args": {
+                "url": "https://gatekeeper-cafe-variome.$$E2E_TEST_NAMESPACE$$.dnastack.com/beacon/query",
+                "aud": "https://ga4gh-apis-beacon.dnastack.com"
               }
             }
           ],
-          "aud": "https://ga4gh-apis-beacon.dnastack.com",
           "defaultRole": "discovery",
           "ui": {
             "description": "Beacon Discovery server",
@@ -204,11 +213,13 @@
         },
         "gcs-file-access": {
           "serviceTemplate": "gcs",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
+          "labels": {
+            "version": "Phase 3",
+            "topic": "variants",
+            "partition": "all",
+            "fidelity": "normalized",
+            "geoLocation": "gcp:na/us/us-central1/us-central1-a"
+          },
           "contentTypes": [
             "application/bam"
           ],
@@ -223,9 +234,9 @@
           },
           "items": [
             {
-              "vars": {
-                "bucket": "ga4gh-apis-controlled-access",
-                "project": "ga4gh-apis"
+              "args": {
+                "bucket": "$$E2E_TEST_BUCKET$$",
+                "project": "$$E2E_TEST_PROJECT$$"
               }
             }
           ],
@@ -243,7 +254,7 @@
         "description": "Demo Controlled Access of a subset of the 1000 Genomes dataset. See: https://www.nature.com/articles/nature15393.",
         "imageUrl": "https://www.genengnews.com/wp-content/uploads/2018/08/Oct1_2015_ErnestoDelAguilaIII_1000GenomesProject9614313724-1.jpg",
         "infoUrl": "http://info.1000-genomes.org",
-        "label": "1000 Genomes (non-prod)",
+        "label": "1000 Genomes",
         "owner": "Human Genome Project",
         "size": "250 GB",
         "tags": "Demo, Genomics, Research",
@@ -255,11 +266,13 @@
       "views": {
         "beacon": {
           "serviceTemplate": "beacon",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "discovery",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
+          "labels": {
+            "version": "Phase 3",
+            "topic": "variants",
+            "partition": "all",
+            "fidelity": "discovery",
+            "geoLocation": "gcp:na/us/us-central1/us-central1-a"
+          },
           "contentTypes": [
             "application/bam"
           ],
@@ -274,12 +287,12 @@
           },
           "items": [
             {
-              "vars": {
-                "url": "https://gatekeeper-cafe-variome.$$E2E_TEST_NAMESPACE$$.dnastack.com/beacon/query"
+              "args": {
+                "url": "https://gatekeeper-cafe-variome.$$E2E_TEST_NAMESPACE$$.dnastack.com/beacon/query",
+                "aud": "https://ga4gh-apis-beacon.dnastack.com"
               }
             }
           ],
-          "aud": "https://ga4gh-apis-beacon.dnastack.com",
           "defaultRole": "discovery",
           "ui": {
             "description": "Search data from Beacon Discovery server",
@@ -288,11 +301,13 @@
         },
         "gcs_read": {
           "serviceTemplate": "gcs",
-          "version": "Phase 3",
-          "topic": "variants",
-          "partition": "all",
-          "fidelity": "normalized",
-          "geoLocation": "gcp:na/us/us-central1/us-central1-a",
+          "labels": {
+            "version": "Phase 3",
+            "topic": "variants",
+            "partition": "all",
+            "fidelity": "normalized",
+            "geoLocation": "gcp:na/us/us-central1/us-central1-a"
+          },
           "contentTypes": [
             "application/bam"
           ],
@@ -307,7 +322,7 @@
           },
           "items": [
             {
-              "vars": {
+              "args": {
                 "bucket": "$$E2E_TEST_BUCKET$$",
                 "project": "$$E2E_TEST_PROJECT$$"
               }
@@ -339,7 +354,9 @@
       "views": {
         "wes-view": {
           "serviceTemplate": "wes",
-          "version": "1",
+          "labels": {
+            "version": "1"
+          },
           "contentTypes": [],
           "roles": {
             "execute": {
@@ -352,12 +369,12 @@
           },
           "items": [
             {
-              "vars": {
-                "url": "https://ddap-wes-service.$$E2E_TEST_NAMESPACE$$.dnastack.com"
+              "args": {
+                "url": "https://ddap-wes-service.$$E2E_TEST_NAMESPACE$$.dnastack.com",
+                "aud": "ddap-wes"
               }
             }
           ],
-          "aud": "ddap-wes",
           "defaultRole": "execute",
           "ui": {
             "description": "wes-view",
@@ -381,36 +398,22 @@
     }
   },
   "clients": {
-    "this_ddap": {
-      "clientId": "$$E2E_CLIENT_ID$$",
-      "scope": "openid ga4gh_passport_v1 account_admin identities profile offline_access",
-      "grant_types": ["authorization_code", "refresh_token"],
-      "response_types": ["code"],
-      "ui": {
-        "description": "This DDAP under test",
-        "label": "DAM DDAP"
-      },
-      "redirectUris": [
-        "http://localhost:8085",
-        "https://ddap-explore.staging.dnastack.com",
-        "https://ddap-explore-candidate.staging.dnastack.com",
-        "https://ddap-explore.prod.dnastack.com",
-        "https://ddap-explore-candidate.prod.dnastack.com"
-      ]
-    }
   },
   "serviceTemplates": {
     "beacon": {
-      "targetAdapter": "token:jwt:gatekeeper",
-      "itemFormat": "url",
+      "serviceName": "gatekeeper",
       "interfaces": {
         "http:beacon": "${url}"
       },
       "roles": {
         "basic_discovery": {
-          "targetScopes": [
-            "registered"
-          ],
+          "serviceArgs": {
+            "scopes": {
+              "values": [
+                "registered"
+              ]
+            }
+          },
           "damRoleCategories": [
             "exists"
           ],
@@ -420,10 +423,14 @@
           }
         },
         "discovery": {
-          "targetScopes": [
-            "registered",
-            "controlled"
-          ],
+          "serviceArgs": {
+            "scopes": {
+              "values": [
+                "registered",
+                "controlled"
+              ]
+            }
+          },
           "damRoleCategories": [
             "metadata"
           ],
@@ -439,19 +446,24 @@
       }
     },
     "bigquery": {
-      "targetAdapter": "token:gcp:sa",
-      "itemFormat": "bigquery",
+      "serviceName": "bigquery",
       "interfaces": {
         "http:gcp:bq": "https://www.googleapis.com/bigquery/v1/projects/${project}"
       },
       "roles": {
         "editor": {
-          "targetRoles": [
-            "roles/bigquery.dataEditor"
-          ],
-          "targetScopes": [
-            "https://www.googleapis.com/auth/cloud-platform"
-          ],
+          "serviceArgs": {
+            "scopes": {
+              "values": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ]
+            },
+            "roles": {
+              "values": [
+                "roles/bigquery.dataEditor"
+              ]
+            }
+          },
           "damRoleCategories": [
             "metadata",
             "list",
@@ -464,12 +476,18 @@
           }
         },
         "viewer": {
-          "targetRoles": [
-            "roles/BQReader"
-          ],
-          "targetScopes": [
-            "https://www.googleapis.com/auth/cloud-platform"
-          ],
+          "serviceArgs": {
+            "scopes": {
+              "values": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ]
+            },
+            "roles": {
+              "values": [
+                "roles/BQReader"
+              ]
+            }
+          },
           "damRoleCategories": [
             "metadata",
             "list",
@@ -487,8 +505,7 @@
       }
     },
     "gcs": {
-      "targetAdapter": "token:gcp:sa",
-      "itemFormat": "gcs",
+      "serviceName": "gcs",
       "interfaces": {
         "gcp:gs": "gs://${bucket}",
         "http:gcp:gs": "https://www.googleapis.com/storage/v1/b/${bucket}",
@@ -496,9 +513,13 @@
       },
       "roles": {
         "creator": {
-          "targetRoles": [
-            "roles/storage.objectCreator"
-          ],
+          "serviceArgs": {
+            "roles": {
+              "values": [
+                "roles/storage.objectCreator"
+              ]
+            }
+          },
           "damRoleCategories": [
             "write"
           ],
@@ -508,16 +529,22 @@
           }
         },
         "editor": {
-          "targetRoles": [
-            "roles/storage.objectViewer",
-            "roles/storage.objectCreator"
-          ],
-          "targetScopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "email",
-            "openid",
-            "profile"
-          ],
+          "serviceArgs": {
+            "scopes": {
+              "values": [
+                "https://www.googleapis.com/auth/cloud-platform",
+                "email",
+                "openid",
+                "profile"
+              ]
+            },
+            "roles": {
+              "values": [
+                "roles/storage.objectViewer",
+                "roles/storage.objectCreator"
+              ]
+            }
+          },
           "damRoleCategories": [
             "metadata",
             "list",
@@ -530,15 +557,21 @@
           }
         },
         "viewer": {
-          "targetRoles": [
-            "roles/storage.objectViewer"
-          ],
-          "targetScopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "email",
-            "openid",
-            "profile"
-          ],
+          "serviceArgs": {
+            "scopes": {
+              "values": [
+                "https://www.googleapis.com/auth/cloud-platform",
+                "email",
+                "openid",
+                "profile"
+              ]
+            },
+            "roles": {
+              "values": [
+                "roles/storage.objectViewer"
+              ]
+            }
+          },
           "damRoleCategories": [
             "metadata",
             "list",
@@ -556,8 +589,7 @@
       }
     },
     "views": {
-      "targetAdapter": "token:aggregate:view",
-      "itemFormat": "view",
+      "serviceName": "aggregator",
       "roles": {
         "viewer": {
           "damRoleCategories": [
@@ -577,16 +609,19 @@
       }
     },
     "wes": {
-      "targetAdapter": "token:jwt:gatekeeper",
-      "itemFormat": "url",
+      "serviceName": "gatekeeper",
       "interfaces": {
         "http:wes": "${url}"
       },
       "roles": {
         "execute": {
-          "targetScopes": [
-            "registered"
-          ],
+          "serviceArgs": {
+            "scopes": {
+              "values": [
+                "registered"
+              ]
+            }
+          },
           "damRoleCategories": [
             "metadata",
             "list",
@@ -605,7 +640,7 @@
       }
     }
   },
-  "claimDefinitions": {
+  "visaTypes": {
     "AcceptedTermsAndPolicies": {
       "ui": {
         "description": "Canonical URLs that indicate that a researcher or either organization has acknowledged the specific terms and conditions indicated by the URL",

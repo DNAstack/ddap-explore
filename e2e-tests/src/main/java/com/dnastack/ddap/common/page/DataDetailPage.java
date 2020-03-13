@@ -20,7 +20,14 @@ public class DataDetailPage extends AnyDdapPage {
     public ExpandedAccessibleViewItem expandViewItem(String viewLabel) {
         final WebElement viewItem = getViewListItem(viewLabel);
         viewItem.click(); // expand view item
-        return new WebDriverWait(getDriver(), 5).until(d -> new ExpandedAccessibleViewItem(d, viewItem));
+        return new WebDriverWait(getDriver(), 5).until(d -> {
+            final ExpandedAccessibleViewItem expandedAccessibleViewItem = new ExpandedAccessibleViewItem(d, viewItem);
+            if (expandedAccessibleViewItem.isExpanded()) {
+                return expandedAccessibleViewItem;
+            } else {
+                return null;
+            }
+        });
     }
 
     private WebElement getViewListItem(String viewName) {

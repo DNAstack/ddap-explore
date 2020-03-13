@@ -1,20 +1,17 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
-import { flatten } from 'ddap-common-lib';
+import {Component, Input} from '@angular/core';
+import {FormGroup} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
+import {flatten} from 'ddap-common-lib';
 import _cloneDeep from 'lodash.clonedeep';
 import _get from 'lodash.get';
 
-import { dam } from '../../../shared/proto/dam-service';
-import { ResourceService } from '../../../shared/resource/resource.service';
-import { SimplifiedWesResourceViews } from '../../workflow.model';
-import { WorkflowService } from '../../workflows.service';
-import { WorkflowsStateService } from '../workflows-state.service';
+import {dam} from '../../../shared/proto/dam-service';
+import {ResourceService} from '../../../shared/resource/resource.service';
+import {WorkflowService} from '../../workflows.service';
+import {WorkflowsStateService} from '../workflows-state.service';
 
-import { WorkflowExecution } from './workflow-execution.model';
-
-import IResourceTokens = dam.v1.IResourceTokens;
+import {WorkflowExecution} from './workflow-execution.model';
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
   selector: 'ddap-workflow-execution-step',
@@ -32,7 +29,7 @@ export class WorkflowExecutionStepComponent {
   @Input()
   selectedColumns: string[];
   @Input()
-  resourceTokens: {[key: string]: IResourceToken};
+  resourceAccesses: {[key: string]: IResourceAccess};
 
   constructor(private route: ActivatedRoute,
               private resourceService: ResourceService,
@@ -41,20 +38,28 @@ export class WorkflowExecutionStepComponent {
   }
 
   getWorkflowExecutionModels(): WorkflowExecution[] {
-    const wdl = this.form.get('wdl').value;
-    const tokens = JSON.stringify(this.getTokensModel());
+    if (!this.selectedRows) {
+      return [];  // Default value
+    }
 
     return this.selectedRows
       .map((row) => {
         const inputs = _cloneDeep(this.form.get('inputs').value);
         this.substituteColumnNamesWithValues(inputs, row);
 
-        return {
-          wdl,
-          inputsJson: JSON.stringify(inputs),
-          tokensJson: tokens,
-        };
+        return this.createWorkflowExecutionModel(inputs);
       });
+  }
+
+  createWorkflowExecutionModel(inputs: any): WorkflowExecution {
+    const wdl = this.form.get('wdl').value;
+    const tokens = JSON.stringify(this.getTokensModel());
+
+    return {
+      wdl,
+      inputsJson: JSON.stringify(inputs),
+      tokensJson: tokens,
+    };
   }
 
   private substituteColumnNamesWithValues(object: object, row: object) {
@@ -72,7 +77,7 @@ export class WorkflowExecutionStepComponent {
 
   private getTokensModel(): object {
     const tokensModel = {};
-    if (!this.resourceTokens || !this.selectedRows || !this.selectedColumns) {
+    if (!this.resourceAccesses || !this.selectedRows || !this.selectedColumns) {
       return tokensModel;
     }
 
@@ -85,8 +90,8 @@ export class WorkflowExecutionStepComponent {
       if (damIdResourcePathPairs) {
         damIdResourcePathPairs.forEach((damIdResourcePathPair) => {
           const resourcePath = damIdResourcePathPair.split(';')[1];
-          const resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceTokens, resourcePath);
-          accessTokens.push({ file: extractedColumnData, token: resourceToken['access_token'] });
+          const resourceAccess = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceAccesses, resourcePath);
+          accessTokens.push({ file: extractedColumnData, token: resourceAccess.credentials['access_token'] });
         });
       }
     });

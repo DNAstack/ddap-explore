@@ -28,6 +28,7 @@ import { DdapFormModule, DdapLayoutModule, MenuModule, ViewControllerService } f
 import { TagInputModule } from 'ngx-chips';
 import { ClipboardModule } from 'ngx-clipboard';
 
+import { AccessDeniedScreenComponent } from './access-denied-screen/access-denied-screen.component';
 import { BeaconResultComponent } from './beacon-search/beacon-result/beacon-result.component';
 import { BeaconSearchBarComponent } from './beacon-search/beacon-search-bar/beacon-search-bar.component';
 import { LimitSearchComponent } from './beacon-search/beacon-search-bar/limit-search/limit-search.component';
@@ -53,6 +54,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MetadataFilterPipe,
     PaginatorComponent,
     MarkdownPipe,
+    AccessDeniedScreenComponent,
   ],
   imports: [
     CommonModule,
@@ -129,6 +131,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     PaginatorComponent,
     MarkdownPipe,
     MenuModule,
+    AccessDeniedScreenComponent,
   ],
   providers : [
     ViewControllerService,

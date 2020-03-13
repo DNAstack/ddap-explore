@@ -64,7 +64,7 @@ public class CommandLineAccessController {
     }
 
     @GetMapping(path = "/status", produces = "application/json")
-    public Mono<DamService.ResourceTokens> authorizeStatus(
+    public Mono<DamService.ResourceResults> authorizeStatus(
         @PathVariable("realm") String realm,
         @PathVariable("cliSessionId") String cliSessionId,
         @RequestParam("resource") String damIdResourcePair
@@ -110,7 +110,7 @@ public class CommandLineAccessController {
     }
 
     @PostMapping(path = "/clear", produces = "application/json")
-    public Mono<DamService.ResourceTokens> authorizeClear(
+    public Mono<DamService.ResourceResults> authorizeClear(
         @PathVariable("realm") String realm,
         @PathVariable("cliSessionId") String cliSessionId
     ) {

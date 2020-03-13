@@ -24,8 +24,8 @@ export class DatasetService {
       );
   }
 
-  getViews(urls: string[]): Observable<any> {
-    return this.http.post(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/views/lookup`, urls)
+  getViews(urls: string[]): Observable<{[url: string]: string[]}> {
+    return this.http.post<{[url: string]: string[]}>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/views/lookup`, urls)
       .pipe(
         this.errorHandler.notifyOnError()
       );

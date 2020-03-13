@@ -3,7 +3,9 @@ package com.dnastack.ddap.explore.common;
 import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.explore.common.config.DamFacadeConfig;
 import dam.v1.DamService;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import dam.v1.DamService.ResourceResults;
+import dam.v1.DamService.ResourceResults.ResourceAccess;
+import dam.v1.DamService.View;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -27,17 +29,17 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
         String resourceId = damFacadeConfig.getResourceName().toLowerCase();
         String viewId = damFacadeConfig.getViewName().toLowerCase();
 
-        var view = DamService.View.newBuilder()
-                .putUi("label", damFacadeConfig.getViewDescription())
-                .putUi("description", damFacadeConfig.getViewDescription())
-                // Fixed access policy
-                .putAccessRoles("execute", DamService.AccessRole.newBuilder()
-                        .putComputedPolicyBasis("ControlledAccessGrants", true)
-                        .build())
-                .setServiceTemplate("wes")
-                .setVersion("1")
-                .putComputedInterfaces(interfaceName, makeInterface())
-                .build();
+        var view = View.newBuilder()
+                       .putUi("label", damFacadeConfig.getViewDescription())
+                       .putUi("description", damFacadeConfig.getViewDescription())
+                       // Fixed access policy
+                       .putRoles("execute", DamService.ViewRole.newBuilder()
+                                                               .putComputedPolicyBasis("ControlledAccessGrants", true)
+                                                               .build())
+                       .setServiceTemplate("wes")
+                       .putLabels("version", "1")
+                       .putComputedInterfaces(interfaceName, makeWesInterface())
+                       .build();
         return Mono.just(Map.of(
                 resourceId,
                 DamService.Resource
@@ -53,11 +55,7 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
         throw new UnsupportedOperationException();
     }
 
-    public Mono<Map<String, DamService.View>> getResourceViews(String realm, String resourceId, String damToken, String refreshToken) {
-        throw new UnsupportedOperationException();
-    }
-
-    public Mono<DamService.ResourceTokens.ResourceToken> getAccessTokenForView(String realm, String resourceId, String viewId, String damToken, String refreshToken) {
+    public Mono<Map<String, View>> getResourceViews(String realm, String resourceId, String damToken, String refreshToken) {
         throw new UnsupportedOperationException();
     }
 
@@ -66,32 +64,35 @@ public class ReactiveDamFacadeClient implements ReactiveDamClient {
         return Mono.just(Map.of());
     }
 
-    public Mono<DamService.ResourceTokens> checkoutCart(String cartToken) {
+    public Mono<ResourceResults> checkoutCart(String cartToken) {
         String resourcePath = String.format("%s/views/%s/roles/execute", damFacadeConfig.getResourceName(), damFacadeConfig.getViewName()).toLowerCase();
-        return Mono.just(DamService.ResourceTokens.newBuilder()
-                .putResources(resourcePath, DamService.ResourceTokens.Descriptor.newBuilder()
-                        .putInterfaces(interfaceName, makeInterface())
-                        .setAccess("0")
-                        .addAllPermissions(List.of("list", "metadata", "read", "write"))
-                        .build())
-                .putAccess("0", DamService.ResourceTokens.ResourceToken.newBuilder()
-                        .setAccount("standalone user")
-                        .setAccessToken(cartToken)
-                        .setExpiresIn(3600)
-                        .setPlatform("ddap-explore-standalone-mode")
-                        .build())
-                .setEpochSeconds(3600)
-                .build());
+        return Mono.just(ResourceResults.newBuilder()
+                                        .putResources(resourcePath, ResourceResults.ResourceDescriptor.newBuilder()
+                                                                                                      .putInterfaces(interfaceName, makeWesInterfaceEntry())
+                                                                                                      .setAccess("0")
+                                                                                                      .addAllPermissions(List.of("list", "metadata", "read", "write"))
+                                                                                                      .build())
+                                        .putAccess("0", ResourceAccess.newBuilder()
+                                                                      .putLabels("account", "standalone user")
+                                                                      .putLabels("platform", "ddap-explore-standalone-mode")
+                                                                      .putCredentials("access_token", cartToken)
+                                                                      .setExpiresIn(3600)
+                                                                      .build())
+                                        .setEpochSeconds(3600)
+                                        .build());
     }
 
-    @Deprecated(forRemoval = true)
-    public Mono<DamService.ResourceTokens> checkoutCart(ServerHttpRequest request, String cartToken) {
-        throw new UnsupportedOperationException("Use the custom checkoutCart");
+    private ResourceResults.InterfaceEntry makeWesInterfaceEntry() {
+        return ResourceResults.InterfaceEntry.newBuilder()
+                                             .addItems(ResourceResults.ResourceInterface.newBuilder()
+                                                                                        .setUri(damFacadeConfig.getWesServerUrl())
+                                                                                        .build())
+                                             .build();
     }
 
-    private DamService.Interface makeInterface() {
+    private DamService.Interface makeWesInterface() {
         return DamService.Interface.newBuilder()
-                .addUri(damFacadeConfig.getWesServerUrl())
-                .build();
+                                   .addUri(damFacadeConfig.getWesServerUrl())
+                                   .build();
     }
 }

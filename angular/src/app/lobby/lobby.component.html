@@ -1,0 +1,77 @@
+<div class="site-container lobby">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ (appConfigService.get() | async).title }}</mat-card-title>
+    </mat-card-header>
+
+    <ng-container *ngIf="!initialized; else dialogForAuthorizedUser">
+      <mat-card-content>
+        <p>
+          Please wait a moment...
+        </p>
+      </mat-card-content>
+    </ng-container>
+
+    <ng-template #dialogForAuthorizedUser>
+      <ng-container *ngIf="!userIsAuthorized; else dialogForAuthorizationOnDemand">
+        <mat-card-content>
+          <p>
+            You have already authorized this session. Please continue your work as usual.
+          </p>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-raised-button
+                  color="primary"
+                  [routerLink]="['/', realmId]">
+            Go back to the app
+          </button>
+        </mat-card-actions>
+      </ng-container>
+    </ng-template>
+
+    <ng-template #dialogForAuthorizationOnDemand>
+      <ng-container *ngIf="authorizationRequestedOnDemand; else dialogForUnauthorizedUser">
+        <mat-card-content>
+          <p>
+            This session may not be authorized to all necessary resources. However,
+            the app will ask your permission wherever required.
+          </p>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-raised-button
+                  color="primary"
+                  [routerLink]="['/', realmId]">
+            Continue
+          </button>
+        </mat-card-actions>
+      </ng-container>
+    </ng-template>
+
+    <ng-template #dialogForUnauthorizedUser>
+      <mat-card-content *ngIf="!eventType">
+        <p>
+          You will need to authorize this session before proceeding.
+        </p>
+      </mat-card-content>
+
+      <mat-card-content *ngIf="eventType === 'deauthorization'">
+        <p>
+          This session has ended.
+        </p>
+        <p>
+          If you need to continue your work, please sign back in.
+        </p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button
+                color="accent"
+                [routerLink]="['/', realmId]">
+          Sign in
+        </button>
+      </mat-card-actions>
+    </ng-template>
+  </mat-card>
+</div>

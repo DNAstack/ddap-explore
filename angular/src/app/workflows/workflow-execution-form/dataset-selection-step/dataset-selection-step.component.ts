@@ -10,8 +10,7 @@ import { DatasetService } from '../dataset.service';
 import { WorkflowsStateService } from '../workflows-state.service';
 
 import { Dataset } from './dataset.model';
-import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
-
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
   selector: 'ddap-dataset-selection-step',
@@ -36,7 +35,7 @@ export class DatasetSelectionStepComponent {
   dataset: Dataset;
   currentDatasetUrl: string;
   datasetResourceAuthUrl: string;
-  resourceToken: IResourceToken;
+  resourceAccess: IResourceAccess;
   error: any;
 
   constructor(private formBuilder: FormBuilder,
@@ -49,7 +48,7 @@ export class DatasetSelectionStepComponent {
 
   fetchDataset(url: string) {
     this.setResourceToken();
-    this.datasetService.fetchDataset(url, this.resourceToken ? this.resourceToken['access_token'] : '')
+    this.datasetService.fetchDataset(url, this.resourceAccess ? this.resourceAccess.credentials['access_token'] : '')
       .subscribe((dataset) => {
         this.dataset = dataset;
         this.datasetColumnsChanged.emit(this.getDatasetColumns());
@@ -63,7 +62,8 @@ export class DatasetSelectionStepComponent {
               if (!views) {
                 this.error.message = 'No views associated with dataset';
               }
-              const damIdResourcePathPairs: string[] = Object.values(views);
+              const damIdResourcePathPairs: string[] = Object.values(views)
+                .reduce((l, r) => l.concat(r));
               const workflowMetaInfo = this.workflowsStateService.getMetaInfoForWorkflow(this.workflowId);
               workflowMetaInfo.datasetDamIdResourcePathPairs = damIdResourcePathPairs;
               this.workflowsStateService.storeMetaInfoForWorkflow(this.workflowId, workflowMetaInfo);
@@ -109,8 +109,8 @@ export class DatasetSelectionStepComponent {
     const { datasetDamIdResourcePathPairs } = this.workflowsStateService.getMetaInfoForWorkflow(this.workflowId);
     if (datasetDamIdResourcePathPairs) {
       const resourceTokens = this.resourceAuthStateService.getAccess();
-      const datasetResourcePath = datasetDamIdResourcePathPairs[0][0].split(';')[1];
-      this.resourceToken = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, datasetResourcePath);
+      const datasetResourcePath = datasetDamIdResourcePathPairs[0].split(';')[1];
+      this.resourceAccess = this.resourceService.lookupResourceTokenFromAccessMap(resourceTokens, datasetResourcePath);
     }
   }
 

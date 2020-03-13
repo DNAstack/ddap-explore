@@ -1,25 +1,22 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntityModel } from 'ddap-common-lib';
 import _get from 'lodash.get';
-import { Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
+import { filter, flatMap, map, share, shareReplay } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { dam } from '../../proto/dam-service';
 import { ResourceService } from '../resource.service';
-import ResourceTokens = dam.v1.ResourceTokens;
-import IResourceToken = dam.v1.ResourceTokens.IResourceToken;
-import IResourceTokens = dam.v1.IResourceTokens;
-
-
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
   selector: 'ddap-resource-view-item',
   templateUrl: './resource-view-item.component.html',
   styleUrls: ['./resource-view-item.component.scss'],
 })
-export class ResourceViewItemComponent implements OnInit, OnDestroy {
+export class ResourceViewItemComponent implements OnInit {
 
   get defaultRole(): string {
     const roles = Object.keys(_get(this.resource, `dto.views.${this.view.name}.roles`, {}));
@@ -33,10 +30,9 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
   @Input()
   damId: string;
 
-  paramsSubscription: Subscription;
-  accessSubscription: Subscription;
-  resourceToken: IResourceToken;
-  url?: string;
+  pending = false;
+  resourceAccess: Observable<IResourceAccess>;
+  url: Observable<string | null>;
 
   roles: string[];
   interfaces: string[];
@@ -59,22 +55,26 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
     this.interfaces = Object.keys(dto.interfaces);
     this.setDefaults();
 
-    this.paramsSubscription = this.route.queryParams
-      .subscribe(params => {
-        if (!params.checkout) {
-          return;
-        }
-        this.accessSubscription = this.getAccessTokensForAuthorizedResources()
-          .subscribe((access) => {
-            const resourcePath = `${this.resource.name}/views/${this.view.name}/roles/${this.defaultRole}`;
-            this.resourceToken = this.resourceService.lookupResourceToken(access, resourcePath);
-            this.url = this.getUrlIfApplicable();
-          });
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.paramsSubscription.unsubscribe();
+    const resourceResults = this.route
+      .queryParams
+      .pipe(
+        filter(params => params.checkout),
+        flatMap(_ => this.getAccessTokensForAuthorizedResources()),
+        /*
+         * The template will end up making this request twice on a page load,
+         * which causes timing issues in e2e tests
+         */
+        shareReplay()
+      );
+    resourceResults.subscribe(
+      _ => this.pending = false,
+      _ => this.pending = false
+    );
+    this.resourceAccess = resourceResults.pipe(map(results => {
+      const resourcePath = `${this.resource.name}/views/${this.view.name}/roles/${this.defaultRole}`;
+      return this.resourceService.lookupResourceToken(results, resourcePath);
+    }));
+    this.url = this.getUrlIfApplicable();
   }
 
   getUrlForObtainingAccessToken(): string {
@@ -85,26 +85,30 @@ export class ResourceViewItemComponent implements OnInit, OnDestroy {
     return this.resourceService.getUrlForObtainingAccessToken([resource], redirectUri);
   }
 
-  getUrlIfApplicable(): string {
+  getAccessTokensForAuthorizedResources() {
+    const resource = this.resourceService.getDamResourcePath(
+      this.damId, this.resource.name, this.view.name, this.role, this.interfaceId
+    );
+    return this.resourceService
+      .getAccessTokensForAuthorizedResources([resource]);
+  }
+
+  private getUrlIfApplicable(): Observable<string | null> {
     const view = this.resource.dto.views[this.view.name];
     const interfaces = view.interfaces;
     const httpInterfaces = Object.keys(interfaces)
       .filter((viewInterface) => viewInterface.startsWith('http'));
 
     if (!httpInterfaces.length) {
-      return;
+      return of(null);
     }
 
     const viewAccessUrl = _get(interfaces, `[${httpInterfaces[0]}].uri[0]`);
 
-    return `${viewAccessUrl}/o?access_token=${this.resourceToken['access_token']}`;
-  }
-
-  getAccessTokensForAuthorizedResources() {
-    const resource = this.resourceService.getDamResourcePath(
-      this.damId, this.resource.name, this.view.name, this.role, this.interfaceId
+    return this.resourceAccess.pipe(
+      map(access => access.credentials['access_token']),
+      map(token => `${viewAccessUrl}/o?access_token=${token}`)
     );
-    return this.resourceService.getAccessTokensForAuthorizedResources([resource]);
   }
 
   private setDefaults() {

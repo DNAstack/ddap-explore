@@ -24,8 +24,8 @@
         <protoc.version>3.7.0.2</protoc.version>
         <protobuf.version>3.7.1</protobuf.version>
         <jwt.version>0.10.5</jwt.version>
-        <ddap-cli.version>1.0-22-gf2826af</ddap-cli.version>
-        <ddap-common.version>0.0.1-31-gf917fe7</ddap-common.version>
+        <ddap-cli.version>1.0-23-g53026a0</ddap-cli.version>
+        <ddap-common.version>0.0.1-39-g1b7478a</ddap-common.version>
     </properties>
 
     <repositories>
@@ -197,6 +197,9 @@
                             <inputDirectories>
                                 <include>${basedir}/shared/protos</include>
                             </inputDirectories>
+                            <includeDirectories>
+                                <directory>${basedir}/shared/protos</directory>
+                            </includeDirectories>
                         </configuration>
                     </execution>
                 </executions>

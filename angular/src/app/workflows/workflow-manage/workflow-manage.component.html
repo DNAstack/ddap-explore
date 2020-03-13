@@ -1,4 +1,4 @@
-<ddaplib-header icon="play_arrow" label="Run"></ddaplib-header>
+<ddaplib-header iconName="play_arrow" label="Run"></ddaplib-header>
 
 <ddaplib-main>
 
@@ -6,6 +6,7 @@
                         [linear]="true">
     <mat-step [stepControl]="datasetForm"
               [completed]="readyToExecute"
+              [optional]="true"
               [editable]="!readyToExecute">
       <ng-template matStepLabel>Import dataset and select data</ng-template>
       <ddap-dataset-selection-step [form]="datasetForm"
@@ -118,11 +119,11 @@
                                     [workflowId]="workflowId"
                                     [selectedColumns]="selectedColumns"
                                     [selectedRows]="selectedRows"
-                                    [resourceTokens]="resourceTokens">
+                                    [resourceAccesses]="resourceAccesses">
       </ddap-workflow-execution-step>
       <div class="flex stepper-actions">
         <div>
-          <button mat-button mat-stroked-button matStepperPrevious>Back</button>
+          <!--<button mat-button mat-stroked-button matStepperPrevious>Back</button>-->
           <button mat-button mat-stroked-button (click)="resetStepper()">Reset</button>
         </div>
         <button mat-flat-button

@@ -155,7 +155,7 @@ class BeaconController {
     private BeaconInfo createBeaconInfo(BeaconView beaconView) {
         final String viewLabel = getLabelFromUiMap(beaconView.getView().getUiMap());
         final String resourceLabel = getLabelFromUiMap(beaconView.getResource().getUiMap());
-        final String role = beaconView.getView().getAccessRolesMap().keySet().stream().findFirst().get(); // Expecting just one role
+        final String role = beaconView.getView().getRolesMap().keySet().stream().findFirst().get(); // Expecting just one role
         final String resourcePath = String.format("%s/views/%s/roles/%s",
             beaconView.getResourceId(), beaconView.getViewId(), role
         );

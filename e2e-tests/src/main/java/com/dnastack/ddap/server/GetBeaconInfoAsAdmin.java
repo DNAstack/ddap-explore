@@ -70,7 +70,7 @@ public class GetBeaconInfoAsAdmin extends AbstractBaseE2eTest {
 
         Assert.assertThat(results,
                           containsInAnyOrder(equalTo(new BeaconInfo("Beacon Discovery", "GA4GH APIs", DAM_ID)),
-                                             equalTo(new BeaconInfo("Beacon Discovery Access", "1000 Genomes (non-prod)", DAM_ID))));
+                                             equalTo(new BeaconInfo("Beacon Discovery Access", "1000 Genomes", DAM_ID))));
     }
 
     @Data

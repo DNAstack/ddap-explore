@@ -1,19 +1,18 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
-import { filter, flatMap, mergeAll } from 'rxjs/operators';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Observable, Subscription} from 'rxjs';
+import {filter, flatMap, mergeAll} from 'rxjs/operators';
 
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import IResourceTokens = dam.v1.IResourceTokens;
-import { AppConfigService } from '../../shared/app-config/app-config.service';
-import { BeaconResponse } from '../../shared/beacon-search/beacon-response.model';
-import { BeaconSearchParams } from '../../shared/beacon-search/beacon-search-params.model';
-import { ResourceBeaconService } from '../../shared/beacon-search/resource-beacon.service';
-import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
-import { dam } from '../../shared/proto/dam-service';
-import { ResourceService } from '../../shared/resource/resource.service';
-import { DataService } from '../data.service';
+import {AppConfigModel} from '../../shared/app-config/app-config.model';
+import {AppConfigService} from '../../shared/app-config/app-config.service';
+import {BeaconResponse} from '../../shared/beacon-search/beacon-response.model';
+import {BeaconSearchParams} from '../../shared/beacon-search/beacon-search-params.model';
+import {ResourceBeaconService} from '../../shared/beacon-search/resource-beacon.service';
+import {ImagePlaceholderRetriever} from '../../shared/image-placeholder.service';
+import {dam} from '../../shared/proto/dam-service';
+import {ResourceService} from '../../shared/resource/resource.service';
+import {DataService} from '../data.service';
+import IResourceResults = dam.v1.IResourceResults;
 
 @Component({
   selector: 'ddap-resource-detail',
@@ -91,7 +90,7 @@ export class DataSearchComponent implements OnDestroy, OnInit {
               });
               return this.resourceService.getAccessTokensForAuthorizedResources(damIdResourcePathPairs);
             }),
-            flatMap((resourceTokens: IResourceTokens) => {
+            flatMap((resourceTokens: IResourceResults) => {
               this.requireAuth = false;
               return damIdResourcePathPairs
                 .map((damIdResourcePathPair) => {
@@ -102,7 +101,7 @@ export class DataSearchComponent implements OnDestroy, OnInit {
                   queryParams.damId = damId;
                   queryParams.resource = resourceId;
 
-                  const accessToken = this.resourceService.lookupResourceToken(resourceTokens, resourcePath)['access_token'];
+                  const accessToken = this.resourceService.lookupResourceToken(resourceTokens, resourcePath).credentials['access_token'];
                   return this.beaconService.query(queryParams, accessToken);
                 });
             }),
@@ -136,7 +135,7 @@ export class DataSearchComponent implements OnDestroy, OnInit {
 
   private getUrlForObtainingAccessToken(damIdResourcePathPairs: string[] = []): string {
     const redirectUri = this.getRedirectUrl();
-    return this.resourceService.getUrlForObtainingAccessToken(damIdResourcePathPairs, encodeURIComponent(redirectUri));
+    return this.resourceService.getUrlForObtainingAccessToken(damIdResourcePathPairs, redirectUri);
   }
 
   private getRedirectUrl(): string {

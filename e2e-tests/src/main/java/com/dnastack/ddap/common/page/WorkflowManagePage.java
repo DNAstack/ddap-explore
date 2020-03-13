@@ -119,4 +119,9 @@ public class WorkflowManagePage extends AnyDdapPage {
         new WebDriverWait(driver, 5).until(ExpectedConditions.elementToBeClickable(accessBtn));
         return URI.create(accessBtn.getAttribute("href"));
     }
+
+    public void typeInEditor(By selector, String content) {
+        WebElement element = driver.findElement(selector);
+        element.sendKeys(content);
+    }
 }

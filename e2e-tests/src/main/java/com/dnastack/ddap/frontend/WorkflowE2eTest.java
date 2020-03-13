@@ -55,8 +55,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.selectColumn("bam_file");
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
-        managePage.fillField(DdapBy
-            .se("inp-workflow-wdl"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
+        managePage.typeInEditor(By.cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");

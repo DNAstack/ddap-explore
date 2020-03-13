@@ -117,8 +117,8 @@ wallet/ic as the ultimate IDP but launches many of the initialzation flows (ie f
 views api
 
 Setup for this strategy is environment based but predominately relies on [JSON](#json-configuration-classes) configuration
-specifically using the [DamConfig](src/main/java/com/dnastack/ddap/commmon/setup/DamConfig.java) and
-[WalletConfig](src/main/java/com/dnastack/ddap/commmon/setup/WalletConfig.java). Please see each of those classes respectively
+specifically using the [DamConfig](src/main/java/com/dnastack/ddap/common/setup/DamConfig.java) and
+[WalletConfig](src/main/java/com/dnastack/ddap/common/setup/WalletConfig.java). Please see each of those classes respectively
 for how to setup the config
 
 
@@ -160,7 +160,7 @@ The DAM config strategy is used in the cases where the test need to configure th
 they need to change the `realm` config, seeding the dam with the appropriate resources,claims,trustedsources etc. before running the tests.
 It is NOT meant to be used in ALL cases where there is a DAM, ie if the config the tests are using is externalized.
 
-For all configuration values please see: [DamConfig](src/main/java/com/dnastack/ddap/commmon/setup/DamConfig.java)
+For all configuration values please see: [DamConfig](src/main/java/com/dnastack/ddap/common/setup/DamConfig.java)
 
 **Setup**
 

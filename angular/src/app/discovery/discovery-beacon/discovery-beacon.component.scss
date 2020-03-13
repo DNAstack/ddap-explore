@@ -30,3 +30,23 @@ ddaplib-header ddaplib-header-add-btn {
   left:0; 
   right:0;
 }
+
+.beacon-search-parameters {
+  div {
+    div {
+      font-size: 10px;
+      line-height: 0.8em;
+      font-weight: 400;
+      color: #4f4f4f;
+      text-transform: uppercase;
+    }
+    input {
+      width: 100px;
+      font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
+      border: 0px solid;
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+}

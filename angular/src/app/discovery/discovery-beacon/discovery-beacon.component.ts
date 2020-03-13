@@ -2,13 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AgGridModule } from 'ag-grid-angular';
+import { sample } from 'rxjs/operators';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
-import { DiscoveryConfigService } from '../discovery-config.service';
+import { BeaconRequest, BeaconResponse } from '../beacon-service/beacon.model';
 import { BeaconService } from '../beacon-service/beacon.service';
-import { BeaconResponse, BeaconRequest } from '../beacon-service/beacon.model';
-import { sample } from 'rxjs/operators';
+import { DiscoveryConfigService } from '../discovery-config.service';
 
 @Component({
   selector: 'ddap-discovery-beacon',
@@ -21,6 +21,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   assembly: string;
 
   query: BeaconRequest;
+  lastQuery: BeaconRequest;
 
   beaconResponses: BeaconResponse[];
   cases: any[];
@@ -68,7 +69,7 @@ export class DiscoveryBeaconComponent implements OnInit {
                   domLayout: 'normal',
                   enableStatusBar: true,
                   suppressCellSelection: true,
-                  rowSelection: 'single'
+                  rowSelection: 'single',
                 };
 
                 this.beaconResponses = [];
@@ -96,15 +97,20 @@ export class DiscoveryBeaconComponent implements OnInit {
   doSearch() {
 
     const that = this;
+    const query = this.query;
 
     this.beaconService.searchBeacon(
-        "hCoV-19",
-        "1",
-        this.query.start, 
+        'hCoV-19',
+        '1',
+        this.query.start,
         this.query.referenceBases,
         this.query.alternateBases
       ).then(
       data => {
+
+        that.lastQuery = JSON.parse(JSON.stringify(query));
+
+        that.selectedCase = undefined;
 
         const beaconId = data['beaconId'] as string;
         const request = data['alleleRequest'] as BeaconRequest;
@@ -119,11 +125,11 @@ export class DiscoveryBeaconComponent implements OnInit {
         for (let i = 0; i < info.length; i++) {
 
           const key = info[i].key;
-          const keyTokens = key.split("=");
+          const keyTokens = key.split('=');
           const keyType = keyTokens[0];
 
           const value = info[i].value;
-          const valueTokens = value.split(":");
+          const valueTokens = value.split(':');
 
           const valueDict = {};
 
@@ -131,7 +137,7 @@ export class DiscoveryBeaconComponent implements OnInit {
 
             const valueToken = valueTokens[j];
 
-            const valueTokenTokens = valueToken.split("=");
+            const valueTokenTokens = valueToken.split('=');
             const valueTokenKey = valueTokenTokens[0];
             const valueTokenValue = valueTokenTokens[1];
 
@@ -151,9 +157,9 @@ export class DiscoveryBeaconComponent implements OnInit {
         for (let k = 0; k < caseColumnKeys.length; k++) {
           const keyStr = caseColumnKeys[k];
           caseColumnDefs.push(
-            { 
-              field : keyStr, 
-              headerName : this.titleCase(keyStr.replace(/_/g," ")), 
+            {
+              field : keyStr,
+              headerName : this.titleCase(keyStr.replace(/_/g, ' ')),
             }
           );
         }
@@ -170,17 +176,6 @@ export class DiscoveryBeaconComponent implements OnInit {
     );
   }
 
-  private titleCase(str) {
-    const splitStr = str.toLowerCase().split(' ');
-    for (var i = 0; i < splitStr.length; i++) {
-        // You do not need to check if i is larger than splitStr length, as your for does that for you
-        // Assign it back to the array
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
-    }
-    // Directly return the joined string
-    return splitStr.join(' '); 
- }
- 
  rowDataChanged(event) {
 
   if (!this.gridApi) {
@@ -188,8 +183,8 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   // Set column visibility
-  this.gridColumnApi.setColumnsVisible(["start","ref","alt","type","vep","nuc_completeness"], false);
-  
+  this.gridColumnApi.setColumnsVisible(['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'], false);
+
   // Resize columns
   const allColumnIds = [];
   this.gridColumnApi.getAllColumns().forEach(function(column) {
@@ -203,7 +198,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   onGridReady(params) {
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
-    
+
     if (this.grid.makeFullWidth) {
       params.api.sizeColumnsToFit();
       window.addEventListener('resize', function() {
@@ -218,31 +213,10 @@ export class DiscoveryBeaconComponent implements OnInit {
     this.selectedCase = this.gridApi.getSelectedRows()[0];
   }
 
-  private initialize() {
-    this.query = new BeaconRequest();
-    this.query.start = 9924;
-    this.query.referenceBases = 'C';
-    this.query.alternateBases = 'T';
-  }
-
-  private setQueryParameters() {
-    this.router.navigate(
-      [],
-      {
-        relativeTo: this.route,
-        queryParams: {
-          start : this.query.start,
-          referenceBases: this.query.referenceBases,
-          alternateBases: this.query.alternateBases,
-        },
-        queryParamsHandling: 'merge', // remove to replace all query params by provided
-      });
-  }
-
   navigateToCell(params) {
-    var previousCell = params.previousCellPosition;
+    let previousCell = params.previousCellPosition;
     const suggestedNextCell = params.nextCellPosition;
-    
+
     const KEY_UP = 38;
     const KEY_DOWN = 40;
     const KEY_LEFT = 37;
@@ -271,7 +245,39 @@ export class DiscoveryBeaconComponent implements OnInit {
         case KEY_RIGHT:
             return suggestedNextCell;
         default:
-            throw "this will never happen, navigation is always one of the 4 keys above";
+            throw new Error('this will never happen, navigation is always one of the 4 keys above');
     }
  }
+
+  private titleCase(str) {
+    const splitStr = str.toLowerCase().split(' ');
+    for (let i = 0; i < splitStr.length; i++) {
+        // You do not need to check if i is larger than splitStr length, as your for does that for you
+        // Assign it back to the array
+        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+    }
+    // Directly return the joined string
+    return splitStr.join(' ');
+ }
+
+  private initialize() {
+    this.query = new BeaconRequest();
+    this.query.start = 3840;
+    this.query.referenceBases = 'A';
+    this.query.alternateBases = 'G';
+  }
+
+  private setQueryParameters() {
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.route,
+        queryParams: {
+          start : this.query.start,
+          referenceBases: this.query.referenceBases,
+          alternateBases: this.query.alternateBases,
+        },
+        queryParamsHandling: 'merge', // remove to replace all query params by provided
+      });
+  }
 }

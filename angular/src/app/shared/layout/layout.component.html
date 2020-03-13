@@ -4,8 +4,8 @@
     [realmActions]="['edit']"
     (realmChangeAcknowledge)="onAcknowledge($event)">
     <ddaplib-menu-apps [accessibleApps]="viewController.getAccessibleApps()"
-                       [realmId]="viewController.getRealmId()"
-                       *ngIf="viewController.getAccessibleApps().length > 1">
+      [realmId]="viewController.getRealmId()"
+      *ngIf="viewController.getAccessibleApps().length > 1">
       <ng-container *ngIf="appConfig.featureAdministrationEnabled">
         <div class="app-menu-section-title">Administration</div>
         <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">
@@ -44,10 +44,10 @@
   </ddaplib-main-header>
 
   <mat-progress-bar *ngIf="loader.progress$ | async"
-  mode="determinate"
-  color="accent"
-  [value]="loader.progress$ | async"
-  data-se="main-progress-bar">
+    mode="determinate"
+    color="accent"
+    [value]="loader.progress$ | async"
+    data-se="main-progress-bar">
   </mat-progress-bar>
 
   <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
@@ -57,7 +57,7 @@
     <mat-sidenav
       position="start"
       mode="side"
-      [opened]="true"
+      [opened]="viewController.getAppSubmodules(viewController.getCurrentApp()).length > 1"
     >
       <app-sidenav-left></app-sidenav-left>
     </mat-sidenav>

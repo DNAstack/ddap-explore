@@ -2,13 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AgGridModule } from 'ag-grid-angular';
-import { sample } from 'rxjs/operators';
+
+import { tap, map, switchMap } from 'rxjs/operators';
+import { of, from } from 'rxjs';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { BeaconRequest, BeaconResponse } from '../beacon-service/beacon.model';
 import { BeaconService } from '../beacon-service/beacon.service';
 import { DiscoveryConfigService } from '../discovery-config.service';
+import { MapsAPILoader, Geocoder } from '@agm/core';
+import { Observable } from 'rxjs';
+import { SimpleLocation } from './location.model';
+import { threadId } from 'worker_threads';
 
 @Component({
   selector: 'ddap-discovery-beacon',
@@ -27,13 +33,21 @@ export class DiscoveryBeaconComponent implements OnInit {
   cases: any[];
   caseColumnDefs: any;
   selectedCase: any;
+  selectedCaseLocation: SimpleLocation;
   sample: any;
+
+  geocoder: Geocoder;
+
+  zoom = 4;
 
   view: {
     isSearching: boolean,
     errorSearching: boolean,
     wrapTableContent: boolean,
-    showQuery: boolean
+    showQuery: boolean,
+    isGeocoding: boolean,
+    errorGeocoding: boolean,
+    isLocation: boolean
   };
 
   grid: any;
@@ -47,14 +61,18 @@ export class DiscoveryBeaconComponent implements OnInit {
               private appConfigService: AppConfigService,
               private configService: DiscoveryConfigService,
               private beaconService: BeaconService,
-              private route: ActivatedRoute
+              private route: ActivatedRoute,
+              private mapLoader: MapsAPILoader
               ) {
 
                 this.beaconService.setApiUrl(this.configService.getBeaconApiUrl());
 
                 this.cases = [];
 
+                this.onSelectionChanged = this.onSelectionChanged.bind(this);
                 this.navigateToCell = this.navigateToCell.bind(this);
+
+                this.selectedCaseLocation = { lat: 0, lng: 0}
 
                 this.grid = {
                   animateRows: false,
@@ -79,6 +97,9 @@ export class DiscoveryBeaconComponent implements OnInit {
                   errorSearching : false,
                   wrapTableContent : false,
                   showQuery: true,
+                  isGeocoding: false,
+                  errorGeocoding: false,
+                  isLocation: true
                 };
   }
 
@@ -92,6 +113,46 @@ export class DiscoveryBeaconComponent implements OnInit {
         this.router.navigate(['/']);
       }
     });
+  }
+
+  geocodeAddress(location: string): Observable<SimpleLocation> {
+    console.log('Geocoding ' + location);
+    
+    return <Observable<SimpleLocation>> this.waitForMapsToLoad().pipe(
+      switchMap(() => {
+        return new Observable(observer => {
+          this.geocoder.geocode({'address': location}, (results, status) => {
+            if (status == google.maps.GeocoderStatus.OK) {
+              console.log('Geocoding complete!');
+              observer.next({
+                lat: results[0].geometry.location.lat(), 
+                lng: results[0].geometry.location.lng()
+              });
+            } else {
+                console.log('Error - ', results, ' & Status - ', status);
+                observer.next(null);
+            }
+            observer.complete();
+          });
+        })        
+      })
+    )
+  }
+
+  private initGeocoder() {
+    console.log('Init geocoder!');
+    this.geocoder = new google.maps.Geocoder();
+  }
+
+  private waitForMapsToLoad(): Observable<boolean> {
+    if(!this.geocoder) {
+      return from(this.mapLoader.load())
+      .pipe(
+        tap(() => this.initGeocoder()),
+        map(() => true)
+      );
+    }
+    return of(true);
   }
 
   doSearch() {
@@ -211,6 +272,28 @@ export class DiscoveryBeaconComponent implements OnInit {
 
   onSelectionChanged() {
     this.selectedCase = this.gridApi.getSelectedRows()[0];
+
+    const that = this;
+
+    if (this.selectedCase['Location']) {
+      that.view.isGeocoding = true;
+      that.view.errorGeocoding = false;
+      that.view.isLocation = true;
+      this.geocodeAddress(this.selectedCase['Location']).subscribe({
+        next(location) {
+          console.log(location);
+          that.selectedCaseLocation = location;
+        },
+        error(msg) {
+          that.view.errorGeocoding = true;
+          that.selectedCaseLocation = { lat: 0, lng: 0 };
+          console.log('Error getting Location: ', msg);
+        }
+      });
+    } else {
+      that.view.isLocation = false;
+      this.selectedCaseLocation = { lat: 0, lng: 0 };
+    }
   }
 
   navigateToCell(params) {

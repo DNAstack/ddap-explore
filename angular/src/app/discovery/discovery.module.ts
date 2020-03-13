@@ -8,6 +8,7 @@ import { DiscoveryRoutingModule } from './discovery-routing.module';
 import { DiscoverySearchComponent } from './discovery-search/discovery-search.component';
 import { DiscoveryBeaconComponent } from './discovery-beacon/discovery-beacon.component';
 import { KeyValuePairComponent } from './ui-components/key-value-pair/key-value-pair.component';
+import { AgmCoreModule } from '@agm/core';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,9 @@ import { KeyValuePairComponent } from './ui-components/key-value-pair/key-value-
       DiscoveryRoutingModule,
       MatToolbarModule,
       AgGridModule.withComponents([]),
+      AgmCoreModule.forRoot({
+        apiKey: 'AIzaSyBzofbWCwf9myxQpZTME0TcyccBDdhSg88'
+      })
     ],
 })
 export class DiscoveryModule { }

@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.fail;
 
 import com.dnastack.ddap.common.setup.ConfigStrategy;
 import com.dnastack.ddap.common.setup.LoginStrategy;
@@ -29,15 +30,15 @@ import org.junit.BeforeClass;
 @Slf4j
 public abstract class AbstractBaseE2eTest {
 
-    public static final String DDAP_E2E_TEST_MODE = EnvUtil.optionalEnv("E2E_TEST_MODE", "normal");
     public static final String DDAP_BASE_URL = EnvUtil.requiredEnv("E2E_BASE_URI");
+    public static final String REALM = EnvUtil.requiredEnv("E2E_TEST_REALM");
     public static final String DDAP_USERNAME = EnvUtil.optionalEnv("E2E_BASIC_USERNAME", null);
     public static final String DDAP_PASSWORD = EnvUtil.optionalEnv("E2E_BASIC_PASSWORD", null);
     public static final String DDAP_COOKIES_ENCRYPTOR_PASSWORD = EnvUtil
         .optionalEnv("E2E_COOKIES_ENCRYPTOR_PASSWORD", "abcdefghijk");
     public static final String DDAP_COOKIES_ENCRYPTOR_SALT = EnvUtil
         .optionalEnv("E2E_COOKIES_ENCRYPTOR_SALT", "598953e322");
-    public static final String REALM = EnvUtil.requiredEnv("E2E_TEST_REALM");
+    public static final String DDAP_E2E_TEST_MODE = EnvUtil.optionalEnv("E2E_TEST_MODE", "normal");
 
     protected static LoginStrategy loginStrategy;
     protected static ConfigStrategy configStrategy;
@@ -53,6 +54,7 @@ public abstract class AbstractBaseE2eTest {
             configStrategy = StrategyFactory.getConfigStrategy();
         } catch (Exception e){
             log.error(e.getMessage(),e);
+            fail(e.getMessage());
         }
         setupRestassured();
     }
@@ -67,7 +69,6 @@ public abstract class AbstractBaseE2eTest {
                 }
             ));
     }
-
 
     @Before
     public void setUp() {

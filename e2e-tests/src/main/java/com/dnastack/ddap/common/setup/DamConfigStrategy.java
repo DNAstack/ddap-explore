@@ -5,10 +5,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.fail;
 
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
 import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.util.EnvUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import dam.v1.DamService;
@@ -48,7 +51,7 @@ public class DamConfigStrategy implements ConfigStrategy {
 
     protected void setupRealmConfig() throws IOException {
         DamService.DamConfig.Builder damConfigBuilder = DamService.DamConfig.newBuilder();
-        String damRealmJson = damConfig.getDamRealmJsonAsString();
+        String damRealmJson = getDamRealmJsonAsString();
         validateProtoBuf(damRealmJson, damConfigBuilder);
 
         /*
@@ -59,7 +62,7 @@ public class DamConfigStrategy implements ConfigStrategy {
         final CookieStore cookieStore = StrategyFactory.getLoginStrategy()
             .performPersonaLogin(TestingPersona.ADMINISTRATOR.getId(), "master");
 
-        damRealmJson = appendMaterRealmClientsToExistingClientsInConfig(cookieStore,damRealmJson);
+        damRealmJson = appendMaterRealmClientsToExistingClientsInConfig(cookieStore, damRealmJson);
 
         final String modificationPayload = format("{ \"item\": %s }", damRealmJson);
 
@@ -118,6 +121,17 @@ public class DamConfigStrategy implements ConfigStrategy {
         } catch (Exception e) {
             throw new IllegalStateException("Failed to parse proto", e);
         }
+    }
+
+    private String getDamRealmJsonAsString() {
+        ObjectMapper mapper = new ObjectMapper();
+        String realmJsonString = null;
+        try {
+            realmJsonString = mapper.writeValueAsString(damConfig.getDamRealmJson());
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+        return realmJsonString;
     }
 
 

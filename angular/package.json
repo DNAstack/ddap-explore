@@ -43,6 +43,8 @@
     "ngx-chips": "^2.0.2",
     "ngx-clipboard": "^12.2.0",
     "ngx-webstorage-service": "^4.1.0",
+    "@materia-ui/ngx-monaco-editor": "4.0.1",
+    "monaco-editor": "~0.18.1",
     "rxjs": "~6.5.3",
     "showdown": "^1.9.1",
     "tslib": "^1.10.0",

@@ -1,12 +1,15 @@
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 import { NgJsonEditorModule } from 'ang-jsoneditor';
 import { MaterialDesignFrameworkModule } from 'angular7-json-schema-form';
 
 import { SharedModule } from '../shared/shared.module';
 
 import { RegisteredWorkflowListComponent } from './registered-workflow-list/registered-workflow-list.component';
+import { TrsBrowserComponent } from './registered-workflow-list/trs-browser/trs-browser.component';
+import { TrsDescriptorComponent } from './registered-workflow-list/trs-descriptor/trs-descriptor.component';
 import { WorkflowDetailComponent } from './workflow-detail/workflow-detail.component';
 import { DatasetResultsComponent } from './workflow-execution-form/dataset-selection-step/dataset-results/dataset-results.component';
 import { DatasetSelectionStepComponent } from './workflow-execution-form/dataset-selection-step/dataset-selection-step.component';
@@ -39,14 +42,21 @@ import { WorkflowsRoutingModule } from './workflows-routing.module';
     ResourceAuthorizationStepComponent,
     WorkflowExecutionStepComponent,
     RegisteredWorkflowListComponent,
+    TrsBrowserComponent,
+    TrsDescriptorComponent,
   ],
-    imports: [
-      SharedModule,
-      NgJsonEditorModule,
-      FlexLayoutModule,
-      MaterialDesignFrameworkModule,
-      WorkflowsRoutingModule,
-      MatStepperModule,
-    ],
+  imports: [
+    SharedModule,
+    NgJsonEditorModule,
+    FlexLayoutModule,
+    MaterialDesignFrameworkModule,
+    WorkflowsRoutingModule,
+    MatStepperModule,
+    MonacoEditorModule,
+  ],
+  entryComponents: [
+    TrsDescriptorComponent,
+  ],
 })
-export class WorkflowsModule { }
+export class WorkflowsModule {
+}

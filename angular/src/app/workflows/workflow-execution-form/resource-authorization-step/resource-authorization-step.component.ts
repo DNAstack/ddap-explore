@@ -1,10 +1,10 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
-import {Router} from '@angular/router';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Router } from '@angular/router';
+import { flatten } from 'ddap-common-lib';
 
-import {ResourceService} from '../../../shared/resource/resource.service';
-import {DatasetService} from '../dataset.service';
-import {WorkflowsStateService} from '../workflows-state.service';
-import {flatten} from "ddap-common-lib";
+import { ResourceService } from '../../../shared/resource/resource.service';
+import { DatasetService } from '../dataset.service';
+import { WorkflowsStateService } from '../workflows-state.service';
 
 
 @Component({
@@ -44,6 +44,10 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
     const columnData: string[] = this.extractColumnData(this.selectedRows, this.selectedColumns);
     this.datasetService.getViews(columnData)
       .subscribe((views: { [p: string]: string[] }) => {
+        if (Object.values(views).length === 0) {
+          console.warn('No views associated to the selected columns');
+          return;
+        }
         const resourcePaths: string[] = Object.values(views).reduce((l, r) => l.concat(r));
         this.workflowsStateService.storeMetaInfoForWorkflow(this.workflowId, {
           columnDataMappedToViews: views,
@@ -66,9 +70,11 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
 
   private getRedirectUrl(): string {
     let currentUrl = this.router.url;
+
     if (currentUrl.includes('?state=')) {
       currentUrl = currentUrl.split('?')[0];
     }
+
     return `${currentUrl}?state=${this.workflowId}`;
   }
 

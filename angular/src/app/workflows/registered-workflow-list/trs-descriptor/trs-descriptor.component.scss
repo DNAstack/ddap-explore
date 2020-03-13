@@ -1,0 +1,58 @@
+@import '~ddap-common-lib/styles/modules/colors';
+
+.code-editor-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.code-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.code-action-divider {
+  background-color: $color-grey-light;
+  width: 1px;
+  height: 2.5rem;
+  margin: 0 5px;
+}
+
+.code-editor-feedback {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    color: $warn-font-color-alert;
+    background-color: $warn-background-color-alert;
+
+    & > mat-icon:first-child {
+      margin-right: 1rem;
+    }
+  }
+}
+
+.code-editor {
+  border: 1px solid $color-grey-light;
+
+  ngx-monaco-editor {
+    width: 100%;
+    height: 80vh;
+  }
+}
+
+.code-editor-feedback + .code-editor {
+  ngx-monaco-editor {
+    height: 75vh;
+  }
+}

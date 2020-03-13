@@ -1,96 +1,14 @@
 <ddaplib-header iconName="bubble_chart" label="Registry"></ddaplib-header>
 
 <ddaplib-main class="fixed">
-  <div class="section-header">
-    <div class="list-paginator">
-      <button mat-icon-button
-              type="button"
-              [disabled]="this.updateInProgress || pageIndex === 0"
-              (click)="onPagerClick(-1)">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <button mat-icon-button
-              type="button"
-              [disabled]="updateInProgress || pageIndex + 1 === getTotalPageNumber()"
-              (click)="onPagerClick(+1)">
-        <mat-icon>arrow_forward</mat-icon>
-      </button>
-    </div>
-    <mat-form-field appearance="standard" class="filter-input">
-      <mat-label>Filter by tool name and/or author</mat-label>
-      <input matInput
-             #filter
-             type="text"
-             (keyup)="onFilterUpdate(filter.value)"
-             [disabled]="updateInProgress"
-             value="{{ filterTerm }}"/>
-    </mat-form-field>
-    <div class="action" *ngIf="filter.value">
-      <button mat-icon-button
-              type="reset"
-              color="warn"
-              title="Clear the filter"
-              (click)="onFilterResetClick()"
-              [disabled]="updateInProgress"><mat-icon>clear</mat-icon></button>
-    </div>
-    <div class="action">
-      <button mat-icon-button
-              type="button"
-              color="primary"
-              title="Refresh"
-              (click)="onFilterRefreshClick()"
-              [disabled]="updateInProgress"><mat-icon>refresh</mat-icon></button>
-    </div>
-  </div>
-
-  <ng-container *ngIf="tools && tools.length == 0">
-    No workflow registered
-  </ng-container>
-
-  <mat-accordion>
-    <mat-expansion-panel *ngFor="let tool of (filteredTools || []).slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)" class="workflow" (expandedChange)="onToolDetailExpandChange()">
-      <mat-expansion-panel-header>
-        <mat-panel-title><span>{{ tool.toolname }}</span></mat-panel-title>
-        <mat-panel-description><span>{{ tool.author || tool.organization }}</span></mat-panel-description>
-      </mat-expansion-panel-header>
-
-      <!-- When there is NO tool selected... -->
-      <div class="content" *ngIf="!selectedTool">
-        <div class="actions">
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="onRunClick(tool)"
-          >Run</button>
-        </div>
-        <div class="description" [innerHTML]="(tool.description || '*No description*') | markdown"></div>
-      </div>
-
-      <!-- When there is a tool SELECTED... -->
-      <div class="version-selector" *ngIf="selectedTool">
-        <h3 class="label">Please select one version</h3>
-        <div class="version-list" *ngIf="tool.versions">
-          <div class="version" *ngFor="let version of tool.versions">
-            <div class="name">
-              {{version.name}}
-              <mat-icon *ngIf="version.verified">check</mat-icon>
-            </div>
-            <div class="meta-version">{{version.meta_version}}</div>
-            <ul class="descriptor-type-list">
-              <li *ngFor="let descriptor_type of version.descriptor_type">
-                <button mat-raised-button
-                        (click)="onVersionSelectionSelectClick(version, descriptor_type)">
-                  {{ descriptor_type }}
-                </button>
-              </li>
-            </ul>
-          </div>
-          <a class="cancel-button"
-             (click)="onVersionSelectionCancelClick()">
-            <mat-icon>cancel</mat-icon> <span>Cancel</span>
-          </a>
-        </div>
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
+  <mat-tab-group>
+    <mat-tab label="Public" *ngIf="publicBrowserConfig">
+      <ddap-trs-browser [config]="publicBrowserConfig"></ddap-trs-browser>
+    </mat-tab>
+    <!--
+    <mat-tab label="Private">
+      <p>Currently not available</p>
+    </mat-tab>
+    -->
+  </mat-tab-group>
 </ddaplib-main>

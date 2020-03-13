@@ -15,6 +15,7 @@ ui:
   feature-realm-input-enabled: true
   feature-administration-enabled: true
   feature-explore-data-enabled: true
+  feature-discovery-enabled: true
   feature-beacons-enabled: true
   feature-workflows-enabled: true
   feature-workflows-trs-integration-enabled: false

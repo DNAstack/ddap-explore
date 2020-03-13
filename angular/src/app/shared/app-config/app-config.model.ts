@@ -8,6 +8,7 @@ export interface AppConfigModel {
   featureAdministrationEnabled: boolean;
   featureExploreDataEnabled: boolean;
   featureBeaconsEnabled: boolean;
+  featureDiscoveryEnabled: boolean;
   featureWorkflowsEnabled: boolean;
   featureWorkflowsTrsIntegrationEnabled: boolean; // deprecated/obsolete
   trsBaseUrl: string;

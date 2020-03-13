@@ -1,0 +1,93 @@
+<mat-toolbar class="tertiary-toolbar" style="height: 64px; position:absolute; top: 0;">
+                    <mat-toolbar-row>
+                        <div class="m-r">Beacon</div>
+                        <div style="display: flex; flex-direction: column;">
+                          <div style="font-size: 10px; line-height: 1em" class="text-muted">Position</div>
+                          <input matInput name="position" [(ngModel)]="query.start">
+                        </div>
+                        <div style="display: flex; flex-direction: column;">
+                          <div style="font-size: 10px; line-height: 1em" class="text-muted">Reference</div>
+                          <input matInput name="reference" [(ngModel)]="query.referenceBases">
+                        </div>
+                        <div style="display: flex; flex-direction: column;">
+                          <div style="font-size: 10px; line-height: 1em" class="text-muted">Alternate</div>
+                          <input matInput name="alternate" [(ngModel)]="query.alternateBases">
+                        </div>
+                        <button (click)="doSearch()" mat-stroked-button color="accent">
+                          Search
+                        </button>
+                        <span class="fill-space"></span>
+                        <mat-chip-list class="m-r-sm">
+                          <mat-chip>{{cases.length}} Sequences</mat-chip>
+                      </mat-chip-list>
+                      <button (click)="drawer.toggle()" mat-icon-button color="accent">
+                        <mat-icon>info</mat-icon>
+                      </button>
+                    </mat-toolbar-row>
+                </mat-toolbar>
+<ddaplib-main style="padding:0; top:64px">
+  <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
+          <mat-drawer #drawer mode="side" position="end" [(opened)]="view.showQuery" style="min-width:400px; max-width:400px">
+              <mat-toolbar class="tertiary-toolbar"
+                  style="height: 64px; position:absolute; top: 0;">
+                  <mat-toolbar-row>
+                      <div>Details</div>
+                      <span class="fill-space"></span>
+                      <button tabindex="-1" mat-icon-button (click)="drawer.toggle()" matTooltip="Close Details">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                  </mat-toolbar-row>
+              </mat-toolbar>
+              <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
+                  <mat-progress-bar *ngIf="view.isSearching" mode="indeterminate" color="accent"></mat-progress-bar>
+                  <div style="flex:1; height:100%;" class="p-a">
+                    <div class="sample-details-list" *ngIf="selectedCase">
+                      <ddap-key-value-pair key="Source" *ngIf="selectedCase.source"  value="{{selectedCase.source}}"></key-value-pair>
+                      <!--<ddap-key-value-pair key="start" *ngIf="selectedCase.start"  value="{{selectedCase.start}}"></key-value-pair>
+                      <ddap-key-value-pair key="ref" *ngIf="selectedCase.ref"  value="{{selectedCase.ref}}"></key-value-pair>
+                      <ddap-key-value-pair key="alt" *ngIf="selectedCase.alt"  value="{{selectedCase.alt}}"></key-value-pair>
+                      <ddap-key-value-pair key="type" *ngIf="selectedCase.type"  value="{{selectedCase.type}}"></key-value-pair>
+                      <ddap-key-value-pair key="vep" *ngIf="selectedCase.vep"  value="{{selectedCase.vep}}"></key-value-pair>-->
+                      <ddap-key-value-pair key="Accession ID" *ngIf="selectedCase.Accession_ID"  value="{{selectedCase.Accession_ID}}"></key-value-pair>
+                      <ddap-key-value-pair key="Data Source" *ngIf="selectedCase.Data_Source"  value="{{selectedCase.Data_Source}}"></key-value-pair>
+                      <ddap-key-value-pair key="Nuc Completeness" *ngIf="selectedCase.Nuc_Completeness"  value="{{selectedCase.Nuc_Completeness}}"></key-value-pair>
+                      <ddap-key-value-pair key="Host" *ngIf="selectedCase.Host"  value="{{selectedCase.Host}}"></key-value-pair>
+                      <ddap-key-value-pair key="Sample Collection Date" *ngIf="selectedCase.Sample_Collection_Date"  value="{{selectedCase.Sample_Collection_Date}}"></key-value-pair>
+                      <ddap-key-value-pair key="Location" *ngIf="selectedCase.Location"  value="{{selectedCase.Location}}"></key-value-pair>
+                      <ddap-key-value-pair key="Originating Lab" *ngIf="selectedCase.Originating_Lab"  value="{{selectedCase.Originating_Lab}}"></key-value-pair>
+                      <ddap-key-value-pair key="Submission Date" *ngIf="selectedCase.Submission_Date"  value="{{selectedCase.Submission_Date}}"></key-value-pair>
+                      <ddap-key-value-pair key="Submitting Lab" *ngIf="selectedCase.Submitting_Lab"  value="{{selectedCase.Submitting_Lab}}"></key-value-pair>
+                    </div>
+                  </div>
+              </div>
+          </mat-drawer>
+          <mat-drawer-content>
+            <cover-message *ngIf="cases.length == 0" style="flex-grow: 1" message="No Results" icon="error_outline"></cover-message>
+            <div [hidden]="cases.length == 0" style="flex-grow: 1; height: 100%">
+              <div class="full-hw p-a">
+                <ag-grid-angular
+                    style="width: 100%; height: 100%;"
+                    #agGrid
+                    class="ag-theme-balham"
+                    [defaultColDef]="grid.defaultColumnDefinition"
+                    [multiSortKey]="grid.multiSortKey"
+                    [animateRows]="grid.animateRows"
+                    [pagination]="grid.pagination"
+                    [floatingFilter]="grid.floatingFilter"
+                    [suppressCellSelection]="grid.suppressCellSelection"
+                    [(rowData)]="cases"
+                    [enableCellTextSelection]="true"
+                    [(columnDefs)]="caseColumnDefs"
+                    [domLayout]="grid.domLayout"
+                    [navigateToNextCell]="navigateToCell"
+                    [rowSelection]="grid.rowSelection"
+                    (gridReady)="onGridReady($event)"
+                    (rowDataChanged)="rowDataChanged($event)"
+                    (selectionChanged)="onSelectionChanged($event)"
+                    >
+                </ag-grid-angular>
+              </div>
+            </div>
+          </mat-drawer-content>
+  </mat-drawer-container>
+</ddaplib-main>

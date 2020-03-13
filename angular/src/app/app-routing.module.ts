@@ -37,6 +37,11 @@ const routes: Routes = [
         loadChildren: () => import('./beacon/beacon.module')
           .then(mod => mod.BeaconModule),
       },
+      {
+        path: 'discovery',
+        loadChildren: () => import('./discovery/discovery.module')
+          .then(mod => mod.DiscoveryModule),
+      },
     ],
   },
 ];

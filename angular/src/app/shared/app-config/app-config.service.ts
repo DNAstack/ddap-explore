@@ -85,6 +85,7 @@ export class AppConfigService {
       featureAdministrationEnabled: true,
       featureExploreDataEnabled: true,
       featureBeaconsEnabled: true,
+      featureDiscoveryEnabled: true,
       featureWorkflowsEnabled: true,
       featureWorkflowsTrsIntegrationEnabled: true,
       trsBaseUrl: null,
@@ -156,27 +157,27 @@ export class AppConfigService {
       });
       this.viewController
       .registerModule({
-        key: 'beacon',
-        name: 'Beacon',
+        key: 'discovery',
+        name: 'Discovery',
         iconClasses: 'icon icon-explore',
-        requiredFeatureFlags: ['featureBeaconsEnabled'],
-        routerLink: 'beacon',
+        requiredFeatureFlags: ['featureDiscoveryEnabled'],
+        routerLink: 'discovery',
         isApp: true,
       })
       .registerModule({
-        key: 'network',
-        name: 'Network',
+        key: 'beacon',
+        name: 'Beacon',
         iconName: 'wifi_tethering',
-        routerLink: 'beacon/network',
-        parentKey: 'beacon',
+        routerLink: 'discovery/beacon',
+        parentKey: 'discovery',
         isApp: false,
       })
       .registerModule({
         key: 'search',
         name: 'Search',
         iconName: 'search',
-        routerLink: 'beacon/search',
-        parentKey: 'beacon',
+        routerLink: 'discovery/search',
+        parentKey: 'discovery',
         isApp: false,
       });
     this.viewController

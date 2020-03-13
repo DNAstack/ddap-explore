@@ -17,10 +17,8 @@ import {TrsService} from '../trs-v2/trs.service';
 import {ResourceAuthorizationStepComponent} 
   from '../workflow-execution-form/resource-authorization-step/resource-authorization-step.component';
 import {WdlSelectionStepComponent} from '../workflow-execution-form/wdl-selection-step/wdl-selection-step.component';
-import {WesServerSelectionStepComponent} 
-  from '../workflow-execution-form/wes-server-selection-step/wes-server-selection-step.component';
-import {WorkflowExecutionStepComponent} 
-  from '../workflow-execution-form/workflow-execution-step/workflow-execution-step.component';
+import {WesServerSelectionStepComponent} from '../workflow-execution-form/wes-server-selection-step/wes-server-selection-step.component';
+import {WorkflowExecutionStepComponent} from '../workflow-execution-form/workflow-execution-step/workflow-execution-step.component';
 import {WorkflowExecution} from '../workflow-execution-form/workflow-execution-step/workflow-execution.model';
 import {WorkflowFormBuilder} from '../workflow-execution-form/workflow-form-builder.service';
 import {WorkflowsStateService} from '../workflow-execution-form/workflows-state.service';

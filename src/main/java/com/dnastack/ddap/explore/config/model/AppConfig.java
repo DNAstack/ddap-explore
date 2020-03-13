@@ -17,6 +17,7 @@ public class AppConfig {
     private boolean featureRealmInputEnabled;
     private boolean featureAdministrationEnabled;
     private boolean featureExploreDataEnabled;
+    private boolean featureDiscoveryEnabled;
     private boolean featureWorkflowsEnabled;
     private boolean featureBeaconsEnabled;
     private boolean featureWorkflowsTrsIntegrationEnabled;

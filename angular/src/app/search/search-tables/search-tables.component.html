@@ -1,0 +1,55 @@
+<ddaplib-header icon="search" label="Search"></ddaplib-header>
+<ddaplib-main>
+  <mat-drawer-container style="height:100%" [autosize]="true">
+    <mat-drawer mode="side" opened style="min-width:400px; max-width:400px">
+      <mat-toolbar class="tertiary-toolbar"
+                   style="height: 64px; position:absolute; top: 0;">
+        <mat-toolbar-row>
+          <div>Tables</div>
+          <span class="fill-space"></span>
+          <button tabindex="-1" mat-icon-button (click)="refreshBeacons()" matTooltip="Refresh Tables">
+            <mat-icon>refresh</mat-icon>
+          </button>
+          <button tabindex="-1" mat-icon-button (click)="closeTables()" matTooltip="Close Tables">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-toolbar-row>
+      </mat-toolbar>
+      <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
+        <ng-container style="flex:1; height:100%;" *ngIf="searchTables.length > 0">
+          <mat-accordion>
+            <mat-expansion-panel *ngFor="let table of searchTables; index as j;" tabindex="-1">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon class="m-r-sm">web_asset</mat-icon>{{table.name}}
+                </mat-panel-title>
+                <mat-panel-description>
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <div class="m-b">
+                <div class="h4 m-b-sm">Table</div>
+                <a (click)="addAtCursor(table.name)" tabindex="-1">
+                  {{table.name}}
+                </a>
+              </div>
+              <div class="h4 m-b-sm">Properties</div>
+              <a tabindex="-1" (click)='addAtCursor("\"" + property.key + "\"")'
+                 *ngFor="let property of table['properties'] | keyvalue : propertyOrder;">
+                <div *ngIf="property.key != 'description'">{{property.key}}</div>
+              </a>
+              <button class="m-t-sm" tabindex="-1" mat-icon-button
+                      (click)="addAtCursor(previewTableQuery(table.name))" matTooltip="Preview Table">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button tabindex="-1" mat-icon-button (click)="viewTableAsJSON(table)"
+                      matTooltip="View Table as JSON" style="display:inline">
+                <mat-icon>launch</mat-icon>
+              </button>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </ng-container>
+      </div>
+    </mat-drawer>
+    <mat-drawer-content>Main Content</mat-drawer-content>
+  </mat-drawer-container>
+</ddaplib-main>

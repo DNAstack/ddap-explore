@@ -85,6 +85,7 @@ export class AppConfigService {
       featureAdministrationEnabled: true,
       featureExploreDataEnabled: true,
       featureWorkflowsEnabled: true,
+      featureSearchEnabled: true,
       featureWorkflowsTrsIntegrationEnabled: true,
       trsBaseUrl: null,
       trsAcceptedToolClasses: [],
@@ -155,5 +156,23 @@ export class AppConfigService {
         isApp: false,
       })
     ;
+
+    this.viewController
+      .registerModule({
+        key: 'search',
+        name: 'Search',
+        iconClasses: 'icon icon-explore',
+        requiredFeatureFlags: ['featureSearchEnabled'],
+        routerLink: 'search',
+        isApp: true,
+      })
+      .registerModule({
+        key: 'search-tables',
+        name: 'Tables',
+        iconClasses: 'icon icon-explore',
+        routerLink: 'search/tables',
+        parentKey: 'search',
+        isApp: false,
+      });
   }
 }

@@ -28,27 +28,32 @@
 </mat-toolbar>
 <ddaplib-main style="padding:0; top:64px">
   <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
-    <mat-drawer #mapDrawer mode="side" position="start" opened="true" style="min-width:400px; max-width:400px">
+    <mat-drawer #mapDrawer mode="side" position="start" opened="false" style="min-width:400px; max-width:400px">
       <mat-toolbar class="tertiary-toolbar"
           style="height: 64px; position:absolute; top: 0;">
           <mat-toolbar-row>
-              <div>Map Location</div>
+              <div>Map</div>
               <span class="fill-space"></span>
               <button tabindex="-1" mat-icon-button (click)="mapDrawer.toggle()" matTooltip="Close Map">
                 <mat-icon>close</mat-icon>
               </button>
           </mat-toolbar-row>
       </mat-toolbar>
-      <div class="full-hw" style="display: flex; flex-direction: column;">
-        <mat-progress-bar *ngIf="view.isGeocoding" mode="indeterminate" color="accent"></mat-progress-bar>
-        <agm-map style="flex:1" [(latitude)]="selectedCaseLocation.lat" [(longitude)]="selectedCaseLocation.lng" [zoom]="selectedCase ? zoom : 2" [usePanning]="true">
-          <agm-marker *ngIf="selectedCase && view.isLocation" [(latitude)]="selectedCaseLocation.lat" [(longitude)]="selectedCaseLocation.lng"></agm-marker>
-        </agm-map>
+      <div class="full-hw" style="display: flex; flex-direction: column; top:64px">
+        <mat-progress-bar style="position:absolute; top:0; z-index: 100;" *ngIf="view.isGeocoding" mode="indeterminate" color="accent"></mat-progress-bar>
+        <cover-message *ngIf="!view.isGeocoding && !(_options.center.latitude != 0 && _options.center.longitude != 0)" style="flex-grow: 1" message="No Location" icon="place"></cover-message>
+        <x-map style="flex:1" #xmap [Options]="_options" *ngIf="!view.isGeocoding && _options.center.latitude != 0 && _options.center.longitude != 0">
+          <x-map-marker 
+          *ngIf="_options.center.latitude != 0 && _options.center.longitude != 0" 
+          [(Latitude)]="_options.center.latitude" 
+          [(Longitude)]="_options.center.longitude">
+        </x-map-marker>
+        </x-map>
       </div>
     </mat-drawer>
     <mat-drawer-content>
       <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
-        <mat-drawer #detailDrawer mode="side" position="end" [(opened)]="view.showQuery" style="min-width:400px; max-width:400px">
+        <mat-drawer #detailDrawer mode="side" position="end" opened="false" style="min-width:400px; max-width:400px">
           <mat-toolbar class="tertiary-toolbar"
               style="height: 64px; position:absolute; top: 0;">
               <mat-toolbar-row>
@@ -61,7 +66,7 @@
           </mat-toolbar>
           <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
               <mat-progress-bar *ngIf="view.isSearching" mode="indeterminate" color="accent"></mat-progress-bar>
-              <cover-message *ngIf="!selectedCase" style="flex-grow: 1" message="No Sequence Selected" icon="error_outline"></cover-message>
+              <cover-message *ngIf="!selectedCase" style="flex-grow: 1" message="No Details" icon="subject"></cover-message>
               <div style="flex:1; height:100%;" *ngIf="selectedCase" class="p-a">
                 <div class="sample-details-list">
                   <ddap-key-value-pair key="Source" *ngIf="selectedCase.source"  value="{{selectedCase.source}}"></ddap-key-value-pair>
@@ -71,6 +76,8 @@
                   <ddap-key-value-pair key="Host" *ngIf="selectedCase.Host"  value="{{selectedCase.Host}}"></ddap-key-value-pair>
                   <ddap-key-value-pair key="Sample Collection Date" *ngIf="selectedCase.Sample_Collection_Date"  value="{{selectedCase.Sample_Collection_Date}}"></ddap-key-value-pair>
                   <ddap-key-value-pair key="Location" *ngIf="selectedCase.Location"  value="{{selectedCase.Location}}"></ddap-key-value-pair>
+                  <ddap-key-value-pair key="Longitude" *ngIf="_options.center.longitude != 0"  value="{{_options.center.longitude }}"></ddap-key-value-pair>
+                  <ddap-key-value-pair key="Latitude" *ngIf="_options.center.latitude != 0"  value="{{_options.center.latitude }}"></ddap-key-value-pair>
                   <ddap-key-value-pair key="Originating Lab" *ngIf="selectedCase.Originating_Lab"  value="{{selectedCase.Originating_Lab}}"></ddap-key-value-pair>
                   <ddap-key-value-pair key="Submission Date" *ngIf="selectedCase.Submission_Date"  value="{{selectedCase.Submission_Date}}"></ddap-key-value-pair>
                   <ddap-key-value-pair key="Submitting Lab" *ngIf="selectedCase.Submitting_Lab"  value="{{selectedCase.Submitting_Lab}}"></ddap-key-value-pair>

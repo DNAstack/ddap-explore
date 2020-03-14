@@ -1,20 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AgGridModule } from 'ag-grid-angular';
-
-import { tap, map, switchMap } from 'rxjs/operators';
-import { of, from } from 'rxjs';
-
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { BeaconRequest, BeaconResponse } from '../beacon-service/beacon.model';
 import { BeaconService } from '../beacon-service/beacon.service';
 import { DiscoveryConfigService } from '../discovery-config.service';
-import { MapsAPILoader, Geocoder } from '@agm/core';
-import { Observable } from 'rxjs';
-import { SimpleLocation } from './location.model';
-import { threadId } from 'worker_threads';
+import { MarkerTypeId, IMapOptions, ILatLong, MapAPILoader } from "angular-maps";
+import { GeocodeService } from './geocode/geocode.service';
 
 @Component({
   selector: 'ddap-discovery-beacon',
@@ -26,6 +18,8 @@ export class DiscoveryBeaconComponent implements OnInit {
   assemblies: string[];
   assembly: string;
 
+  mapLoaded = false;
+
   query: BeaconRequest;
   lastQuery: BeaconRequest;
 
@@ -33,12 +27,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   cases: any[];
   caseColumnDefs: any;
   selectedCase: any;
-  selectedCaseLocation: SimpleLocation;
   sample: any;
-
-  geocoder: Geocoder;
-
-  zoom = 4;
 
   view: {
     isSearching: boolean,
@@ -49,6 +38,8 @@ export class DiscoveryBeaconComponent implements OnInit {
     errorGeocoding: boolean,
     isLocation: boolean
   };
+
+  map: any;
 
   grid: any;
 
@@ -62,7 +53,8 @@ export class DiscoveryBeaconComponent implements OnInit {
               private configService: DiscoveryConfigService,
               private beaconService: BeaconService,
               private route: ActivatedRoute,
-              private mapLoader: MapsAPILoader
+              private geocodeService: GeocodeService,
+              private changeDetector: ChangeDetectorRef
               ) {
 
                 this.beaconService.setApiUrl(this.configService.getBeaconApiUrl());
@@ -72,7 +64,7 @@ export class DiscoveryBeaconComponent implements OnInit {
                 this.onSelectionChanged = this.onSelectionChanged.bind(this);
                 this.navigateToCell = this.navigateToCell.bind(this);
 
-                this.selectedCaseLocation = { lat: 0, lng: 0}
+                this._options.center = { latitude: 0, longitude: 0 }
 
                 this.grid = {
                   animateRows: false,
@@ -103,6 +95,29 @@ export class DiscoveryBeaconComponent implements OnInit {
                 };
   }
 
+  /** Bing map */
+  private _markerTypeId = MarkerTypeId 
+            // a little trick so we can use enums in the template...
+
+       private _options: IMapOptions = {
+            disableBirdseye: true,
+            disableStreetside: true,
+            showCopyright: false,
+            showMapTypeSelector: false,
+            navigationBarMode: 2,
+            mapTypeId: 7,
+            zoom: 4,
+            center: {
+              latitude: 0,
+              longitude: 0
+            }
+       };
+            // for all available options for the various components, see IInfoWindowOptions, IInfoWindowAction, IMarkerOptions, IMapOptions, IMarkerIconInfo
+
+       private _click(){
+           console.log("hello world...");
+       }
+
   ngOnInit(): void {
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
@@ -113,46 +128,6 @@ export class DiscoveryBeaconComponent implements OnInit {
         this.router.navigate(['/']);
       }
     });
-  }
-
-  geocodeAddress(location: string): Observable<SimpleLocation> {
-    console.log('Geocoding ' + location);
-    
-    return <Observable<SimpleLocation>> this.waitForMapsToLoad().pipe(
-      switchMap(() => {
-        return new Observable(observer => {
-          this.geocoder.geocode({'address': location}, (results, status) => {
-            if (status == google.maps.GeocoderStatus.OK) {
-              console.log('Geocoding complete!');
-              observer.next({
-                lat: results[0].geometry.location.lat(), 
-                lng: results[0].geometry.location.lng()
-              });
-            } else {
-                console.log('Error - ', results, ' & Status - ', status);
-                observer.next(null);
-            }
-            observer.complete();
-          });
-        })        
-      })
-    )
-  }
-
-  private initGeocoder() {
-    console.log('Init geocoder!');
-    this.geocoder = new google.maps.Geocoder();
-  }
-
-  private waitForMapsToLoad(): Observable<boolean> {
-    if(!this.geocoder) {
-      return from(this.mapLoader.load())
-      .pipe(
-        tap(() => this.initGeocoder()),
-        map(() => true)
-      );
-    }
-    return of(true);
   }
 
   doSearch() {
@@ -275,25 +250,31 @@ export class DiscoveryBeaconComponent implements OnInit {
 
     const that = this;
 
-    if (this.selectedCase['Location']) {
+    const locationText = this.selectedCase['Location'];
+
+    if (locationText) {
       that.view.isGeocoding = true;
       that.view.errorGeocoding = false;
       that.view.isLocation = true;
-      this.geocodeAddress(this.selectedCase['Location']).subscribe({
-        next(location) {
-          console.log(location);
-          that.selectedCaseLocation = location;
-        },
-        error(msg) {
-          that.view.errorGeocoding = true;
-          that.selectedCaseLocation = { lat: 0, lng: 0 };
-          console.log('Error getting Location: ', msg);
-        }
-      });
+
+      // Geocode
+      that.view.isGeocoding = true;
+      this.geocodeService.geocodeAddress(locationText)
+        .subscribe((location: ILatLong) => {
+            that.setCaseLocaton(location.latitude,location.longitude);
+            this.view.isGeocoding = false;
+            that.changeDetector.detectChanges();
+          }      
+        );
+      
     } else {
       that.view.isLocation = false;
-      this.selectedCaseLocation = { lat: 0, lng: 0 };
+      that.setCaseLocaton(0,0);
     }
+  }
+
+  setCaseLocaton(lat:number, lng:number) {
+    this._options.center = { latitude: lat, longitude: lng };
   }
 
   navigateToCell(params) {

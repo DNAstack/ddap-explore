@@ -165,10 +165,10 @@ export class AppConfigService {
         isApp: true,
       })
       .registerModule({
-        key: 'beacon',
-        name: 'Beacon',
+        key: 'variants',
+        name: 'Variants',
         iconName: 'wifi_tethering',
-        routerLink: 'discovery/beacon',
+        routerLink: 'discovery/variants',
         parentKey: 'discovery',
         isApp: false,
       })

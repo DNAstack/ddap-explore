@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { DiscoverySearchComponent } from './discovery-search/discovery-search.component';
 import { DiscoveryBeaconComponent } from './discovery-beacon/discovery-beacon.component';
+import { DiscoverySearchComponent } from './discovery-search/discovery-search.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'beacon' },
+  { path: '', redirectTo: 'variants' },
   { path: 'search', component: DiscoverySearchComponent},
-  { path: 'beacon', component: DiscoveryBeaconComponent},
+  { path: 'variants', component: DiscoveryBeaconComponent},
   // { path: 'operations/:damId/views/:viewId/runs/:runId', component: WorkflowDetailComponent},
 ];
 

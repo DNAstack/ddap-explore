@@ -1,22 +1,6 @@
 <mat-toolbar class="tertiary-toolbar" style="height: 64px; position:absolute; top: 0;">
     <mat-toolbar-row>
-        <div class="beacon-search-parameters" style="display: flex; flex-direction: row;">
-          <div style="display: flex; flex-direction: column;">
-              <div>Position</div>
-            <input matInput name="position" [(ngModel)]="query.start">
-          </div>
-          <div style="display: flex; flex-direction: column;">
-            <div>Reference</div>
-            <input matInput name="reference" [(ngModel)]="query.referenceBases">
-          </div>
-          <div style="display: flex; flex-direction: column;">
-            <div>Alternate</div>
-            <input matInput name="alternate" [(ngModel)]="query.alternateBases">
-          </div>
-        </div>
-        <button (click)="doSearch()" mat-stroked-button color="accent">
-          Search
-        </button>
+        <div class="m-r-lg">Variants</div>
         <span class="fill-space"></span>
         <button (click)="mapDrawer.toggle()" mat-icon-button color="{{mapDrawer.opened ? 'accent' : '' }}">
           <mat-icon>map</mat-icon>
@@ -86,15 +70,32 @@
           </div>
         </mat-drawer>
         <mat-drawer-content>
-          <cover-message *ngIf="cases.length == 0" style="flex-grow: 1" message="No Sequences" icon="error_outline"></cover-message>
-          <div [hidden]="cases.length == 0" style="flex-grow: 1; height: 100%">
-            <div class="full-hw p-a" style="display:flex; flex-direction: column;">
+          <div class="full-hw p-a" style="display:flex; flex-direction: column;">
               <div style="display: flex; flex-direction: column; flex: 1">
-                <div style="display:flex" class="m-b" *ngIf="lastQuery">
-                  <div class="h2">{{cases.length}} sequences with {{lastQuery.referenceBases}} » {{lastQuery.alternateBases}} at {{lastQuery.start}}</div>
-                  <span class="fill-space"></span>
+                <div id="beacon-search-parameters"  class="m-b-sm" style="display: flex; flex-direction: row;">
+                    <div style="display: flex; flex-direction: column;">
+                      <div>Position</div>
+                      <input matInput name="position" [(ngModel)]="query.start">
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                      <div>Reference</div>
+                      <input matInput name="reference" [(ngModel)]="query.referenceBases">
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                      <div>Alternate</div>
+                      <input matInput name="alternate" [(ngModel)]="query.alternateBases">
+                    </div>
+                    <button tabindex="-1" mat-icon-button (click)="doSearch()" matTooltip="Search Variant">
+                      <mat-icon>search</mat-icon>
+                    </button>
+                    <span class="fill-space"></span>
                 </div>
+                <div style="display: flex" class="m-b text-muted" *ngIf="lastQuery">
+                  {{cases.length}} sequences  with {{lastQuery.referenceBases}} » {{lastQuery.alternateBases}} at {{lastQuery.start}}
+                </div>
+                <cover-message *ngIf="cases.length == 0" style="flex: 1" message="No Sequences" icon="filter_list"></cover-message>
                 <ag-grid-angular
+                    *ngIf="cases.length > 0" 
                     style="width: 100%; flex: 1;"
                     #agGrid
                     class="ag-theme-balham"
@@ -117,7 +118,6 @@
                 </ag-grid-angular>
               </div>
             </div>
-          </div>
         </mat-drawer-content>
       </mat-drawer-container>
     </mat-drawer-content>

@@ -44,6 +44,6 @@
 <div class="code-editor">
   <ngx-monaco-editor [options]="getEditableConfig()"
                      [(ngModel)]="descriptorContent"
-                     (init)="codeEditorEnhancer.configure('wdl')">
+                     (init)="codeEditorEnhancer.configure({language: 'wdl'})">
   </ngx-monaco-editor>
 </div>

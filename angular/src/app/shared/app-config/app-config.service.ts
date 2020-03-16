@@ -165,6 +165,7 @@ export class AppConfigService {
         requiredFeatureFlags: ['featureSearchEnabled'],
         routerLink: 'search',
         isApp: true,
+        isExperimental: true,
       })
       .registerModule({
         key: 'search-tables',
@@ -173,6 +174,7 @@ export class AppConfigService {
         routerLink: 'search/tables',
         parentKey: 'search',
         isApp: false,
+        isExperimental: true,
       });
   }
 }

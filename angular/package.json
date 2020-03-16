@@ -31,7 +31,7 @@
     "angular7-json-schema-form": "^1.0.4",
     "brace": "^0.11.1",
     "dayjs": "^1.8.16",
-    "ddap-common-lib": "0.0.19-62-ga708267",
+    "ddap-common-lib": "0.0.19-66-gc28abfd",
     "hammerjs": "^2.0.8",
     "jsoneditor": "^7.0.4",
     "lodash.clonedeep": "^4.5.0",
@@ -50,7 +50,8 @@
     "rxjs": "~6.5.3",
     "showdown": "^1.9.1",
     "tslib": "^1.10.0",
-    "zone.js": "~0.9.1"
+    "zone.js": "~0.9.1",
+    "linkifyjs": "latest"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.803.24",

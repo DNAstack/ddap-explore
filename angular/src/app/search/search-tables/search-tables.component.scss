@@ -1,0 +1,22 @@
+.main-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+.search-container {
+  height: 100%;
+}
+
+/*TODO Refactor styles */
+.search-toolbar {
+  height: 64px;
+  position:absolute;
+  top: 0;
+}
+
+.search-drawer {
+  min-width: 400px;
+  max-width: 400px;
+}

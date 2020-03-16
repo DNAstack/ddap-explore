@@ -1,18 +1,17 @@
 package com.dnastack.ddap.explore.search.controller;
 
+import com.dnastack.ddap.common.controller.GlobalExceptionHandler;
 import com.dnastack.ddap.explore.search.client.SearchClient;
 import com.dnastack.ddap.explore.search.model.SearchTablesResponseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -28,8 +27,13 @@ public class SearchController {
 
     @GetMapping("/tables")
     public Mono<SearchTablesResponseModel> getTables(@PathVariable String realm) throws URISyntaxException {
-        log.info("Tables controller method is called");
         URI prestoTablesUri = new URI("https://ga4gh-search-adapter-presto-public.staging.dnastack.com/tables");
         return searchClient.getTables(prestoTablesUri);
+    }
+
+    @PostMapping("/query")
+    public Mono<Object> query(@RequestBody Map<String, String> queryData) throws URISyntaxException {
+        URI prestoSearchUri = new URI("https://ga4gh-search-adapter-presto-public.staging.dnastack.com/search");
+        return searchClient.query(prestoSearchUri, queryData);
     }
 }

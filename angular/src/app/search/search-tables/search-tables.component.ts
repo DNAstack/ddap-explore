@@ -21,7 +21,6 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   searchTables: object[] = [];
   registry: BeaconRegistry;
 
-  query: BeaconQuery;
   private QUERY_EDITOR_DELIMITER = ';';
   private QUERY_EDITOR_NEWLINE = '\n';
 
@@ -34,6 +33,12 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   private search: {
     text: string,
   };
+
+  private query: string;
+  private result: any;
+  private properties: string[];
+  private queryHistory: string[];
+
 
   constructor( private searchService: SearchService,
                private route: ActivatedRoute,
@@ -50,6 +55,8 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
       isSearching : false,
       isRefreshingTables : false,
     };
+
+    this.queryHistory = [];
   }
 
   ngOnInit() {
@@ -182,6 +189,15 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
 
     this.view.isSearching = true;
     this.view.errorQueryingTables = false;
+    this.searchService.search({ 'query' : query }).subscribe(result => {
+      this.query = query;
+      this.result = result;
+      this.view.isSearching = false;
+      this.queryHistory.unshift(query);
+      const schema = result['data_model']['properties'];
+      const properties = Object.keys(schema);
+      this.properties = properties.filter(e => e !== 'description');
+    });
     // this.searchService.search({ 'query' : query }, this.headers).then(
     //   result => {
     //     this.query = query;
@@ -205,30 +221,8 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   queryChanged($event) {
   }
 
-  private initialize() {
-
-    this.query = new BeaconQuery();
-    this.query.chromosome = '1';
-    this.query.position = 1;
-    this.query.allele = 'A';
-    this.query.referenceAllele = 'A';
-
-    // this.selectedRegistryId = this.route.snapshot.queryParamMap.get('network');
-    // this.selectedBeaconId = this.route.snapshot.queryParamMap.get('beacon');
-    //
-    // this.registries = this.beaconConfigService.getRegistries();
-    // if (this.registries.length > 0) {
-    //
-    //   if (this.selectedRegistryId == null || this.selectedBeaconId.length === 0) {
-    //     this.setRegistry(this.registries[0]);
-    //   } else {
-    //     for (let i = 0; i < this.registries.length; i++) {
-    //       if (this.registries[i].id === this.selectedRegistryId) {
-    //         this.setRegistry(this.registries[i]);
-    //       }
-    //     }
-    //   }
-    // }
+  viewResultsJSON() {
+    this.jsonViewerService.viewJSON(this.result);
   }
 
 }

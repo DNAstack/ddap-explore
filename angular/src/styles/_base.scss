@@ -213,12 +213,79 @@ $color-blue-2: (
     )
 );
 
+$color-dnastack: (
+    50 : #e4f0f9,
+    100 : #bbdaef,
+    200 : #8ec2e5,
+    300 : #60a9da,
+    400 : #3e96d2,
+    500 : #1c84ca,
+    600 : #197cc5,
+    700 : #1471bd,
+    800 : #1167b7,
+    900 : #0954ab,
+    A100 : #d7e8ff,
+    A200 : #a4caff,
+    A400 : #71acff,
+    A700 : #589dff,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #000000,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #000000,
+    )
+);
+
+
+$color-azure: (
+    50 : #e5eff9,
+    100 : #bfd7f0,
+    200 : #94bce6,
+    300 : #69a1dc,
+    400 : #498dd5,
+    500 : #2979cd,
+    600 : #2471c8,
+    700 : #1f66c1,
+    800 : #195cba,
+    900 : #0f49ae,
+    A100 : #dde8ff,
+    A200 : #aac5ff,
+    A400 : #77a3ff,
+    A700 : #5d92ff,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #000000,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #000000,
+    )
+);
+
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$app-primary: mat-palette($color-blue);
-$app-accent:  mat-palette($color-blue);
+$app-primary: mat-palette($color-dnastack);
+$app-accent:  mat-palette($color-dnastack);
 
 // The warn palette is optional (defaults to red).
 $app-warn:    mat-palette($mat-red);

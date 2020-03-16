@@ -16,6 +16,7 @@ public class AppConfig {
     private boolean sidebarEnabled;
     private boolean featureRealmInputEnabled;
     private boolean featureAdministrationEnabled;
+    private boolean featureTermsEnabled;
     private boolean featureExploreDataEnabled;
     private boolean featureDiscoveryEnabled;
     private boolean featureWorkflowsEnabled;

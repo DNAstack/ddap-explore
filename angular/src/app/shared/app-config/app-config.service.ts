@@ -83,6 +83,7 @@ export class AppConfigService {
       sidebarEnabled: true,
       featureRealmInputEnabled: true,
       featureAdministrationEnabled: true,
+      featureTermsEnabled: true,
       featureExploreDataEnabled: true,
       featureBeaconsEnabled: true,
       featureDiscoveryEnabled: true,

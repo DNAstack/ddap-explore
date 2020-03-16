@@ -14,6 +14,7 @@ ui:
   sidebar-enabled: true
   feature-realm-input-enabled: true
   feature-administration-enabled: true
+  feature-terms-enabled: true
   feature-explore-data-enabled: true
   feature-discovery-enabled: true
   feature-beacons-enabled: true

@@ -7,6 +7,7 @@
       [realmId]="viewController.getRealmId()"
       *ngIf="viewController.getAccessibleApps().length > 1">
       <ng-container *ngIf="appConfig.featureAdministrationEnabled">
+        <mat-divider></mat-divider>
         <div class="app-menu-section-title">Administration</div>
         <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">
           <a [href]="withRealm(identityConcentratorInfo.uiUrl)"
@@ -14,11 +15,10 @@
             class="link-to-external-app"
             data-se="nav-identity-concentrator"
             target="_blank">
-            <mat-icon class="icon">launch</mat-icon>
+            <mat-icon class="icon">vpn_key</mat-icon>
             <span>Identity Concentrator</span>
           </a>
         </ng-container>
-
         <ng-container *ngIf="dataAccessManagersInfo$ | async as dataAccessManagersInfo">
           <a *ngFor="let damInfo of dataAccessManagersInfo | keyvalue"
             [href]="withRealm(damInfo.value.uiUrl)"
@@ -34,6 +34,23 @@
         </ng-container>
       </ng-container>
     </ddaplib-menu-apps>
+    <ddaplib-menu-terms *ngIf="appConfig.featureTermsEnabled">
+      <a href="https://dnastack.com"
+            mat-menu-item
+            target="_blank">
+            <span>DNAstack</span>
+          </a>
+          <a href="https://dnastack.com/#/legal/terms"
+            mat-menu-item
+            target="_blank">
+            <span>Terms of Use</span>
+          </a>
+          <a href="https://dnastack.com/#/legal/privacy"
+            mat-menu-item
+            target="_blank">
+            <span>Privacy Policy</span>
+          </a>
+    </ddaplib-menu-terms>
     <ddaplib-menu-profile *ngIf="appConfig.authorizationOnInitRequired && accessControlService.isUserAuthorized()">
       <button mat-menu-item
         (click)="onSignOut()">

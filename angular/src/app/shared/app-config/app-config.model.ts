@@ -6,6 +6,7 @@ export interface AppConfigModel {
   sidebarEnabled: boolean;
   featureRealmInputEnabled: boolean;
   featureAdministrationEnabled: boolean;
+  featureTermsEnabled: boolean;
   featureExploreDataEnabled: boolean;
   featureBeaconsEnabled: boolean;
   featureDiscoveryEnabled: boolean;

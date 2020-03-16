@@ -14,7 +14,6 @@ export class GeocodeService {
 
   private initGeocoder() {
     this.geocoder = new google.maps.Geocoder();
-    console.log(this.geocoder);
   }
 
   private waitForMapsToLoad(): Observable<boolean> {
@@ -40,7 +39,6 @@ export class GeocodeService {
                 longitude: results[0].geometry.location.lng()
               });
             } else {
-                console.log('Error - ', results, ' & Status - ', status);
                 observer.next(<ILatLong>{ latitude: 0, longitude: 0 });
             }
             observer.complete();

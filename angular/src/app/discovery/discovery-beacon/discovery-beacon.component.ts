@@ -213,22 +213,29 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
  rowDataChanged(event) {
-
   if (!this.gridApi) {
     return;
   }
+  this.resizeColumns();
+ }
 
-  // Set column visibility
-  this.gridColumnApi.setColumnsVisible(['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'], false);
+ resizeColumns() {
 
   // Resize columns
+  const hiddenFieldIds = ['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'];
+  
   const allColumnIds = [];
+  const hiddenColumnIds = [];
+
   this.gridColumnApi.getAllColumns().forEach(function(column) {
     allColumnIds.push(column.colId);
+    if (hiddenFieldIds.includes(column.userProvidedColDef.field)) {
+      hiddenColumnIds.push(column.colId);
+    }
   });
+  console.log(hiddenColumnIds);
+  this.gridColumnApi.setColumnsVisible(hiddenColumnIds, false);
   this.gridColumnApi.autoSizeColumns(allColumnIds);
-
-
  }
 
   onGridReady(params) {
@@ -243,6 +250,8 @@ export class DiscoveryBeaconComponent implements OnInit {
         });
       });
     }
+    
+    this.resizeColumns();
   }
 
   onSelectionChanged() {

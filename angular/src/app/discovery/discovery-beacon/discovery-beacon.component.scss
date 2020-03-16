@@ -14,6 +14,15 @@ ddaplib-header ddaplib-header-add-btn {
   }
 }
 
+#MicrosoftNav {
+  .NavBar_Container {
+    display: none !important;
+  }
+}
+
+#Infobox {
+  border-radius: 0px;
+}
 
 .sample-details-list {
   display: flex;
@@ -52,6 +61,3 @@ ddaplib-header ddaplib-header-add-btn {
   }
 }
 
-#TrafficToggleButton {
-  display: none !important;
-}

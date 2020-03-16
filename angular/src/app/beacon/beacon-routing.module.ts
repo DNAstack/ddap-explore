@@ -8,7 +8,6 @@ export const routes: Routes = [
   { path: '', redirectTo: 'network' },
   { path: 'network', component: BeaconListComponent},
   { path: 'search', component: BeaconSearchComponent},
-  // { path: 'operations/:damId/views/:viewId/runs/:runId', component: WorkflowDetailComponent},
 ];
 
 @NgModule({

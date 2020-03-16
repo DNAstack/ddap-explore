@@ -46,6 +46,7 @@ import static org.junit.Assert.fail;
 @SuppressWarnings("Duplicates")
 @Slf4j
 public abstract class AbstractBaseE2eTest {
+    public static final String DDAP_E2E_TEST_ENABLED = optionalEnv("E2E_TEST_ENABLED", "true");
     public static final String DDAP_E2E_TEST_MODE = optionalEnv("E2E_TEST_MODE", "normal");
 
     public static final String DDAP_BASE_URL = requiredEnv("E2E_BASE_URI");
@@ -90,6 +91,8 @@ public abstract class AbstractBaseE2eTest {
 
     @BeforeClass
     public static void staticSetup() {
+        Assume.assumeThat(DDAP_E2E_TEST_ENABLED, equalTo("true"));
+
         log.debug("Test Mode: {}", DDAP_E2E_TEST_MODE);
         Assume.assumeThat(DDAP_E2E_TEST_MODE, equalTo("normal"));
 

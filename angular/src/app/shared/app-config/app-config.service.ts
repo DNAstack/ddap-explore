@@ -161,7 +161,7 @@ export class AppConfigService {
       .registerModule({
         key: 'search',
         name: 'Search',
-        iconClasses: 'icon icon-explore',
+        iconClasses: 'icon icon-search',
         requiredFeatureFlags: ['featureSearchEnabled'],
         routerLink: 'search',
         isApp: true,
@@ -169,7 +169,7 @@ export class AppConfigService {
       .registerModule({
         key: 'search-tables',
         name: 'Tables',
-        iconClasses: 'icon icon-explore',
+        iconName: 'list_alt',
         routerLink: 'search/tables',
         parentKey: 'search',
         isApp: false,

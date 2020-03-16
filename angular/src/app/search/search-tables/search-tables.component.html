@@ -50,6 +50,58 @@
         </ng-container>
       </div>
     </mat-drawer>
-    <mat-drawer-content>Main Content</mat-drawer-content>
+    <mat-drawer-content>
+      <mat-drawer-container style="height:100%" [autosize]="true">
+        <mat-drawer position="end" mode="side" opened style="min-width:400px;">
+          <div style="display:flex; flex: 1; flex-direction: column">
+            <mat-toolbar class="tertiary-toolbar">
+              <mat-toolbar-row>
+                <div>Search</div>
+                <span class="fill-space"></span>
+              </mat-toolbar-row>
+            </mat-toolbar>
+          </div>
+        </mat-drawer>
+        <mat-drawer-content>
+          <div style="display:flex; flex: 1; flex-direction: column;">
+            <mat-toolbar class="tertiary-toolbar"
+                         style="height: 64px; position:absolute; top: 0;">
+              <mat-toolbar-row>
+                <button class="m-r-sm" tabindex="-1" mat-icon-button
+                        (click)="view.showTables = !view.showTables">
+                  <mat-icon>web_asset</mat-icon>
+                </button>
+                <div>Search</div>
+                <span class="fill-space"></span>
+                <button tabindex="-1" mat-icon-button
+                        (click)="view.showQueryEditor = !view.showQueryEditor">
+                  <mat-icon>code</mat-icon>
+                </button>
+              </mat-toolbar-row>
+            </mat-toolbar>
+            <div style="display: flex; flex-direction:column; position:absolute; width:100%; top:64px; bottom:0;">
+              <div [hidden]="!view.showQueryEditor" class="b-b">
+                <mat-toolbar class="tertiary-toolbar">
+                  <mat-toolbar-row class="b-b">
+                    <div>Query Editor</div>
+                    <span class="fill-space"></span>
+                    <button tabindex="-1" mat-stroked-button color="accent"
+                            (click)="doSearchFromEditor()" matTooltip="Run query"
+                            style="display:inline">
+                      <mat-icon>play_arrow</mat-icon> Run
+                    </button>
+                  </mat-toolbar-row>
+                </mat-toolbar>
+                <ace-editor #editor [(text)]="search.text" [mode]="'sql'" [theme]="'eclipse'"
+                            [options]="options" [readOnly]="false" [autoUpdateContent]="true"
+                            [durationBeforeCallback]="1000" (textChanged)="queryChanged($event)"
+                            style="min-height: 200px; width:100%; overflow: auto; flex-grow: 2">
+                </ace-editor>
+              </div>
+            </div>
+          </div>
+        </mat-drawer-content>
+      </mat-drawer-container>
+    </mat-drawer-content>
   </mat-drawer-container>
 </ddaplib-main>

@@ -27,3 +27,13 @@ export class BeaconQuery {
   allele: string;
   reference: string;
 }
+
+export class SearchView {
+  errorLoadingTables: boolean;
+  errorQueryingTables: boolean;
+  showQueryEditor: boolean;
+  showTables: boolean;
+  wrapSearchResults: boolean;
+  isSearching: boolean;
+  isRefreshingTables: boolean;
+}

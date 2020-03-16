@@ -18,4 +18,11 @@ export class SearchService {
         this.errorHandler.notifyOnError()
       );
   }
+
+  search(query) {
+    return this.http.post(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/query`, query)
+      .pipe(
+        this.errorHandler.notifyOnError()
+      );
+  }
 }

@@ -31,6 +31,9 @@
               </div>
               <ddap-key-value-pair key="Accession ID" *ngIf="selectedCase.Accession_ID"  value="{{selectedCase.Accession_ID}}"></ddap-key-value-pair>
               <ddap-key-value-pair key="Data Source" *ngIf="selectedCase.Data_Source"  value="{{selectedCase.Data_Source}}"></ddap-key-value-pair>
+              <div class="m-b-sm text-muted font-sm" *ngIf="selectedCase && selectedCase.Data_Source == 'GISAID'">
+                This service aggregates data from the Global Initiative on Sharing All Influenza Data (GISAID). <a href="https://www.gisaid.org/registration/terms-of-use/">GISAID Terms of Use</a>.
+              </div>
               <ddap-key-value-pair key="Nuc Completeness" *ngIf="selectedCase.Nuc_Completeness"  value="{{selectedCase.Nuc_Completeness}}"></ddap-key-value-pair>
               <ddap-key-value-pair key="Host" *ngIf="selectedCase.Host"  value="{{selectedCase.Host}}"></ddap-key-value-pair>
               <ddap-key-value-pair key="Sample Collection Date" *ngIf="selectedCase.Sample_Collection_Date"  value="{{selectedCase.Sample_Collection_Date}}"></ddap-key-value-pair>

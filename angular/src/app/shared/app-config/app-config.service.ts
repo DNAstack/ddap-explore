@@ -159,7 +159,7 @@ export class AppConfigService {
       this.viewController
       .registerModule({
         key: 'discovery',
-        name: 'Discovery',
+        name: 'COVID-19',
         iconName: 'trending_up',
         requiredFeatureFlags: ['featureDiscoveryEnabled'],
         routerLink: 'discovery',

@@ -39,6 +39,9 @@ public class NavBar {
         return new NavLink("Run", DdapBy.se("nav-analytics-run"), null);
     }
 
+    public static NavLink tablesLink() {
+        return new NavLink("Tables", DdapBy.se("nav-search-tables"), null);
+    }
     public NavBar(WebDriver driver) {
         this.driver = driver;
     }

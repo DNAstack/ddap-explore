@@ -43,7 +43,9 @@
                 <div *ngIf="property.key != 'description'">{{property.key}}</div>
               </a>
               <button class="m-t-sm" tabindex="-1" mat-icon-button
-                      (click)="addAtCursor(previewTableQuery(table.name))" matTooltip="Preview Table">
+                      (click)="addAtCursor(previewTableQuery(table.name))"
+                      data-se="preview-table"
+                      matTooltip="Preview Table">
                 <mat-icon>visibility</mat-icon>
               </button>
               <button tabindex="-1" mat-icon-button (click)="viewTableAsJSON(table)"
@@ -80,8 +82,12 @@
                   <mat-toolbar-row class="b-b">
                     <div>Query Editor</div>
                     <span class="fill-space"></span>
-                    <button tabindex="-1" mat-stroked-button color="accent"
-                            (click)="doSearchFromEditor()" matTooltip="Run query"
+                    <button tabindex="-1"
+                            mat-stroked-button
+                            color="accent"
+                            (click)="doSearchFromEditor()"
+                            matTooltip="Run query"
+                            data-se="run-query"
                             style="display:inline">
                       <mat-icon>play_arrow</mat-icon> Run
                     </button>
@@ -138,7 +144,6 @@
                   </div>
                 </mat-toolbar-row>
               </mat-toolbar>
-              <mat-progress-bar *ngIf="view.isSearching" mode="indeterminate" color="accent"></mat-progress-bar>
               <div style="flex: 1; display:flex; flex-direction: column; overflow-y:auto">
                 <div class="p-a" *ngIf="queryHistory.length > 0 && !view.isSearching">
                   <div style="flex:1; height:100%">
@@ -146,7 +151,7 @@
                          style="display:flex; flex-direction: row; align-items: center;">
                       <pre><code>{{query}}</code></pre>
                     </div>
-                    <div *ngIf="result" class="mat-table" style="width:100%">
+                    <div *ngIf="result" class="mat-table" style="width:100%" data-se="result-wrapper">
                       <div class="mat-header-row">
                         <div class="mat-header-cell" *ngFor="let property of properties;">
                           {{property}}

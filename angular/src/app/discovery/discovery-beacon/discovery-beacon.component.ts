@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ILatLong, IMapOptions, MapAPILoader, MarkerTypeId } from 'angular-maps';
 
@@ -9,6 +10,7 @@ import { BeaconService } from '../beacon-service/beacon.service';
 import { DiscoveryConfigService } from '../discovery-config.service';
 
 import { GeocodeService } from './geocode/geocode.service';
+import { DiscoveryBeaconHelpDialogComponent } from './help/discovery-beacon.help.dialog';
 
 @Component({
   selector: 'ddap-discovery-beacon',
@@ -74,7 +76,8 @@ export class DiscoveryBeaconComponent implements OnInit {
               private beaconService: BeaconService,
               private route: ActivatedRoute,
               private geocodeService: GeocodeService,
-              private changeDetector: ChangeDetectorRef
+              private changeDetector: ChangeDetectorRef,
+              public helpDialog: MatDialog
               ) {
 
                 this.beaconService.setApiUrl(this.configService.getBeaconApiUrl());
@@ -125,6 +128,17 @@ export class DiscoveryBeaconComponent implements OnInit {
         this.router.navigate(['/']);
       }
     });
+  }
+
+  openHelpDialog() {
+    const dialogConfig = new MatDialogConfig();
+
+    const dialogRef = this.helpDialog.open(
+      DiscoveryBeaconHelpDialogComponent,
+        {
+          width: '500px',
+        }
+      );
   }
 
   doSearch() {

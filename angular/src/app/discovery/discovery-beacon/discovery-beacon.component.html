@@ -1,7 +1,26 @@
 <mat-toolbar class="tertiary-toolbar" style="height: 64px; position:absolute; top: 0;">
     <mat-toolbar-row>
-        <div>Variants</div>
+      <div id="beacon-search-parameters" style="display: flex; flex-direction: row;">
+        <div style="display: flex; flex-direction: column; margin-top:5px">
+          <div>Position</div>
+          <input matInput name="position" [(ngModel)]="query.start">
+        </div>
+        <div style="display: flex; flex-direction: column;  margin-top:5px">
+          <div>Reference</div>
+          <input matInput name="reference" [(ngModel)]="query.referenceBases">
+        </div>
+        <div style="display: flex; flex-direction: column;  margin-top:5px">
+          <div>Alternate</div>
+          <input matInput name="alternate" [(ngModel)]="query.alternateBases">
+        </div>
+        <button tabindex="-1" mat-stroked-button (click)="doSearch()" matTooltip="Search Variant" color="accent">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
         <span class="fill-space"></span>
+        <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
+          <mat-icon>help_outline</mat-icon>
+        </button>
         <button (click)="detailDrawer.toggle()" mat-icon-button color="{{detailDrawer.opened ? 'accent' : '' }}" matTooltip="{{detailDrawer.opened ? 'Hide Details' : 'Show Details' }}">
           <mat-icon>info</mat-icon>
         </button>
@@ -63,25 +82,6 @@
     <mat-drawer-content>
       <div class="full-hw p-a" style="display:flex; flex-direction: column;">
           <div style="display: flex; flex-direction: column; flex: 1">
-            <div style="display: flex;" class="m-b-sm">
-              <div id="beacon-search-parameters" style="display: flex; flex-direction: row;">
-                <div style="display: flex; flex-direction: column;">
-                  <div>Position</div>
-                  <input matInput name="position" [(ngModel)]="query.start">
-                </div>
-                <div style="display: flex; flex-direction: column;">
-                  <div>Reference</div>
-                  <input matInput name="reference" [(ngModel)]="query.referenceBases">
-                </div>
-                <div style="display: flex; flex-direction: column;">
-                  <div>Alternate</div>
-                  <input matInput name="alternate" [(ngModel)]="query.alternateBases">
-                </div>
-                <button tabindex="-1" mat-stroked-button (click)="doSearch()" matTooltip="Search Variant" color="accent">
-                  <mat-icon>search</mat-icon>
-                </button>
-              </div>
-            </div>
             <div class="m-b text-muted" *ngIf="lastQuery">
               {{cases.length}} sequences  with {{lastQuery.referenceBases}} » {{lastQuery.alternateBases}} at {{lastQuery.start}}
             </div>

@@ -5,10 +5,7 @@ import { DiscoveryBeaconComponent } from './discovery-beacon/discovery-beacon.co
 import { DiscoverySearchComponent } from './discovery-search/discovery-search.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'variants' },
-  { path: 'search', component: DiscoverySearchComponent},
-  { path: 'variants', component: DiscoveryBeaconComponent},
-  // { path: 'operations/:damId/views/:viewId/runs/:runId', component: WorkflowDetailComponent},
+  { path: '', component: DiscoveryBeaconComponent },
 ];
 
 @NgModule({

@@ -159,27 +159,11 @@ export class AppConfigService {
       this.viewController
       .registerModule({
         key: 'discovery',
-        name: 'COVID-19',
+        name: 'Discovery',
         iconName: 'trending_up',
         requiredFeatureFlags: ['featureDiscoveryEnabled'],
         routerLink: 'discovery',
         isApp: true,
-      })
-      .registerModule({
-        key: 'variants',
-        name: 'Variants',
-        iconName: 'wifi_tethering',
-        routerLink: 'discovery/variants',
-        parentKey: 'discovery',
-        isApp: false,
-      })
-      .registerModule({
-        key: 'search',
-        name: 'Search',
-        iconName: 'search',
-        routerLink: 'discovery/search',
-        parentKey: 'discovery',
-        isApp: false,
       });
     this.viewController
       .registerModule({

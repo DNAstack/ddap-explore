@@ -101,7 +101,7 @@ export class AppConfigService {
       .registerModule({
         key: 'data',
         name: 'Data',
-        iconClasses: 'icon icon-explore',
+        iconName: 'search',
         requiredFeatureFlags: ['featureExploreDataEnabled'],
         routerLink: 'data',
         isApp: true,
@@ -135,7 +135,7 @@ export class AppConfigService {
       .registerModule({
         key: 'beacon',
         name: 'Beacon',
-        iconClasses: 'icon icon-explore',
+        iconName: 'wifi_tethering',
         requiredFeatureFlags: ['featureBeaconsEnabled'],
         routerLink: 'beacon',
         isApp: true,
@@ -143,7 +143,7 @@ export class AppConfigService {
       .registerModule({
         key: 'network',
         name: 'Network',
-        iconName: 'wifi_tethering',
+        iconName: 'public',
         routerLink: 'beacon/network',
         parentKey: 'beacon',
         isApp: false,
@@ -160,7 +160,7 @@ export class AppConfigService {
       .registerModule({
         key: 'discovery',
         name: 'Discovery',
-        iconClasses: 'icon icon-explore',
+        iconName: 'trending_up',
         requiredFeatureFlags: ['featureDiscoveryEnabled'],
         routerLink: 'discovery',
         isApp: true,
@@ -186,7 +186,7 @@ export class AppConfigService {
         key: 'analytics',
         name: 'Analytics',
         requiredFeatureFlags: ['featureWorkflowsEnabled'],
-        iconClasses: 'icon icon-rules',
+        iconName: 'memory',
         routerLink: 'analyze',  // FIXME Change to "analytics"
         isApp: true,
       })

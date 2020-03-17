@@ -21,23 +21,23 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   searchTables: object[] = [];
   registry: BeaconRegistry;
 
-  private QUERY_EDITOR_DELIMITER = ';';
-  private QUERY_EDITOR_NEWLINE = '\n';
+  view: SearchView;
 
-  private view: SearchView;
-
-  private options: {
+  options: {
     wrapBehavioursEnabled: true
   };
 
-  private search: {
+  search: {
     text: string,
   };
+  result: any;
+  queryHistory: string[];
+
+  private QUERY_EDITOR_DELIMITER = ';';
+  private QUERY_EDITOR_NEWLINE = '\n';
 
   private query: string;
-  private result: any;
   private properties: string[];
-  private queryHistory: string[];
 
 
   constructor( private searchService: SearchService,
@@ -198,24 +198,6 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
       const properties = Object.keys(schema);
       this.properties = properties.filter(e => e !== 'description');
     });
-    // this.searchService.search({ 'query' : query }, this.headers).then(
-    //   result => {
-    //     this.query = query;
-    //     this.result = result;
-    //     this.view.isSearching = false;
-    //     this.queryHistory.unshift(query);
-    //     const schema = result['data_model']['properties'];
-    //     const properties = Object.keys(schema);
-    //     this.properties = properties.filter(e => e !== 'description');
-    //   }
-    // ).catch(error => {
-    //   this.view.isSearching = false;
-    //   this.view.errorQueryingTables = true;
-    //   this.snackBar.open(error, 'Dismiss', {
-    //     panelClass: 'error-snack',
-    //   });
-    //   return;
-    // });
   }
 
   queryChanged($event) {

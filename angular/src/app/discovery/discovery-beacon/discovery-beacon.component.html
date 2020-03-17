@@ -1,21 +1,21 @@
 <mat-toolbar class="tertiary-toolbar" style="height: 64px; position:absolute; top: 0;">
     <mat-toolbar-row>
-        <div class="m-r-lg">Variants</div>
+        <div>Variants</div>
         <span class="fill-space"></span>
-        <button (click)="detailDrawer.toggle()" mat-icon-button color="{{detailDrawer.opened ? 'accent' : '' }}">
+        <button (click)="detailDrawer.toggle()" mat-icon-button color="{{detailDrawer.opened ? 'accent' : '' }}" matTooltip="{{detailDrawer.opened ? 'Hide Details' : 'Show Details' }}">
           <mat-icon>info</mat-icon>
         </button>
     </mat-toolbar-row>
 </mat-toolbar>
 <ddaplib-main style="padding:0; top:64px">
   <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
-    <mat-drawer #detailDrawer mode="side" position="end" opened="false" style="min-width:400px; max-width:400px">
+    <mat-drawer #detailDrawer mode="side" position="end" opened="open" style="min-width:400px; max-width:400px">
       <mat-toolbar class="tertiary-toolbar"
           style="height: 64px; position:absolute; top: 0;">
           <mat-toolbar-row>
               <div>Details</div>
               <span class="fill-space"></span>
-              <button tabindex="-1" mat-icon-button (click)="detailDrawer.toggle()" matTooltip="Close Details">
+              <button tabindex="-1" mat-icon-button (click)="detailDrawer.toggle()" matTooltip="Hide Details">
                 <mat-icon>close</mat-icon>
               </button>
           </mat-toolbar-row>
@@ -26,6 +26,9 @@
           <div style="flex:1; height:100%;" *ngIf="selectedCase" class="p-a">
             <div class="sample-details-list">
               <ddap-key-value-pair key="Source" *ngIf="selectedCase.source"  value="{{selectedCase.source}}"></ddap-key-value-pair>
+              <div *ngIf="selectedCase.source && nextStrainUrl(selectedCase.source)" class="m-b-sm" style="display: flex; flex-direction: row;">
+                <img class="m-r-sm" src="https://github.com/nextstrain.png?size=20"><a [href]="nextStrainUrl(selectedCase.source)" target="_blank">Nextstrain</a>
+              </div>
               <ddap-key-value-pair key="Accession ID" *ngIf="selectedCase.Accession_ID"  value="{{selectedCase.Accession_ID}}"></ddap-key-value-pair>
               <ddap-key-value-pair key="Data Source" *ngIf="selectedCase.Data_Source"  value="{{selectedCase.Data_Source}}"></ddap-key-value-pair>
               <ddap-key-value-pair key="Nuc Completeness" *ngIf="selectedCase.Nuc_Completeness"  value="{{selectedCase.Nuc_Completeness}}"></ddap-key-value-pair>
@@ -54,7 +57,8 @@
     <mat-drawer-content>
       <div class="full-hw p-a" style="display:flex; flex-direction: column;">
           <div style="display: flex; flex-direction: column; flex: 1">
-            <div id="beacon-search-parameters"  class="m-b-sm" style="display: flex; flex-direction: row;">
+            <div style="display: flex;" class="m-b-sm">
+              <div id="beacon-search-parameters" style="display: flex; flex-direction: row;">
                 <div style="display: flex; flex-direction: column;">
                   <div>Position</div>
                   <input matInput name="position" [(ngModel)]="query.start">
@@ -67,12 +71,12 @@
                   <div>Alternate</div>
                   <input matInput name="alternate" [(ngModel)]="query.alternateBases">
                 </div>
-                <button tabindex="-1" mat-icon-button (click)="doSearch()" matTooltip="Search Variant">
+                <button tabindex="-1" mat-stroked-button (click)="doSearch()" matTooltip="Search Variant" color="accent">
                   <mat-icon>search</mat-icon>
                 </button>
-                <span class="fill-space"></span>
+              </div>
             </div>
-            <div style="display: flex" class="m-b text-muted" *ngIf="lastQuery">
+            <div class="m-b text-muted" *ngIf="lastQuery">
               {{cases.length}} sequences  with {{lastQuery.referenceBases}} » {{lastQuery.alternateBases}} at {{lastQuery.start}}
             </div>
             <cover-message *ngIf="cases.length == 0" style="flex: 1" message="No Sequences" icon="filter_list"></cover-message>

@@ -1,11 +1,13 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ILatLong, IMapOptions, MapAPILoader, MarkerTypeId } from 'angular-maps';
+
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { BeaconRequest, BeaconResponse } from '../beacon-service/beacon.model';
 import { BeaconService } from '../beacon-service/beacon.service';
 import { DiscoveryConfigService } from '../discovery-config.service';
-import { MarkerTypeId, IMapOptions, ILatLong, MapAPILoader } from "angular-maps";
+
 import { GeocodeService } from './geocode/geocode.service';
 
 @Component({
@@ -17,6 +19,8 @@ export class DiscoveryBeaconComponent implements OnInit {
   appConfig: AppConfigModel;
   assemblies: string[];
   assembly: string;
+
+  public detailDrawer;
 
   mapLoaded = false;
 
@@ -48,6 +52,22 @@ export class DiscoveryBeaconComponent implements OnInit {
 
   private queryParameters: any;
 
+  /** Bing map */
+  private _markerTypeId = MarkerTypeId;
+       private _options: IMapOptions = {
+            disableBirdseye: true,
+            disableStreetside: true,
+            showCopyright: false,
+            showMapTypeSelector: false,
+            navigationBarMode: 2,
+            mapTypeId: 7,
+            zoom: 4,
+            center: {
+              latitude: 0,
+              longitude: 0,
+            },
+       };
+
   constructor(private router: Router,
               private appConfigService: AppConfigService,
               private configService: DiscoveryConfigService,
@@ -64,7 +84,7 @@ export class DiscoveryBeaconComponent implements OnInit {
                 this.onSelectionChanged = this.onSelectionChanged.bind(this);
                 this.navigateToCell = this.navigateToCell.bind(this);
 
-                this._options.center = { latitude: 0, longitude: 0 }
+                this._options.center = { latitude: 0, longitude: 0 };
 
                 this.grid = {
                   animateRows: false,
@@ -75,7 +95,7 @@ export class DiscoveryBeaconComponent implements OnInit {
                     filter: true,
                   },
                   makeFullWidth: false,
-                  pagination: false,
+                  pagination: true,
                   domLayout: 'normal',
                   enableStatusBar: true,
                   suppressCellSelection: true,
@@ -91,32 +111,9 @@ export class DiscoveryBeaconComponent implements OnInit {
                   showQuery: true,
                   isGeocoding: false,
                   errorGeocoding: false,
-                  isLocation: true
+                  isLocation: true,
                 };
   }
-
-  /** Bing map */
-  private _markerTypeId = MarkerTypeId 
-            // a little trick so we can use enums in the template...
-
-       private _options: IMapOptions = {
-            disableBirdseye: true,
-            disableStreetside: true,
-            showCopyright: false,
-            showMapTypeSelector: false,
-            navigationBarMode: 2,
-            mapTypeId: 7,
-            zoom: 4,
-            center: {
-              latitude: 0,
-              longitude: 0
-            }
-       };
-            // for all available options for the various components, see IInfoWindowOptions, IInfoWindowAction, IMarkerOptions, IMapOptions, IMarkerIconInfo
-
-       private _click(){
-           console.log("hello world...");
-       }
 
   ngOnInit(): void {
     // Ensure that the user can only access this component when it is enabled.
@@ -216,14 +213,14 @@ export class DiscoveryBeaconComponent implements OnInit {
   if (!this.gridApi) {
     return;
   }
-  this.resizeColumns();
+
  }
 
  resizeColumns() {
 
   // Resize columns
   const hiddenFieldIds = ['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'];
-  
+
   const allColumnIds = [];
   const hiddenColumnIds = [];
 
@@ -233,9 +230,16 @@ export class DiscoveryBeaconComponent implements OnInit {
       hiddenColumnIds.push(column.colId);
     }
   });
-  console.log(hiddenColumnIds);
   this.gridColumnApi.setColumnsVisible(hiddenColumnIds, false);
   this.gridColumnApi.autoSizeColumns(allColumnIds);
+ }
+
+ nextStrainUrl(source) {
+    const tokens = source.split('/');
+    if (tokens.length === 1) {
+      return null;
+    }
+    return 'https://nextstrain.org/ncov?s=' + tokens[1] + '/' + tokens[2] + '/' + tokens[3];
  }
 
   onGridReady(params) {
@@ -250,11 +254,12 @@ export class DiscoveryBeaconComponent implements OnInit {
         });
       });
     }
-    
+
     this.resizeColumns();
   }
 
-  onSelectionChanged() {
+  onSelectionChanged(event) {
+
     this.selectedCase = this.gridApi.getSelectedRows()[0];
 
     const that = this;
@@ -270,19 +275,19 @@ export class DiscoveryBeaconComponent implements OnInit {
       that.view.isGeocoding = true;
       this.geocodeService.geocodeAddress(locationText)
         .subscribe((location: ILatLong) => {
-            that.setCaseLocaton(location.latitude,location.longitude);
+            that.setCaseLocaton(location.latitude, location.longitude);
             this.view.isGeocoding = false;
             that.changeDetector.detectChanges();
-          }      
+          }
         );
-      
+
     } else {
       that.view.isLocation = false;
-      that.setCaseLocaton(0,0);
+      that.setCaseLocaton(0, 0);
     }
   }
 
-  setCaseLocaton(lat:number, lng:number) {
+  setCaseLocaton(lat: number, lng: number) {
     this._options.center = { latitude: lat, longitude: lng };
   }
 
@@ -318,7 +323,7 @@ export class DiscoveryBeaconComponent implements OnInit {
         case KEY_RIGHT:
             return suggestedNextCell;
         default:
-            throw new Error('this will never happen, navigation is always one of the 4 keys above');
+            throw new Error('this will never happen');
     }
  }
 

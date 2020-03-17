@@ -32,7 +32,10 @@
               <ddap-key-value-pair key="Accession ID" *ngIf="selectedCase.Accession_ID"  value="{{selectedCase.Accession_ID}}"></ddap-key-value-pair>
               <ddap-key-value-pair key="Data Source" *ngIf="selectedCase.Data_Source"  value="{{selectedCase.Data_Source}}"></ddap-key-value-pair>
               <div class="m-b-sm text-muted font-sm" *ngIf="selectedCase && selectedCase.Data_Source == 'GISAID'">
-                This service aggregates data from the Global Initiative on Sharing All Influenza Data (<a href="https://www.gisaid.org/">GISAID</a>). <a href="https://www.gisaid.org/registration/terms-of-use/">Terms of Use</a>.
+                This service shares derivative data from the Global Initiative on Sharing All Influenza Data (<a target="_blank" href="https://www.gisaid.org/">GISAID</a>).
+              </div>
+              <div class="m-b-sm text-muted font-sm" *ngIf="selectedCase && selectedCase.Data_Source == 'Genome Warehouse'">
+                This service shares derivative data from the <a target="_blank" href="http://bigd.big.ac.cn/gwh/">National Genomics Data Center</a>.
               </div>
               <ddap-key-value-pair key="Nuc Completeness" *ngIf="selectedCase.Nuc_Completeness"  value="{{selectedCase.Nuc_Completeness}}"></ddap-key-value-pair>
               <ddap-key-value-pair key="Host" *ngIf="selectedCase.Host"  value="{{selectedCase.Host}}"></ddap-key-value-pair>

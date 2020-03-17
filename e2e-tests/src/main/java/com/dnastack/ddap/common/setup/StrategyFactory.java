@@ -36,7 +36,9 @@ public class StrategyFactory {
 
 
             } catch (Exception e) {
-                fail("Could not find a Login strategy for class: " + loginStrategyClassName);
+                throw new AssertionError(
+                        "Could not load Login strategy for class: " + loginStrategyClassName,
+                        e);
             }
         }
         return loginStrategy;

@@ -90,16 +90,16 @@
       </p>
       <ddap-resource-authorization-step #resourceAuthorizationStep
                                         [workflowId]="workflowId"
-                                        [selectedColumns]="selectedColumns"
-                                        [selectedRows]="selectedRows"
-                                        [damIdWesResourcePathPair]="workflowForm.get('wesViewResourcePath').value">
+                                        [selectedColumns]="observableSelectedColumns()"
+                                        [selectedRows]="observableSelectedRows()"
+                                        [damIdWesResourcePathPair]="workflowForm.get('wesViewResourcePath').valueChanges">
       </ddap-resource-authorization-step>
       <div class="flex stepper-actions">
         <div>
           <button mat-button matStepperPrevious>Back</button>
         </div>
-        <a *ngIf="resourceAuthorizationStep.resourceAuthUrl as resourceAuthUrl"
-           [href]="resourceAuthUrl"
+        <a [href]="resourceAuthorizationStep.resourceAuthUrl | async"
+           [attr.disabled]="!!resourceAuthorizationStep.resourceAuthUrl"
            data-se="btn-authorize">
           <button mat-flat-button
                   color="primary"

@@ -1,6 +1,8 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { flatten } from 'ddap-common-lib';
+import { combineLatest, merge, Observable, of } from 'rxjs';
+import { flatMap, map } from 'rxjs/operators';
 
 import { ResourceService } from '../../../shared/resource/resource.service';
 import { DatasetService } from '../dataset.service';
@@ -12,18 +14,19 @@ import { WorkflowsStateService } from '../workflows-state.service';
   templateUrl: './resource-authorization-step.component.html',
   styleUrls: ['./resource-authorization-step.component.scss'],
 })
-export class ResourceAuthorizationStepComponent implements OnChanges {
+export class ResourceAuthorizationStepComponent implements OnInit {
 
   @Input()
   workflowId: string;
   @Input()
-  selectedRows: object[];
+  selectedRows: Observable<object[]>;
   @Input()
-  selectedColumns: string[];
+  selectedColumns: Observable<string[]>;
   @Input()
-  damIdWesResourcePathPair: string;
+  damIdWesResourcePathPair: Observable<string>;
 
-  resourceAuthUrl: string;
+  @Output()
+  resourceAuthUrl: Observable<string>;
 
   constructor(private router: Router,
               private datasetService: DatasetService,
@@ -31,29 +34,37 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
               private workflowsStateService: WorkflowsStateService) {
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    this.getViewsAndSetResourceAuthUrl();
-  }
+  ngOnInit(): void {
+    this.resourceAuthUrl = combineLatest([
+      // Merge so there is always a fallback value
+      // Workflows don't need to have selected rows or columns
+      merge(of([]), this.selectedRows),
+      merge(of([]), this.selectedColumns),
+      this.damIdWesResourcePathPair,
+    ])
+      .pipe(
+        flatMap(values => {
+          const rows = values[0];
+          const cols = values[1];
+          const wesIdResPair = values[2];
 
-  getViewsAndSetResourceAuthUrl() {
-    if (!this.selectedRows || !this.selectedColumns) {
-      this.resourceAuthUrl = this.getUrlForObtainingAccessToken();
-      return;
-    }
-
-    const columnData: string[] = this.extractColumnData(this.selectedRows, this.selectedColumns);
-    this.datasetService.getViews(columnData)
-      .subscribe((views: { [p: string]: string[] }) => {
-        if (Object.values(views).length === 0) {
-          console.warn('No views associated to the selected columns');
-          return;
-        }
-        const resourcePaths: string[] = Object.values(views).reduce((l, r) => l.concat(r));
-        this.workflowsStateService.storeMetaInfoForWorkflow(this.workflowId, {
-          columnDataMappedToViews: views,
-        });
-        this.resourceAuthUrl = this.getUrlForObtainingAccessToken(resourcePaths);
-      });
+          const columnData: string[] = this.extractColumnData(rows, cols);
+          if (!columnData || columnData.length === 0) {
+            return of(this.getUrlForObtainingAccessToken(wesIdResPair, []));
+          } else {
+            return this.datasetService.getViews(columnData)
+              .pipe(
+                map((views: { [p: string]: string[] }) => {
+                  const resourcePaths: string[] = Object.values(views).reduce((l, r) => l.concat(r));
+                  this.workflowsStateService.storeMetaInfoForWorkflow(this.workflowId, {
+                    columnDataMappedToViews: views,
+                  });
+                  return this.getUrlForObtainingAccessToken(wesIdResPair, resourcePaths);
+                })
+              );
+          }
+        })
+      );
   }
 
   private extractColumnData(selectedRows: object[], columnNames: string[]): string[] {
@@ -62,10 +73,10 @@ export class ResourceAuthorizationStepComponent implements OnChanges {
     ).filter((columnData) => columnData);
   }
 
-  private getUrlForObtainingAccessToken(resources: string[] = []): string {
-    const redirectUri = this.getRedirectUrl();
-    resources.push(this.damIdWesResourcePathPair);
-    return this.resourceService.getUrlForObtainingAccessToken(resources, redirectUri);
+  private getUrlForObtainingAccessToken(wesIdResourcePathPair: string, resources: string[]): string {
+      const redirectUri = this.getRedirectUrl();
+      resources.push(wesIdResourcePathPair);
+      return this.resourceService.getUrlForObtainingAccessToken(resources, redirectUri);
   }
 
   private getRedirectUrl(): string {

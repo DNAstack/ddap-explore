@@ -88,6 +88,14 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   ) {
   }
 
+  observableSelectedRows(): Observable<object[]> {
+    return this.datasetForm.get('selectedRows').valueChanges;
+  }
+
+  observableSelectedColumns(): Observable<string[]> {
+    return this.datasetForm.get('selectedColumns').valueChanges;
+  }
+
   ngOnInit() {
     this.preInitialize();
 
@@ -183,10 +191,6 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     ;
   }
 
-  toggleLeftSideNav() {
-    this.viewController.toggleLeftSidenav();
-  }
-
   protected getSourceUrl(): string {
     const {sourceUrl} = this.route.snapshot.params;
 
@@ -208,9 +212,6 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     this.datasetForm = this.workflowFormBuilder.buildDatasetForm();
     this.workflowForm = this.workflowFormBuilder.buildWorkflowForm();
     this.subscribeToFormChanges();
-  }
-
-  private initialize() {
     this.subscriptions.push(this.route.queryParams
       .subscribe(params => {
         if (!params.state) {
@@ -220,6 +221,9 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
         this.workflowId = params.state;
         this.loadFromStateAndCheckoutAuthorizedResources();
       }));
+  }
+
+  private initialize() {
   }
 
   private loadFromStateAndCheckoutAuthorizedResources() {

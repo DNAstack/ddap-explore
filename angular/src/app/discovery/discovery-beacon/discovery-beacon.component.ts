@@ -22,10 +22,6 @@ export class DiscoveryBeaconComponent implements OnInit {
   assemblies: string[];
   assembly: string;
 
-  public detailDrawer;
-
-  mapLoaded = false;
-
   query: BeaconRequest;
   lastQuery: BeaconRequest;
 
@@ -34,6 +30,8 @@ export class DiscoveryBeaconComponent implements OnInit {
   caseColumnDefs: any;
   selectedCase: any;
   sample: any;
+
+  infoPanelActivated = false;
 
   view: {
     isSearching: boolean,
@@ -118,6 +116,8 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.preInitialize();
+
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
       this.appConfig = data;
@@ -130,6 +130,10 @@ export class DiscoveryBeaconComponent implements OnInit {
 
       this.beaconService.setApiUrl(this.appConfig.covidBeaconUrl);
     });
+  }
+
+  onInfoPanelVisibilityChange(visible: boolean) {
+    this.infoPanelActivated = visible;
   }
 
   openHelpDialog() {
@@ -354,12 +358,16 @@ export class DiscoveryBeaconComponent implements OnInit {
     return splitStr.join(' ');
  }
 
-  private initialize() {
+  private preInitialize() {
     this.query = new BeaconRequest();
     this.query.start = 3840;
     this.query.referenceBases = 'A';
     this.query.alternateBases = 'G';
   }
+
+  private initialize() {
+  }
+
 
   private setQueryParameters() {
     this.router.navigate(

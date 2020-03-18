@@ -17,18 +17,21 @@
           <mat-icon>search</mat-icon>
         </button>
       </div>
-        <span class="fill-space"></span>
-        <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
-          <mat-icon>help_outline</mat-icon>
-        </button>
-        <button (click)="detailDrawer.toggle()" mat-icon-button color="{{detailDrawer.opened ? 'accent' : '' }}" matTooltip="{{detailDrawer.opened ? 'Hide Details' : 'Show Details' }}">
-          <mat-icon>info</mat-icon>
-        </button>
+      <span class="fill-space"></span>
+      <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
+        <mat-icon>help_outline</mat-icon>
+      </button>
+      <button (click)="detailDrawer.toggle()" *ngIf="infoPanelActivated" mat-icon-button color="accent" matTooltip="Hide Details">
+        <mat-icon>info</mat-icon>
+      </button>
+      <button (click)="detailDrawer.toggle()" *ngIf="!infoPanelActivated" mat-icon-button color="" matTooltip="Show Details">
+        <mat-icon>info</mat-icon>
+      </button>
     </mat-toolbar-row>
 </mat-toolbar>
 <ddaplib-main style="padding:0; top:64px">
   <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
-    <mat-drawer #detailDrawer mode="side" position="end" opened="open" style="min-width:400px; max-width:400px">
+    <mat-drawer #detailDrawer mode="side" position="end" opened="open" style="min-width:400px; max-width:400px" (openedStart)="onInfoPanelVisibilityChange(true)" (closedStart)="onInfoPanelVisibilityChange(false)">
       <mat-toolbar class="tertiary-toolbar"
           style="height: 64px; position:absolute; top: 0;">
           <mat-toolbar-row>

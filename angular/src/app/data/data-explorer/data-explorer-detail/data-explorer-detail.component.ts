@@ -29,35 +29,36 @@ export class DataExplorerDetailComponent implements AfterViewInit {
   tableNames: Set<string>;
   propertyNames: Set<string>;
 
-  private QUERY_EDITOR_DELIMITER = ';';
-  private QUERY_EDITOR_NEWLINE = '\n';
-
-  private search: {
+  search: {
     text: string,
   };
 
-  private collection: Collection;
-  private searchServiceInfo: ServiceInfo;
-  private queryHistory: string[];
-  private query: string;
-  private result: any;
-  private properties: string[];
+  collection: Collection;
+  searchServiceInfo: ServiceInfo;
+  queryHistory: string[];
+  query: string;
+  result: any;
+  properties: string[];
 
-  private searchService: Ga4ghDiscoverySearchService;
+  searchService: Ga4ghDiscoverySearchService;
 
-  private view: {
+  view: {
     errorLoadingTables: boolean;
     errorQueryingTables: boolean;
     showQueryEditor: boolean;
     showTables: boolean;
+    showSearchBar: boolean;
     wrapSearchResults: boolean;
     isSearching: boolean;
     isRefreshingTables: boolean;
   };
 
-  private options: {
+  options: {
     wrapBehavioursEnabled: true
   };
+
+  private QUERY_EDITOR_DELIMITER = ';';
+  private QUERY_EDITOR_NEWLINE = '\n';
 
   private datasets: any;
   private accessToken: string;
@@ -94,6 +95,7 @@ export class DataExplorerDetailComponent implements AfterViewInit {
       errorQueryingTables : true,
       showQueryEditor : true,
       showTables : true,
+      showSearchBar: true,
       wrapSearchResults : false,
       isSearching : false,
       isRefreshingTables : false,

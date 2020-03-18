@@ -11,12 +11,12 @@ import { DataCollectionsConfigService } from './data-explorer-collections-config
 })
 export class DataExplorerComponent {
 
-  private view: {
+  view: {
     showSearchBar: boolean;
     showQueryEditor: boolean;
   };
 
-  private collections: Collection[];
+  collections: Collection[];
 
   constructor(
     private dataExplorerConfig: DataCollectionsConfigService

@@ -18,8 +18,8 @@
                 </mat-toolbar>
                 <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
                     <mat-progress-bar *ngIf="view.isRefreshingTables" mode="indeterminate" color="accent"></mat-progress-bar>
-                    <cover-message style="flex-grow: 1" *ngIf="view.errorLoadingTables" message="Error Loading Tables" icon="error_outline"></cover-message>
-                    <cover-message style="flex-grow: 1" *ngIf="!view.isRefreshingTables && tables.length == 0 && !view.errorLoadingTables" message="No Tables" icon="not_interested"></cover-message>
+                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="view.errorLoadingTables" message="Error Loading Tables" icon="error_outline"></ddaplib-cover-message>
+                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="!view.isRefreshingTables && tables.length == 0 && !view.errorLoadingTables" message="No Tables" icon="not_interested"></ddaplib-cover-message>
                     <div style="flex:1; height:100%;" *ngIf="tables.length > 0">
                         <mat-accordion>
                             <mat-expansion-panel *ngFor="let table of tables; index as j;" tabindex="-1">
@@ -153,10 +153,10 @@
                                     <mat-progress-bar *ngIf="view.isSearching" mode="indeterminate" color="accent">
                                     </mat-progress-bar>
                                 <div style="flex: 1; display:flex; flex-direction: column; overflow-y:auto">
-                                    <cover-message style="flex-grow: 1" *ngIf="queryHistory.length == 0 && !view.isSearching"
-                                        message="No Results" icon="not_interested"></cover-message>
-                                    <cover-message style="flex-grow: 1" *ngIf="view.isSearching"
-                                        message="Searching" icon="hourglass_empty"></cover-message>
+                                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="queryHistory.length == 0 && !view.isSearching"
+                                        message="No Results" icon="not_interested"></ddaplib-cover-message>
+                                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="view.isSearching"
+                                        message="Searching" icon="hourglass_empty"></ddaplib-cover-message>
                                     <div class="p-a" *ngIf="queryHistory.length > 0 && !view.isSearching">
                                         <div style="flex:1; height:100%">
                                             <div class="m-b-sm"

@@ -2,11 +2,11 @@ import { Component, Input } from '@angular/core';
 
 import { SearchFilter } from './search-filter';
 
-@Component({
-    selector: 'ddap-search-filter',
-    templateUrl: './search-filter.component.html',
-    styleUrls: ['./search-filter.component.scss', '../../base/base.component.scss'],
-})
+// @Component({
+//     selector: 'ddap-search-filter',
+//     templateUrl: './search-filter.component.html',
+//     styleUrls: ['./search-filter.component.scss', '../../base/base.component.scss'],
+// })
 export class SearchFilterComponent {
 
     @Input() filter: SearchFilter;

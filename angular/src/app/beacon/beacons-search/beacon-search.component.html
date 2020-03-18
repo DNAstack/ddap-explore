@@ -12,15 +12,15 @@
                       <button tabindex="-1" mat-icon-button (click)="refreshBeacons()" matTooltip="Refresh">
                           <mat-icon>refresh</mat-icon>
                       </button>
-                      <button tabindex="-1" mat-icon-button (click)="closeTables()" matTooltip="Close Query">
+                      <!--<button tabindex="-1" mat-icon-button (click)="closeTables()" matTooltip="Close Query">
                           <mat-icon>close</mat-icon>
-                      </button>
+                      </button>-->
                   </mat-toolbar-row>
               </mat-toolbar>
               <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
                   <mat-progress-bar *ngIf="view.isSearching" mode="indeterminate" color="accent"></mat-progress-bar>
-                  <cover-message style="flex-grow: 1" *ngIf="view.errorLoadingBeacons" message="Error Loading Beacons" icon="error_outline"></cover-message>
-                  <cover-message style="flex-grow: 1" *ngIf="!view.isRefreshingBeacons && (!registries || registries.length == 0)" message="No Registries" icon="not_interested"></cover-message>
+                  <ddaplib-cover-message style="flex-grow: 1" *ngIf="view.errorLoadingBeacons" message="Error Loading Beacons" icon="error_outline"></ddaplib-cover-message>
+                  <ddaplib-cover-message style="flex-grow: 1" *ngIf="!view.isRefreshingBeacons && (!registries || registries.length == 0)" message="No Registries" icon="not_interested"></ddaplib-cover-message>
                   <div style="flex:1; height:100%;" *ngIf="registries && registries.length > 0" class="p-a">
                     <form class="beacon-query-form">
                       <mat-form-field>
@@ -65,7 +65,7 @@
               </div>
           </mat-drawer>
           <mat-drawer-content>
-            <cover-message *ngIf="rowData.length == 0" style="flex-grow: 1" message="No Results" icon="error_outline"></cover-message>
+            <ddaplib-cover-message *ngIf="rowData.length == 0" style="flex-grow: 1" message="No Results" icon="error_outline"></ddaplib-cover-message>
             <div [hidden]="rowData.length == 0" style="display:flex; flex: 1; flex-direction: column;" class="p-a">
                 <ag-grid-angular
                     style="width: 100%;"

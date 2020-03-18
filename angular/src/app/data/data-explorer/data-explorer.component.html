@@ -3,11 +3,11 @@
 <ddaplib-main>
     <div style="display:flex; flex-direction:column;">
         <!--<mat-progress-bar mode="indeterminate"></mat-progress-bar>-->
-        <cover-message style="flex-grow: 1" *ngIf="collections.length == 0" message="No Collections"
-            icon="not_interested"></cover-message>
+        <ddaplib-cover-message style="flex-grow: 1" *ngIf="collections.length == 0" message="No Collections"
+            icon="not_interested"></ddaplib-cover-message>
         <div style="display:flex; flex-direction:row; flex-wrap: wrap;" *ngIf="collections.length > 0">
             <div class="b-a m-b m-r" style="width:400px; display: flex; flex-direction: column" *ngFor="let collection of collections">
-                <div class="p-a bg-white" style="display: flex; flex-direction: column;"> 
+                <div class="p-a bg-white" style="display: flex; flex-direction: column;">
                     <div style="display: flex; flex-direction: column;">
                         <div class="m-b" style="height:150px; text-align: center;">
                             <img class="m-r" *ngIf="collection.imgUrl" src="{{collection.imgUrl}}"

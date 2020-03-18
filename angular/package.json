@@ -37,7 +37,7 @@
     "angular7-json-schema-form": "^1.0.4",
     "bingmaps": "^2.0.3",
     "dayjs": "^1.8.16",
-    "ddap-common-lib": "0.0.19-62-ga708267",
+    "ddap-common-lib": "0.0.19-70-g84dad78",
     "hammerjs": "^2.0.8",
     "highlight.js": "^9.15.10",
     "jsoneditor": "^7.5.0",

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DdapLayoutModule } from 'ddap-common-lib';
 import { AceEditorModule } from 'ng2-ace-editor';
 
+import { SearchResourcesComponent } from './search-resources/search-resources.component';
 import { SearchRoutingModule } from './search-routing.module';
 import { LinkifyPipe } from './search-tables/linkify.pipe';
 import { ObjectToArrayPipe } from './search-tables/objecttoarray.pipe';
@@ -22,6 +24,7 @@ import { SearchTablesComponent } from './search-tables/search-tables.component';
     SearchTablesComponent,
     ObjectToArrayPipe,
     LinkifyPipe,
+    SearchResourcesComponent,
   ],
   imports: [
     SearchRoutingModule,
@@ -38,6 +41,7 @@ import { SearchTablesComponent } from './search-tables/search-tables.component';
     _MatMenuDirectivesModule,
     MatMenuModule,
     MatProgressBarModule,
+    MatCardModule,
   ],
 })
 export class SearchModule {}

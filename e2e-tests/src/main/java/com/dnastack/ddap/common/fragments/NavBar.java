@@ -39,8 +39,8 @@ public class NavBar {
         return new NavLink("Run", DdapBy.se("nav-analytics-run"), null);
     }
 
-    public static NavLink tablesLink() {
-        return new NavLink("Tables", DdapBy.se("nav-search-tables"), null);
+    public static NavLink searchResources() {
+        return new NavLink("Resources", DdapBy.se("nav-search-resources"), null);
     }
     public NavBar(WebDriver driver) {
         this.driver = driver;
@@ -84,6 +84,13 @@ public class NavBar {
         driver.findElement(dataLink().getSelector()).click();
 
         return new DataListPage(driver);
+    }
+
+    public SearchResourcesPage goToSearchResources() {
+        goToApp("product-app-menu-search");
+        goTo(NavBar.searchResources());
+
+        return new SearchResourcesPage(driver);
     }
 
     public WorkflowWesServersPage goToWorkflows() {

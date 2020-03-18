@@ -1,3 +1,4 @@
+@import '~ddap-common-lib/styles/modules/colors';
 .main-container {
   position: absolute;
   left: 0;
@@ -19,4 +20,15 @@
 .search-drawer {
   min-width: 400px;
   max-width: 400px;
+}
+
+table {
+  background: white;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td, th {
+  border: 1px solid $color-grey-light;
+  padding: 1rem;
 }

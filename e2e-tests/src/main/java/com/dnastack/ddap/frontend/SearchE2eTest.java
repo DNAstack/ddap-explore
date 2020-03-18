@@ -3,6 +3,7 @@ package com.dnastack.ddap.frontend;
 import com.dnastack.ddap.common.fragments.NavBar;
 import com.dnastack.ddap.common.page.AdminDdapPage;
 import com.dnastack.ddap.common.page.AnyDdapPage;
+import com.dnastack.ddap.common.page.SearchResourcesPage;
 import com.dnastack.ddap.common.page.TablesPage;
 import com.dnastack.ddap.common.util.DdapBy;
 import org.junit.BeforeClass;
@@ -29,8 +30,8 @@ public class SearchE2eTest extends AbstractFrontendE2eTest{
     @Test
     public void queryPrestoTable() throws MalformedURLException {
         driver.navigate().to(new URL(driver.getCurrentUrl() + "?exp_flag=demo"));
-        ddapPage.getNavBar().goToApp("product-app-menu-search");
-        ddapPage.getNavBar().goTo(NavBar.tablesLink());
+        SearchResourcesPage searchResourcesPage= ddapPage.getNavBar().goToSearchResources();
+        searchResourcesPage.exploreResource();
         ddapPage.waitForInflightRequests();
 
         TablesPage tablesPage = new TablesPage(driver);

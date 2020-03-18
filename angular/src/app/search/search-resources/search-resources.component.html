@@ -1,0 +1,22 @@
+<ddaplib-header icon="search" label="Search Resources"></ddaplib-header>
+<ddaplib-main>
+  <mat-card class="ddap-card"
+            *ngFor="let resource of resources">
+    <mat-card-header>
+      <mat-card-title>{{ resource.ui.label || 'Unknown' }}</mat-card-title>
+      <mat-card-subtitle>{{ resource.ui.description || 'Unknown' }}</mat-card-subtitle>
+    </mat-card-header>
+    <img mat-card-image
+         [src]="[resource.ui.imageUrl || randomImageRetriever.getPathToFixedRandomImage(resource.ui.label)]"
+         alt="Photo">
+    <mat-card-actions>
+      <button mat-button
+              color="primary"
+              class="uppercase"
+              [routerLink]="['../tables']"
+              [queryParams]="{resourceUrl: resource.resourceUrl}"
+              queryParamsHandling="merge"
+              data-se="explore-resource">Explore</button>
+    </mat-card-actions>
+  </mat-card>
+</ddaplib-main>

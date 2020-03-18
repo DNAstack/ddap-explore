@@ -14,11 +14,11 @@ public class TablesPage extends AnyDdapPage{
     public void searchTable() {
         WebDriver driver = getDriver();
         new WebDriverWait(driver, 30)
-                .until(ExpectedConditions.elementToBeClickable(By.xpath("//mat-expansion-panel[1]")));
-        driver.findElement(By.xpath("//mat-expansion-panel[1]")).click();
-        new WebDriverWait(driver, 5)
-                .until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-se='preview-table']")));
-        driver.findElement(By.xpath("//button[@data-se='preview-table']")).click();
+                .until(ExpectedConditions.elementToBeClickable(By.xpath("//mat-expansion-panel[3]")));
+        driver.findElement(By.xpath("//mat-expansion-panel[3]")).click();
+        new WebDriverWait(driver, 10)
+                .until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-se='preview-table-3']")));
+        driver.findElement(By.xpath("//button[@data-se='preview-table-3']")).click();
         driver.findElement(DdapBy.se("run-query")).click();
     }
 }

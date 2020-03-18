@@ -44,7 +44,7 @@
               </a>
               <button class="m-t-sm" tabindex="-1" mat-icon-button
                       (click)="addAtCursor(previewTableQuery(table.name))"
-                      data-se="preview-table"
+                      [attr.data-se]="'preview-table-'+(j+1)"
                       matTooltip="Preview Table">
                 <mat-icon>visibility</mat-icon>
               </button>
@@ -105,7 +105,7 @@
                   <span class="fill-space"></span>
                   <div *ngIf="result" style="display:flex; flex-direction: row">
                     <mat-chip-list class="m-s-sm" [hidden]="">
-                      <mat-chip color="primary">{{result['data'].length}}
+                      <mat-chip color="primary">{{result['data']?.length}}
                         results
                       </mat-chip>
                     </mat-chip-list>
@@ -151,20 +151,18 @@
                          style="display:flex; flex-direction: row; align-items: center;">
                       <pre><code>{{query}}</code></pre>
                     </div>
-                    <div *ngIf="result" class="mat-table" style="width:100%" data-se="result-wrapper">
-                      <div class="mat-header-row">
-                        <div class="mat-header-cell" *ngFor="let property of properties;">
-                          {{property}}
-                        </div>
-                      </div>
-                      <div class="mat-row" *ngFor="let row of result['data']">
-                        <div class="mat-cell"
-                             [ngClass]="{'no-wrap': !view.wrapSearchResults}"
-                             *ngFor="let value of row | objectToArray : properties"
-                             [innerHTML]="value | linkify">
-                        </div>
-                      </div>
-                    </div>
+                    <table *ngIf="result" data-se="result-wrapper">
+                      <tr>
+                        <th *ngFor="let property of properties;">{{property}}</th>
+                      </tr>
+                      <tr *ngFor="let row of result['data']">
+                        <td [ngClass]="{'no-wrap': !view.wrapSearchResults}"
+                            *ngFor="let value of row | objectToArray : properties"
+                            [innerHTML]="value | linkify">
+                        </td>
+                      </tr>
+                    </table>
+                    <div data-se="result-wrapper">No results</div>
                   </div>
                 </div>
               </div>

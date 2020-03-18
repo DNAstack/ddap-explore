@@ -33,7 +33,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   };
   result: any;
   queryHistory: string[];
-  searchResource: any;
+  resourceUrl: string;
 
   private QUERY_EDITOR_DELIMITER = ';';
   private QUERY_EDITOR_NEWLINE = '\n';
@@ -62,17 +62,15 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    this.searchService.getSearchResources()
-      .pipe(
-        // FIXME: just not to break existing functionality, returned list is mocked up
-        flatMap((resources: any[]) => {
-          this.searchResource = resources[0];
-          return this.searchService.getTables(this.searchResource.resourceUrl);
-        })
-      )
-      .subscribe(({ tables }) => {
-        this.searchTables = tables;
-      });
+    this.route.queryParams.pipe(
+      flatMap(({resourceUrl}) => {
+        this.resourceUrl = decodeURI(resourceUrl);
+        return this.searchService.getTables(this.resourceUrl);
+      })
+    )
+    .subscribe(({ tables }) => {
+      this.searchTables = tables;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -199,12 +197,12 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
 
     this.view.isSearching = true;
     this.view.errorQueryingTables = false;
-    this.searchService.search(this.searchResource.resourceUrl, { 'query' : query }).subscribe(result => {
+    this.searchService.search(this.resourceUrl, { 'query' : query }).subscribe(result => {
       this.query = query;
       this.result = result;
       this.view.isSearching = false;
       this.queryHistory.unshift(query);
-      const schema = result['data_model']['properties'];
+      const schema = result['data_model'] ? result['data_model']['properties'] : {};
       const properties = Object.keys(schema);
       this.properties = properties.filter(e => e !== 'description');
     });

@@ -34,7 +34,7 @@ public class SearchController {
             .resourceUrl("https://ga4gh-search-adapter-presto-public.staging.dnastack.com")
             .ui(Map.of(
                 "label", "GA4GH Search Adapter Presto",
-                "description", "Presto Searc"
+                "description", "Presto Search"
             ))
             .build();
         return Mono.just(asList(resource));

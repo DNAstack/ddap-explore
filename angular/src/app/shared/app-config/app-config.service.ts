@@ -168,10 +168,10 @@ export class AppConfigService {
         isExperimental: true,
       })
       .registerModule({
-        key: 'search-tables',
-        name: 'Tables',
-        iconName: 'list_alt',
-        routerLink: 'search/tables',
+        key: 'search-resources',
+        name: 'Resources',
+        iconClasses: 'icon icon-resources',
+        routerLink: 'search/resources',
         parentKey: 'search',
         isApp: false,
         isExperimental: true,

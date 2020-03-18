@@ -39,12 +39,14 @@ ic:
 
 dam-facade:
   base-url: ${ddap.public-uri}
-  oauth2-url: https://sample-oauth-server/common
-  oauth2-authorization-url: https://sample-oauth-server/oauth/authorize
-  oauth2-token-url: https://sample-oauth-server/oauth/token
-  oauth2-userinfo-url: https://sample-oauth-server/me
-  client-id: foo
-  client-secret: bar
+  oauth2:
+    issuer: https://sample-oauth-server/common
+    authorization-url: https://sample-oauth-server/oauth/authorize
+    token-url: https://sample-oauth-server/oauth/token
+    userinfo-url: https://sample-oauth-server/me
+    client-id: foo
+    client-secret: bar
+    default-scope: openid profile email
   resource-name: WES
   resource-description: Workflow Execution Service
   view-name: WES-SOLO

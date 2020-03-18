@@ -1,5 +1,6 @@
 export interface AppConfigModel {
   title: string;
+  logoUrl: string;
   defaultModule: string;
   inStandaloneMode: boolean;
   authorizationOnInitRequired: boolean;

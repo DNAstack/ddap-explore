@@ -77,6 +77,7 @@ export class AppConfigService {
   getDefault(): AppConfigModel {
     return this.cachedConfig || {
       title: 'DDAP', // This is a placeholder and the actual value would be set by the backend service.
+      logoUrl: null,
       defaultModule: null,
       inStandaloneMode: false,
       authorizationOnInitRequired: false,

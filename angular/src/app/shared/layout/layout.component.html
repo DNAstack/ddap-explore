@@ -1,5 +1,6 @@
 <div class="site-container {{viewController.view.leftSidebarOpened ? '' : 'zen-mode'}}">
   <ddaplib-main-header [siteName]="appConfig.title"
+    [logoUrl]="appConfig.logoUrl"
     [isSandbox]="appConfig.featureRealmInputEnabled"
     [realmActions]="['edit']"
     (realmChangeAcknowledge)="onAcknowledge($event)">
@@ -34,23 +35,6 @@
         </ng-container>
       </ng-container>
     </ddaplib-menu-apps>
-    <ddaplib-menu-terms *ngIf="appConfig.featureTermsEnabled">
-      <a href="https://dnastack.com"
-            mat-menu-item
-            target="_blank">
-            <span>DNAstack</span>
-          </a>
-          <a href="https://dnastack.com/#/legal/terms"
-            mat-menu-item
-            target="_blank">
-            <span>Terms of Use</span>
-          </a>
-          <a href="https://dnastack.com/#/legal/privacy"
-            mat-menu-item
-            target="_blank">
-            <span>Privacy Policy</span>
-          </a>
-    </ddaplib-menu-terms>
     <ddaplib-menu-profile *ngIf="appConfig.authorizationOnInitRequired && accessControlService.isUserAuthorized()">
       <button mat-menu-item
         (click)="onSignOut()">
@@ -83,4 +67,20 @@
       <router-outlet></router-outlet>
     </mat-sidenav-content>
   </mat-sidenav-container>
+
+  <ddaplib-footer *ngIf="appConfig.featureTermsEnabled">
+    <span class="fill-space"></span>
+    <a class="m-r-sm" href="https://dnastack.com"
+          target="_blank">
+          <span>&copy; DNAstack</span>
+        </a>
+        <a class="m-r-sm" href="https://dnastack.com/#/legal/terms"
+          target="_blank">
+          <span>Terms of Use</span>
+        </a>
+        <a href="https://dnastack.com/#/legal/privacy"
+          target="_blank">
+          <span>Privacy Policy</span>
+        </a>
+  </ddaplib-footer>
 </div>

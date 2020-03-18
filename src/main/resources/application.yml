@@ -8,6 +8,7 @@ server:
 
 ui:
   title: "DDAP"
+  logo-url: null
   default-module: data
   in-standalone-mode: ${ddap.dam-facade}
   authorization-on-init-required: false

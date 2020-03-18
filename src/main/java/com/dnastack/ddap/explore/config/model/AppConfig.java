@@ -10,6 +10,7 @@ import java.util.List;
 public class AppConfig {
 
     private String title;
+    private String logoUrl;
     private String defaultModule;
     private boolean inStandaloneMode;
     private boolean authorizationOnInitRequired;

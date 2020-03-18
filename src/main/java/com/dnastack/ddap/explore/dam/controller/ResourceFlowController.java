@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
@@ -282,7 +283,11 @@ public class ResourceFlowController {
                                   return Mono.error(new TokenExchangeException("Unrecognized purpose in token exchange"));
                               }
                           })
-                          .doOnError(exception -> log.info("Failed to negotiate token", exception));
+                          .doOnError(exception -> {
+
+                              log.info("Failed to negotiate token", exception);
+                              throw new IllegalArgumentException(exception);
+                          });
     }
 
     /**

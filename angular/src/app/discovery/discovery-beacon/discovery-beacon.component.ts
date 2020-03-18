@@ -72,7 +72,6 @@ export class DiscoveryBeaconComponent implements OnInit {
 
   constructor(private router: Router,
               private appConfigService: AppConfigService,
-              private configService: DiscoveryConfigService,
               private beaconService: BeaconService,
               private route: ActivatedRoute,
               private geocodeService: GeocodeService,
@@ -80,7 +79,7 @@ export class DiscoveryBeaconComponent implements OnInit {
               public helpDialog: MatDialog
               ) {
 
-                this.beaconService.setApiUrl(this.configService.getBeaconApiUrl());
+
 
                 this.cases = [];
 
@@ -122,11 +121,14 @@ export class DiscoveryBeaconComponent implements OnInit {
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
       this.appConfig = data;
+
       if (this.appConfig.featureDiscoveryEnabled) {
         this.initialize();
       } else {
         this.router.navigate(['/']);
       }
+
+      this.beaconService.setApiUrl(this.appConfig.covidBeaconUrl);
     });
   }
 

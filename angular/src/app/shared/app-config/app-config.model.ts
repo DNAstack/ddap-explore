@@ -17,4 +17,5 @@ export interface AppConfigModel {
   trsAcceptedToolClasses: string[];
   trsAcceptedVersionDescriptorTypes: string[];
   listPageSize: number;
+  covidBeaconUrl: string;
 }

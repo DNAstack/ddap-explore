@@ -94,6 +94,7 @@ export class AppConfigService {
       trsAcceptedToolClasses: [],
       trsAcceptedVersionDescriptorTypes: [],
       listPageSize: 14,
+      covidBeaconUrl: null,
     };
   }
 

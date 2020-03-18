@@ -25,7 +25,8 @@ ui:
   trs-accepted-tool-classes: ['Workflow']
   trs-accepted-version-descriptor-types: ['WDL']
   list-page-size: 20
-
+  covid-beacon-url: null
+  
 dams:
   1:
     # If you try to run the DAM and IC locally, they need to use different domain names,

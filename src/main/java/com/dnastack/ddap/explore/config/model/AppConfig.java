@@ -27,5 +27,6 @@ public class AppConfig {
     private List<String> trsAcceptedToolClasses;
     private List<String> trsAcceptedVersionDescriptorTypes;
     private int listPageSize;
+    private String covidBeaconUrl;
 
 }

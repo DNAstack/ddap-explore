@@ -77,11 +77,12 @@ public class ResourceFlowController {
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/authorize")
     public ResponseEntity<?> authorizeResources(ServerHttpRequest request,
-                                                                @PathVariable String realm,
-                                                                @RequestParam(required = false) String loginHint,
-                                                                @RequestParam(required = false) URI redirectUri,
-                                                                @RequestParam(required = false) String scope,
-                                                                @RequestParam("resource") List<String> damIdResourcePairs) {
+                                                @PathVariable String realm,
+                                                @RequestParam(required = false) String loginHint,
+                                                @RequestParam(required = false) URI redirectUri,
+                                                @RequestParam(required = false) String scope,
+                                                @RequestParam("resource") List<String> damIdResourcePairs,
+                                                @RequestParam(defaultValue = "1h") String ttl) {
         final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
         URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
 
@@ -93,7 +94,7 @@ public class ResourceFlowController {
 
         // FIXME should separate resources by DAM
         final ReactiveDamOAuthClient oAuthClient = damClientFactory.lookupDamOAuthClient(resources);
-        final URI authorizeUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources, loginHint);
+        final URI authorizeUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources, loginHint, ttl);
         return ResponseEntity.status(TEMPORARY_REDIRECT)
                              .location(authorizeUri)
                              .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString())

@@ -6,5 +6,5 @@ import java.net.URI;
 import java.util.List;
 
 public interface ReactiveDamOAuthClient extends ReactiveOAuthClient {
-    URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint);
+    URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint, String ttl);
 }

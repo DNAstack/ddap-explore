@@ -82,7 +82,8 @@ export class ResourceViewItemComponent implements OnInit {
     const resource = this.resourceService.getDamResourcePath(
       this.damId, this.resource.name, this.view.name, this.role, this.interfaceId
     );
-    return this.resourceService.getUrlForObtainingAccessToken([resource], redirectUri);
+    const ttl = `${this.ttlForm.value}${this.selectedTimeUnit}`;
+    return this.resourceService.getUrlForObtainingAccessToken([resource], redirectUri, ttl);
   }
 
   getAccessTokensForAuthorizedResources() {

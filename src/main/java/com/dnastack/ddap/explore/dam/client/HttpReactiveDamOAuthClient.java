@@ -18,10 +18,10 @@ public class HttpReactiveDamOAuthClient extends BaseReactiveOAuthClient implemen
     }
 
     @Override
-    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint) {
+    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint, String ttl) {
         return getAuthorizedUriBuilder(realm, state, scopes, redirectUri, loginHint)
                 .queryParam("resource", resources.toArray())
-                .queryParam("ttl", "1h") // FIXME pass this in
+                .queryParam("ttl", ttl)
                 .build();
     }
 

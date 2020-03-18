@@ -29,14 +29,15 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
     }
 
     @Override
-    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint) {
+    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint, String ttl) {
         var builder = UriComponentsBuilder.fromUri(URI.create(damFacadeConfig.getOauth2Url() + "/oauth2/authorize"))
                 .queryParam("response_type", "code")
                 .queryParam("client_id", damFacadeConfig.getClientId())
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("resource", damFacadeConfig.getWesResourceId())
                 .queryParam("nonce", state)
-                .queryParam("state", state);
+                .queryParam("state", state)
+                .queryParam("ttl", ttl);
 
         if (scopes != null) {
             builder.queryParam("scope", scopes);

@@ -30,6 +30,7 @@ import org.junit.BeforeClass;
 @Slf4j
 public abstract class AbstractBaseE2eTest {
 
+    public static final boolean DDAP_TEST_DAM_ENABLED = Boolean.parseBoolean(EnvUtil.optionalEnv("E2E_TEST_DAM_ENABLED", "true"));
     public static final String DDAP_BASE_URL = EnvUtil.requiredEnv("E2E_BASE_URI");
     public static final String REALM = EnvUtil.requiredEnv("E2E_TEST_REALM");
     public static final String DDAP_USERNAME = EnvUtil.optionalEnv("E2E_BASIC_USERNAME", null);

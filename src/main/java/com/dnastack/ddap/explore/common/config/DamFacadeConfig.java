@@ -14,6 +14,9 @@ public class DamFacadeConfig {
     private String wesResourceId;
     private String baseUrl;
     private String oauth2Url;
+    private String oauth2AuthorizationUrl;
+    private String oauth2TokenUrl;
+    private String oauth2UserInfoUrl;
     private String clientId;
     private String clientSecret;
 }

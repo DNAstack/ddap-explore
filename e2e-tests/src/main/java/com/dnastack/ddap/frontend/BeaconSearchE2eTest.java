@@ -7,8 +7,10 @@ import com.dnastack.ddap.common.page.DataDetailPage;
 import com.dnastack.ddap.common.page.DataListPage;
 import com.dnastack.ddap.common.page.SearchPage;
 import com.dnastack.ddap.common.util.DdapBy;
+import com.dnastack.ddap.common.util.EnvUtil;
 import com.dnastack.ddap.common.util.WebDriverCookieHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,9 +33,12 @@ import static org.junit.Assert.assertTrue;
 @Slf4j
 @SuppressWarnings("Duplicates")
 public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
+    public static final boolean DDAP_CURRENT_TEST_ENABLED = Boolean.parseBoolean(EnvUtil.optionalEnv("E2E_TEST_BEACON_SEARCH_ENABLED", "true"));
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
+        Assume.assumeTrue(DDAP_CURRENT_TEST_ENABLED);
+
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AdminDdapPage::new);
     }
 

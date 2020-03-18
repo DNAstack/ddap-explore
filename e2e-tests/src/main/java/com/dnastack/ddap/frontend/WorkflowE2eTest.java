@@ -14,6 +14,7 @@ import com.dnastack.ddap.common.util.EnvUtil;
 import java.io.IOException;
 import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -21,7 +22,7 @@ import org.openqa.selenium.By;
 @SuppressWarnings("Duplicates")
 @Slf4j
 public class WorkflowE2eTest extends AbstractFrontendE2eTest {
-
+    public static final boolean DDAP_CURRENT_TEST_ENABLED = Boolean.parseBoolean(EnvUtil.optionalEnv("E2E_TEST_WORKFLOWS_ENABLED", "true"));
 
     private static String datasetUrl = EnvUtil.optionalEnv(
         "E2E_DATASET_URL",
@@ -36,6 +37,8 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
+        Assume.assumeTrue(DDAP_CURRENT_TEST_ENABLED);
+
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }
 
@@ -121,6 +124,8 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void testSingleWorkflowExecutionWithTokensFromSecuredDataset() throws IOException {
+        Assume.assumeTrue(DDAP_TEST_DAM_ENABLED);
+
         //        WorkflowWesServersPage workflowWesServersPage = ddapPage.getNavBar()
         //            .goToWorkflows();
         //        WorkflowManagePage managePage = workflowWesServersPage.clickManage();

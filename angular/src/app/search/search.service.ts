@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
+import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 
@@ -9,18 +10,32 @@ import { environment } from '../../environments/environment';
 })
 export class SearchService {
 
-  constructor( private http: HttpClient,
-               private errorHandler: ErrorHandlerService) { }
+  constructor(private http: HttpClient,
+              private errorHandler: ErrorHandlerService) {
+  }
 
-  getTables() {
-    return this.http.get(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/tables`)
+  getSearchResources(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search`)
       .pipe(
         this.errorHandler.notifyOnError()
       );
   }
 
-  search(query) {
-    return this.http.post(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/query`, query)
+  getTables(resource: string): Observable<any> {
+    return this.http.get<any>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/tables`,
+      { params: {
+          resource: encodeURIComponent(resource),
+        }})
+      .pipe(
+        this.errorHandler.notifyOnError()
+      );
+  }
+
+  search(resource: string, query): Observable<any> {
+    return this.http.post<any>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/query`, query,
+      { params: {
+          resource: encodeURIComponent(resource),
+        }})
       .pipe(
         this.errorHandler.notifyOnError()
       );

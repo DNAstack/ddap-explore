@@ -4,12 +4,13 @@ import { ActivatedRoute } from '@angular/router';
 import 'brace';
 import 'brace/mode/sql';
 import 'brace/theme/eclipse';
+import Table = WebAssembly.Table;
+import { flatMap, map } from 'rxjs/operators';
 
 import { SearchService } from '../search.service';
 
 import { JsonViewerService } from './json-viewer/json-viewer.component';
 import { BeaconQuery, BeaconRegistry, SearchView } from './search-tables.model';
-import Table = WebAssembly.Table;
 
 @Component({
   selector: 'ddap-search-detail',
@@ -32,6 +33,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   };
   result: any;
   queryHistory: string[];
+  searchResource: any;
 
   private QUERY_EDITOR_DELIMITER = ';';
   private QUERY_EDITOR_NEWLINE = '\n';
@@ -60,9 +62,17 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    this.searchService.getTables().subscribe(data => {
-      this.searchTables = data['tables'];
-    });
+    this.searchService.getSearchResources()
+      .pipe(
+        // FIXME: just not to break existing functionality, returned list is mocked up
+        flatMap((resources: any[]) => {
+          this.searchResource = resources[0];
+          return this.searchService.getTables(this.searchResource.resourceUrl);
+        })
+      )
+      .subscribe(({ tables }) => {
+        this.searchTables = tables;
+      });
   }
 
   ngAfterViewInit(): void {
@@ -189,7 +199,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
 
     this.view.isSearching = true;
     this.view.errorQueryingTables = false;
-    this.searchService.search({ 'query' : query }).subscribe(result => {
+    this.searchService.search(this.searchResource.resourceUrl, { 'query' : query }).subscribe(result => {
       this.query = query;
       this.result = result;
       this.view.isSearching = false;

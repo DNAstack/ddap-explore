@@ -7,7 +7,9 @@ import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.DataDetailPage;
 import com.dnastack.ddap.common.page.DataListPage;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
+import com.dnastack.ddap.common.util.EnvUtil;
 import org.apache.http.cookie.Cookie;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -21,9 +23,12 @@ import static io.restassured.RestAssured.given;
 
 @SuppressWarnings("Duplicates")
 public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
+    public static final boolean DDAP_CURRENT_TEST_ENABLED = Boolean.parseBoolean(EnvUtil.optionalEnv("E2E_TEST_DATA_EXPLORE_ACCESS_ENABLED", "true"));
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
+        Assume.assumeTrue(DDAP_CURRENT_TEST_ENABLED);
+
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }
 

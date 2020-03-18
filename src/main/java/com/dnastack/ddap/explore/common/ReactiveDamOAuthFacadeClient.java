@@ -30,7 +30,8 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
 
     @Override
     public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint, String ttl) {
-        var builder = UriComponentsBuilder.fromUri(URI.create(damFacadeConfig.getOauth2Url() + "/oauth2/authorize"))
+        // authorization_endpoint
+        var builder = UriComponentsBuilder.fromUri(URI.create(damFacadeConfig.getOauth2AuthorizationUrl()))
                 .queryParam("response_type", "code")
                 .queryParam("client_id", damFacadeConfig.getClientId())
                 .queryParam("redirect_uri", redirectUri)
@@ -54,7 +55,7 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
         // NOTE: Based on BaseReactiveOauthClient
         return WebClientFactory.getWebClient()
                 .post()
-                .uri(damFacadeConfig.getOauth2Url() + "/oauth2/token")
+                .uri(damFacadeConfig.getOauth2TokenUrl())
                 .header(AUTHORIZATION, "Basic " + encodeBasicAuth(damFacadeConfig.getClientId(), damFacadeConfig.getClientSecret()))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData("grant_type", "authorization_code")

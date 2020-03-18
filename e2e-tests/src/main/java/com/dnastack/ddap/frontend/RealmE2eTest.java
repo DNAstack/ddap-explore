@@ -2,9 +2,7 @@ package com.dnastack.ddap.frontend;
 
 import static com.dnastack.ddap.common.TestingPersona.ADMINISTRATOR;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 
 import com.dnastack.ddap.common.page.AdminDdapPage;
 import com.dnastack.ddap.common.util.EnvUtil;
@@ -16,10 +14,12 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 @SuppressWarnings("Duplicates")
 public class RealmE2eTest extends AbstractFrontendE2eTest {
-
+    public static final boolean DDAP_CURRENT_TEST_ENABLED = Boolean.parseBoolean(EnvUtil.optionalEnv("E2E_TEST_REALM_ENABLED", "true"));
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
+        Assume.assumeTrue(DDAP_CURRENT_TEST_ENABLED);
+
         boolean isSandbox = Boolean.parseBoolean(EnvUtil.optionalEnv("E2E_SANDBOX", "false"));
         Assume.assumeTrue(isSandbox);
         ddapPage = doBrowserLogin(REALM, ADMINISTRATOR, AdminDdapPage::new);

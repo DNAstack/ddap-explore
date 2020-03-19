@@ -42,7 +42,8 @@ public class PersonaLoginStrategy implements LoginStrategy {
 
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
-        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
+        String baseUrl = EnvUtil.stripTrailingSlash(DDAP_BASE_URL);
+        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(baseUrl, DDAP_USERNAME, DDAP_PASSWORD);
         final CookieStore cookieStore = setupCookieStore(session);
         final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
         final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);
@@ -50,7 +51,7 @@ public class PersonaLoginStrategy implements LoginStrategy {
         final String state;
 
         {
-            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=persona:%s%s", DDAP_BASE_URL, realmName, personaName, scopeString));
+            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=persona:%s%s", baseUrl, realmName, personaName, scopeString));
 
             HttpResponse response = httpclient.execute(request);
 
@@ -80,7 +81,8 @@ public class PersonaLoginStrategy implements LoginStrategy {
 
     @Override
     public <T extends AnyDdapPage> T performPersonaLogin(WebDriver driver, TestingPersona persona, String realm, Function<WebDriver, T> pageFactory) {
-        driver.get(URI.create(DDAP_BASE_URL).resolve(format("/api/v1alpha/realm/%s/identity/login", realm)).toString());
+        String baseUrl = EnvUtil.stripTrailingSlash(DDAP_BASE_URL);
+        driver.get(URI.create(baseUrl).resolve(format("/api/v1alpha/realm/%s/identity/login", realm)).toString());
         ICLoginPage icLoginPage = new ICLoginPage(driver);
         return icLoginPage.loginAsPersona(persona, pageFactory);
     }

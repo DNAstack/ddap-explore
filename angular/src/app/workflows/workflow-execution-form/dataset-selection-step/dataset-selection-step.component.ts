@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import _sampleSize from 'lodash.samplesize';
@@ -17,7 +17,7 @@ import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
   templateUrl: './dataset-selection-step.component.html',
   styleUrls: ['./dataset-selection-step.component.scss'],
 })
-export class DatasetSelectionStepComponent {
+export class DatasetSelectionStepComponent implements OnInit {
 
   get datasetUrl() {
     return this.currentDatasetUrl
@@ -29,6 +29,8 @@ export class DatasetSelectionStepComponent {
   form: FormGroup;
   @Input()
   workflowId: string;
+  @Input()
+  tableData?: any;
   @Output()
   readonly datasetColumnsChanged: EventEmitter<string[]> = new EventEmitter<string[]>();
 
@@ -44,6 +46,13 @@ export class DatasetSelectionStepComponent {
               private datasetService: DatasetService,
               private workflowsStateService: WorkflowsStateService,
               private resourceAuthStateService: ResourceAuthStateService) {
+  }
+
+  ngOnInit(): void {
+    if (this.tableData && Object.keys(this.tableData).length !== 0) {
+      this.dataset = this.tableData;
+      this.datasetColumnsChanged.emit(this.getDatasetColumns());
+    }
   }
 
   fetchDataset(url: string) {

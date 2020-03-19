@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 
@@ -10,8 +10,11 @@ import { environment } from '../../environments/environment';
 })
 export class SearchService {
 
+  tableData: BehaviorSubject<object>;
+
   constructor(private http: HttpClient,
               private errorHandler: ErrorHandlerService) {
+    this.tableData = new BehaviorSubject<object>({});
   }
 
   getSearchResources(): Observable<any[]> {
@@ -39,5 +42,9 @@ export class SearchService {
       .pipe(
         this.errorHandler.notifyOnError()
       );
+  }
+
+  updateTableData(tableData) {
+    this.tableData.next(tableData);
   }
 }

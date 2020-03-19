@@ -150,6 +150,16 @@
                     <div class="m-b-sm"
                          style="display:flex; flex-direction: row; align-items: center;">
                       <pre><code>{{query}}</code></pre>
+                      <button *ngIf="result"
+                              mat-stroked-button
+                              color="accent"
+                              matTooltip="Run query"
+                              class="run-workflow"
+                              [routerLink]="['/'+realm, 'analyze', 'run']"
+                              [queryParams]="{'source': 'search'}">
+                        <mat-icon>launch</mat-icon>
+                        Run Workflow
+                      </button>
                     </div>
                     <table *ngIf="result" data-se="result-wrapper">
                       <tr>

@@ -10,6 +10,7 @@
               [editable]="!readyToExecute">
       <ng-template matStepLabel>Import dataset and select data</ng-template>
       <ddap-dataset-selection-step [form]="datasetForm"
+                                   [tableData]="datasetData"
                                    [workflowId]="workflowId"
                                    (datasetColumnsChanged)="datasetColumnsChange($event)">
       </ddap-dataset-selection-step>

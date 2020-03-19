@@ -7,6 +7,8 @@ import _isequal from 'lodash.isequal';
 import { Observable, Subscription, zip } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
+import { SearchService } from '../../search/search.service';
 import { AccessControlService } from '../../shared/access-control.service';
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
@@ -24,7 +26,6 @@ import { WorkflowExecution } from '../workflow-execution-form/workflow-execution
 import { WorkflowFormBuilder } from '../workflow-execution-form/workflow-form-builder.service';
 import { WorkflowsStateService } from '../workflow-execution-form/workflows-state.service';
 import { WorkflowService } from '../workflows.service';
-import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
   selector: 'ddap-workflow-manage',
@@ -60,6 +61,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   resourceAccesses: { [key: string]: IResourceAccess };
   workflowId = Math.random().toString(36).substring(7);
   readyToExecute = false;
+  datasetData: any;
 
   @ViewChild('stepper', {static: false})
   stepper: MatStepper;
@@ -84,7 +86,8 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
               private workflowsStateService: WorkflowsStateService,
               private resourceAuthStateService: ResourceAuthStateService,
               private errorHandler: ErrorHandlerService,
-              private viewController: ViewControllerService
+              private viewController: ViewControllerService,
+              private searchService: SearchService
   ) {
   }
 
@@ -215,12 +218,26 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     this.subscriptions.push(this.route.queryParams
       .subscribe(params => {
         if (!params.state) {
-          this.loadPredefinedWorkflowDescription();
+          if (params.source && params.source === 'search') {
+            this.buildDatasetForm();
+          } else {
+            this.loadPredefinedWorkflowDescription();
+          }
           return;
         }
         this.workflowId = params.state;
         this.loadFromStateAndCheckoutAuthorizedResources();
       }));
+  }
+
+  private buildDatasetForm() {
+    this.subscriptions.push(
+      this.searchService.tableData.subscribe(data => {
+        if (data) {
+          this.datasetData = data;
+        }
+      })
+    );
   }
 
   private initialize() {

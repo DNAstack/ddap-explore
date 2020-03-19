@@ -34,6 +34,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   result: any;
   queryHistory: string[];
   resourcePath: string;
+  realm: string;
 
   private QUERY_EDITOR_DELIMITER = ';';
   private QUERY_EDITOR_NEWLINE = '\n';
@@ -59,6 +60,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
     };
 
     this.queryHistory = [];
+    this.realm = this.route.root.firstChild.snapshot.params.realmId;
   }
 
   ngOnInit() {
@@ -200,6 +202,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
     this.searchService.search(this.resourcePath, { 'query' : query }).subscribe(result => {
       this.query = query;
       this.result = result;
+      this.searchService.updateTableData(result);
       this.view.isSearching = false;
       this.queryHistory.unshift(query);
       const schema = result['data_model'] ? result['data_model']['properties'] : {};

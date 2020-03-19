@@ -12,14 +12,16 @@ import { SearchService } from '../search.service';
 })
 export class SearchResourcesComponent implements OnInit {
 
-  resources: object[];
+  resources: any[];
+
   constructor(private searchService: SearchService,
               private randomImageRetriever: ImagePlaceholderRetriever,
-              private router: Router) { }
+              private router: Router) {
+  }
 
   ngOnInit() {
     this.searchService.getSearchResources()
-      .subscribe(resources => this.resources = resources);
+      .subscribe((resources) => this.resources = resources);
   }
 
 }

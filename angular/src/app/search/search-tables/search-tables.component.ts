@@ -33,7 +33,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   };
   result: any;
   queryHistory: string[];
-  resourceUrl: string;
+  resourcePath: string;
 
   private QUERY_EDITOR_DELIMITER = ';';
   private QUERY_EDITOR_NEWLINE = '\n';
@@ -63,9 +63,9 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.route.queryParams.pipe(
-      flatMap(({resourceUrl}) => {
-        this.resourceUrl = decodeURI(resourceUrl);
-        return this.searchService.getTables(this.resourceUrl);
+      flatMap(({ resourcePath }) => {
+        this.resourcePath = decodeURI(resourcePath);
+        return this.searchService.getTables(this.resourcePath);
       })
     )
     .subscribe(({ tables }) => {
@@ -197,7 +197,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
 
     this.view.isSearching = true;
     this.view.errorQueryingTables = false;
-    this.searchService.search(this.resourceUrl, { 'query' : query }).subscribe(result => {
+    this.searchService.search(this.resourcePath, { 'query' : query }).subscribe(result => {
       this.query = query;
       this.result = result;
       this.view.isSearching = false;

@@ -13,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class SearchResourceResponseModel {
 
-    private String resourceUrl;
+    private String resourcePath;
     private Map<String, String> ui;
 
 }

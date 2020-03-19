@@ -6,9 +6,11 @@ ddaplib-header ddaplib-header-add-btn {
 
 ::ng-deep mat-card {
   margin: 1rem 0;
+
   mat-card-content {
     padding: 0 1rem;
   }
+
   mat-card-actions {
     margin-left: 0;
   }
@@ -27,6 +29,7 @@ ddaplib-header ddaplib-header-add-btn {
 .sample-details-list {
   display: flex;
   flex-direction: column;
+
   ddap-key-value-pair {
     margin-bottom: 10px;
   }
@@ -34,17 +37,17 @@ ddaplib-header ddaplib-header-add-btn {
 
 .full-hw {
   position: absolute;
-  top:0; 
-  bottom:0; 
-  left:0; 
-  right:0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 #beacon-search-parameters {
   div {
 
     margin-right: 5px;
-    
+
 
     div {
       font-size: 10px;
@@ -53,17 +56,29 @@ ddaplib-header ddaplib-header-add-btn {
       color: #4f4f4f;
       text-transform: uppercase;
     }
+
     input {
       width: 100px;
       background: transparent;
       font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
       border: 0px solid;
+
       &:focus {
         outline: none;
       }
+
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
   }
+}
+
+.discovery-beacon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 64px;
+  bottom: 0;
+  padding: 0;
 }

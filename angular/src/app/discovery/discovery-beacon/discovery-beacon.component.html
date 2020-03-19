@@ -29,7 +29,13 @@
       </button>
     </mat-toolbar-row>
 </mat-toolbar>
-<ddaplib-main style="padding:0; top:64px">
+<!--
+NOTE:
+
+Originally, it tries to use ddaplib-main. However, overriding "ddaplib-main > main" is near impossible due to
+some weird CSS compilation done by Angular. So, we use "div" here in order to have full control over the element style.
+-->
+<div class="discovery-beacon">
   <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
     <mat-drawer #detailDrawer mode="side" position="end" opened="open" style="min-width:400px; max-width:400px" (openedStart)="onInfoPanelVisibilityChange(true)" (closedStart)="onInfoPanelVisibilityChange(false)">
       <mat-toolbar class="tertiary-toolbar"
@@ -115,4 +121,4 @@
         </div>
     </mat-drawer-content>
   </mat-drawer-container>
-</ddaplib-main>
+</div>

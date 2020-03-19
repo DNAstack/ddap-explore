@@ -30,7 +30,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
-        testConfig = EnvUtil.requiredEnvConfig("E2E_TEST_DATA_EXPLORE_CONFIG",  DataExploreTestConfig.class);
+        testConfig = EnvUtil.optionalEnvConfig("E2E_TEST_DATA_EXPLORE_CONFIG",new DataExploreTestConfig(),  DataExploreTestConfig.class);
         Assume.assumeTrue("DataExploreAccessE2eTest has been disabled, and will not run.",testConfig.isEnabled());
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }

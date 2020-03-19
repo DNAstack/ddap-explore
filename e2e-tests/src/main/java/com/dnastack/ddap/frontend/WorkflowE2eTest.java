@@ -31,8 +31,9 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
-        workflowTestConfig = EnvUtil.requiredEnvConfig("E2E_TEST_WORKFLOW_CONFIG", WorkflowTestConfig.class);
-        Assume.assumeTrue("RealmE2eTest has been disabled, and will not run.",workflowTestConfig.isEnabled());
+        workflowTestConfig = EnvUtil
+            .optionalEnvConfig("E2E_TEST_WORKFLOW_CONFIG", new WorkflowTestConfig(), WorkflowTestConfig.class);
+        Assume.assumeTrue("RealmE2eTest has been disabled, and will not run.", workflowTestConfig.isEnabled());
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }
 

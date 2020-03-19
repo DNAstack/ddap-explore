@@ -30,10 +30,14 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import static com.dnastack.ddap.common.security.UserTokenCookiePackager.BasicServices.DAM;
 import static java.lang.String.format;
+import static java.util.Map.entry;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
@@ -62,17 +66,66 @@ public class ResourceFlowController {
     public Mono<ResponseEntity<DamService.ResourceResults>> checkout(ServerHttpRequest request,
                                                                      @PathVariable String realm,
                                                                      @RequestParam("resource") List<String> damIdResourcePairs) {
-        final List<URI> resources = getResourcesFrom(realm, damIdResourcePairs);
+        final Map<String, List<String>> damIdResourcePairsById = damIdResourcePairs.stream()
+                                                                                   .collect(Collectors.groupingBy(pair -> pair.split(";")[0], toList()));
+        final List<Mono<Entry<String, DamService.ResourceResults>>> reactiveResponsesWithDamIds =
+                damIdResourcePairsById.entrySet()
+                                      .stream()
+                                      .map(e -> {
+                                          final String damId = e.getKey();
+                                          final List<URI> resources = getResourcesFrom(realm, e.getValue());
+                                          final ReactiveDamClient damClient = lookupDamClient(resources);
+                                          final CartTokenCookieName cartCookieName = new CartTokenCookieName(Set.copyOf(resources));
+                                          final Optional<String> extractedCartToken = cookiePackager
+                                                  .extractTokenIgnoringInvalid(request, cartCookieName)
+                                                  .map(UserTokenCookiePackager.CookieValue::getClearText);
 
-        final ReactiveDamClient damClient = lookupDamClient(resources);
-        final CartTokenCookieName cartCookieName = new CartTokenCookieName(Set.copyOf(resources));
-        final Optional<String> extractedCartToken = cookiePackager
-            .extractTokenIgnoringInvalid(request, cartCookieName)
-            .map(UserTokenCookiePackager.CookieValue::getClearText);
+                                          return extractedCartToken.map(s -> damClient.checkoutCart(s)
+                                                                                      .map(response -> entry(damId, response)))
+                                                                   .orElseGet(() -> Mono.error(new AuthCookieNotPresentInRequestException(cartCookieName.cookieName())));
+                                      })
+                                      .collect(toList());
 
-        return extractedCartToken.map(s -> damClient.checkoutCart(s)
-                                                    .map(ResponseEntity::ok))
-                                 .orElseGet(() -> Mono.error(new AuthCookieNotPresentInRequestException(cartCookieName.cookieName())));
+        return Mono.zip(reactiveResponsesWithDamIds, responsesWithDamIds -> {
+            final DamService.ResourceResults.Builder builder = DamService.ResourceResults.newBuilder();
+
+            for (var o : responsesWithDamIds) {
+                final Entry<String, DamService.ResourceResults> pair = (Entry<String, DamService.ResourceResults>) o;
+                final DamService.ResourceResults.Builder subBuilder = pair.getValue()
+                                                                          .toBuilder();
+                final Map<String, DamService.ResourceResults.ResourceDescriptor> newResourceMap =
+                        subBuilder.getResourcesMap()
+                                  .entrySet()
+                                  .stream()
+                                  .map(e -> entry(e.getKey(), convertAccess(pair.getKey(), e.getValue())))
+                                  .collect(toMap(Entry::getKey, Entry::getValue));
+                subBuilder.clearResources();
+                subBuilder.putAllResources(newResourceMap);
+
+                final Map<String, DamService.ResourceResults.ResourceAccess> newAccessMap =
+                        subBuilder.getAccessMap()
+                                  .entrySet()
+                                  .stream()
+                                  .map(e -> entry(convertAccess(pair.getKey(), e.getKey()), e.getValue()))
+                                  .collect(toMap(Entry::getKey, Entry::getValue));
+                subBuilder.clearAccess();
+                subBuilder.putAllAccess(newAccessMap);
+
+                builder.mergeFrom(subBuilder.build());
+            }
+
+            return ResponseEntity.ok(builder.build());
+        });
+    }
+
+    private DamService.ResourceResults.ResourceDescriptor convertAccess(String damId, DamService.ResourceResults.ResourceDescriptor descriptor) {
+        return descriptor.toBuilder()
+                         .setAccess(convertAccess(damId, descriptor.getAccess()))
+                         .build();
+    }
+
+    private String convertAccess(String damId, String access) {
+        return format("%s;%s", damId, access);
     }
 
     @GetMapping("/api/v1alpha/realm/{realm}/resources/authorize")
@@ -88,16 +141,24 @@ public class ResourceFlowController {
 
         // FIXME better fallback page
         final URI nonNullRedirectUri = redirectUri != null ? redirectUri : cartCheckoutUrl(request, realm, resources);
-        final String state = stateHandler.generateResourceState(nonNullRedirectUri, realm, resources);
 
         final URI postLoginTokenEndpoint = getRedirectUri(request);
 
-        // FIXME should separate resources by DAM
-        final ReactiveDamOAuthClient oAuthClient = damClientFactory.lookupDamOAuthClient(resources);
-        final URI authorizeUri = oAuthClient.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, resources, loginHint, ttl);
+        final Map<ReactiveDamOAuthClient, List<URI>> resourcesByClient = damClientFactory.lookupDamOAuthClient(resources);
+
+        URI lastAuthUrl = null;
+        String lastState = null;
+        for (var e : resourcesByClient.entrySet()) {
+            final ReactiveDamOAuthClient client = e.getKey();
+            final List<URI> uris = e.getValue();
+            final String state = stateHandler.generateResourceState(nonNullRedirectUri, realm, uris, lastAuthUrl);
+            lastAuthUrl = client.getAuthorizeUrl(realm, state, scope, postLoginTokenEndpoint, uris, loginHint, ttl);
+            lastState = state;
+        }
+
         return ResponseEntity.status(TEMPORARY_REDIRECT)
-                             .location(authorizeUri)
-                             .header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString())
+                             .location(lastAuthUrl)
+                             .header(SET_COOKIE, cookiePackager.packageToken(lastState, cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString())
                              .build();
 
     }
@@ -194,8 +255,7 @@ public class ResourceFlowController {
      */
     @GetMapping("/api/v1alpha/resources/loggedIn")
     public Mono<? extends ResponseEntity<?>> handleTokenRequest(ServerHttpRequest request,
-                                                                @RequestParam String code,
-                                                                @RequestParam("state") String stateParam) {
+                                                                @RequestParam String code) {
         final UserTokenCookiePackager.CookieName cookieName = DAM.cookieName(TokenKind.OAUTH_STATE);
         final OAuthStateHandler.ValidatedState validatedState = stateHandler.parseAndVerify(request, cookieName);
         final TokenExchangePurpose tokenExchangePurpose = validatedState.getTokenExchangePurpose();
@@ -204,18 +264,22 @@ public class ResourceFlowController {
                                                   .flatMap(List::stream)
                                                   .map(URI::create)
                                                   .collect(toList());
-        final ReactiveDamOAuthClient oAuthClient = damClientFactory.lookupDamOAuthClient(resources);
+        final ReactiveDamOAuthClient oAuthClient = damClientFactory.lookupSingleOAuthClient(resources);
         final URI redirectUri = getRedirectUri(request);
         final String realm = validatedState.getRealm();
+
         return oAuthClient.exchangeAuthorizationCodeForTokens(realm, redirectUri, code)
                           .flatMap(tokenResponse -> {
+                              final Optional<URI> nextAuthUri = validatedState.getNextAuthorizeUri();
                               Optional<URI> customDestination = validatedState.getDestinationAfterLogin()
                                                                               .map(possiblyRelativeUrl -> UriUtil.selfLinkToUi(request, realm, "").resolve(possiblyRelativeUrl));
                               if (tokenExchangePurpose == TokenExchangePurpose.RESOURCE_AUTH) {
-                                  final URI ddapDataBrowserUrl = customDestination.orElseGet(() -> UriUtil.selfLinkToUi(request, realm, ""));
-                                  return Mono.just(assembleTokenResponse(ddapDataBrowserUrl, tokenResponse, Set.copyOf(resources)));
+                                  final URI redirectTo = nextAuthUri.or(() -> customDestination)
+                                                                    .orElseGet(() -> UriUtil.selfLinkToUi(request, realm, ""));
+                                  final URI cookieDomainPath = UriUtil.selfLinkToApi(request, realm, "resources");
+                                  return Mono.just(assembleTokenResponse(redirectTo, cookieDomainPath, Set.copyOf(resources), tokenResponse));
                               } else {
-                                  throw new TokenExchangeException("Unrecognized purpose in token exchange");
+                                  return Mono.error(new TokenExchangeException("Unrecognized purpose in token exchange"));
                               }
                           })
                           .doOnError(exception -> log.info("Failed to negotiate token", exception));
@@ -225,11 +289,13 @@ public class ResourceFlowController {
      * Examines the result of an auth-code-for-token exchange with the Identity Concentrator and creates a response
      * which sets the appropriate cookies on the user's client and redirects it to the appropriate part of the UI.
      *
-     * @param token the token response from the outbound request we initiated with the Identity Concentrator.
+     *
+     * @param cookieDomainPath
      * @param resources
+     * @param token the token response from the outbound request we initiated with the Identity Concentrator.
      * @return A response entity that sets the user's token cookies and redirects to the UI. Never null.
      */
-    private ResponseEntity<?> assembleTokenResponse(URI redirectTo, TokenResponse token, Set<URI> resources) {
+    private ResponseEntity<?> assembleTokenResponse(URI redirectTo, URI cookieDomainPath, Set<URI> resources, TokenResponse token) {
         Set<String> missingItems = new HashSet<>();
         if (token == null) {
             missingItems.add("token");
@@ -239,16 +305,28 @@ public class ResourceFlowController {
             }
         }
 
+        // Redirect may be to start a new oauth2 authorization code flow
+        final String state = UriComponentsBuilder.fromUri(redirectTo)
+                                                 .build()
+                                                 .getQueryParams()
+                                                 .getFirst("state");
+
         if (!missingItems.isEmpty()) {
             throw new IllegalArgumentException("Incomplete token response: missing " + missingItems);
         } else {
-            final String publicHost = redirectTo.getHost();
+            final String publicHost = cookieDomainPath.getHost();
             final ResponseCookie resourceCookie = cookiePackager.packageToken(token.getAccessToken(), publicHost, new CartTokenCookieName(resources));
-            return ResponseEntity.status(TEMPORARY_REDIRECT)
-                                 .location(redirectTo)
-                                 // FIXME remove old oauth_state cookie here
-                                 .header(SET_COOKIE, resourceCookie.toString())
-                                 .build();
+            final ResponseEntity.BodyBuilder builder = ResponseEntity.status(TEMPORARY_REDIRECT)
+                                                                     .location(redirectTo)
+                                                                     .header(SET_COOKIE, resourceCookie.toString());
+
+            if (state != null) {
+                builder.header(SET_COOKIE, cookiePackager.packageToken(state, cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString());
+            } else {
+                builder.header(SET_COOKIE, cookiePackager.clearToken(cookieDomainPath.getHost(), DAM.cookieName(TokenKind.OAUTH_STATE)).toString());
+            }
+
+            return builder.build();
         }
     }
 

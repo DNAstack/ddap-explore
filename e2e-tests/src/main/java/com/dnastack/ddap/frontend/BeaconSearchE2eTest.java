@@ -38,7 +38,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
-        testConfig = EnvUtil.requiredEnvConfig("E2E_TEST_BEACON_SEARCH_CONFIG", BeaconSearchTestConfig.class);
+        testConfig = EnvUtil.optionalEnvConfig("E2E_TEST_BEACON_SEARCH_CONFIG",new BeaconSearchTestConfig(), BeaconSearchTestConfig.class);
         Assume.assumeTrue("BeaconSearchE2eTest tests have been disabled, and will not run.",testConfig.isEnabled());
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AdminDdapPage::new);
     }

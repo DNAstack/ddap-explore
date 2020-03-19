@@ -35,7 +35,8 @@ RUN ./mvnw -B -o package -DskipTests=true
 
 # This stage uses a pre-packaged Selenium Docker image.
 # It is assembling the runnable test container and packaging all its Maven dependencies
-FROM selenium/standalone-chrome:3.141.59-xenon
+FROM selenium/standalone-chrome:3.141.59-zirconium
+
 ARG APP_NAME
 ARG APP_VERSION
 

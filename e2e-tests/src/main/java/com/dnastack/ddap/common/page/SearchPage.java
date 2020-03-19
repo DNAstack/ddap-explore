@@ -57,8 +57,9 @@ public class SearchPage extends AnyDdapPage {
                 .click();
     }
 
-    public void clickBRCA2() {
-        getDriver().findElement(DdapBy.se("brca2-link"))
+
+    public void clickBeaconLink(String linkName){
+        getDriver().findElement(DdapBy.se(linkName + "-link"))
                 .click();
     }
 

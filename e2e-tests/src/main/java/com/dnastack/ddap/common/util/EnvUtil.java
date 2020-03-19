@@ -24,7 +24,7 @@ public class EnvUtil {
         return val;
     }
 
-    public static  <T extends ConfigModel> T requiredEnvConfig(String name, Class<T> clazz) {
+    public static <T extends ConfigModel> T requiredEnvConfig(String name, Class<T> clazz) {
         ObjectMapper mapper = new ObjectMapper();
         String val = requiredEnv(name);
         T config = null;
@@ -37,6 +37,30 @@ public class EnvUtil {
         }
 
         return config;
+    }
+
+    public static <T extends ConfigModel> T optionalEnvConfig(String name, T defaultValue, Class<T> clazz) {
+        ObjectMapper mapper = new ObjectMapper();
+        String val = optionalEnv(name, null);
+        T config = null;
+        if (val != null) {
+            try {
+                config = mapper.readValue(val, clazz);
+                config.validateConfig();
+            } catch (IOException e) {
+                fail("Environment variable " + name + " could not be converted to type: " + clazz.getName());
+            }
+        } else {
+            config = defaultValue;
+        }
+        return config;
+    }
+
+
+    public static String stripTrailingSlash(String string) {
+        return (string.endsWith("/"))
+            ? string.substring(0, string.length() - 1)
+            : string;
     }
 
 }

@@ -30,7 +30,6 @@ import org.junit.BeforeClass;
 @Slf4j
 public abstract class AbstractBaseE2eTest {
 
-    public static final boolean DDAP_TEST_DAM_ENABLED = Boolean.parseBoolean(EnvUtil.optionalEnv("E2E_TEST_DAM_ENABLED", "true"));
     public static final String DDAP_BASE_URL = EnvUtil.requiredEnv("E2E_BASE_URI");
     public static final String REALM = EnvUtil.requiredEnv("E2E_TEST_REALM");
     public static final String DDAP_USERNAME = EnvUtil.optionalEnv("E2E_BASIC_USERNAME", null);
@@ -39,7 +38,6 @@ public abstract class AbstractBaseE2eTest {
         .optionalEnv("E2E_COOKIES_ENCRYPTOR_PASSWORD", "abcdefghijk");
     public static final String DDAP_COOKIES_ENCRYPTOR_SALT = EnvUtil
         .optionalEnv("E2E_COOKIES_ENCRYPTOR_SALT", "598953e322");
-    public static final String DDAP_E2E_TEST_MODE = EnvUtil.optionalEnv("E2E_TEST_MODE", "normal");
 
     protected static LoginStrategy loginStrategy;
     protected static ConfigStrategy configStrategy;
@@ -47,9 +45,6 @@ public abstract class AbstractBaseE2eTest {
 
     @BeforeClass
     public static void staticSetup() {
-        log.debug("Test Mode: {}", DDAP_E2E_TEST_MODE);
-        Assume.assumeThat(DDAP_E2E_TEST_MODE, equalTo("normal"));
-
         try {
             loginStrategy = StrategyFactory.getLoginStrategy();
             configStrategy = StrategyFactory.getConfigStrategy();
@@ -92,10 +87,6 @@ public abstract class AbstractBaseE2eTest {
         }
     }
 
-    private static String stripTrailingSlash(String url) {
-        return (url.endsWith("/"))
-            ? url.substring(0, url.length() - 1)
-            : url;
-    }
+
 
 }

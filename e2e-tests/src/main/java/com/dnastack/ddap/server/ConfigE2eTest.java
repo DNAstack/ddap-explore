@@ -110,6 +110,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void requireSomeCredentials() {
+        Assume.assumeTrue(DDAP_PASSWORD != null);
         given()
             .log().method()
             .log().uri()

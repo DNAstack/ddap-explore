@@ -3,9 +3,7 @@ package com.dnastack.ddap.frontend;
 import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
 import static org.junit.Assert.assertTrue;
 
-import com.dnastack.ddap.common.fragments.NavBar;
 import com.dnastack.ddap.common.page.AdminDdapPage;
-import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.SearchResourcesPage;
 import com.dnastack.ddap.common.page.TablesPage;
 import com.dnastack.ddap.common.setup.ConfigModel;

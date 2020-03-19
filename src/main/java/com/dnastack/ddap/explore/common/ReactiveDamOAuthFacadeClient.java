@@ -32,7 +32,7 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
     }
 
     @Override
-    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint) {
+    public URI getAuthorizeUrl(String realm, String state, String scopes, URI redirectUri, List<URI> resources, String loginHint, String ttl) {
         // authorization_endpoint
         var builder = UriComponentsBuilder.fromUri(URI.create(oauth2Config.getAuthorizationUrl()))
             .queryParam("response_type", "code")
@@ -40,7 +40,8 @@ public class ReactiveDamOAuthFacadeClient implements ReactiveDamOAuthClient {
             .queryParam("redirect_uri", redirectUri)
             .queryParam("resource", damFacadeConfig.getWesResourceId())
             .queryParam("nonce", state)
-            .queryParam("state", state);
+            .queryParam("state", state)
+            .queryParam("ttl",ttl);
 
         if (scopes != null && !scopes.equals("")) {
             builder.queryParam("scope", scopes);

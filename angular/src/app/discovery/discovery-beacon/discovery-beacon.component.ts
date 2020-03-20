@@ -41,6 +41,7 @@ export class DiscoveryBeaconComponent implements OnInit {
     isGeocoding: boolean,
     errorGeocoding: boolean,
     isLocation: boolean
+    isMobile: boolean
   };
 
   map: any;
@@ -110,6 +111,7 @@ export class DiscoveryBeaconComponent implements OnInit {
       isGeocoding: false,
       errorGeocoding: false,
       isLocation: true,
+      isMobile : window.innerWidth < 760,
     };
   }
 

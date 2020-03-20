@@ -83,6 +83,12 @@ ddaplib-header ddaplib-header-add-btn {
   padding: 0;
 }
 
+mat-toolbar-row {
+  .mat-mini-fab {
+    box-shadow: none;
+  }
+}
+
 @media (max-width: 480px) {
   .data-table-container {
     padding: 0 !important;

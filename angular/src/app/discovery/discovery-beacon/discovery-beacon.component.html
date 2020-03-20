@@ -1,29 +1,25 @@
 <mat-toolbar class="tertiary-toolbar" style="height: 64px; position:absolute; top: 0;">
-    <mat-toolbar-row>
-      <div *ngIf="view.isMobile" style="display: flex; flex-direction: row;">
-        <div class="m-r-sm">
-          {{query.start}} {{query.referenceBases}} » {{query.alternateBases}}
-        </div>
-        <button tabindex="-1" mat-mini-fab (click)="doEdit()" matTooltip="Edit Search Paramters" color="accent">
-          <mat-icon>edit</mat-icon>
-        </button>
-      </div>
-      <div *ngIf="!view.isMobile" id="beacon-search-parameters" style="display: flex; flex-direction: row; flex-wrap: wrap;">
+  <mat-toolbar-row>
+    <ng-container *ngIf="searchBoxActive; else inactiveSearchBox">
+      <div id="beacon-search-parameters"
+           style="display: flex; flex-direction: row; flex-wrap: wrap;">
         <div style="display: flex; flex-direction: column; margin-top:5px">
           <div>Position</div>
           <input (keyup.enter)="doSearch()" matInput name="position" [(ngModel)]="query.start">
         </div>
-        <div style="display: flex; flex-direction: column;  margin-top:5px">
+        <div style="display: flex; flex-direction: column; margin-top:5px">
           <div>Reference</div>
           <input (keyup.enter)="doSearch()" matInput name="reference" [(ngModel)]="query.referenceBases">
         </div>
-        <div style="display: flex; flex-direction: column;  margin-top:5px">
+        <div style="display: flex; flex-direction: column; margin-top:5px">
           <div>Alternate</div>
           <input (keyup.enter)="doSearch()" matInput name="alternate" [(ngModel)]="query.alternateBases">
         </div>
       </div>
-      <button *ngIf="!view.isMobile"
-              tabindex="-1"
+
+      <span class="fill-space"></span>
+
+      <button tabindex="-1"
               mat-mini-fab
               [disabled]="view.isSearching"
               (click)="doSearch()"
@@ -31,19 +27,46 @@
               color="accent">
         <mat-icon>search</mat-icon>
       </button>
+      <button mat-icon-button
+              [disabled]="view.isSearching"
+              (click)="setSearchBoxActive(false)"
+              matTooltip="Cancel search"
+              color="warn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </ng-container>
+
+    <ng-template #inactiveSearchBox>
+      <div style="display: flex; flex-direction: row; align-items: center">
+        <div class="m-r-sm">
+          {{query.start}} {{query.referenceBases}} » {{query.alternateBases}}
+        </div>
+        <button tabindex="-1"
+                mat-mini-fab
+                (click)="setSearchBoxActive(true)"
+                matTooltip="Edit Search Paramters"
+                color="accent">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
+
       <span class="fill-space"></span>
+
       <div>
         <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
           <mat-icon>help_outline</mat-icon>
         </button>
-        <button (click)="detailDrawer.close()" *ngIf="infoPanelActivated" mat-icon-button color="accent" matTooltip="Hide Details">
+        <button (click)="detailDrawer.close()" *ngIf="infoPanelActivated" mat-icon-button color="accent"
+                matTooltip="Hide Details">
           <mat-icon>info</mat-icon>
         </button>
-        <button (click)="detailDrawer.open()" *ngIf="!infoPanelActivated" mat-icon-button color="" matTooltip="Show Details">
+        <button (click)="detailDrawer.open()" *ngIf="!infoPanelActivated" mat-icon-button color=""
+                matTooltip="Show Details">
           <mat-icon>info</mat-icon>
         </button>
       </div>
-    </mat-toolbar-row>
+    </ng-template>
+  </mat-toolbar-row>
 </mat-toolbar>
 <!--
 NOTE:

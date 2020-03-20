@@ -25,6 +25,8 @@ export class DiscoveryBeaconComponent implements OnInit {
   query: BeaconRequest;
   lastQuery: BeaconRequest;
 
+  searchBoxActive = false;
+
   beaconResponses: BeaconResponse[];
   cases: any[];
   caseColumnDefs: any;
@@ -252,6 +254,10 @@ export class DiscoveryBeaconComponent implements OnInit {
       return null;
     }
     return 'https://nextstrain.org/ncov?s=' + tokens[1] + '/' + tokens[2] + '/' + tokens[3];
+  }
+
+  setSearchBoxActive(active: boolean) {
+    this.searchBoxActive = active;
   }
 
   onGridReady(params) {

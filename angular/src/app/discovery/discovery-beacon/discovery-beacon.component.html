@@ -4,7 +4,7 @@
         <div class="m-r-sm">
           {{query.start}} {{query.referenceBases}} » {{query.alternateBases}}
         </div>
-        <button tabindex="-1" mat-flat-button (click)="doEdit()" matTooltip="Edit Search Paramters" color="accent">
+        <button tabindex="-1" mat-mini-fab (click)="doEdit()" matTooltip="Edit Search Paramters" color="accent">
           <mat-icon>edit</mat-icon>
         </button>
       </div>
@@ -22,7 +22,13 @@
           <input (keyup.enter)="doSearch()" matInput name="alternate" [(ngModel)]="query.alternateBases">
         </div>
       </div>
-      <button *ngIf="!view.isMobile" tabindex="-1" mat-flat-button [disabled]="view.isSearching" (click)="doSearch()" matTooltip="Search Variant" color="accent">
+      <button *ngIf="!view.isMobile"
+              tabindex="-1"
+              mat-mini-fab
+              [disabled]="view.isSearching"
+              (click)="doSearch()"
+              matTooltip="Search Variant"
+              color="accent">
         <mat-icon>search</mat-icon>
       </button>
       <span class="fill-space"></span>
@@ -102,11 +108,8 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
       </div>
     </mat-drawer>
     <mat-drawer-content>
-      <div class="full-hw p-a" style="display:flex; flex-direction: column;">
+      <div class="data-table-container full-hw p-a" style="display:flex; flex-direction: column;">
           <div style="display: flex; flex-direction: column; flex: 1">
-            <div class="m-b text-muted" *ngIf="lastQuery">
-              {{cases.length}} sequences  with {{lastQuery.referenceBases}} » {{lastQuery.alternateBases}} at {{lastQuery.start}}
-            </div>
             <ddaplib-cover-message *ngIf="cases.length == 0" style="flex: 1"
                                    [message]="beaconResponses === undefined ? 'Searching...' : 'No Sequences'"
                                    [icon]="beaconResponses === undefined ? 'hourglass_empty' : 'filter_list'"></ddaplib-cover-message>

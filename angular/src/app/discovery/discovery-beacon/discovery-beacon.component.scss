@@ -83,3 +83,12 @@ ddaplib-header ddaplib-header-add-btn {
   padding: 0;
 }
 
+@media (max-width: 480px) {
+  .data-table-container {
+    padding: 0 !important;
+
+    ag-grid-angular {
+      border: none;
+    }
+  }
+}

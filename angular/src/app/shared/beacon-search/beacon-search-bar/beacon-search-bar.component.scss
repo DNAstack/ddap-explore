@@ -18,3 +18,7 @@ div.flex {
 :host(ddap-beacon-search-bar) {
   flex: 1;
 }
+
+button {
+  min-width: auto;
+}

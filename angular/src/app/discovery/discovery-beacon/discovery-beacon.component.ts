@@ -54,7 +54,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   // private queryParameters: any;
 
   /** Bing map */
-  private _markerTypeId = MarkerTypeId;
+  // private _markerTypeId = MarkerTypeId;
   private _options: IMapOptions = {
     disableBirdseye: true,
     disableStreetside: true,
@@ -133,10 +133,6 @@ export class DiscoveryBeaconComponent implements OnInit {
     });
   }
 
-  onInfoPanelVisibilityChange(visible: boolean) {
-    this.infoPanelActivated = visible;
-  }
-
   openHelpDialog() {
     const dialogConfig = new MatDialogConfig();
 
@@ -149,7 +145,6 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   doSearch() {
-    const that = this;
     const query = this.query;
 
     this.setQueryParameters();
@@ -164,15 +159,13 @@ export class DiscoveryBeaconComponent implements OnInit {
       this.query.alternateBases
     ).then(
       data => {
-        that.lastQuery = JSON.parse(JSON.stringify(query));
-        that.selectedCase = undefined;
+        this.lastQuery = JSON.parse(JSON.stringify(query));
+        this.selectedCase = null;
 
         // const beaconId = data['beaconId'] as string;
         // const request = data['alleleRequest'] as BeaconRequest;
         const responses = data['datasetAlleleResponses'] as BeaconResponse[];
-
-        const response = responses[0];
-        const info = response.info;
+        const info = responses[0].info;
 
         const cases = [];
         const caseColumnKeys = [];
@@ -218,14 +211,14 @@ export class DiscoveryBeaconComponent implements OnInit {
           );
         }
 
-        that.beaconResponses = data;
-        that.cases = cases;
-        that.caseColumnDefs = caseColumnDefs;
-        that.view.isSearching = false;
+        this.beaconResponses = data;
+        this.cases = cases;
+        this.caseColumnDefs = caseColumnDefs;
+        this.view.isSearching = false;
       },
       error => {
-        that.view.errorSearching = true;
-        that.view.isSearching = false;
+        this.view.errorSearching = true;
+        this.view.isSearching = false;
       }
     );
   }
@@ -278,8 +271,8 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   onSelectionChanged(event) {
-
     this.selectedCase = this.gridApi.getSelectedRows()[0];
+    this.infoPanelActivated = true;
 
     const that = this;
 

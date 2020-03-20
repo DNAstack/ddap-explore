@@ -31,7 +31,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   selectedCase: any;
   // sample: any; // marked for removal
 
-  infoPanelActivated = false;
+  infoPanelActivated: boolean;
 
   view: {
     isSearching: boolean,
@@ -74,9 +74,15 @@ export class DiscoveryBeaconComponent implements OnInit {
               private route: ActivatedRoute,
               private geocodeService: GeocodeService,
               private changeDetector: ChangeDetectorRef,
-              public helpDialog: MatDialog
+              public helpDialog: MatDialog,
+              private activatedRoute: ActivatedRoute
               ) {
+
+
+
     this.cases = [];
+
+    this.infoPanelActivated = window.innerWidth > 760;
 
     this.onSelectionChanged = this.onSelectionChanged.bind(this);
     this.navigateToCell = this.navigateToCell.bind(this);
@@ -113,7 +119,6 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.preInitialize();
 
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
@@ -125,6 +130,8 @@ export class DiscoveryBeaconComponent implements OnInit {
         this.router.navigate(['/']);
       }
     });
+
+
   }
 
   onInfoPanelVisibilityChange(visible: boolean) {
@@ -145,6 +152,10 @@ export class DiscoveryBeaconComponent implements OnInit {
   doSearch() {
     const that = this;
     const query = this.query;
+
+    this.setQueryParameters();
+
+    this.view.isSearching = true;
 
     this.beaconService.searchBeacon(
         'hCoV-19',
@@ -347,20 +358,31 @@ export class DiscoveryBeaconComponent implements OnInit {
     return splitStr.join(' ');
  }
 
-  private preInitialize() {
-    this.query = new BeaconRequest();
-    this.query.start = 3840;
-    this.query.referenceBases = 'A';
-    this.query.alternateBases = 'G';
-  }
-
   private initialize() {
     if (this.appConfig.covidBeaconUrl) {
       this.beaconService.setApiUrl(this.appConfig.covidBeaconUrl);
-      this.doSearch();
     }
-  }
 
+    const that = this;
+
+    this.activatedRoute.paramMap.subscribe(
+      params => {
+
+        that.query = new BeaconRequest();
+        that.query.start = Number(params['position']);
+        that.query.referenceBases = params['referenceBases'];
+        that.query.alternateBases = params['alternateBases'];
+
+        if (that.query.start === 0 || !that.query.referenceBases || !that.query.alternateBases) {
+          that.query.start = 3840;
+          that.query.referenceBases = 'A';
+          that.query.alternateBases = 'G';
+        }
+
+        that.doSearch();
+      }
+    );
+  }
 
   private setQueryParameters() {
     this.router.navigate(
@@ -368,7 +390,7 @@ export class DiscoveryBeaconComponent implements OnInit {
       {
         relativeTo: this.route,
         queryParams: {
-          start : this.query.start,
+          position : this.query.start,
           referenceBases: this.query.referenceBases,
           alternateBases: this.query.alternateBases,
         },

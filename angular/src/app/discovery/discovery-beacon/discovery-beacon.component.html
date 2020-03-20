@@ -13,8 +13,8 @@
           <div>Alternate</div>
           <input matInput name="alternate" [(ngModel)]="query.alternateBases">
         </div>
-        <button tabindex="-1" mat-stroked-button (click)="doSearch()" matTooltip="Search Variant" color="accent">
-          <mat-icon>search</mat-icon>
+        <button tabindex="-1" mat-flat-button [disabled]="view.isSearching" (click)="doSearch()" matTooltip="Search Variant" color="accent">
+          <mat-icon>search</mat-icon> {{!view.isSearching ? 'Search' : 'Searching...'}}
         </button>
       </div>
       <span class="fill-space"></span>
@@ -40,10 +40,8 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
     <mat-drawer #detailDrawer
                 mode="side"
                 position="end"
-                opened="open"
-                style="min-width:400px; max-width:400px"
-                (openedStart)="onInfoPanelVisibilityChange(true)"
-                (closedStart)="onInfoPanelVisibilityChange(false)">
+                [(opened)]="infoPanelActivated"
+                style="min-width:400px; max-width:400px">
       <mat-toolbar class="tertiary-toolbar"
           style="height: 64px; position:absolute; top: 0;">
           <mat-toolbar-row>
@@ -55,7 +53,6 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
           </mat-toolbar-row>
       </mat-toolbar>
       <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
-          <mat-progress-bar *ngIf="view.isSearching" mode="indeterminate" color="accent"></mat-progress-bar>
           <ddaplib-cover-message *ngIf="!selectedCase" style="flex-grow: 1" message="No Details" icon="subject"></ddaplib-cover-message>
           <div style="flex:1; height:100%;" *ngIf="selectedCase" class="p-a">
             <div class="sample-details-list">

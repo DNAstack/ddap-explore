@@ -1,23 +1,24 @@
 <mat-toolbar class="tertiary-toolbar" style="height: 64px; position:absolute; top: 0;">
   <mat-toolbar-row>
-    <ng-container *ngIf="searchBoxActive; else inactiveSearchBox">
-      <div id="beacon-search-parameters"
-           style="display: flex; flex-direction: row; flex-wrap: wrap;">
-        <div style="display: flex; flex-direction: column; margin-top:5px">
-          <div>Position</div>
+    <ng-template #searchBox>
+      <div id="beacon-search-parameters">
+        <div class="input-control">
+          <span class="input-control-label">Position</span>
           <input (keyup.enter)="doSearch()" matInput name="position" [(ngModel)]="query.start">
         </div>
-        <div style="display: flex; flex-direction: column; margin-top:5px">
-          <div>Reference</div>
+
+        <div class="input-control">
+          <span class="input-control-label">Reference</span>
           <input (keyup.enter)="doSearch()" matInput name="reference" [(ngModel)]="query.referenceBases">
         </div>
-        <div style="display: flex; flex-direction: column; margin-top:5px">
-          <div>Alternate</div>
+
+        <div class="input-control">
+          <span class="input-control-label">Alternate</span>
           <input (keyup.enter)="doSearch()" matInput name="alternate" [(ngModel)]="query.alternateBases">
         </div>
       </div>
 
-      <span class="fill-space"></span>
+      <span class="fill-space" *ngIf="view.isMobile"></span>
 
       <button tabindex="-1"
               mat-mini-fab
@@ -27,31 +28,9 @@
               color="accent">
         <mat-icon>search</mat-icon>
       </button>
-      <button mat-icon-button
-              [disabled]="view.isSearching"
-              (click)="setSearchBoxActive(false)"
-              matTooltip="Cancel search"
-              color="warn">
-        <mat-icon>close</mat-icon>
-      </button>
-    </ng-container>
+    </ng-template>
 
-    <ng-template #inactiveSearchBox>
-      <div style="display: flex; flex-direction: row; align-items: center">
-        <div class="m-r-sm">
-          {{query.start}} {{query.referenceBases}} » {{query.alternateBases}}
-        </div>
-        <button tabindex="-1"
-                mat-mini-fab
-                (click)="setSearchBoxActive(true)"
-                matTooltip="Edit Search Paramters"
-                color="accent">
-          <mat-icon>edit</mat-icon>
-        </button>
-      </div>
-
-      <span class="fill-space"></span>
-
+    <ng-template #moreActions>
       <div>
         <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
           <mat-icon>help_outline</mat-icon>
@@ -66,6 +45,48 @@
         </button>
       </div>
     </ng-template>
+
+    <ng-template #mobileToolbar>
+      <ng-container *ngIf="searchBoxActive; else inactiveSearchBox">
+        <ng-container *ngTemplateOutlet="searchBox"></ng-container>
+        <button mat-icon-button
+                [disabled]="view.isSearching"
+                (click)="setSearchBoxActive(false)"
+                matTooltip="Cancel search"
+                color="warn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </ng-container>
+
+      <ng-template #inactiveSearchBox>
+        <div style="display: flex; flex-direction: row; align-items: center">
+          <div class="m-r-sm">
+            {{query.start}} {{query.referenceBases}} » {{query.alternateBases}}
+          </div>
+          <button tabindex="-1"
+                  mat-mini-fab
+                  (click)="setSearchBoxActive(true)"
+                  matTooltip="Edit Search Paramters"
+                  color="accent">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
+
+        <span class="fill-space"></span>
+
+        <ng-container *ngTemplateOutlet="moreActions"></ng-container>
+      </ng-template>
+    </ng-template>
+
+    <ng-template #desktopToolbar>
+      <ng-container *ngTemplateOutlet="searchBox"></ng-container>
+
+      <span class="fill-space"></span>
+
+      <ng-container *ngTemplateOutlet="moreActions"></ng-container>
+    </ng-template>
+
+    <ng-container *ngTemplateOutlet="view.isMobile ? mobileToolbar : desktopToolbar"></ng-container>
   </mat-toolbar-row>
 </mat-toolbar>
 <!--

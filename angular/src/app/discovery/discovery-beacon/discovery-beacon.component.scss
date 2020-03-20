@@ -44,12 +44,17 @@ ddaplib-header ddaplib-header-add-btn {
 }
 
 #beacon-search-parameters {
-  div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 
+  div.input-control {
+    display: flex;
+    flex-direction: column;
+    margin-top:5px;
     margin-right: 5px;
 
-
-    div {
+    span.input-control-label {
       font-size: 10px;
       line-height: 0.8em;
       font-weight: 500;

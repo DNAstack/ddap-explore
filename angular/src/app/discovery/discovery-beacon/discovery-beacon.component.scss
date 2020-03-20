@@ -51,7 +51,7 @@ ddaplib-header ddaplib-header-add-btn {
   div.input-control {
     display: flex;
     flex-direction: column;
-    margin-top:5px;
+    margin-top: 5px;
     margin-right: 5px;
 
     span.input-control-label {
@@ -79,6 +79,18 @@ ddaplib-header ddaplib-header-add-btn {
   }
 }
 
+.discovery-beacon-main-toolbar {
+  height: 64px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  &.mobile-search-active {
+    display: none;
+  }
+}
+
 .discovery-beacon {
   position: absolute;
   left: 0;
@@ -87,9 +99,21 @@ ddaplib-header ddaplib-header-add-btn {
   bottom: 0;
   padding: 0;
 
+  .details-panel {
+    position: absolute;
+    width: 100%;
+    top: 64px;
+    bottom: 0;
+    overflow-y: auto;
+  }
+
   mat-drawer {
-    min-width:400px;
+    min-width: 400px;
     max-width: 100%;
+  }
+
+  &.mobile-search-active {
+    top: 0;
   }
 }
 
@@ -103,7 +127,7 @@ mat-toolbar-row {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 760px) {
   .data-table-container {
     padding: 0 !important;
 
@@ -123,6 +147,7 @@ mat-toolbar-row {
 
     div.input-control {
       margin-bottom: 8px;
+
       input {
         margin-top: 4px;
         width: 100%;

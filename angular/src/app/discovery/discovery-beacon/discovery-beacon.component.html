@@ -48,7 +48,7 @@
   </div>
 </ng-template>
 
-<mat-toolbar class="tertiary-toolbar" style="height: 64px; position:absolute; top: 0;">
+<mat-toolbar class="discovery-beacon-main-toolbar tertiary-toolbar {{ (view.isMobile && !searchBoxActive) ? 'mobile-search-inactive' : 'mobile-search-active' }}">
   <mat-toolbar-row>
     <ng-template #moreActions>
       <div>
@@ -108,7 +108,7 @@ NOTE:
 Originally, it tries to use ddaplib-main. However, overriding "ddaplib-main > main" is near impossible due to
 some weird CSS compilation done by Angular. So, we use "div" here in order to have full control over the element style.
 -->
-<div class="discovery-beacon">
+<div class="discovery-beacon {{ (view.isMobile && !searchBoxActive) ? 'mobile-search-inactive' : 'mobile-search-active' }}">
   <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
     <mat-drawer #detailDrawer
                 mode="side"
@@ -124,7 +124,7 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
               </button>
           </mat-toolbar-row>
       </mat-toolbar>
-      <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
+      <div class="details-panel">
           <ddaplib-cover-message *ngIf="!selectedCase" style="flex-grow: 1" message="No Details" icon="subject"></ddaplib-cover-message>
           <div style="flex:1; height:100%;" *ngIf="selectedCase" class="p-a">
             <div class="sample-details-list">

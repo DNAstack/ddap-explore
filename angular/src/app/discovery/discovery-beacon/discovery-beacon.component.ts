@@ -257,6 +257,10 @@ export class DiscoveryBeaconComponent implements OnInit {
 
   setSearchBoxActive(active: boolean) {
     this.searchBoxActive = active;
+
+    if (active) {
+      this.infoPanelActivated = false;
+    }
   }
 
   onGridReady(params) {

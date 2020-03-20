@@ -80,6 +80,8 @@ export class DiscoveryBeaconComponent implements OnInit {
   ) {
     this.cases = [];
 
+    const isMobile = window.innerWidth < 760;
+
     this.infoPanelActivated = false;
 
     this.onSelectionChanged = this.onSelectionChanged.bind(this);
@@ -96,12 +98,14 @@ export class DiscoveryBeaconComponent implements OnInit {
         filter: true,
       },
       makeFullWidth: false,
-      pagination: true,
+      pagination: !isMobile,
       domLayout: 'normal',
       enableStatusBar: true,
       suppressCellSelection: true,
       rowSelection: 'single',
     };
+
+
 
     this.view = {
       isSearching: false,
@@ -111,7 +115,7 @@ export class DiscoveryBeaconComponent implements OnInit {
       isGeocoding: false,
       errorGeocoding: false,
       isLocation: true,
-      isMobile : window.innerWidth < 760,
+      isMobile : isMobile,
     };
   }
 

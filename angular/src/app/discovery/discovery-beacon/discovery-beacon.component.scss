@@ -81,6 +81,11 @@ ddaplib-header ddaplib-header-add-btn {
   top: 64px;
   bottom: 0;
   padding: 0;
+
+  mat-drawer {
+    min-width:400px;
+    max-width: 100%;
+  }
 }
 
 mat-toolbar-row {
@@ -95,6 +100,12 @@ mat-toolbar-row {
 
     ag-grid-angular {
       border: none;
+    }
+  }
+
+  .discovery-beacon {
+    mat-drawer {
+      min-width: 100%;
     }
   }
 }

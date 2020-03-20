@@ -97,7 +97,9 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
             <div class="m-b text-muted" *ngIf="lastQuery">
               {{cases.length}} sequences  with {{lastQuery.referenceBases}} » {{lastQuery.alternateBases}} at {{lastQuery.start}}
             </div>
-            <ddaplib-cover-message *ngIf="cases.length == 0" style="flex: 1" message="No Sequences" icon="filter_list"></ddaplib-cover-message>
+            <ddaplib-cover-message *ngIf="cases.length == 0" style="flex: 1"
+                                   [message]="beaconResponses === undefined ? 'Searching...' : 'No Sequences'"
+                                   [icon]="beaconResponses === undefined ? 'autorenew' : 'filter_list'"></ddaplib-cover-message>
             <ag-grid-angular
                 *ngIf="cases.length > 0"
                 style="width: 100%; flex: 1;"

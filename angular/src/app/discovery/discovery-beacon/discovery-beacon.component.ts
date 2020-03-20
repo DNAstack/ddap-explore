@@ -79,7 +79,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   ) {
     this.cases = [];
 
-    this.infoPanelActivated = window.innerWidth > 760;
+    this.infoPanelActivated = false;
 
     this.onSelectionChanged = this.onSelectionChanged.bind(this);
     this.navigateToCell = this.navigateToCell.bind(this);

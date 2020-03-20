@@ -21,10 +21,10 @@
       <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
         <mat-icon>help_outline</mat-icon>
       </button>
-      <button (click)="detailDrawer.toggle()" *ngIf="infoPanelActivated" mat-icon-button color="accent" matTooltip="Hide Details">
+      <button (click)="detailDrawer.close()" *ngIf="infoPanelActivated" mat-icon-button color="accent" matTooltip="Hide Details">
         <mat-icon>info</mat-icon>
       </button>
-      <button (click)="detailDrawer.toggle()" *ngIf="!infoPanelActivated" mat-icon-button color="" matTooltip="Show Details">
+      <button (click)="detailDrawer.open()" *ngIf="!infoPanelActivated" mat-icon-button color="" matTooltip="Show Details">
         <mat-icon>info</mat-icon>
       </button>
     </mat-toolbar-row>
@@ -103,7 +103,6 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
             <ag-grid-angular
                 *ngIf="cases.length > 0"
                 style="width: 100%; flex: 1;"
-                #agGrid
                 class="ag-theme-material b-a"
                 [defaultColDef]="grid.defaultColumnDefinition"
                 [multiSortKey]="grid.multiSortKey"
@@ -111,9 +110,9 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
                 [pagination]="grid.pagination"
                 [floatingFilter]="grid.floatingFilter"
                 [suppressCellSelection]="grid.suppressCellSelection"
-                [(rowData)]="cases"
+                [rowData]="cases"
                 [enableCellTextSelection]="true"
-                [(columnDefs)]="caseColumnDefs"
+                [columnDefs]="caseColumnDefs"
                 [domLayout]="grid.domLayout"
                 [navigateToNextCell]="navigateToCell"
                 [rowSelection]="grid.rowSelection"

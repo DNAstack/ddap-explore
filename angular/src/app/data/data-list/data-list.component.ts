@@ -1,9 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EntityModel } from 'ddap-common-lib';
-import { Subscription } from 'rxjs';
+import { EntityModel, flatten } from 'ddap-common-lib';
+import { zip } from 'rxjs';
 import { Observable } from 'rxjs';
-import { flatMap, map, mergeAll, tap } from 'rxjs/operators';
+import { flatMap, map } from 'rxjs/operators';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
@@ -18,10 +18,9 @@ import { DataService } from '../data.service';
   styleUrls: ['./data-list.component.scss'],
   providers: [ImagePlaceholderRetriever],
 })
-export class DataListComponent implements OnInit, OnDestroy {
+export class DataListComponent implements OnInit {
 
-  qualifiedResources$: Observable<{ damId: string, entity: EntityModel }[]>;
-  routeParamsSubscription: Subscription;
+  qualifiedResources$: Observable<{damId: string, entity: EntityModel}[]>;
 
   constructor(
     private dataService: DataService,
@@ -37,18 +36,12 @@ export class DataListComponent implements OnInit, OnDestroy {
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get()
       .subscribe((data: AppConfigModel) => {
-        if (data.featureExploreDataEnabled) {
-          this.initialize();
-        } else {
-          this.router.navigate(['/']);
-        }
-      });
-  }
-
-  ngOnDestroy(): void {
-    if (this.routeParamsSubscription) {
-      this.routeParamsSubscription.unsubscribe();
-    }
+      if (data.featureExploreDataEnabled) {
+        this.initialize();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
   }
 
   ellipseIfLongerThan(text: string, maxLength: number): string {
@@ -59,19 +52,26 @@ export class DataListComponent implements OnInit, OnDestroy {
   }
 
   private initialize() {
-    this.routeParamsSubscription = this.route.parent.params.subscribe(() => {
-      this.qualifiedResources$ = this.damInfoService.getDamUrls()
-        .pipe(
-          map((damApiUrls) => Array.from(damApiUrls.keys())),
-          flatMap((damIds: string[]) => {
-            return damIds.map(damId => this.dataService.get(damId)
-              .pipe(
-                map((ems: EntityModel[]) => ems.map(DataListComponent.qualifier(damId)))
-              )
-            );
-          }),
-          mergeAll()
-        );
+    // FIXME I think this should be a piped Observable and not a subscription
+    // Needed to reload the data every time the realm in the URL changes (conditionIndex.e. using the realm selector)
+    this.route.parent.params.subscribe(() => {
+      this.qualifiedResources$ =
+        this.damInfoService.getDamUrls()
+          .pipe(
+            flatMap(damApiUrls => {
+              const damIds: string[] = Array.from(damApiUrls.keys());
+              const unzippedQualifiedModels: Observable<{ damId: string, entity: EntityModel }[]>[] =
+                damIds.map(damId =>
+                  this.dataService.get(damId)
+                    .pipe(map((ems: EntityModel[]) => ems.map(DataListComponent.qualifier(damId)))));
+
+              // Need to pass in all args separately, not as array
+              return zip(...unzippedQualifiedModels)
+                .pipe(
+                  map(flatten)
+                );
+            })
+          );
     });
   }
 

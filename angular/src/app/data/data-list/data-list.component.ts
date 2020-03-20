@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EntityModel } from 'ddap-common-lib';
+import { EntityModel, flatten } from 'ddap-common-lib';
 import { zip } from 'rxjs';
 import { Observable } from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
@@ -34,13 +34,21 @@ export class DataListComponent implements OnInit {
 
   ngOnInit() {
     // Ensure that the user can only access this component when it is enabled.
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
+    this.appConfigService.get()
+      .subscribe((data: AppConfigModel) => {
       if (data.featureExploreDataEnabled) {
         this.initialize();
       } else {
         this.router.navigate(['/']);
       }
     });
+  }
+
+  ellipseIfLongerThan(text: string, maxLength: number): string {
+    if (text && text.length > maxLength) {
+      return `${text.substring(0, maxLength)}...`;
+    }
+    return text;
   }
 
   private initialize() {
@@ -60,7 +68,7 @@ export class DataListComponent implements OnInit {
               // Need to pass in all args separately, not as array
               return zip(...unzippedQualifiedModels)
                 .pipe(
-                  map(DataListComponent.flatten)
+                  map(flatten)
                 );
             })
           );
@@ -74,10 +82,6 @@ export class DataListComponent implements OnInit {
         entity: em,
       };
     };
-  }
-
-  private static flatten<T>(arrayOfArrays: T[][]): T[] {
-    return arrayOfArrays.reduce((accum, cur) => accum.concat(...cur), []);
   }
 
 }

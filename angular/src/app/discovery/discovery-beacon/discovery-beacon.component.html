@@ -48,7 +48,7 @@
   </div>
 </ng-template>
 
-<mat-toolbar class="discovery-beacon-main-toolbar tertiary-toolbar {{ (view.isMobile && !searchBoxActive) ? 'mobile-search-inactive' : 'mobile-search-active' }}">
+<mat-toolbar class="discovery-beacon-main-toolbar tertiary-toolbar {{ !view.isMobile || (view.isMobile && !searchBoxActive) ? 'mobile-search-inactive' : 'mobile-search-active' }}">
   <mat-toolbar-row>
     <ng-template #moreActions>
       <div>
@@ -108,7 +108,7 @@ NOTE:
 Originally, it tries to use ddaplib-main. However, overriding "ddaplib-main > main" is near impossible due to
 some weird CSS compilation done by Angular. So, we use "div" here in order to have full control over the element style.
 -->
-<div class="discovery-beacon {{ (view.isMobile && !searchBoxActive) ? 'mobile-search-inactive' : 'mobile-search-active' }}">
+<div class="discovery-beacon {{ !view.isMobile || (view.isMobile && !searchBoxActive) ? 'mobile-search-inactive' : 'mobile-search-active' }}">
   <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
     <mat-drawer #detailDrawer
                 mode="side"

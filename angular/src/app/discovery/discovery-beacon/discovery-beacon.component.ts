@@ -107,8 +107,6 @@ export class DiscoveryBeaconComponent implements OnInit {
       rowSelection: 'single',
     };
 
-
-
     this.view = {
       isSearching: false,
       errorSearching: false,

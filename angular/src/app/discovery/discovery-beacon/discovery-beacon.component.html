@@ -1,45 +1,65 @@
+<ng-template #searchBox>
+  <div class="beacon-search-parameters">
+    <div class="input-control">
+      <span class="input-control-label">Position</span>
+      <input (keyup.enter)="doSearch()" matInput name="position" [(ngModel)]="query.start">
+    </div>
+
+    <div class="input-control">
+      <span class="input-control-label">Reference</span>
+      <input (keyup.enter)="doSearch()" matInput name="reference" [(ngModel)]="query.referenceBases">
+    </div>
+
+    <div class="input-control">
+      <span class="input-control-label">Alternate</span>
+      <input (keyup.enter)="doSearch()" matInput name="alternate" [(ngModel)]="query.alternateBases">
+    </div>
+  </div>
+
+  <div class="fill-space" *ngIf="view.isMobile"></div>
+
+  <div class="beacon-search-actions" *ngIf="view.isMobile">
+    <button tabindex="-1"
+            mat-flat-button
+            [disabled]="view.isSearching"
+            (click)="doSearch()"
+            matTooltip="Search Variant"
+            color="accent">
+      Search
+    </button>
+
+    <button mat-button
+            [disabled]="view.isSearching"
+            (click)="setSearchBoxActive(false)"
+            matTooltip="Cancel search">
+      Cancel
+    </button>
+  </div>
+
+  <div class="beacon-search-actions" *ngIf="!view.isMobile">
+    <button tabindex="-1"
+            mat-mini-fab
+            [disabled]="view.isSearching"
+            (click)="doSearch()"
+            matTooltip="Search Variant"
+            color="accent">
+      <mat-icon>search</mat-icon>
+    </button>
+  </div>
+</ng-template>
+
 <mat-toolbar class="tertiary-toolbar" style="height: 64px; position:absolute; top: 0;">
   <mat-toolbar-row>
-    <ng-template #searchBox>
-      <div id="beacon-search-parameters">
-        <div class="input-control">
-          <span class="input-control-label">Position</span>
-          <input (keyup.enter)="doSearch()" matInput name="position" [(ngModel)]="query.start">
-        </div>
-
-        <div class="input-control">
-          <span class="input-control-label">Reference</span>
-          <input (keyup.enter)="doSearch()" matInput name="reference" [(ngModel)]="query.referenceBases">
-        </div>
-
-        <div class="input-control">
-          <span class="input-control-label">Alternate</span>
-          <input (keyup.enter)="doSearch()" matInput name="alternate" [(ngModel)]="query.alternateBases">
-        </div>
-      </div>
-
-      <span class="fill-space" *ngIf="view.isMobile"></span>
-
-      <button tabindex="-1"
-              mat-mini-fab
-              [disabled]="view.isSearching"
-              (click)="doSearch()"
-              matTooltip="Search Variant"
-              color="accent">
-        <mat-icon>search</mat-icon>
-      </button>
-    </ng-template>
-
     <ng-template #moreActions>
       <div>
         <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
           <mat-icon>help_outline</mat-icon>
         </button>
-        <button (click)="detailDrawer.close()" *ngIf="infoPanelActivated" mat-icon-button color="accent"
+        <button (click)="detailDrawer.close()" *ngIf="selectedCase && infoPanelActivated" mat-icon-button color="accent"
                 matTooltip="Hide Details">
           <mat-icon>info</mat-icon>
         </button>
-        <button (click)="detailDrawer.open()" *ngIf="!infoPanelActivated" mat-icon-button color=""
+        <button (click)="detailDrawer.open()" *ngIf="selectedCase && !infoPanelActivated" mat-icon-button color=""
                 matTooltip="Show Details">
           <mat-icon>info</mat-icon>
         </button>
@@ -48,14 +68,7 @@
 
     <ng-template #mobileToolbar>
       <ng-container *ngIf="searchBoxActive; else inactiveSearchBox">
-        <ng-container *ngTemplateOutlet="searchBox"></ng-container>
-        <button mat-icon-button
-                [disabled]="view.isSearching"
-                (click)="setSearchBoxActive(false)"
-                matTooltip="Cancel search"
-                color="warn">
-          <mat-icon>close</mat-icon>
-        </button>
+        <b>Looking for...</b>
       </ng-container>
 
       <ng-template #inactiveSearchBox>
@@ -153,10 +166,11 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
     <mat-drawer-content>
       <div class="data-table-container full-hw p-a" style="display:flex; flex-direction: column;">
           <div style="display: flex; flex-direction: column; flex: 1">
-            <ddaplib-cover-message *ngIf="cases.length == 0" style="flex: 1"
-                                   [message]="beaconResponses === undefined ? 'Searching...' : 'No Sequences'"
-                                   [icon]="beaconResponses === undefined ? 'hourglass_empty' : 'filter_list'"></ddaplib-cover-message>
-            <ag-grid-angular
+            <ng-template #beaconSearchResult>
+              <ddaplib-cover-message *ngIf="cases.length == 0" style="flex: 1"
+                                     [message]="beaconResponses === undefined ? 'Searching...' : 'No Sequences'"
+                                     [icon]="beaconResponses === undefined ? 'hourglass_empty' : 'filter_list'"></ddaplib-cover-message>
+              <ag-grid-angular
                 *ngIf="cases.length > 0"
                 style="width: 100%; flex: 1;"
                 class="ag-theme-material b-a"
@@ -176,8 +190,17 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
                 (rowDataChanged)="rowDataChanged($event)"
                 (selectionChanged)="onSelectionChanged($event)"
                 (cellClicked)="onSelectionChanged($event)"
-                >
-            </ag-grid-angular>
+              >
+              </ag-grid-angular>
+            </ng-template>
+
+            <ng-template #activeMobileSearchBox>
+              <div class="mobile-search-box">
+                <ng-container *ngTemplateOutlet="searchBox"></ng-container>
+              </div>
+            </ng-template>
+
+            <ng-container *ngTemplateOutlet="(view.isMobile && searchBoxActive) ? activeMobileSearchBox : beaconSearchResult"></ng-container>
           </div>
         </div>
     </mat-drawer-content>

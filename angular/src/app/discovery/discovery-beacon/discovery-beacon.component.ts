@@ -152,6 +152,7 @@ export class DiscoveryBeaconComponent implements OnInit {
     this.setQueryParameters();
 
     this.view.isSearching = true;
+    this.searchBoxActive = false;
 
     this.beaconService.searchBeacon(
       'hCoV-19',

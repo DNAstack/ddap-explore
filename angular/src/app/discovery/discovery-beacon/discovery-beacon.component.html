@@ -11,15 +11,15 @@
       <div *ngIf="!view.isMobile" id="beacon-search-parameters" style="display: flex; flex-direction: row; flex-wrap: wrap;">
         <div style="display: flex; flex-direction: column; margin-top:5px">
           <div>Position</div>
-          <input matInput name="position" [(ngModel)]="query.start">
+          <input (keyup.enter)="doSearch()" matInput name="position" [(ngModel)]="query.start">
         </div>
         <div style="display: flex; flex-direction: column;  margin-top:5px">
           <div>Reference</div>
-          <input matInput name="reference" [(ngModel)]="query.referenceBases">
+          <input (keyup.enter)="doSearch()" matInput name="reference" [(ngModel)]="query.referenceBases">
         </div>
         <div style="display: flex; flex-direction: column;  margin-top:5px">
           <div>Alternate</div>
-          <input matInput name="alternate" [(ngModel)]="query.alternateBases">
+          <input (keyup.enter)="doSearch()" matInput name="alternate" [(ngModel)]="query.alternateBases">
         </div>
       </div>
       <button *ngIf="!view.isMobile" tabindex="-1" mat-flat-button [disabled]="view.isSearching" (click)="doSearch()" matTooltip="Search Variant" color="accent">

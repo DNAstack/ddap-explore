@@ -125,8 +125,6 @@ export class DiscoveryBeaconComponent implements OnInit {
         this.router.navigate(['/']);
       }
     });
-
-
   }
 
   onInfoPanelVisibilityChange(visible: boolean) {
@@ -358,25 +356,32 @@ export class DiscoveryBeaconComponent implements OnInit {
       this.beaconService.setApiUrl(this.appConfig.covidBeaconUrl);
     }
 
+
     const that = this;
 
-    this.activatedRoute.paramMap.subscribe(
-      params => {
+    this.route.queryParams
+      .subscribe(params => {
+        const position = Number(params['position']);
+        const reference = params['referenceBases'];
+        const alternate = params['alternateBases'];
 
-        that.query = new BeaconRequest();
-        that.query.start = Number(params['position']);
-        that.query.referenceBases = params['referenceBases'];
-        that.query.alternateBases = params['alternateBases'];
+        const q = new BeaconRequest();
 
-        if (that.query.start === 0 || !that.query.referenceBases || !that.query.alternateBases) {
-          that.query.start = 3840;
-          that.query.referenceBases = 'A';
-          that.query.alternateBases = 'G';
+        if (position === 0 || !reference || !alternate) {
+          q.start = 3840;
+          q.referenceBases = 'A';
+          q.alternateBases = 'G';
+        } else {
+          q.start = position;
+          q.referenceBases = reference;
+          q.alternateBases = alternate;
         }
 
+        that.query = q;
+
         that.doSearch();
-      }
-    );
+      });
+
   }
 
   private setQueryParameters() {

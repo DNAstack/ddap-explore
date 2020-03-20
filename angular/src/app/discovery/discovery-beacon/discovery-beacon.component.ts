@@ -151,6 +151,8 @@ export class DiscoveryBeaconComponent implements OnInit {
 
     this.view.isSearching = true;
     this.searchBoxActive = false;
+    this.selectedCase = null;
+    this.infoPanelActivated = false;
 
     this.beaconService.searchBeacon(
       'hCoV-19',
@@ -161,7 +163,6 @@ export class DiscoveryBeaconComponent implements OnInit {
     ).then(
       data => {
         this.lastQuery = JSON.parse(JSON.stringify(query));
-        this.selectedCase = null;
 
         // const beaconId = data['beaconId'] as string;
         // const request = data['alleleRequest'] as BeaconRequest;

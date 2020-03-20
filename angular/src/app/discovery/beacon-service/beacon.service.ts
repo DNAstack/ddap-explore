@@ -23,28 +23,28 @@ export class BeaconService {
   }
 
   searchBeacon(
-    assembly:string, 
-    referenceName: string, 
-    start: number, 
-    referenceBases: string, 
-    alternateBases: string, 
+    assembly: string,
+    referenceName: string,
+    start: number,
+    referenceBases: string,
+    alternateBases: string,
     headers?: HttpHeaders)
     : Promise<BeaconResponse[]> {
     return this.searchBeacons(
-      assembly, 
-      referenceName, 
-      start, 
-      referenceBases, 
-      alternateBases, 
+      assembly,
+      referenceName,
+      start,
+      referenceBases,
+      alternateBases,
       headers);
   }
 
   searchBeacons(
-    assembly:string, 
-    referenceName: string, 
-    start: number, 
-    referenceBases: string, 
-    alternateBases: string, 
+    assembly: string,
+    referenceName: string,
+    start: number,
+    referenceBases: string,
+    alternateBases: string,
     headers?: HttpHeaders)
     : Promise<BeaconResponse[]> {
 

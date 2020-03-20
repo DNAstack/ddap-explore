@@ -19,8 +19,8 @@ import { DiscoveryBeaconHelpDialogComponent } from './help/discovery-beacon.help
 })
 export class DiscoveryBeaconComponent implements OnInit {
   appConfig: AppConfigModel;
-  assemblies: string[];
-  assembly: string;
+  // assemblies: string[]; // marked for removal
+  // assembly: string; // marked for removal
 
   query: BeaconRequest;
   lastQuery: BeaconRequest;
@@ -29,7 +29,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   cases: any[];
   caseColumnDefs: any;
   selectedCase: any;
-  sample: any;
+  // sample: any; // marked for removal
 
   infoPanelActivated = false;
 
@@ -76,43 +76,40 @@ export class DiscoveryBeaconComponent implements OnInit {
               private changeDetector: ChangeDetectorRef,
               public helpDialog: MatDialog
               ) {
+    this.cases = [];
 
+    this.onSelectionChanged = this.onSelectionChanged.bind(this);
+    this.navigateToCell = this.navigateToCell.bind(this);
 
+    this._options.center = {latitude: 0, longitude: 0};
 
-                this.cases = [];
+    this.grid = {
+      animateRows: false,
+      multiSortKey: 'ctrl',
+      defaultColumnDefinition: {
+        sortable: true,
+        resizable: true,
+        filter: true,
+      },
+      makeFullWidth: false,
+      pagination: true,
+      domLayout: 'normal',
+      enableStatusBar: true,
+      suppressCellSelection: true,
+      rowSelection: 'single',
+    };
 
-                this.onSelectionChanged = this.onSelectionChanged.bind(this);
-                this.navigateToCell = this.navigateToCell.bind(this);
+    this.beaconResponses = [];
 
-                this._options.center = { latitude: 0, longitude: 0 };
-
-                this.grid = {
-                  animateRows: false,
-                  multiSortKey: 'ctrl',
-                  defaultColumnDefinition: {
-                    sortable: true,
-                    resizable: true,
-                    filter: true,
-                  },
-                  makeFullWidth: false,
-                  pagination: true,
-                  domLayout: 'normal',
-                  enableStatusBar: true,
-                  suppressCellSelection: true,
-                  rowSelection: 'single',
-                };
-
-                this.beaconResponses = [];
-
-                this.view = {
-                  isSearching : false,
-                  errorSearching : false,
-                  wrapTableContent : false,
-                  showQuery: true,
-                  isGeocoding: false,
-                  errorGeocoding: false,
-                  isLocation: true,
-                };
+    this.view = {
+      isSearching: false,
+      errorSearching: false,
+      wrapTableContent: false,
+      showQuery: true,
+      isGeocoding: false,
+      errorGeocoding: false,
+      isLocation: true,
+    };
   }
 
   ngOnInit(): void {
@@ -127,8 +124,6 @@ export class DiscoveryBeaconComponent implements OnInit {
       } else {
         this.router.navigate(['/']);
       }
-
-      this.beaconService.setApiUrl(this.appConfig.covidBeaconUrl);
     });
   }
 
@@ -148,7 +143,6 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   doSearch() {
-
     const that = this;
     const query = this.query;
 
@@ -160,13 +154,11 @@ export class DiscoveryBeaconComponent implements OnInit {
         this.query.alternateBases
       ).then(
       data => {
-
         that.lastQuery = JSON.parse(JSON.stringify(query));
-
         that.selectedCase = undefined;
 
-        const beaconId = data['beaconId'] as string;
-        const request = data['alleleRequest'] as BeaconRequest;
+        // const beaconId = data['beaconId'] as string;
+        // const request = data['alleleRequest'] as BeaconRequest;
         const responses = data['datasetAlleleResponses'] as BeaconResponse[];
 
         const response = responses[0];
@@ -176,7 +168,6 @@ export class DiscoveryBeaconComponent implements OnInit {
         const caseColumnKeys = [];
 
         for (let i = 0; i < info.length; i++) {
-
           const key = info[i].key;
           const keyTokens = key.split('=');
           const keyType = keyTokens[0];
@@ -233,25 +224,23 @@ export class DiscoveryBeaconComponent implements OnInit {
   if (!this.gridApi) {
     return;
   }
-
  }
 
  resizeColumns() {
+   // Resize columns
+   const hiddenFieldIds = ['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'];
 
-  // Resize columns
-  const hiddenFieldIds = ['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'];
+   const allColumnIds = [];
+   const hiddenColumnIds = [];
 
-  const allColumnIds = [];
-  const hiddenColumnIds = [];
-
-  this.gridColumnApi.getAllColumns().forEach(function(column) {
-    allColumnIds.push(column.colId);
-    if (hiddenFieldIds.includes(column.userProvidedColDef.field)) {
-      hiddenColumnIds.push(column.colId);
-    }
-  });
-  this.gridColumnApi.setColumnsVisible(hiddenColumnIds, false);
-  this.gridColumnApi.autoSizeColumns(allColumnIds);
+   this.gridColumnApi.getAllColumns().forEach(function (column) {
+     allColumnIds.push(column.colId);
+     if (hiddenFieldIds.includes(column.userProvidedColDef.field)) {
+       hiddenColumnIds.push(column.colId);
+     }
+   });
+   this.gridColumnApi.setColumnsVisible(hiddenColumnIds, false);
+   this.gridColumnApi.autoSizeColumns(allColumnIds);
  }
 
  nextStrainUrl(source) {
@@ -295,7 +284,7 @@ export class DiscoveryBeaconComponent implements OnInit {
       that.view.isGeocoding = true;
       this.geocodeService.geocodeAddress(locationText)
         .subscribe((location: ILatLong) => {
-            that.setCaseLocaton(location.latitude, location.longitude);
+            that.setCaseLocation(location.latitude, location.longitude);
             this.view.isGeocoding = false;
             that.changeDetector.detectChanges();
           }
@@ -303,11 +292,11 @@ export class DiscoveryBeaconComponent implements OnInit {
 
     } else {
       that.view.isLocation = false;
-      that.setCaseLocaton(0, 0);
+      that.setCaseLocation(0, 0);
     }
   }
 
-  setCaseLocaton(lat: number, lng: number) {
+  setCaseLocation(lat: number, lng: number) {
     this._options.center = { latitude: lat, longitude: lng };
   }
 
@@ -366,6 +355,10 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   private initialize() {
+    if (this.appConfig.covidBeaconUrl) {
+      this.beaconService.setApiUrl(this.appConfig.covidBeaconUrl);
+      this.doSearch();
+    }
   }
 
 

@@ -37,7 +37,13 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
 -->
 <div class="discovery-beacon">
   <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
-    <mat-drawer #detailDrawer mode="side" position="end" opened="open" style="min-width:400px; max-width:400px" (openedStart)="onInfoPanelVisibilityChange(true)" (closedStart)="onInfoPanelVisibilityChange(false)">
+    <mat-drawer #detailDrawer
+                mode="side"
+                position="end"
+                opened="open"
+                style="min-width:400px; max-width:400px"
+                (openedStart)="onInfoPanelVisibilityChange(true)"
+                (closedStart)="onInfoPanelVisibilityChange(false)">
       <mat-toolbar class="tertiary-toolbar"
           style="height: 64px; position:absolute; top: 0;">
           <mat-toolbar-row>

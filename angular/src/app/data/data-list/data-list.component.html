@@ -9,7 +9,7 @@
             *ngFor="let qualifiedResource of qualifiedResources$ | async">
     <mat-card-header>
       <mat-card-title>
-        <span>{{ ellipseIfLongerThan(qualifiedResource.entity.dto.ui.label || 'Unknown' , 60) }}</span>
+        {{ ellipseIfLongerThan(qualifiedResource.entity.dto.ui.label || 'Unknown' , 60) }}
       </mat-card-title>
     </mat-card-header>
 

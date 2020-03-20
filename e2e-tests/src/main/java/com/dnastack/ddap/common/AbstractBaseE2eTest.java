@@ -2,14 +2,15 @@ package com.dnastack.ddap.common;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
 
 import com.dnastack.ddap.common.setup.ConfigStrategy;
 import com.dnastack.ddap.common.setup.LoginStrategy;
 import com.dnastack.ddap.common.setup.StrategyFactory;
+import com.dnastack.ddap.common.util.DdapLoginUtil;
 import com.dnastack.ddap.common.util.EnvUtil;
+import com.dnastack.ddap.common.util.WebDriverCookieHelper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
@@ -20,9 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.junit.Assume;
+import org.apache.http.cookie.Cookie;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -48,8 +50,8 @@ public abstract class AbstractBaseE2eTest {
         try {
             loginStrategy = StrategyFactory.getLoginStrategy();
             configStrategy = StrategyFactory.getConfigStrategy();
-        } catch (Exception e){
-            log.error(e.getMessage(),e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
             fail(e.getMessage());
         }
         setupRestassured();
@@ -71,8 +73,15 @@ public abstract class AbstractBaseE2eTest {
         RestAssured.baseURI = DDAP_BASE_URL;
     }
 
-    protected static RequestSpecification getRequestSpecification() {
-        return given();
+    public static RequestSpecification getRequestSpecWithBasicAuthIfNeeded() throws IOException {
+        Optional<Cookie> sessionCookie = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
+        RequestSpecification request = given()
+            .log().method()
+            .log().uri();
+
+        sessionCookie.ifPresent(cookie -> request.cookie(WebDriverCookieHelper.SESSION_COOKIE_NAME, cookie.getValue()));
+
+        return request;
     }
 
     protected static String loadTemplate(String resourcePath) {
@@ -86,7 +95,6 @@ public abstract class AbstractBaseE2eTest {
             throw new RuntimeException("Unable to load test resource template.", e);
         }
     }
-
 
 
 }

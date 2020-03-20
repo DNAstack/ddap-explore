@@ -17,6 +17,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -71,18 +72,19 @@ public class WalletLoginStrategy implements LoginStrategy {
             doWait(2_000L);
             String currentPage = driver.getCurrentUrl();
             if (currentPage.startsWith(DDAP_BASE_URL) && currentPage.endsWith("/login")) {
-                Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-                WebDriverCookieHelper.addBrowserCookie(driver, session);
+                DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD)
+                    .ifPresent(cookie -> WebDriverCookieHelper.addBrowserCookie(driver, cookie));
                 driver.get(DDAP_BASE_URL);
                 doWait(2_000L);
             }
 
             if (driver.getCurrentUrl().startsWith(walletConfig.getWalletUrl())) {
-                Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-                final CookieStore cookieStore = setupCookieStore(session);
+                Optional<Cookie> session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
+                final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session.orElse(null));
                 final HttpClient httpclient = setupHttpClient(cookieStore);
                 walletLogin(httpclient, personalAccessTokens.get(persona.getId()));
-                addCookiesFromStoreToSelenium(cookieStore, driver);
+                WebDriverCookieHelper.addCookiesFromStoreToSelenium(cookieStore, driver);
+                doWait(2_000L);
             }
 
         }
@@ -93,27 +95,22 @@ public class WalletLoginStrategy implements LoginStrategy {
 
     @Override
     public <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-        final CookieStore cookieStore = setupCookieStore(session);
+        Optional<Cookie> session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
+        final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session.orElse(null));
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {
             driver.get(authorizeUri.toString());
             doWait(5_000L);
             if (driver.getCurrentUrl().startsWith(walletConfig.getWalletUrl())) {
-                walletLogin(httpclient, personalAccessTokens.get(persona.getId()));
-                addCookiesFromStoreToSelenium(cookieStore, driver);
+                walletLogin(httpclient,personalAccessTokens.get(persona));
+                WebDriverCookieHelper.addCookiesFromStoreToSelenium(cookieStore, driver);
             }
         }
 
         return pageFactory.apply(driver);
     }
 
-    private CookieStore setupCookieStore(Cookie sessionCookie) {
-        final CookieStore cookieStore = new BasicCookieStore();
-        cookieStore.addCookie(sessionCookie);
-        return cookieStore;
-    }
 
     private HttpClient setupHttpClient(CookieStore cookieStore) {
         return HttpClientBuilder.create()
@@ -141,16 +138,7 @@ public class WalletLoginStrategy implements LoginStrategy {
         assertThat(responseMessage, response.getStatusLine().getStatusCode(), is(200));
     }
 
-    private void addCookiesFromStoreToSelenium(CookieStore cookieStore, WebDriver driver) {
-        cookieStore.getCookies()
-            .forEach(cookie -> {
-                System.out.printf(
-                    "Adding cookie to selenium: Cookie(name=%s, domain=%s, path=%s, expiry=%s, secure=%b" + System
-                        .lineSeparator(), cookie.getName(), cookie.getDomain(), cookie.getPath(), cookie
-                        .getExpiryDate(), cookie.isSecure());
-                WebDriverCookieHelper.addBrowserCookie(driver, cookie);
-            });
-    }
+
 
     private void doWait(Long timeoutms) {
         try {

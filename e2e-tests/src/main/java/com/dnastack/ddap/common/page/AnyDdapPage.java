@@ -34,17 +34,26 @@ public class AnyDdapPage {
                 .until(invisibilityOfElementLocated(By.xpath("//mat-progress-bar[contains(@class, 'main-progress-bar')]")));
     }
 
+
+    private boolean retry = true;
+
     private void acknowledgeSandboxIfAvailable() {
         try {
             WebStorage webStorage = (WebStorage) new Augmenter().augment(driver);
             LocalStorage localStorage = webStorage.getLocalStorage();
             String acknowledged = localStorage.getItem("sandbox-warning-acknowledgement");
-            if (!Boolean.valueOf(acknowledged)) {
+            if (!Boolean.parseBoolean(acknowledged)) {
                 this.driver.findElement(DdapBy.se("accept-sandbox-warning"))
                         .click();
             }
         } catch (NoSuchElementException nsee) {
             // intentionally left empty
+        } catch (StaleElementReferenceException stee){
+            // retry because sometimes this fails
+            if (retry) {
+                retry = false;
+                acknowledgeSandboxIfAvailable();
+            }
         }
     }
 

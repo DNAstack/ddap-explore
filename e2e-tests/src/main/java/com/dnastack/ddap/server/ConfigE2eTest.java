@@ -1,6 +1,5 @@
 package com.dnastack.ddap.server;
 
-import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
@@ -12,7 +11,8 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
 import com.dnastack.ddap.common.AbstractBaseE2eTest;
-import com.dnastack.ddap.common.util.DdapLoginUtil;
+import com.dnastack.ddap.common.setup.ConfigModel;
+import com.dnastack.ddap.common.util.EnvUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureException;
 import io.restassured.RestAssured;
@@ -26,14 +26,24 @@ import java.util.List;
 import lombok.Data;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.cookie.Cookie;
 import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ConfigE2eTest extends AbstractBaseE2eTest {
 
+    private static ConfigTestConfig testConfig;
+
+    @BeforeClass
+    public static void setup() {
+        testConfig = EnvUtil
+            .optionalEnvConfig("E2E_TEST_CONFIG_CONFIG", new ConfigTestConfig(), ConfigTestConfig.class);
+        Assume.assumeTrue(testConfig.isEnabled());
+    }
+
     @Test
     public void doNotAcceptDevCookieEncryptorCredentials() {
+
         Assume.assumeFalse("Dev cookie encryptor credentials are allowed on localhost", RestAssured.baseURI
             .startsWith("http://localhost:"));
         Assume.assumeFalse("Dev cookie encryptor credentials are allowed on localhost", RestAssured.baseURI
@@ -51,7 +61,7 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void doNotAcceptDevCredentials() {
-        Assume.assumeTrue(DDAP_PASSWORD != null);
+        Assume.assumeTrue(DDAP_PASSWORD != null || DDAP_USERNAME != null);
         Assume.assumeFalse("Dev credentials are allowed on localhost", RestAssured.baseURI
             .startsWith("http://localhost:"));
         Assume.assumeFalse("Dev credentials are allowed on localhost", RestAssured.baseURI
@@ -77,13 +87,8 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI.startsWith("http://localhost:"));
         Assume.assumeFalse("Dev keys are allowed on localhost", RestAssured.baseURI
             .startsWith("http://host.docker.internal:"));
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-
-        final Response response = given()
-            .log().method()
-            .log().uri()
+        final Response response = getRequestSpecWithBasicAuthIfNeeded()
             .redirects().follow(false)
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
             .when()
             .get(String
                 .format("/api/v1alpha/realm/%s/resources/authorize?resource=1;thousand-genomes/views/discovery-access/roles/discovery", REALM));
@@ -136,12 +141,8 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void accessAngularIndexPage() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
-        given()
-            .log().method()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
+        getRequestSpecWithBasicAuthIfNeeded()
             .when()
             .get("/index.html")
             .then()
@@ -151,12 +152,9 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void accessDamEndpoint() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-
-        given()
-            .log().method()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
+        Assume.assumeTrue("This deployment does not use a DAM, and testing its features has been disabled", testConfig
+            .isDamEnabled());
+        getRequestSpecWithBasicAuthIfNeeded()
             .when()
             .get("/dam/1/v1alpha/dnastack/resources")
             .then()
@@ -179,12 +177,8 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void angularRoutesDoNotWorkForJavaScriptFiles() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
-        given()
-            .log().method()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
+        getRequestSpecWithBasicAuthIfNeeded()
             .when()
             .get("/made-up-resource-name.js")
             .then()
@@ -194,12 +188,8 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void noAngularRoutesForMapFiles() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
-        given()
-            .log().method()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
+        getRequestSpecWithBasicAuthIfNeeded()
             .when()
             .get("/made-up-resource-name.js.map")
             .then()
@@ -209,12 +199,8 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void noAngularRoutesForHtmlFiles() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
-        given()
-            .log().method()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
+        getRequestSpecWithBasicAuthIfNeeded()
             .when()
             .get("/made-up-resource-name.html")
             .then()
@@ -224,12 +210,8 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
 
     @Test
     public void noAngularRoutesForFileWithArbitraryExtension() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
 
-        given()
-            .log().method()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
+        getRequestSpecWithBasicAuthIfNeeded()
             .when()
             .get("/made-up-resource-name.foobar")
             .then()
@@ -241,5 +223,17 @@ public class ConfigE2eTest extends AbstractBaseE2eTest {
     static class CliLoginResponse {
 
         private String token;
+    }
+
+    @Data
+    static class ConfigTestConfig implements ConfigModel {
+
+        private boolean enabled = true;
+        private boolean damEnabled = true;
+
+        @Override
+        public void validateConfig() {
+
+        }
     }
 }

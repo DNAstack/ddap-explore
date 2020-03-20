@@ -5,6 +5,7 @@ import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.ICLoginPage;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
 import com.dnastack.ddap.common.util.EnvUtil;
+import com.dnastack.ddap.common.util.WebDriverCookieHelper;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
@@ -43,8 +44,8 @@ public class PersonaLoginStrategy implements LoginStrategy {
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         String baseUrl = EnvUtil.stripTrailingSlash(DDAP_BASE_URL);
-        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(baseUrl, DDAP_USERNAME, DDAP_PASSWORD);
-        final CookieStore cookieStore = setupCookieStore(session);
+        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(baseUrl, DDAP_USERNAME, DDAP_PASSWORD).orElse(null);
+        final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session);
         final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
         final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);
         final String path;
@@ -93,10 +94,5 @@ public class PersonaLoginStrategy implements LoginStrategy {
         return null;
     }
 
-    private CookieStore setupCookieStore(Cookie sessionCookie) {
-        final CookieStore cookieStore = new BasicCookieStore();
-        cookieStore.addCookie(sessionCookie);
-        return cookieStore;
-    }
 
 }

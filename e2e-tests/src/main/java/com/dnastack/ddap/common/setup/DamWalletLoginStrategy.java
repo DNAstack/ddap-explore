@@ -38,7 +38,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.openqa.selenium.WebDriver;
@@ -75,8 +74,9 @@ public class DamWalletLoginStrategy implements LoginStrategy {
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(personaName);
         Cookie session = DdapLoginUtil
-            .loginToDdap(damConfig.getDamBaseUrl(), damConfig.getDamUsername(), damConfig.getDamPassword());
-        final CookieStore cookieStore = setupCookieStore(session);
+            .loginToDdap(damConfig.getDamBaseUrl(), damConfig.getDamUsername(), damConfig.getDamPassword())
+            .orElse(null);
+        final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {
@@ -111,8 +111,8 @@ public class DamWalletLoginStrategy implements LoginStrategy {
         driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s", realmName)).toString());
         {
             // Need to add session cookie separately
-            Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-            WebDriverCookieHelper.addBrowserCookie(driver, session);
+            DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD)
+                .ifPresent(cookie -> WebDriverCookieHelper.addBrowserCookie(driver, cookie));
         }
         // Visit again with session cookie
         driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s", realmName)).toString());
@@ -123,8 +123,8 @@ public class DamWalletLoginStrategy implements LoginStrategy {
     @Override
     public <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(persona.getId());
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-        final CookieStore cookieStore = setupCookieStore(session);
+        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD).orElse(null);
+        final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {
@@ -150,17 +150,12 @@ public class DamWalletLoginStrategy implements LoginStrategy {
 
         final URI finalLocation = acceptPermissions(httpclient, csrfToken);
 
-        addCookiesFromStoreToSelenium(cookieStore, driver);
+        WebDriverCookieHelper.addCookiesFromStoreToSelenium(cookieStore, driver);
         driver.get(finalLocation.toString());
 
         return pageFactory.apply(driver);
     }
 
-    private CookieStore setupCookieStore(Cookie sessionCookie) {
-        final CookieStore cookieStore = new BasicCookieStore();
-        cookieStore.addCookie(sessionCookie);
-        return cookieStore;
-    }
 
     private HttpClient setupHttpClient(CookieStore cookieStore) {
         return HttpClientBuilder.create()
@@ -231,16 +226,6 @@ public class DamWalletLoginStrategy implements LoginStrategy {
         return finalLocation;
     }
 
-    private void addCookiesFromStoreToSelenium(CookieStore cookieStore, WebDriver driver) {
-        cookieStore.getCookies()
-            .forEach(cookie -> {
-                System.out.printf(
-                    "Adding cookie to selenium: Cookie(name=%s, domain=%s, path=%s, expiry=%s, secure=%b" + System
-                        .lineSeparator(), cookie.getName(), cookie.getDomain(), cookie.getPath(), cookie
-                        .getExpiryDate(), cookie.isSecure());
-                WebDriverCookieHelper.addBrowserCookie(driver, cookie);
-            });
-    }
 
     @Data
     @NoArgsConstructor

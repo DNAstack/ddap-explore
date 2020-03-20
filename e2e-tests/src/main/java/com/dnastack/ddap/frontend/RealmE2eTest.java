@@ -25,7 +25,7 @@ public class RealmE2eTest extends AbstractFrontendE2eTest {
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
         realmTestConfig = EnvUtil.optionalEnvConfig("E2E_TEST_REALM_CONFIG",new RealmTestConfig(),  RealmTestConfig.class);
-        Assume.assumeTrue("RealmE2eTest has been disabled, and will not run.",realmTestConfig.isEnabled());
+        Assume.assumeTrue("RealmE2eTest has been disabled, and will not be tested.",realmTestConfig.isEnabled());
         Assume.assumeTrue(realmTestConfig.isSandbox());
         ddapPage = doBrowserLogin(REALM, ADMINISTRATOR, AdminDdapPage::new);
     }

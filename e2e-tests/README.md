@@ -34,16 +34,11 @@ the login strategy that is being used.
 | `E2E_BASIC_USERNAME` | `false`  | `null`  | The username used if Basic Auth is enabled |
 | `E2E_BASIC_PASSWORD` | `false`  | `null`  | The Password used if Basic Auth is enabled |
 | `E2E_TEST_RETRIES`   | `false`  | `3`     | Default number of retries for failed requests | 
-| `E2E_TEST_MODE` | `false` | `normal` | The mode to run the tests in. At the moment, only `normal` is supported 
 | `E2E_COOKIES_ENCRYPTOR_PASSWORD` | `false` | `abcdefghijk` | The password to use for encyrpting cookies with |
 | `E2E_COOKIES_ENCRYPTOR_SALT` | `false` | `598953e322` | The salt used for encrypting a cookie with |
 | `E2E_CONFIG_STRATEGY` | `false` | `com.dnastack.ddap.common.setup.NoopConfigStrategy`| The class name of the config strategy to use for one time test setup |
 | `E2E_LOGIN_STRATEGY` | `false` | `com.dnastack.ddap.common.setup.PersonaLoginStrategy` | The class name of the login strategy to use for logging users in during tests |
 | `E2E_SCREENSHOT_DIR` | `false` | `target` | The directory to save sacreenshots from failed tests to |
-| `E2E_SANDBOX` | `false` | `false` | Feature flag for turning on the `RealmE2eTest` |
-| `E2E_DATASET_URL` | `false` | `https://storage.googleapis.com/ddap-e2etest-objects/table/dnastack-internal-subjects-with-objects/data` | Publicly accessible Dataset to use for workflows/dataset tests | 
-| `E2E_DATASET_SECURED_URL` | `false` | `https://storage.googleapis.com/ddap-e2etest-objects/table/subjects-restricted-access/data` | Privately accessible Dataset to use for workflows/dataset tests | 
-| `E2E_WORKFLOW_MAX_WAIT_TIME_IN_MINUTES` | `false` | `2` | The amount of time required to wait for the 
 
 
 
@@ -84,8 +79,39 @@ public void someMethod(){
 
 ```
 
-  
+### Individual Test Configuration and Feature Flagging
 
+Because of the different ways in which DDAP can be deployed with different features enabled/disabled,
+the e2e tests need to support testing only the specific features that are present as well as testing those features
+in a way that the deployment understands.
+
+To this end, many of the E2E tests (all of the FE e2e Tests, and the config e2e test) allow the user to configure them
+independently of the rest of the test suite. The tests use [json configuration classes](#json-configuration-classes) defined
+within the test itself for all configuration and feature flagging.
+
+By default, **ALL** Features are enabled,and it is up to the user to explicity disable test features that their deployment
+is not concerned about. This is to ensure that we are never erronously testing nothing while believing we have a working deployment.
+
+#### Setting Test Configuration
+
+All test configuration can be set through environment variables. These Variables will be parsed with Jackson and loaded into the respective
+configuration classes and then validated to ensure that the expected config properties have been set. In general, Test Configurations
+are tied to features and are set like the following:
+
+```shell script
+
+export E2E_TEST_<FEATURE>_CONFIG='{.....}'
+
+```
+
+#### Disabling Tests
+
+Test can be easily disabled by setting the `enabled` property in their `CONFIG` to `false`. For example:
+
+```shell script
+#This would disable all tests for the specified <FEATURE> 
+export E2E_TEST_<FEATURE>_CONFIG='{"enabled":false}'
+```
 
 
 ### Login Strategies
@@ -127,6 +153,22 @@ for how to setup the config
 ```bash
 E2E_LOGIN_STRATEGY=com.dnastack.ddap.common.setup.DamWalletLoginStrategy
 E2E_DAM_CONFIG='{....}'
+E2E_WALLET_CONFIG='{....}'
+
+```
+#### WalletLoginStrategy
+
+This strategy utilizes Wallet. It uses wallet in combination with any IDP to launch many of the authorization flows (ie for resources) 
+
+Setup for this strategy is environment based but predominately relies on [JSON](#json-configuration-classes) configuration
+specifically using the [WalletConfig](src/main/java/com/dnastack/ddap/common/setup/WalletConfig.java). Please see this class 
+for how to setup the config
+
+
+**Setup**
+
+```bash
+E2E_LOGIN_STRATEGY=com.dnastack.ddap.common.setup.WalletLoginStrategy
 E2E_WALLET_CONFIG='{....}'
 
 ```

@@ -1,10 +1,11 @@
 package com.dnastack.ddap.common.util;
 
-    import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.CookieStore;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
-
-import java.util.Optional;
 
 @Slf4j
 public class WebDriverCookieHelper {
@@ -16,9 +17,13 @@ public class WebDriverCookieHelper {
     }
 
     public static void addBrowserCookie(WebDriver driver, org.apache.http.cookie.Cookie httpCookie) {
-        getCookie(driver, httpCookie.getName()).ifPresent((cookie) -> driver.manage().deleteCookie(cookie));
-        driver.manage().addCookie(mapToBrowserCookie(httpCookie));
+        if (httpCookie != null) {
+            getCookie(driver, httpCookie.getName()).ifPresent((cookie) -> driver.manage().deleteCookie(cookie));
+            driver.manage().addCookie(mapToBrowserCookie(httpCookie));
+        }
     }
+
+
 
     public static Cookie mapToBrowserCookie(org.apache.http.cookie.Cookie cookie) {
         // Making cookie null for localhost, more info: https://stackoverflow.com/a/29312227/4445511
@@ -33,4 +38,23 @@ public class WebDriverCookieHelper {
             .forEach((cookie) -> driver.manage().deleteCookie(cookie));
     }
 
+
+    public static org.apache.http.client.CookieStore setupCookieStore(org.apache.http.cookie.Cookie sessionCookie) {
+        final CookieStore cookieStore = new BasicCookieStore();
+        if (sessionCookie != null) {
+            cookieStore.addCookie(sessionCookie);
+        }
+        return cookieStore;
+    }
+
+    public static void addCookiesFromStoreToSelenium(CookieStore cookieStore, WebDriver driver) {
+        cookieStore.getCookies()
+            .forEach(cookie -> {
+                System.out.printf(
+                    "Adding cookie to selenium: Cookie(name=%s, domain=%s, path=%s, expiry=%s, secure=%b" + System
+                        .lineSeparator(), cookie.getName(), cookie.getDomain(), cookie.getPath(), cookie
+                        .getExpiryDate(), cookie.isSecure());
+                addBrowserCookie(driver, cookie);
+            });
+    }
 }

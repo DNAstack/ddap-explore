@@ -81,7 +81,7 @@ public abstract class AbstractFrontendE2eTest extends AbstractBaseE2eTest {
         try {
             return loginStrategy.performPersonaLogin(driver, persona, realm, pageFactory);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to login", e);
+            throw new AssertionError("Unable to login", e);
         }
     }
 

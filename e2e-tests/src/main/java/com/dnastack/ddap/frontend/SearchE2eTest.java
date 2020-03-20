@@ -24,7 +24,7 @@ public class SearchE2eTest extends AbstractFrontendE2eTest {
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
         testConfig = EnvUtil.optionalEnvConfig("E2E_TEST_SEARCH_CONFIG",new SearchTestConfig(), SearchTestConfig.class);
-        Assume.assumeTrue(testConfig.isEnabled());
+        Assume.assumeTrue("The search feature has been disabled for this deployment, and will not be tested",testConfig.isEnabled());
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AdminDdapPage::new);
     }
 

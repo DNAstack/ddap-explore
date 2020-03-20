@@ -2,8 +2,6 @@ package com.dnastack.ddap.frontend;
 
 import static com.dnastack.ddap.common.TestingPersona.USER_WITHOUT_ACCESS;
 import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
-import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.dnastack.ddap.common.PolicyRequirementFailedException;
@@ -12,12 +10,10 @@ import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.DataDetailPage;
 import com.dnastack.ddap.common.page.DataListPage;
 import com.dnastack.ddap.common.setup.ConfigModel;
-import com.dnastack.ddap.common.util.DdapLoginUtil;
 import com.dnastack.ddap.common.util.EnvUtil;
 import java.io.IOException;
 import java.net.URI;
 import lombok.Data;
-import org.apache.http.cookie.Cookie;
 import org.hamcrest.Matchers;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -70,8 +66,6 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void shouldFindWorkingDownloadLink() throws IOException {
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage detailPage = dataListPage
             .findDataByName(testConfig.getResourceName())
@@ -84,10 +78,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
          * Clicking a link that opens in a new tab is difficult to do, so instead let's just
          * check that the href works directly.
          */
-        given()
-            .log().method()
-            .log().uri()
-            .cookie(SESSION_COOKIE_NAME, session.getValue())
+        getRequestSpecWithBasicAuthIfNeeded()
             .when()
             .get(downloadHref)
             .then()

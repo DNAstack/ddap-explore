@@ -55,14 +55,6 @@
         <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
           <mat-icon>help_outline</mat-icon>
         </button>
-        <button (click)="detailDrawer.close()" *ngIf="selectedCase && infoPanelActivated" mat-icon-button color="accent"
-                matTooltip="Hide Details">
-          <mat-icon>info</mat-icon>
-        </button>
-        <button (click)="detailDrawer.open()" *ngIf="selectedCase && !infoPanelActivated" mat-icon-button color=""
-                matTooltip="Show Details">
-          <mat-icon>info</mat-icon>
-        </button>
       </div>
     </ng-template>
 

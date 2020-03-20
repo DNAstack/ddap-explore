@@ -1,6 +1,14 @@
 <mat-toolbar class="tertiary-toolbar" style="height: 64px; position:absolute; top: 0;">
     <mat-toolbar-row>
-      <div id="beacon-search-parameters" style="display: flex; flex-direction: row;">
+      <div *ngIf="view.isMobile" style="display: flex; flex-direction: row;">
+        <div class="m-r-sm">
+          {{query.start}} {{query.referenceBases}} » {{query.alternateBases}}
+        </div>
+        <button tabindex="-1" mat-flat-button (click)="doEdit()" matTooltip="Edit Search Paramters" color="accent">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
+      <div *ngIf="!view.isMobile" id="beacon-search-parameters" style="display: flex; flex-direction: row; flex-wrap: wrap;">
         <div style="display: flex; flex-direction: column; margin-top:5px">
           <div>Position</div>
           <input matInput name="position" [(ngModel)]="query.start">
@@ -13,20 +21,22 @@
           <div>Alternate</div>
           <input matInput name="alternate" [(ngModel)]="query.alternateBases">
         </div>
-        <button tabindex="-1" mat-flat-button [disabled]="view.isSearching" (click)="doSearch()" matTooltip="Search Variant" color="accent">
-          <mat-icon>search</mat-icon> {{!view.isSearching ? 'Search' : 'Searching...'}}
+      </div>
+      <button *ngIf="!view.isMobile" tabindex="-1" mat-flat-button [disabled]="view.isSearching" (click)="doSearch()" matTooltip="Search Variant" color="accent">
+        <mat-icon>search</mat-icon>
+      </button>
+      <span class="fill-space"></span>
+      <div>
+        <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
+          <mat-icon>help_outline</mat-icon>
+        </button>
+        <button (click)="detailDrawer.close()" *ngIf="infoPanelActivated" mat-icon-button color="accent" matTooltip="Hide Details">
+          <mat-icon>info</mat-icon>
+        </button>
+        <button (click)="detailDrawer.open()" *ngIf="!infoPanelActivated" mat-icon-button color="" matTooltip="Show Details">
+          <mat-icon>info</mat-icon>
         </button>
       </div>
-      <span class="fill-space"></span>
-      <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
-        <mat-icon>help_outline</mat-icon>
-      </button>
-      <button (click)="detailDrawer.close()" *ngIf="infoPanelActivated" mat-icon-button color="accent" matTooltip="Hide Details">
-        <mat-icon>info</mat-icon>
-      </button>
-      <button (click)="detailDrawer.open()" *ngIf="!infoPanelActivated" mat-icon-button color="" matTooltip="Show Details">
-        <mat-icon>info</mat-icon>
-      </button>
     </mat-toolbar-row>
 </mat-toolbar>
 <!--
@@ -41,7 +51,7 @@ some weird CSS compilation done by Angular. So, we use "div" here in order to ha
                 mode="side"
                 position="end"
                 [(opened)]="infoPanelActivated"
-                style="min-width:400px; max-width:400px">
+                style="min-width:400px; max-width:100%">
       <mat-toolbar class="tertiary-toolbar"
           style="height: 64px; position:absolute; top: 0;">
           <mat-toolbar-row>

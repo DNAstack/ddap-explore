@@ -11,3 +11,15 @@ export class BeaconResponse {
     exists: boolean;
     info: any[];
 }
+
+export interface BeaconAPIResponse {
+  beaconId: string;
+  alleleRequest: {
+    referenceName: string,
+    referenceBases: string,
+    alternateBases: string,
+    assemblyId: string,
+    start: number,
+  };
+  datasetAlleleResponses: BeaconResponse[];
+}

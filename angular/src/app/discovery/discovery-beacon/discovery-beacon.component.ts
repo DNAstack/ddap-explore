@@ -50,23 +50,23 @@ export class DiscoveryBeaconComponent implements OnInit {
   private gridApi;
   private gridColumnApi;
 
-  private queryParameters: any;
+  // private queryParameters: any;
 
   /** Bing map */
   private _markerTypeId = MarkerTypeId;
-       private _options: IMapOptions = {
-            disableBirdseye: true,
-            disableStreetside: true,
-            showCopyright: false,
-            showMapTypeSelector: false,
-            navigationBarMode: 2,
-            mapTypeId: 7,
-            zoom: 4,
-            center: {
-              latitude: 0,
-              longitude: 0,
-            },
-       };
+  private _options: IMapOptions = {
+    disableBirdseye: true,
+    disableStreetside: true,
+    showCopyright: false,
+    showMapTypeSelector: false,
+    navigationBarMode: 2,
+    mapTypeId: 7,
+    zoom: 4,
+    center: {
+      latitude: 0,
+      longitude: 0,
+    },
+  };
 
   constructor(private router: Router,
               private appConfigService: AppConfigService,
@@ -75,7 +75,7 @@ export class DiscoveryBeaconComponent implements OnInit {
               private geocodeService: GeocodeService,
               private changeDetector: ChangeDetectorRef,
               public helpDialog: MatDialog
-              ) {
+  ) {
     this.cases = [];
 
     this.onSelectionChanged = this.onSelectionChanged.bind(this);
@@ -98,8 +98,6 @@ export class DiscoveryBeaconComponent implements OnInit {
       suppressCellSelection: true,
       rowSelection: 'single',
     };
-
-    this.beaconResponses = [];
 
     this.view = {
       isSearching: false,
@@ -136,10 +134,10 @@ export class DiscoveryBeaconComponent implements OnInit {
 
     const dialogRef = this.helpDialog.open(
       DiscoveryBeaconHelpDialogComponent,
-        {
-          width: '500px',
-        }
-      );
+      {
+        width: '500px',
+      }
+    );
   }
 
   doSearch() {
@@ -147,12 +145,12 @@ export class DiscoveryBeaconComponent implements OnInit {
     const query = this.query;
 
     this.beaconService.searchBeacon(
-        'hCoV-19',
-        '1',
-        this.query.start,
-        this.query.referenceBases,
-        this.query.alternateBases
-      ).then(
+      'hCoV-19',
+      '1',
+      this.query.start,
+      this.query.referenceBases,
+      this.query.alternateBases
+    ).then(
       data => {
         that.lastQuery = JSON.parse(JSON.stringify(query));
         that.selectedCase = undefined;
@@ -202,8 +200,8 @@ export class DiscoveryBeaconComponent implements OnInit {
           const keyStr = caseColumnKeys[k];
           caseColumnDefs.push(
             {
-              field : keyStr,
-              headerName : this.titleCase(keyStr.replace(/_/g, ' ')),
+              field: keyStr,
+              headerName: this.titleCase(keyStr.replace(/_/g, ' ')),
             }
           );
         }
@@ -220,36 +218,36 @@ export class DiscoveryBeaconComponent implements OnInit {
     );
   }
 
- rowDataChanged(event) {
-  if (!this.gridApi) {
-    return;
+  rowDataChanged(event) {
+    if (!this.gridApi) {
+      return;
+    }
   }
- }
 
- resizeColumns() {
-   // Resize columns
-   const hiddenFieldIds = ['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'];
+  resizeColumns() {
+    // Resize columns
+    const hiddenFieldIds = ['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'];
 
-   const allColumnIds = [];
-   const hiddenColumnIds = [];
+    const allColumnIds = [];
+    const hiddenColumnIds = [];
 
-   this.gridColumnApi.getAllColumns().forEach(function (column) {
-     allColumnIds.push(column.colId);
-     if (hiddenFieldIds.includes(column.userProvidedColDef.field)) {
-       hiddenColumnIds.push(column.colId);
-     }
-   });
-   this.gridColumnApi.setColumnsVisible(hiddenColumnIds, false);
-   this.gridColumnApi.autoSizeColumns(allColumnIds);
- }
+    this.gridColumnApi.getAllColumns().forEach(function (column) {
+      allColumnIds.push(column.colId);
+      if (hiddenFieldIds.includes(column.userProvidedColDef.field)) {
+        hiddenColumnIds.push(column.colId);
+      }
+    });
+    this.gridColumnApi.setColumnsVisible(hiddenColumnIds, false);
+    this.gridColumnApi.autoSizeColumns(allColumnIds);
+  }
 
- nextStrainUrl(source) {
+  nextStrainUrl(source) {
     const tokens = source.split('/');
     if (tokens.length === 1) {
       return null;
     }
     return 'https://nextstrain.org/ncov?s=' + tokens[1] + '/' + tokens[2] + '/' + tokens[3];
- }
+  }
 
   onGridReady(params) {
     this.gridApi = params.api;
@@ -257,8 +255,8 @@ export class DiscoveryBeaconComponent implements OnInit {
 
     if (this.grid.makeFullWidth) {
       params.api.sizeColumnsToFit();
-      window.addEventListener('resize', function() {
-        setTimeout(function() {
+      window.addEventListener('resize', function () {
+        setTimeout(function () {
           params.api.sizeColumnsToFit();
         });
       });
@@ -297,7 +295,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   setCaseLocation(lat: number, lng: number) {
-    this._options.center = { latitude: lat, longitude: lng };
+    this._options.center = {latitude: lat, longitude: lng};
   }
 
   navigateToCell(params) {
@@ -310,42 +308,42 @@ export class DiscoveryBeaconComponent implements OnInit {
     const KEY_RIGHT = 39;
 
     switch (params.key) {
-        case KEY_DOWN:
-            previousCell = params.previousCellPosition;
-            // set selected cell on current cell + 1
-            this.gridApi.forEachNode(function(node) {
-                if (previousCell.rowIndex + 1 === node.rowIndex) {
-                    node.setSelected(true);
-                }
-            });
-            return suggestedNextCell;
-        case KEY_UP:
-            previousCell = params.previousCellPosition;
-            // set selected cell on current cell - 1
-            this.gridApi.forEachNode(function(node) {
-                if (previousCell.rowIndex - 1 === node.rowIndex) {
-                    node.setSelected(true);
-                }
-            });
-            return suggestedNextCell;
-        case KEY_LEFT:
-        case KEY_RIGHT:
-            return suggestedNextCell;
-        default:
-            throw new Error('this will never happen');
+      case KEY_DOWN:
+        previousCell = params.previousCellPosition;
+        // set selected cell on current cell + 1
+        this.gridApi.forEachNode(function (node) {
+          if (previousCell.rowIndex + 1 === node.rowIndex) {
+            node.setSelected(true);
+          }
+        });
+        return suggestedNextCell;
+      case KEY_UP:
+        previousCell = params.previousCellPosition;
+        // set selected cell on current cell - 1
+        this.gridApi.forEachNode(function (node) {
+          if (previousCell.rowIndex - 1 === node.rowIndex) {
+            node.setSelected(true);
+          }
+        });
+        return suggestedNextCell;
+      case KEY_LEFT:
+      case KEY_RIGHT:
+        return suggestedNextCell;
+      default:
+        throw new Error('this will never happen');
     }
- }
+  }
 
   private titleCase(str) {
     const splitStr = str.toLowerCase().split(' ');
     for (let i = 0; i < splitStr.length; i++) {
-        // You do not need to check if i is larger than splitStr length, as your for does that for you
-        // Assign it back to the array
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+      // You do not need to check if i is larger than splitStr length, as your for does that for you
+      // Assign it back to the array
+      splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
     }
     // Directly return the joined string
     return splitStr.join(' ');
- }
+  }
 
   private preInitialize() {
     this.query = new BeaconRequest();
@@ -368,7 +366,7 @@ export class DiscoveryBeaconComponent implements OnInit {
       {
         relativeTo: this.route,
         queryParams: {
-          start : this.query.start,
+          start: this.query.start,
           referenceBases: this.query.referenceBases,
           alternateBases: this.query.alternateBases,
         },

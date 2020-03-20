@@ -29,7 +29,7 @@ export class BeaconService {
     referenceBases: string,
     alternateBases: string,
     headers?: HttpHeaders)
-    : Promise<BeaconResponse[]> {
+    : Promise<BeaconResponse[]> { // FIXME This is an incorrect response type. Need to use BeaconAPIResponse instead.
     return this.searchBeacons(
       assembly,
       referenceName,

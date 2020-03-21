@@ -229,9 +229,11 @@ export class DiscoveryBeaconComponent implements OnInit {
     if (!this.gridApi) {
       return;
     }
+    this.hideAndResizeColumns();
   }
 
-  resizeColumns() {
+  hideAndResizeColumns() {
+
     // Resize columns
     const hiddenFieldIds = ['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'];
 
@@ -244,6 +246,7 @@ export class DiscoveryBeaconComponent implements OnInit {
         hiddenColumnIds.push(column.colId);
       }
     });
+
     this.gridColumnApi.setColumnsVisible(hiddenColumnIds, false);
     this.gridColumnApi.autoSizeColumns(allColumnIds);
   }
@@ -277,7 +280,7 @@ export class DiscoveryBeaconComponent implements OnInit {
       });
     }
 
-    this.resizeColumns();
+    this.hideAndResizeColumns();
   }
 
   onSelectionChanged(event) {

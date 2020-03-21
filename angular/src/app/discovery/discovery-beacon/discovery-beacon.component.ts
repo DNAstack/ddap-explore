@@ -82,7 +82,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   ) {
     this.cases = [];
 
-    const isMobile = window.innerWidth < 760;
+    const isMobile = this.isMobileWidth(window.innerWidth);
 
     this.infoPanelActivated = false;
 
@@ -349,6 +349,11 @@ export class DiscoveryBeaconComponent implements OnInit {
     }
   }
 
+  onResize(event) {
+    this.view.isMobile = this.isMobileWidth(event.target.innerWidth);
+    this.grid.pagination = !this.view.isMobile;
+  }
+
   private titleCase(str) {
     const splitStr = str.toLowerCase().split(' ');
     for (let i = 0; i < splitStr.length; i++) {
@@ -406,4 +411,9 @@ export class DiscoveryBeaconComponent implements OnInit {
         queryParamsHandling: 'merge', // remove to replace all query params by provided
       });
   }
+
+  private isMobileWidth(width: number) {
+    return width < 760;
+  }
+
 }

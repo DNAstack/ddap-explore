@@ -13,8 +13,11 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 @Slf4j
 @RestController
@@ -51,61 +54,76 @@ public class ViewsController {
             .filter((url) -> !drsUrls.contains(url))
             .collect(toList());
 
-        Mono<List<String>> gsUrlsFromDrsObjectsMono = Flux.fromStream(drsUrls.stream()
-            .map(URI::create)
-            .map(drsClient::getDrsObject))
-            .flatMap((mono) -> mono)
-            .map((drsObject) -> {
-                // Skip if there is no access method for GS
-                if (drsObject.getAccessMethods() == null) {
-                    log.debug("No access methods for DRS Object with id {}", drsObject.getId());
-                    return Optional.<String>empty();
-                }
-
-                // TODO: what if there are more GS accesses?
-                return drsObject.getAccessMethods()
-                    .stream()
-                    .filter((accessMethod) -> accessMethod.getType().equalsIgnoreCase("gs"))
-                    .map(DrsObjectModel.AccessMethod::getAccessUrl)
-                    .map(DrsObjectModel.AccessUrl::getUrl)
-                    .findFirst();
-            })
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collectList();
-
-        return gsUrlsFromDrsObjectsMono
-            .flatMap((gsUrlsFromDrsObjects) -> {
-                final Set<String> allGsUrls = new HashSet<>(otherUrls);
-                allGsUrls.addAll(gsUrlsFromDrsObjects);
-
-                return Flux.fromStream(damClients
-                    .entrySet()
-                    .stream())
-                    .flatMap(clientEntry -> {
-                        String damId = clientEntry.getKey();
-                        ReactiveDamClient damClient = clientEntry.getValue();
-                        return damClient.getFlattenedViews(realm)
-                            .flatMap(flatViews -> {
-                                return viewsService.getRelevantViewsForUrlsInDam(damId, realm, flatViews, new ArrayList<>(allGsUrls));
-                            });
-                    })
-                    .collectList()
-                    .flatMap(viewsForAllDams -> {
-                        final Map<String, Set<String>> finalViewListing = new HashMap<>();
-
-                        for (Map<String, Set<String>> viewsForDam : viewsForAllDams) {
-                            for (Map.Entry<String, Set<String>> entry : viewsForDam.entrySet()) {
-                                if (finalViewListing.containsKey(entry.getKey())) {
-                                    finalViewListing.get(entry.getKey()).addAll(entry.getValue());
-                                } else {
-                                    finalViewListing.put(entry.getKey(), entry.getValue());
-                                }
-                            }
+        Mono<Map<String, String>> drsUrisByGcsAccessMethodUri =
+                Flux.fromStream(drsUrls.stream()
+                                       .map(URI::create)
+                                       .map(drsServerUrl -> Map.entry(drsServerUrl, drsClient.getDrsObject(drsServerUrl))))
+                    .flatMap((e) -> e.getValue()
+                                     .map(drsObject -> Map.entry(e.getKey(), drsObject)))
+                    .map(e -> {
+                        final URI drsUri = e.getKey();
+                        final DrsObjectModel drsObject = e.getValue();
+                        // Skip if there is no access method for GS
+                        if (drsObject.getAccessMethods() == null) {
+                            log.debug("No access methods for DRS Object with id {}", drsObject.getId());
                         }
-                        return Mono.just(finalViewListing);
-                    });
-            });
+
+                        // TODO: what if there are more GS accesses?
+                        return Optional.ofNullable(drsObject.getAccessMethods())
+                                       .stream()
+                                       .flatMap(Collection::stream)
+                                       .filter((accessMethod) -> accessMethod.getType().equalsIgnoreCase("gs"))
+                                       .map(DrsObjectModel.AccessMethod::getAccessUrl)
+                                       .map(DrsObjectModel.AccessUrl::getUrl)
+                                       .map(url -> Map.entry(url, drsUri.toString()))
+                                       .findFirst();
+                    })
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collectMap(Entry::getKey, Entry::getValue);
+
+        return drsUrisByGcsAccessMethodUri
+                .flatMap((gsUrlsFromDrsObjects) -> {
+                    final Set<String> allGsUrls = new HashSet<>(otherUrls);
+                    allGsUrls.addAll(gsUrlsFromDrsObjects.keySet());
+
+                    return Flux.fromStream(damClients
+                                                   .entrySet()
+                                                   .stream())
+                               .flatMap(clientEntry -> {
+                                   String damId = clientEntry.getKey();
+                                   ReactiveDamClient damClient = clientEntry.getValue();
+                                   return damClient.getFlattenedViews(realm)
+                                                   .flatMap(flatViews -> {
+                                                       return viewsService.getRelevantViewsForUrlsInDam(damId, realm, flatViews, new ArrayList<>(allGsUrls));
+                                                   })
+                                                   .map(Map::entrySet);
+                               })
+                               .map(set -> set.stream()
+                                              .collect(groupViewCoordinatesByUrl())
+                                              .entrySet()
+                                              .stream())
+                               .flatMap(Flux::fromStream)
+                               .map(e -> {
+                                   if (gsUrlsFromDrsObjects.containsKey(e.getKey())) {
+                                       return Map.entry(gsUrlsFromDrsObjects.get(e.getKey()), e.getValue());
+                                   } else {
+                                       return e;
+                                   }
+                               })
+                            .collect(groupViewCoordinatesByUrl());
+                });
+    }
+
+    public Collector<Entry<String, Set<String>>, ?, Map<String, Set<String>>> groupViewCoordinatesByUrl() {
+        return groupingBy(Entry::getKey,
+                          mapping(Entry::getValue,
+                                  reducing(Set.<String>of(), (s1, s2) -> {
+                                        Set<String> s3 = new HashSet<>(s1);
+                                        s3.addAll(s2);
+                                        return s3;
+                                    }))
+        );
     }
 
 }

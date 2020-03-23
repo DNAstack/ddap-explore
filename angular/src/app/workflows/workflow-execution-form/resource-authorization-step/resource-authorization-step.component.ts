@@ -84,6 +84,8 @@ export class ResourceAuthorizationStepComponent implements OnInit {
 
     if (currentUrl.includes('?state=')) {
       currentUrl = currentUrl.split('?')[0];
+    } else if (currentUrl.includes('?')) {
+      return `${currentUrl}&state=${this.workflowId}`;
     }
 
     return `${currentUrl}?state=${this.workflowId}`;

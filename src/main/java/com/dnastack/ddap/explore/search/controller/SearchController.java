@@ -39,31 +39,43 @@ public class SearchController {
     }
 
     @GetMapping("/resource/{resourceName}")
-    public Mono<SearchResourceResponseModel> getResourceDetails(@PathVariable String realm,
+    public Mono<List<SearchResourceResponseModel>> getResourceDetails(@PathVariable String realm,
                                                                 @PathVariable String resourceName) {
         return searchResourceService.getSearchResourceViews(resourceName, realm);
-//        return null;
     }
+
+//    @GetMapping("/resource/{resourceName}/views")
+//    public Mono<SearchResourceResponseModel> getAllViews(@PathVariable String realm,
+//                                                                @PathVariable String resourceName) {
+//        return searchResourceService.getSearchResourceViews(resourceName, realm);
+//    }
 
     @GetMapping("/tables")
     public Mono<SearchTablesResponseModel> getTables(@PathVariable String realm,
                                                      @RequestParam("resource") String resourcePath,
+                                                     @RequestParam("connectorKey") String connectorKey,
+                                                     @RequestParam("connectorToken") String connectorToken,
                                                      @RequestParam("accessToken") String accessToken) {
         String urlDecodedResourcePath = URLDecoder.decode(resourcePath, Charset.defaultCharset());
         Mono<URI> interfaceUriMono = searchResourceService.lookupFirstInterfaceUrlByResourcePath(realm, urlDecodedResourcePath);
 
         return interfaceUriMono
-            .flatMap((rootUri) -> searchClient.getTables(URI.create(rootUri + "/tables"), accessToken));
+            .flatMap((rootUri) -> searchClient.getTables(URI.create(rootUri + "/tables"), accessToken, connectorKey, connectorToken));
     }
 
     @PostMapping("/query")
     public Mono<Object> query(@PathVariable String realm,
                               @RequestParam("resource") String resourcePath,
+                              @RequestParam("connectorKey") String connectorKey,
+                              @RequestParam("connectorToken") String connectorToken,
+                              @RequestParam("accessToken") String accessToken,
                               @RequestBody Map<String, String> queryData) {
         String urlDecodedResourcePath = URLDecoder.decode(resourcePath, Charset.defaultCharset());
         Mono<URI> interfaceUriMono = searchResourceService.lookupFirstInterfaceUrlByResourcePath(realm, urlDecodedResourcePath);
 
         return interfaceUriMono
-            .flatMap((rootUri) -> searchClient.query(URI.create(rootUri + "/search"), queryData));
+            .flatMap((rootUri) -> searchClient.query(
+                    URI.create(rootUri + "/search"),
+                    queryData, accessToken, connectorKey, connectorToken));
     }
 }

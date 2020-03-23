@@ -7,11 +7,14 @@ import 'brace/theme/eclipse';
 import Table = WebAssembly.Table;
 import { filter, flatMap, map, shareReplay } from 'rxjs/operators';
 
+import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
 import { SearchService } from '../search.service';
 
 import { JsonViewerService } from './json-viewer/json-viewer.component';
 import { BeaconQuery, BeaconRegistry, SearchView } from './search-tables.model';
+import IResourceResults = dam.v1.IResourceResults;
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
   selector: 'ddap-search-detail',
@@ -37,6 +40,13 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   resourcePath: string;
   realm: string;
   accessToken;
+  resourceName: string;
+  viewName: string;
+  resourceAccessMap;
+  interfaceAccessTokensMap;
+  currentView;
+  tableApiRequests = 0;
+  connectorDetails: object = {};
 
   private QUERY_EDITOR_DELIMITER = ';';
   private QUERY_EDITOR_NEWLINE = '\n';
@@ -72,9 +82,10 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
       .queryParams
       .subscribe(params => {
         if (params['checkout']) {
-          const resourceName = this.route.snapshot.params.resourceName;
-          this.searchService.getResourceDetail(resourceName).subscribe(resource => {
-            this.authorizeResource(resource);
+          this.resourceName = this.route.snapshot.params.resourceName;
+          this.viewName = this.route.snapshot.params.viewName;
+          this.searchService.getResourceDetail(this.resourceName).subscribe(views => {
+            this.authorizeResource(views);
           });
         } else {
           this.router.navigate([`/${this.realm}`, 'search', 'resources']);
@@ -206,7 +217,8 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
 
     this.view.isSearching = true;
     this.view.errorQueryingTables = false;
-    this.searchService.search(this.resourcePath, { 'query' : query }).subscribe(result => {
+    this.searchService.search(this.currentView.resourcePath,
+      { 'query' : query }, this.accessToken, this.connectorDetails).subscribe(result => {
       this.query = query;
       this.result = result;
       this.searchService.updateTableData(result);
@@ -225,14 +237,71 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
     this.jsonViewerService.viewJSON(this.result);
   }
 
-  authorizeResource(resource) {
-    const resourcePath = `1;${resource['resourceName']}/views/` +
-      `${resource['viewName']}/roles/${resource['roleName']}/interfaces/${resource['interfaceName']}`;
-    this.resourceService.getAccessTokensForAuthorizedResources([resourcePath]).subscribe(data => {
-      const accessMap = this.resourceService.toResourceAccessMap(data);
-      this.accessToken = this.resourceService.lookupResourceTokenFromAccessMap(accessMap, resourcePath.split(';')[1])
-        .credentials['access_token'];
-      this.searchService.getTables(resource['resourcePath'], this.accessToken).subscribe();
+  authorizeResource(views) {
+    // const resourcePath = `1;${resource['resourceName']}/views/` +
+    //   `${resource['viewName']}/roles/${resource['roleName']}/interfaces/${resource['interfaceName']}`;
+    const resourcesPath = [];
+    views.map(view => {
+      if (view.viewName === this.viewName) {
+        this.currentView = view;
+      }
+      resourcesPath.push(
+        `1;${view.resourceName}/views/` +
+        `${view.viewName}/roles/${view.roleName}/interfaces/${view.interfaceName}`
+      );
     });
+    this.resourceService.getAccessTokensForAuthorizedResources(resourcesPath).subscribe(data => {
+      this.resourceAccessMap = this.resourceService.toResourceAccessMap(data);
+      this.interfaceAccessTokensMap = this.interfaceAccessMap(data);
+      Object.keys(this.resourceAccessMap).map(key => {
+        if (key.indexOf(this.viewName) !== -1) {
+          this.accessToken = this.resourceAccessMap[key].credentials.access_token;
+        }
+      });
+
+      this.tableApiRequests = 0;
+      this.getTables();
+    });
+  }
+
+  // FIXME: Done for demo, remove this
+  interfaceAccessMap(resourceTokens: IResourceResults): {[key: string]: IResourceAccess} {
+    const accessMap = {};
+    Object.entries(resourceTokens.resources)
+      .forEach(([resource, value]) => {
+        const items = Object.values(value.interfaces)[0].items;
+        items.map(item => {
+          accessMap[item.uri] = resourceTokens.access[value.access];
+        });
+        // accessMap[resource] = resourceTokens.access[value.access];
+      });
+    return accessMap;
+  }
+
+  getTables(additionalAuthDetails?) {
+    if (additionalAuthDetails && this.tableApiRequests < 3) {
+      this.tableApiRequests++;
+      this.connectorDetails['key'] = additionalAuthDetails['key'];
+      this.connectorDetails['token'] = this.interfaceAccessTokensMap[additionalAuthDetails['resource-description']['interface-uri']]
+        .credentials.access_token;
+    }
+    this.searchService.getTables(
+      this.currentView.resourcePath,
+      this.accessToken,
+      this.connectorDetails
+    ).subscribe(
+      ({tables}) => {
+        this.searchTables = tables;
+      },
+      ({error}) => {
+        if (error && error.message) {
+          const errorDetails = JSON.parse(error.message);
+          if (errorDetails.hasOwnProperty('authorization-request')) {
+            const authRequestDetails = errorDetails['authorization-request'];
+            this.getTables(authRequestDetails);
+          }
+        }
+      }
+    );
   }
 }

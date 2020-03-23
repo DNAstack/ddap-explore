@@ -5,6 +5,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 
+import { SearchResourceModel } from './search-resources/search-resource.model';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -24,11 +26,12 @@ export class SearchService {
       );
   }
 
-  getResourceDetail(resourceName: string) {
-    return this.http.get(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/resource/${resourceName}`);
+  getResourceDetail(resourceName: string): Observable<SearchResourceModel[]> {
+    return this.http.get<SearchResourceModel[]>(
+      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/resource/${resourceName}`);
   }
 
-  getTables(resource: string, accessToken): Observable<any> {
+  getTables(resource: string, accessToken, connectorDetails: object = {}): Observable<any> {
     if (!accessToken) {
       console.warn('No access token');
       return;
@@ -37,16 +40,18 @@ export class SearchService {
       { params: {
           resource: encodeURIComponent(resource),
           accessToken: accessToken,
-        }})
-      .pipe(
-        this.errorHandler.notifyOnError()
-      );
+          connectorKey: connectorDetails['key'],
+          connectorToken: connectorDetails['token'],
+        }});
   }
 
-  search(resource: string, query): Observable<any> {
+  search(resource: string, query, accessToken, connectorDetails: object = {}): Observable<any> {
     return this.http.post<any>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/query`, query,
       { params: {
           resource: encodeURIComponent(resource),
+          accessToken: accessToken,
+          connectorKey: connectorDetails['key'],
+          connectorToken: connectorDetails['token'],
         }})
       .pipe(
         this.errorHandler.notifyOnError()

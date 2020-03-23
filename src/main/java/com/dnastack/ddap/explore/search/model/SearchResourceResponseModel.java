@@ -19,6 +19,7 @@ public class SearchResourceResponseModel {
     private String viewName;
     private Optional<String> roleName;
     private Optional<String> interfaceName;
+    private Optional<Boolean> isSearchView;
     private Map<String, String> ui;
 
 }

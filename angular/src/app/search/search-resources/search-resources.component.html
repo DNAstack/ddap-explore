@@ -10,7 +10,7 @@
          [src]="[resource.ui.imageUrl || randomImageRetriever.getPathToFixedRandomImage(resource.ui.label)]"
          alt="Photo">
     <mat-card-actions>
-      <a [href]="getUrlForAccessToken(resource)">
+      <a [href]="resource.accessUrl">
         <button mat-button
               color="primary"
               class="uppercase"

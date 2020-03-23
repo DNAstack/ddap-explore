@@ -112,5 +112,4 @@ export class ResourceService {
       });
     return resourceTokens.resources[resourceKey];
   }
-
 }

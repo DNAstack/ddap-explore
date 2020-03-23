@@ -44,7 +44,7 @@ public class SearchResourceService {
             .flatMap(mono -> mono);
     }
 
-    private List<SearchResourceResponseModel> toSearchResponseModels(Map<String, FlatView> views) {
+    private List<SearchResourceResponseModel> toSearchResponseModels( Map<String, FlatView> views) {
         return views.values()
             .stream()
             .filter(this::isSearchView)
@@ -84,31 +84,31 @@ public class SearchResourceService {
             });
     }
 
-    public Mono<SearchResourceResponseModel> getSearchResourceViews(String resourceName, String realm) {
+    public Mono<List<SearchResourceResponseModel>> getSearchResourceViews(String resourceName, String realm) {
         return getAllFlattenedViews(realm)
                 .map((flatViews) -> {
                     return flatViews.values()
                             .stream()
-                            .filter(this::isSearchView)
                             .filter((view) -> view.getResourceName().equals(resourceName))
-                            .findFirst();
+                            .map(view -> {
+                                return SearchResourceResponseModel.builder()
+                                        .resourceName(view.getResourceName())
+                                        .viewName(view.getViewName())
+                                        .roleName(Optional.of(view.getRoleName()))
+                                        .interfaceName(Optional.of(view.getInterfaceName()))
+                                        .resourcePath(view.getResourcePath())
+                                        .isSearchView(Optional.of(isSearchView(view)))
+                                        .ui(Map.of(
+                                                "label", view.getViewUiMap().get("label"),
+                                                "description", view.getViewUiMap().get("description")
+                                        ))
+                                        .build();
+                            })
+                            .collect(Collectors.toList());
                 })
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(view -> {
-                    return SearchResourceResponseModel.builder()
-                            .resourceName(view.getResourceName())
-                            .viewName(view.getViewName())
-                            .roleName(Optional.of(view.getRoleName()))
-                            .interfaceName(Optional.of(view.getInterfaceName()))
-                            .resourcePath(view.getResourcePath())
-                            .ui(Map.of(
-                                    "label", view.getViewUiMap().get("label"),
-                                    "description", view.getViewUiMap().get("description")
-                            ))
-                            .build();
-                })
-                .next();
-//        return null;
+                .reduce((list1, list2) -> {
+                    return Stream.concat(list1.stream(), list2.stream())
+                            .collect(Collectors.toList());
+                });
     }
 }

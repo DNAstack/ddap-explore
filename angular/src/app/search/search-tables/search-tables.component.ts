@@ -1,12 +1,13 @@
 import { KeyValue } from '@angular/common';
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import 'brace';
 import 'brace/mode/sql';
 import 'brace/theme/eclipse';
 import Table = WebAssembly.Table;
-import { flatMap, map } from 'rxjs/operators';
+import { filter, flatMap, map, shareReplay } from 'rxjs/operators';
 
+import { ResourceService } from '../../shared/resource/resource.service';
 import { SearchService } from '../search.service';
 
 import { JsonViewerService } from './json-viewer/json-viewer.component';
@@ -35,6 +36,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   queryHistory: string[];
   resourcePath: string;
   realm: string;
+  accessToken;
 
   private QUERY_EDITOR_DELIMITER = ';';
   private QUERY_EDITOR_NEWLINE = '\n';
@@ -45,7 +47,9 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
 
   constructor( private searchService: SearchService,
                private route: ActivatedRoute,
-               private jsonViewerService: JsonViewerService) {
+               private jsonViewerService: JsonViewerService,
+               private router: Router,
+               private resourceService: ResourceService) {
 
     this.search = { text : '' };
 
@@ -64,15 +68,18 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    this.route.queryParams.pipe(
-      flatMap(({ resourcePath }) => {
-        this.resourcePath = decodeURI(resourcePath);
-        return this.searchService.getTables(this.resourcePath);
-      })
-    )
-    .subscribe(({ tables }) => {
-      this.searchTables = tables;
-    });
+    this.route
+      .queryParams
+      .subscribe(params => {
+        if (params['checkout']) {
+          const resourceName = this.route.snapshot.params.resourceName;
+          this.searchService.getResourceDetail(resourceName).subscribe(resource => {
+            this.authorizeResource(resource);
+          });
+        } else {
+          this.router.navigate([`/${this.realm}`, 'search', 'resources']);
+        }
+      });
   }
 
   ngAfterViewInit(): void {
@@ -218,4 +225,14 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
     this.jsonViewerService.viewJSON(this.result);
   }
 
+  authorizeResource(resource) {
+    const resourcePath = `1;${resource['resourceName']}/views/` +
+      `${resource['viewName']}/roles/${resource['roleName']}/interfaces/${resource['interfaceName']}`;
+    this.resourceService.getAccessTokensForAuthorizedResources([resourcePath]).subscribe(data => {
+      const accessMap = this.resourceService.toResourceAccessMap(data);
+      this.accessToken = this.resourceService.lookupResourceTokenFromAccessMap(accessMap, resourcePath.split(';')[1])
+        .credentials['access_token'];
+      this.searchService.getTables(resource['resourcePath'], this.accessToken).subscribe();
+    });
+  }
 }

@@ -10,13 +10,12 @@
          [src]="[resource.ui.imageUrl || randomImageRetriever.getPathToFixedRandomImage(resource.ui.label)]"
          alt="Photo">
     <mat-card-actions>
-      <button mat-button
+      <a [href]="getUrlForAccessToken(resource)">
+        <button mat-button
               color="primary"
               class="uppercase"
-              [routerLink]="['../tables']"
-              [queryParams]="{ resourcePath: resource.resourcePath }"
-              queryParamsHandling="merge"
               data-se="explore-resource">Explore</button>
+      </a>
     </mat-card-actions>
   </mat-card>
 </ddaplib-main>

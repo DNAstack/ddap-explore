@@ -6,6 +6,7 @@ import { SearchTablesComponent } from './search-tables/search-tables.component';
 
 export const routes: Routes = [
   { path: 'resources', component: SearchResourcesComponent},
+  { path: 'resource/:resourceName', component: SearchTablesComponent},
   { path: 'tables', component: SearchTablesComponent},
   { path: '', redirectTo: 'resources'},
 ];

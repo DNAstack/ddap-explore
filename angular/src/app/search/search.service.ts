@@ -18,16 +18,25 @@ export class SearchService {
   }
 
   getSearchResources(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search`)
+    return this.http.get<any[]>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/resources`)
       .pipe(
         this.errorHandler.notifyOnError()
       );
   }
 
-  getTables(resource: string): Observable<any> {
+  getResourceDetail(resourceName: string) {
+    return this.http.get(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/resource/${resourceName}`);
+  }
+
+  getTables(resource: string, accessToken): Observable<any> {
+    if (!accessToken) {
+      console.warn('No access token');
+      return;
+    }
     return this.http.get<any>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/tables`,
       { params: {
           resource: encodeURIComponent(resource),
+          accessToken: accessToken,
         }})
       .pipe(
         this.errorHandler.notifyOnError()
@@ -46,5 +55,9 @@ export class SearchService {
 
   updateTableData(tableData) {
     this.tableData.next(tableData);
+  }
+
+  authorizeResource(resirectUri: string, resourceName: string) {
+    return;
   }
 }

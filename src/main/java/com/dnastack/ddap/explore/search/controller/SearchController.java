@@ -7,7 +7,10 @@ import com.dnastack.ddap.explore.search.service.SearchResourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import dam.v1.DamService.GetFlatViewsResponse.FlatView;
+
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -30,19 +33,27 @@ public class SearchController {
         this.searchResourceService = searchResourceService;
     }
 
-    @GetMapping
+    @GetMapping("/resources")
     public Mono<List<SearchResourceResponseModel>> getSearchResources(@PathVariable String realm) {
         return searchResourceService.getSearchResources(realm);
     }
 
+    @GetMapping("/resource/{resourceName}")
+    public Mono<SearchResourceResponseModel> getResourceDetails(@PathVariable String realm,
+                                                                @PathVariable String resourceName) {
+        return searchResourceService.getSearchResourceViews(resourceName, realm);
+//        return null;
+    }
+
     @GetMapping("/tables")
     public Mono<SearchTablesResponseModel> getTables(@PathVariable String realm,
-                                                     @RequestParam("resource") String resourcePath) {
+                                                     @RequestParam("resource") String resourcePath,
+                                                     @RequestParam("accessToken") String accessToken) {
         String urlDecodedResourcePath = URLDecoder.decode(resourcePath, Charset.defaultCharset());
         Mono<URI> interfaceUriMono = searchResourceService.lookupFirstInterfaceUrlByResourcePath(realm, urlDecodedResourcePath);
 
         return interfaceUriMono
-            .flatMap((rootUri) -> searchClient.getTables(URI.create(rootUri + "/tables")));
+            .flatMap((rootUri) -> searchClient.getTables(URI.create(rootUri + "/tables"), accessToken));
     }
 
     @PostMapping("/query")

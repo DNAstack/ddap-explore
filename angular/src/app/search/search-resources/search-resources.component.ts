@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
+import { DamInfoService } from '../../shared/dam/dam-info.service';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
+import { ResourceService } from '../../shared/resource/resource.service';
 import { SearchService } from '../search.service';
 
 @Component({
@@ -16,7 +18,10 @@ export class SearchResourcesComponent implements OnInit {
 
   constructor(private searchService: SearchService,
               private randomImageRetriever: ImagePlaceholderRetriever,
-              private router: Router) {
+              private router: Router,
+              private resourceService: ResourceService,
+              private damInfoService: DamInfoService,
+              private route: ActivatedRoute) {
   }
 
   ngOnInit() {
@@ -24,4 +29,11 @@ export class SearchResourcesComponent implements OnInit {
       .subscribe((resources) => this.resources = resources);
   }
 
+  getUrlForAccessToken(resource) {
+    const realmId = this.route.root.firstChild.snapshot.params.realmId;
+    const redirectUri = `/${realmId}/search/resource/${resource['resourceName']}?checkout=true`;
+    const resourcePath = `1;${resource['resourceName']}/views/` +
+    `${resource['viewName']}/roles/${resource['roleName']}/interfaces/${resource['interfaceName']}`;
+    return this.resourceService.getUrlForObtainingAccessToken([resourcePath], redirectUri);
+  }
 }

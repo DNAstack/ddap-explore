@@ -1,0 +1,36 @@
+
+.ddap-card {
+  vertical-align: top;
+  min-width: 20rem;
+  width: calc(30% + 4rem);
+  max-width: 30rem;
+  min-height: 20rem;
+  display: inline-block;
+  margin-right: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+
+  mat-card-title {
+    word-break: break-all;
+  }
+
+  img {
+    min-width: 20rem;
+    height: 10rem;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 1600px) {
+  .ddap-card {
+    min-width: 20rem;
+    width: calc(50% - 4rem);
+  }
+}
+
+@media (max-width: 1024px) {
+  .ddap-card {
+    min-width: 20rem;
+    width: calc(100% - 2rem);
+  }
+}

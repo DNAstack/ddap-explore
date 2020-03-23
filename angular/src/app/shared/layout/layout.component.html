@@ -1,11 +1,22 @@
+<!--<script async src="https://www.googletagmanager.com/gtag/js?id=UA-52918106-11"></script>-->
+<!--<script>-->
+<!--    window.dataLayer = window.dataLayer || [];-->
+<!--    function gtag(){dataLayer.push(arguments);}-->
+<!--    gtag('js', new Date());-->
+
+<!--    gtag('config', 'UA-52918106-11');-->
+<!--</script>-->
 <div class="site-container {{viewController.view.leftSidebarOpened ? '' : 'zen-mode'}}">
   <ddaplib-main-header [siteName]="appConfig.title"
+    [logoUrl]="appConfig.logoUrl"
     [isSandbox]="appConfig.featureRealmInputEnabled"
     [realmActions]="['edit']"
     (realmChangeAcknowledge)="onAcknowledge($event)">
     <ddaplib-menu-apps [accessibleApps]="viewController.getAccessibleApps()"
-      [realmId]="viewController.getRealmId()">
+      [realmId]="viewController.getRealmId()"
+      *ngIf="viewController.getAccessibleApps().length > 1">
       <ng-container *ngIf="appConfig.featureAdministrationEnabled">
+        <mat-divider></mat-divider>
         <div class="app-menu-section-title">Administration</div>
         <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">
           <a [href]="withRealm(identityConcentratorInfo.uiUrl)"
@@ -13,7 +24,7 @@
             class="link-to-external-app"
             data-se="nav-identity-concentrator"
             target="_blank">
-            <mat-icon class="icon">launch</mat-icon>
+            <mat-icon class="icon">vpn_key</mat-icon>
             <span>Identity Concentrator</span>
           </a>
         </ng-container>
@@ -50,12 +61,14 @@
     data-se="main-progress-bar">
   </mat-progress-bar>
 
+  <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
+
   <mat-sidenav-container>
     <!-- Left Side Navigation -->
     <mat-sidenav
       position="start"
       mode="side"
-      [opened]="true"
+      [opened]="viewController.getCurrentApp().isSidebarEnabled"
     >
       <app-sidenav-left></app-sidenav-left>
     </mat-sidenav>
@@ -65,4 +78,20 @@
       <router-outlet></router-outlet>
     </mat-sidenav-content>
   </mat-sidenav-container>
+
+  <ddaplib-footer *ngIf="appConfig.featureTermsEnabled">
+    <span class="fill-space"></span>
+    <a class="m-r-sm" href="https://dnastack.com"
+          target="_blank">
+          <span>&copy; DNAstack</span>
+        </a>
+        <a class="m-r-sm" href="https://dnastack.com/#/legal/terms"
+          target="_blank">
+          <span>Terms of Use</span>
+        </a>
+        <a href="https://dnastack.com/#/legal/privacy"
+          target="_blank">
+          <span>Privacy Policy</span>
+        </a>
+  </ddaplib-footer>
 </div>

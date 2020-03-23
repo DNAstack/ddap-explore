@@ -124,4 +124,9 @@ public class WorkflowManagePage extends AnyDdapPage {
         WebElement element = driver.findElement(selector);
         element.sendKeys(content);
     }
+
+    public void shouldContainInCodeEditor(String expected) {
+        By selector = By.xpath("//ngx-monaco-editor[contains(@ng-reflect-model, '" + expected + "')]");
+        new WebDriverWait(driver, 20).until(ExpectedConditions.numberOfElementsToBe(selector, 1));
+    }
 }

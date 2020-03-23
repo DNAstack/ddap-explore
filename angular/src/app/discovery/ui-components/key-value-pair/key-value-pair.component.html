@@ -1,0 +1,9 @@
+<div style="display: flex; flex-direction: column;">
+  <div class="text-muted" style="font-size: 10px; font-weight: 500; text-transform: uppercase;">
+    {{key}}
+  </div>
+  <div *ngIf="value">
+    {{value}}
+  </div>
+  <ng-content></ng-content>
+</div>

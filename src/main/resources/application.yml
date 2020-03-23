@@ -8,13 +8,19 @@ server:
 
 ui:
   title: "DDAP"
+  logo-url: null
+  google-analytics-id: null
+  theme: null
   default-module: data
   in-standalone-mode: ${ddap.dam-facade}
   authorization-on-init-required: false
   sidebar-enabled: true
   feature-realm-input-enabled: true
   feature-administration-enabled: true
+  feature-terms-enabled: false
   feature-explore-data-enabled: true
+  feature-discovery-enabled: false
+  feature-beacons-enabled: false
   feature-workflows-enabled: true
   feature-search-enabled: true
   feature-workflows-trs-integration-enabled: false
@@ -22,6 +28,7 @@ ui:
   trs-accepted-tool-classes: ['Workflow']
   trs-accepted-version-descriptor-types: ['WDL']
   list-page-size: 20
+  covid-beacon-url: null
 
 dams:
   1:

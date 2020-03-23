@@ -24,6 +24,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { AgGridModule } from 'ag-grid-angular';
 import { DdapFormModule, DdapLayoutModule, MenuModule, ViewControllerService } from 'ddap-common-lib';
 import { TagInputModule } from 'ngx-chips';
 import { ClipboardModule } from 'ngx-clipboard';
@@ -91,6 +92,8 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     DdapFormModule,
 
     MenuModule,
+
+    AgGridModule.withComponents([]),
   ],
   exports: [
     CommonModule,

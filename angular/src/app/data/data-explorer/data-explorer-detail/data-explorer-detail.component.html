@@ -1,0 +1,189 @@
+<ddaplib-header label="{{collection.name}}" [backLink]="['../..']">
+</ddaplib-header>
+<ddaplib-main style="padding:0">
+    <mat-drawer-container style="height:100%" [autosize]="true">
+            <mat-drawer mode="side" [(opened)]="view.showTables" style="min-width:400px; max-width:400px">
+                <mat-toolbar class="tertiary-toolbar"
+                    style="height: 64px; position:absolute; top: 0;">
+                    <mat-toolbar-row>
+                        <div>Tables</div>
+                        <span class="fill-space"></span>
+                        <button tabindex="-1" mat-icon-button (click)="refreshTables()" matTooltip="Refresh Tables">
+                            <mat-icon>refresh</mat-icon>
+                        </button>
+                        <button tabindex="-1" mat-icon-button (click)="closeTables()" matTooltip="Close Tables">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </mat-toolbar-row>
+                </mat-toolbar>
+                <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
+                    <mat-progress-bar *ngIf="view.isRefreshingTables" mode="indeterminate" color="accent"></mat-progress-bar>
+                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="view.errorLoadingTables" message="Error Loading Tables" icon="error_outline"></ddaplib-cover-message>
+                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="!view.isRefreshingTables && tables.length == 0 && !view.errorLoadingTables" message="No Tables" icon="not_interested"></ddaplib-cover-message>
+                    <div style="flex:1; height:100%;" *ngIf="tables.length > 0">
+                        <mat-accordion>
+                            <mat-expansion-panel *ngFor="let table of tables; index as j;" tabindex="-1">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>
+                                        <mat-icon class="m-r-sm">web_asset</mat-icon>{{table.name}}
+                                    </mat-panel-title>
+                                    <mat-panel-description>
+                                    </mat-panel-description>
+                                </mat-expansion-panel-header>
+                                <div class="m-b">
+                                    <div class="h4 m-b-sm">Table</div>
+                                    <a (click)="addAtCursor(table.name)" tabindex="-1">
+                                        {{table.name}}
+                                    </a>
+                                </div>
+                                <div class="h4 m-b-sm">Properties</div>
+                                <a tabindex="-1" (click)='addAtCursor("\"" + property.key + "\"")'
+                                    *ngFor="let property of table['properties'] | keyvalue : propertyOrder;">
+                                    <div *ngIf="property.key != 'description'">{{property.key}}</div>
+                                </a>
+                                <button class="m-t-sm" tabindex="-1" mat-icon-button
+                                    (click)="addAtCursor(previewTableQuery(table.name))" matTooltip="Preview Table">
+                                    <mat-icon>visibility</mat-icon>
+                                </button>
+                                <button tabindex="-1" mat-icon-button (click)="viewTableAsJSON(table)"
+                                                    matTooltip="View Table as JSON" style="display:inline">
+                                                    <mat-icon>launch</mat-icon>
+                                                </button>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+                    </div>
+                </div>
+            </mat-drawer>
+            <mat-drawer-content>
+                <mat-drawer-container style="height:100%" [autosize]="true">
+                    <mat-drawer position="end" mode="side" [(opened)]="view.showSearchBar" style="min-width:400px;">
+                        <div style="display:flex; flex: 1; flex-direction: column">
+                            <mat-toolbar class="tertiary-toolbar">
+                                <mat-toolbar-row>
+                                    <div>Search</div>
+                                    <span class="fill-space"></span>
+                                </mat-toolbar-row>
+                            </mat-toolbar>
+                        </div>
+                    </mat-drawer>
+                    <mat-drawer-content>
+                        <div style="display:flex; flex: 1; flex-direction: column;">
+                            <mat-toolbar class="tertiary-toolbar"
+                                style="height: 64px; position:absolute; top: 0;">
+                                <mat-toolbar-row>
+                                    <button class="m-r-sm" tabindex="-1" mat-icon-button
+                                        (click)="view.showTables = !view.showTables"
+                                        color="{{view.showTables ? 'accent' : '' }}"
+                                        matTooltip="{{view.showTables ? 'Close Tables' : 'Open Tables' }}">
+                                        <mat-icon>web_asset</mat-icon>
+                                    </button>
+                                    <div>Search</div>
+                                    <span class="fill-space"></span>
+                                    <button tabindex="-1" mat-icon-button
+                                        (click)="view.showQueryEditor = !view.showQueryEditor"
+                                        color="{{view.showQueryEditor ? 'accent' : '' }}"
+                                        matTooltip="{{view.showQueryEditor ? 'Close Query Editor' : 'Open Query Editor' }}">
+                                        <mat-icon>code</mat-icon>
+                                    </button>
+                                </mat-toolbar-row>
+                            </mat-toolbar>
+                            <div style="display: flex; flex-direction:column; position:absolute; width:100%; top:64px; bottom:0;">
+                                <div [hidden]="!view.showQueryEditor" class="b-b">
+                                    <mat-toolbar class="tertiary-toolbar">
+                                        <mat-toolbar-row class="b-b">
+                                            <div>Query Editor</div>
+                                            <span class="fill-space"></span>
+                                            <button tabindex="-1" mat-stroked-button color="accent"
+                                                (click)="doSearchFromEditor()" matTooltip="Run query"
+                                                style="display:inline">
+                                                <mat-icon>play_arrow</mat-icon> Run
+                                            </button>
+                                        </mat-toolbar-row>
+                                    </mat-toolbar>
+                                    <ace-editor #editor [(text)]="search.text" [mode]="'sql'" [theme]="'eclipse'"
+                                        [options]="options" [readOnly]="false" [autoUpdateContent]="true"
+                                        [durationBeforeCallback]="1000" (textChanged)="queryChanged($event)"
+                                        style="min-height: 200px; width:100%; overflow: auto; flex-grow: 2">
+                                    </ace-editor>
+                                </div>
+                                <mat-toolbar class="tertiary-toolbar">
+                                        <mat-toolbar-row style="position: sticky; position: -webkit-sticky; align-self: flex-start">
+                                            <div>Results</div>
+                                            <span class="fill-space"></span>
+                                            <div *ngIf="result" style="display:flex; flex-direction: row">
+                                                <mat-chip-list class="m-s-sm" [hidden]="">
+                                                    <mat-chip color="primary">{{result['data'].length}}
+                                                        results</mat-chip>
+                                                </mat-chip-list>
+                                                <button tabindex="-1" mat-icon-button
+                                                    (click)="view.wrapSearchResults = !view.wrapSearchResults"
+                                                    color="{{view.wrapSearchResults ? 'accent' : '' }}"
+                                                    matTooltip="{{view.wrapSearchResults ? 'Don\'t Wrap Text' : 'Wrap Text' }}">
+                                                    <mat-icon>wrap_text</mat-icon>
+                                                </button>
+                                                <button tabindex="-1" mat-icon-button
+                                                    (click)="view.showQueryEditor = false; view.showTables = false"
+                                                    *ngIf="view.showTables || view.showQueryEditor"
+                                                    matTooltip="Fullscreen">
+                                                    <mat-icon>fullscreen</mat-icon>
+                                                </button>
+                                                <button tabindex="-1" mat-icon-button
+                                                    (click)="view.showQueryEditor = true; view.showTables = true"
+                                                    *ngIf="!view.showTables && !view.showQueryEditor"
+                                                    matTooltip="Exit Fullscreen">
+                                                    <mat-icon>fullscreen_exit</mat-icon>
+                                                </button>
+                                                <button mat-icon-button matTooltip="Query History"
+                                                    [matMenuTriggerFor]="menu">
+                                                    <i class="material-icons">
+                                                        history
+                                                    </i>
+                                                </button>
+                                                <mat-menu #menu="matMenu" class="menu-width-lg">
+                                                    <button *ngFor="let q of queryHistory" (click)="doSearch(q)"
+                                                        mat-menu-item>{{q}}</button>
+                                                </mat-menu>
+                                                <button tabindex="-1" mat-icon-button (click)="viewResultsJSON()"
+                                                    matTooltip="View Results as JSON" style="display:inline">
+                                                    <mat-icon>launch</mat-icon>
+                                                </button>
+                                            </div>
+                                        </mat-toolbar-row>
+                                    </mat-toolbar>
+                                    <mat-progress-bar *ngIf="view.isSearching" mode="indeterminate" color="accent">
+                                    </mat-progress-bar>
+                                <div style="flex: 1; display:flex; flex-direction: column; overflow-y:auto">
+                                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="queryHistory.length == 0 && !view.isSearching"
+                                        message="No Results" icon="not_interested"></ddaplib-cover-message>
+                                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="view.isSearching"
+                                        message="Searching" icon="hourglass_empty"></ddaplib-cover-message>
+                                    <div class="p-a" *ngIf="queryHistory.length > 0 && !view.isSearching">
+                                        <div style="flex:1; height:100%">
+                                            <div class="m-b-sm"
+                                                style="display:flex; flex-direction: row; align-items: center;">
+                                                <pre><code>{{query}}</code></pre>
+                                            </div>
+                                            <div *ngIf="result" class="mat-table" style="width:100%">
+                                                <div class="mat-header-row">
+                                                    <div class="mat-header-cell" *ngFor="let property of properties;">
+                                                        {{property}}
+                                                    </div>
+                                                </div>
+                                                <div class="mat-row" *ngFor="let row of result['data']">
+                                                    <div class="mat-cell"
+                                                        [ngClass]="{'no-wrap': !view.wrapSearchResults}"
+                                                        *ngFor="let value of row | objectToArray : properties"
+                                                        [innerHTML]="value | linkify">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-drawer-content>
+                </mat-drawer-container>
+            </mat-drawer-content>
+    </mat-drawer-container>
+</ddaplib-main>

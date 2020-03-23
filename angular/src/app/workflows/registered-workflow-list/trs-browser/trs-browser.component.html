@@ -52,7 +52,9 @@
   <mat-accordion>
     <mat-expansion-panel
       *ngFor="let tool of (filteredTools || []).slice(pageIndex * config.pageSize, (pageIndex + 1) * config.pageSize)"
+      [attr.data-name]="tool.toolname"
       class="workflow">
+
       <mat-expansion-panel-header>
         <mat-panel-title><span>{{ tool.toolname }}</span></mat-panel-title>
         <mat-panel-description><span>{{ tool.author || tool.organization }}</span></mat-panel-description>
@@ -77,6 +79,9 @@
                 <ul class="descriptor-type-list">
                   <li *ngFor="let descriptor_type of version.descriptor_type">
                     <button mat-raised-button
+                            class="version-descriptor-selector"
+                            [attr.data-version-name]="version.name"
+                            [attr.data-descriptor-type]="descriptor_type"
                             (click)="onVersionSelectionSelectClick(version, descriptor_type)">
                       {{ descriptor_type }}
                     </button>

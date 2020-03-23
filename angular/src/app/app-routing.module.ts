@@ -33,9 +33,14 @@ const routes: Routes = [
           .then(mod => mod.WorkflowsModule),
       },
       {
-        path: 'search',
-        loadChildren: () => import('./search/search.module')
-          .then(mod => mod.SearchModule),
+        path: 'beacon',
+        loadChildren: () => import('./beacon/beacon.module')
+          .then(mod => mod.BeaconModule),
+      },
+      {
+        path: 'discovery',
+        loadChildren: () => import('./discovery/discovery.module')
+          .then(mod => mod.DiscoveryModule),
       },
     ],
   },

@@ -1,0 +1,200 @@
+<ng-template #searchBox>
+  <div class="beacon-search-parameters">
+    <div class="input-control">
+      <span class="input-control-label">Position</span>
+      <input (keyup.enter)="doSearch()" matInput name="position" [(ngModel)]="query.start">
+    </div>
+
+    <div class="input-control">
+      <span class="input-control-label">Reference</span>
+      <input (keyup.enter)="doSearch()" matInput name="reference" [(ngModel)]="query.referenceBases">
+    </div>
+
+    <div class="input-control">
+      <span class="input-control-label">Alternate</span>
+      <input (keyup.enter)="doSearch()" matInput name="alternate" [(ngModel)]="query.alternateBases">
+    </div>
+  </div>
+
+  <div class="fill-space" *ngIf="view.isMobile"></div>
+
+  <div class="beacon-search-actions" *ngIf="view.isMobile">
+    <button tabindex="-1"
+            mat-flat-button
+            [disabled]="view.isSearching"
+            (click)="doSearch()"
+            matTooltip="Search Variant"
+            color="accent">
+      Search
+    </button>
+
+    <button mat-button
+            [disabled]="view.isSearching"
+            (click)="setSearchBoxActive(false)"
+            matTooltip="Cancel search">
+      Cancel
+    </button>
+  </div>
+
+  <div class="beacon-search-actions" *ngIf="!view.isMobile">
+    <button tabindex="-1"
+            mat-mini-fab
+            [disabled]="view.isSearching"
+            (click)="doSearch()"
+            matTooltip="Search Variant"
+            color="accent">
+      <mat-icon>search</mat-icon>
+    </button>
+  </div>
+</ng-template>
+
+<mat-toolbar class="discovery-beacon-main-toolbar tertiary-toolbar {{ !view.isMobile || (view.isMobile && !searchBoxActive) ? 'mobile-search-inactive' : 'mobile-search-active' }}">
+  <mat-toolbar-row>
+    <ng-template #moreActions>
+      <div>
+        <button (click)="openHelpDialog()" mat-icon-button matTooltip="Help">
+          <mat-icon>help_outline</mat-icon>
+        </button>
+      </div>
+    </ng-template>
+
+    <ng-template #mobileToolbar>
+      <ng-container *ngIf="searchBoxActive; else inactiveSearchBox">
+        <b>Looking for...</b>
+      </ng-container>
+
+      <ng-template #inactiveSearchBox>
+        <div style="display: flex; flex-direction: row; align-items: center">
+          <div class="m-r-sm">
+            {{query.start}} {{query.referenceBases}} » {{query.alternateBases}}
+          </div>
+          <button tabindex="-1"
+                  mat-mini-fab
+                  (click)="setSearchBoxActive(true)"
+                  matTooltip="Edit Search Paramters"
+                  color="accent">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
+
+        <span class="fill-space"></span>
+
+        <ng-container *ngTemplateOutlet="moreActions"></ng-container>
+      </ng-template>
+    </ng-template>
+
+    <ng-template #desktopToolbar>
+      <ng-container *ngTemplateOutlet="searchBox"></ng-container>
+
+      <span class="fill-space"></span>
+
+      <ng-container *ngTemplateOutlet="moreActions"></ng-container>
+    </ng-template>
+
+    <ng-container *ngTemplateOutlet="view.isMobile ? mobileToolbar : desktopToolbar"></ng-container>
+  </mat-toolbar-row>
+</mat-toolbar>
+<!--
+NOTE:
+
+Originally, it tries to use ddaplib-main. However, overriding "ddaplib-main > main" is near impossible due to
+some weird CSS compilation done by Angular. So, we use "div" here in order to have full control over the element style.
+-->
+<div (window:resize)="onResize($event)" class="discovery-beacon {{ !view.isMobile || (view.isMobile && !searchBoxActive) ? 'mobile-search-inactive' : 'mobile-search-active' }}">
+  <mat-drawer-container style="height:100%; overflow: hidden;" [autosize]="true">
+    <mat-drawer #detailDrawer
+                [mode]="view.isMobile ? 'over' : 'side'"
+                position="end"
+                [(opened)]="infoPanelActivated">
+      <mat-toolbar class="tertiary-toolbar"
+          style="height: 64px; position:absolute; top: 0;">
+          <mat-toolbar-row>
+              <div>Details</div>
+              <span class="fill-space"></span>
+              <button tabindex="-1" mat-icon-button (click)="detailDrawer.toggle()" matTooltip="Hide Details">
+                <mat-icon>close</mat-icon>
+              </button>
+          </mat-toolbar-row>
+      </mat-toolbar>
+      <div class="details-panel">
+          <ddaplib-cover-message *ngIf="!selectedCase" style="flex-grow: 1" message="No Details" icon="subject"></ddaplib-cover-message>
+          <div style="flex:1; height:100%;" *ngIf="selectedCase" class="p-a">
+            <div class="sample-details-list">
+              <ddap-key-value-pair key="Source" *ngIf="selectedCase.source"  value="{{selectedCase.source}}"></ddap-key-value-pair>
+              <div *ngIf="selectedCase.source && nextStrainUrl(selectedCase.source)" class="m-b-sm" style="display: flex; flex-direction: row;">
+                <img class="m-r-sm" src="https://github.com/nextstrain.png?size=20"><a [href]="nextStrainUrl(selectedCase.source)" target="_blank">Nextstrain</a>
+              </div>
+              <ddap-key-value-pair key="Accession ID" *ngIf="selectedCase.Accession_ID"  value="{{selectedCase.Accession_ID}}"></ddap-key-value-pair>
+              <ddap-key-value-pair key="Data Source" *ngIf="selectedCase.Data_Source"  value="{{selectedCase.Data_Source}}"></ddap-key-value-pair>
+              <div class="m-b-sm text-muted font-sm" *ngIf="selectedCase && selectedCase.Data_Source == 'GISAID'">
+                This service shares derivative data from the Global Initiative on Sharing All Influenza Data (<a target="_blank" href="https://www.gisaid.org/">GISAID</a>).
+              </div>
+              <div class="m-b-sm text-muted font-sm" *ngIf="selectedCase && selectedCase.Data_Source == 'Genome Warehouse'">
+                This service shares derivative data from the <a target="_blank" href="http://bigd.big.ac.cn/gwh/">National Genomics Data Center</a>.
+              </div>
+              <ddap-key-value-pair key="Nuc Completeness" *ngIf="selectedCase.Nuc_Completeness"  value="{{selectedCase.Nuc_Completeness}}"></ddap-key-value-pair>
+              <ddap-key-value-pair key="Host" *ngIf="selectedCase.Host"  value="{{selectedCase.Host}}"></ddap-key-value-pair>
+              <ddap-key-value-pair key="Sample Collection Date" *ngIf="selectedCase.Sample_Collection_Date"  value="{{selectedCase.Sample_Collection_Date}}"></ddap-key-value-pair>
+              <ddap-key-value-pair key="Location" *ngIf="selectedCase.Location"  value="{{selectedCase.Location}}"></ddap-key-value-pair>
+              <div class="p-a-sm b-a m-b-sm" *ngIf="!view.isGeocoding && _options.center.latitude != 0 && _options.center.longitude != 0 && selectedCase">
+                <x-map  style="width: 100%; height: 300px" #xmap [Options]="_options" >
+                  <x-map-marker
+                    *ngIf="_options.center.latitude != 0 && _options.center.longitude != 0"
+                    [matTooltip]="selectedCase.source"
+                    [Latitude]="_options.center.latitude"
+                    [Longitude]="_options.center.longitude">
+                    <x-info-box [Title]="selectedCase.source">
+                    </x-info-box>
+                  </x-map-marker>
+                </x-map>
+              </div>
+              <ddap-key-value-pair key="Originating Lab" *ngIf="selectedCase.Originating_Lab"  value="{{selectedCase.Originating_Lab}}"></ddap-key-value-pair>
+              <ddap-key-value-pair key="Submission Date" *ngIf="selectedCase.Submission_Date"  value="{{selectedCase.Submission_Date}}"></ddap-key-value-pair>
+              <ddap-key-value-pair key="Submitting Lab" *ngIf="selectedCase.Submitting_Lab"  value="{{selectedCase.Submitting_Lab}}"></ddap-key-value-pair>
+            </div>
+          </div>
+      </div>
+    </mat-drawer>
+    <mat-drawer-content>
+      <div class="data-table-container full-hw p-a" style="display:flex; flex-direction: column;">
+          <div style="display: flex; flex-direction: column; flex: 1">
+            <ng-template #beaconSearchResult>
+              <ddaplib-cover-message *ngIf="cases.length == 0" style="flex: 1"
+                                     [message]="beaconResponses === undefined ? 'Searching...' : 'No Sequences'"
+                                     [icon]="beaconResponses === undefined ? 'hourglass_empty' : 'filter_list'"></ddaplib-cover-message>
+              <ag-grid-angular
+                *ngIf="cases.length > 0"
+                style="width: 100%; flex: 1;"
+                class="ag-theme-material b-a"
+                [defaultColDef]="grid.defaultColumnDefinition"
+                [multiSortKey]="grid.multiSortKey"
+                [animateRows]="grid.animateRows"
+                [pagination]="grid.pagination"
+                [floatingFilter]="grid.floatingFilter"
+                [suppressCellSelection]="grid.suppressCellSelection"
+                [rowData]="cases"
+                [enableCellTextSelection]="true"
+                [columnDefs]="caseColumnDefs"
+                [domLayout]="grid.domLayout"
+                [navigateToNextCell]="navigateToCell"
+                [rowSelection]="grid.rowSelection"
+                (gridReady)="onGridReady($event)"
+                (rowDataChanged)="rowDataChanged($event)"
+                (selectionChanged)="onSelectionChanged($event)"
+                (cellClicked)="onSelectionChanged($event)"
+              >
+              </ag-grid-angular>
+            </ng-template>
+
+            <ng-template #activeMobileSearchBox>
+              <div class="mobile-search-box">
+                <ng-container *ngTemplateOutlet="searchBox"></ng-container>
+              </div>
+            </ng-template>
+
+            <ng-container *ngTemplateOutlet="(view.isMobile && searchBoxActive) ? activeMobileSearchBox : beaconSearchResult"></ng-container>
+          </div>
+        </div>
+    </mat-drawer-content>
+  </mat-drawer-container>
+</div>

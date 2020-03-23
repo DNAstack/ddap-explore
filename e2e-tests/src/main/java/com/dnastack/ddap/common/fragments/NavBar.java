@@ -39,6 +39,10 @@ public class NavBar {
         return new NavLink("Run", DdapBy.se("nav-analytics-run"), null);
     }
 
+    public static NavLink workflowRegistryLink() {
+        return new NavLink("Registry", DdapBy.se("nav-analytics-registry"), null);
+    }
+
     public static NavLink searchResources() {
         return new NavLink("Resources", DdapBy.se("nav-search-resources"), null);
     }
@@ -113,6 +117,11 @@ public class NavBar {
     public WorkflowManagePage goToRun() {
         driver.findElement(workflowLink().getSelector()).click();
         return new WorkflowManagePage(driver);
+    }
+
+    public WorkflowRegistryPage goToWorkflowRegistry() {
+        driver.findElement(workflowRegistryLink().getSelector()).click();
+        return new WorkflowRegistryPage(driver);
     }
 
     private WebElement getRealmInput() {

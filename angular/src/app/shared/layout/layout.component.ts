@@ -50,6 +50,9 @@ export class LayoutComponent implements OnInit {
   }
 
   initialize() {
+    this.updateTheme();
+    this.injectGoogleAnalytics();
+
     this.dataAccessManagersInfo$ = this.damInfoStore.getDamsInfo();
     this.identityConcentratorInfo$ = this.identityService.getIdentityConcentratorInfo();
 
@@ -98,8 +101,40 @@ export class LayoutComponent implements OnInit {
       });
   }
 
+  private injectGoogleAnalytics() {
+    if (!this.appConfig.googleAnalyticsId) {
+      return;
+    }
+
+    const doc = window.document;
+
+    const importedScriptElement = doc.createElement('script');
+    importedScriptElement.setAttribute('async', '');
+    importedScriptElement.setAttribute(
+      'src',
+      `https://www.googletagmanager.com/gtag/js?id=${this.appConfig.googleAnalyticsId}`
+    );
+
+    const injectedScriptElement = doc.createElement('script');
+    const injectedScriptElementContent = doc.createTextNode('    window.dataLayer = window.dataLayer || [];\n' +
+      '    function gtag(){dataLayer.push(arguments);}\n' +
+      '    gtag(\'js\', new Date());\n' +
+      '\n' +
+      `    gtag('config', '${this.appConfig.googleAnalyticsId}');`);
+    injectedScriptElement.append(injectedScriptElementContent);
+
+    const headElement = doc.querySelector('head');
+    headElement.append(importedScriptElement);
+    headElement.append(injectedScriptElement);
+  }
+
   private changeRealmAndGoToLogin(realm) {
     this.router.navigate(['/', realm]);
   }
 
+  private updateTheme() {
+    if (this.appConfig.theme) {
+      window.document.querySelector('ddap-root').classList.add(this.appConfig.theme);
+    }
+  }
 }

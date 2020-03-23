@@ -18,10 +18,11 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Component
 public class SearchClient {
 
-    public Mono<SearchTablesResponseModel> getTables(URI resourceUri) {
+    public Mono<SearchTablesResponseModel> getTables(URI resourceUri, String accessToken) {
         return WebClientFactory.getWebClient()
                 .get()
                 .uri(resourceUri)
+                .header(AUTHORIZATION, "Bearer " + accessToken)
                 .retrieve()
                 .bodyToMono(SearchTablesResponseModel.class);
     }

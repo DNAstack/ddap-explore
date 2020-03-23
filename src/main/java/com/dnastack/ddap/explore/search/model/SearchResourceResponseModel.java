@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Data
 @Builder
@@ -14,6 +15,10 @@ import java.util.Map;
 public class SearchResourceResponseModel {
 
     private String resourcePath;
+    private String resourceName;
+    private String viewName;
+    private Optional<String> roleName;
+    private Optional<String> interfaceName;
     private Map<String, String> ui;
 
 }

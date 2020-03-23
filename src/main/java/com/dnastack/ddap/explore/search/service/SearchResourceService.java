@@ -49,12 +49,16 @@ public class SearchResourceService {
             .stream()
             .filter(this::isSearchView)
             .map((view) -> SearchResourceResponseModel.builder()
-                .resourcePath(view.getResourcePath())
-                .ui(Map.of(
+                    .resourcePath(view.getResourcePath())
+                    .viewName(view.getViewName())
+                    .resourceName(view.getResourceName())
+                    .roleName(Optional.of(view.getRoleName()))
+                    .interfaceName(Optional.of(view.getInterfaceName()))
+                    .ui(Map.of(
                     "label", view.getViewUiMap().get("label"),
                     "description", view.getViewUiMap().get("description")
-                ))
-                .build())
+                    ))
+                    .build())
             .collect(Collectors.toList());
     }
 
@@ -80,4 +84,31 @@ public class SearchResourceService {
             });
     }
 
+    public Mono<SearchResourceResponseModel> getSearchResourceViews(String resourceName, String realm) {
+        return getAllFlattenedViews(realm)
+                .map((flatViews) -> {
+                    return flatViews.values()
+                            .stream()
+                            .filter(this::isSearchView)
+                            .filter((view) -> view.getResourceName().equals(resourceName))
+                            .findFirst();
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(view -> {
+                    return SearchResourceResponseModel.builder()
+                            .resourceName(view.getResourceName())
+                            .viewName(view.getViewName())
+                            .roleName(Optional.of(view.getRoleName()))
+                            .interfaceName(Optional.of(view.getInterfaceName()))
+                            .resourcePath(view.getResourcePath())
+                            .ui(Map.of(
+                                    "label", view.getViewUiMap().get("label"),
+                                    "description", view.getViewUiMap().get("description")
+                            ))
+                            .build();
+                })
+                .next();
+//        return null;
+    }
 }

@@ -1,5 +1,5 @@
 <div class="code-editor-header">
-  <h1>Version <span class="version-name">{{ data.version.name }}</span> / {{ data.type }}</h1>
+  <h1>Version <span class="version-name">{{ data.version.name }}</span> / <span class="descriptor-type">{{ data.type }}</span></h1>
   <div class="code-actions">
     <button mat-button
             color="accent"
@@ -9,6 +9,7 @@
       Save
     </button>
     <button mat-button
+            class="transfer-to-manage-trigger"
             color="accent"
             (click)="onRunButtonClick()"
             *ngIf="canRun()">
@@ -41,7 +42,7 @@
   </li>
 </ul>
 
-<div class="code-editor">
+<div class="code-editor" [attr.data-content]="descriptorContent">
   <ngx-monaco-editor [options]="getEditableConfig()"
                      [(ngModel)]="descriptorContent"
                      (init)="codeEditorEnhancer.configure({language: 'wdl'})">

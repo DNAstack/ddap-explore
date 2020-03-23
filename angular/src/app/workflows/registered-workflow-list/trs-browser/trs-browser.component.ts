@@ -95,6 +95,7 @@ export class TrsBrowserComponent implements OnInit {
 
   onNewVersionClick() {
     // TODO Pop up a modal dialog for code editing
+    // This is blocked by dockstore integration.
   }
 
   getTotalPageNumber(): number {

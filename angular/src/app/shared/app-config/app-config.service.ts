@@ -76,21 +76,26 @@ export class AppConfigService {
 
   getDefault(): AppConfigModel {
     return this.cachedConfig || {
-      title: 'DDAP', // This is a placeholder and the actual value would be set by the backend service.
+      title: '', // This is a placeholder and the actual value would be set by the backend service.
+      logoUrl: null,
+      googleAnalyticsId: null,
+      theme: null,
       defaultModule: null,
       inStandaloneMode: false,
       authorizationOnInitRequired: false,
       sidebarEnabled: true,
       featureRealmInputEnabled: true,
       featureAdministrationEnabled: true,
+      featureTermsEnabled: true,
       featureExploreDataEnabled: true,
+      featureDiscoveryEnabled: true,
       featureWorkflowsEnabled: true,
-      featureSearchEnabled: true,
       featureWorkflowsTrsIntegrationEnabled: true,
       trsBaseUrl: null,
       trsAcceptedToolClasses: [],
       trsAcceptedVersionDescriptorTypes: [],
       listPageSize: 14,
+      covidBeaconUrl: null,
     };
   }
 
@@ -99,10 +104,11 @@ export class AppConfigService {
       .registerModule({
         key: 'data',
         name: 'Data',
-        iconClasses: 'icon icon-explore',
+        iconName: 'search',
         requiredFeatureFlags: ['featureExploreDataEnabled'],
         routerLink: 'data',
         isApp: true,
+        isSidebarEnabled: true,
       })
       .registerModule({
         key: 'data-collections',
@@ -124,12 +130,24 @@ export class AppConfigService {
 
     this.viewController
       .registerModule({
+        key: 'discovery',
+        name: 'Discovery',
+        iconName: 'trending_up',
+        requiredFeatureFlags: ['featureDiscoveryEnabled'],
+        routerLink: 'discovery',
+        isApp: true,
+        isSidebarEnabled: false,
+      });
+
+    this.viewController
+      .registerModule({
         key: 'analytics',
         name: 'Analytics',
         requiredFeatureFlags: ['featureWorkflowsEnabled'],
-        iconClasses: 'icon icon-rules',
+        iconName: 'memory',
         routerLink: 'analyze',  // FIXME Change to "analytics"
         isApp: true,
+        isSidebarEnabled: true,
       })
       .registerModule({
         key: 'analytics-operations',
@@ -166,6 +184,7 @@ export class AppConfigService {
         routerLink: 'search',
         isApp: true,
         isExperimental: true,
+        isSidebarEnabled: true,
       })
       .registerModule({
         key: 'search-resources',

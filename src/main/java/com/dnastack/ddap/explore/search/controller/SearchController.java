@@ -44,12 +44,6 @@ public class SearchController {
         return searchResourceService.getSearchResourceViews(resourceName, realm);
     }
 
-//    @GetMapping("/resource/{resourceName}/views")
-//    public Mono<SearchResourceResponseModel> getAllViews(@PathVariable String realm,
-//                                                                @PathVariable String resourceName) {
-//        return searchResourceService.getSearchResourceViews(resourceName, realm);
-//    }
-
     @GetMapping("/tables")
     public Mono<SearchTablesResponseModel> getTables(@PathVariable String realm,
                                                      @RequestParam("resource") String resourcePath,

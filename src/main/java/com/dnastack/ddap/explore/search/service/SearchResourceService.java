@@ -3,6 +3,7 @@ package com.dnastack.ddap.explore.search.service;
 import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.explore.search.model.SearchResourceResponseModel;
 import dam.v1.DamService.GetFlatViewsResponse.FlatView;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,8 +14,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Component
@@ -29,37 +30,33 @@ public class SearchResourceService {
 
     public Mono<List<SearchResourceResponseModel>> getSearchResources(String realm) {
         return getAllFlattenedViews(realm)
-            .map(this::toSearchResponseModels)
-            .reduce((list1, list2) -> {
-                return Stream.concat(list1.stream(), list2.stream())
-                    .collect(Collectors.toList());
-            });
+                .filter(this::isSearchView)
+                .map((view) -> SearchResourceResponseModel.builder()
+                                                          .damId(view.getDamId())
+                                                          .resourcePath(view.getResourcePath())
+                                                          .viewName(view.getFlatView().getViewName())
+                                                          .resourceName(view.getFlatView().getResourceName())
+                                                          .roleName(Optional.of(view.getFlatView().getRoleName()))
+                                                          .interfaceName(Optional.of(view.getFlatView().getInterfaceName()))
+                                                          .ui(Map.of(
+                                                                  "label", view.getFlatView().getViewUiMap().get("label"),
+                                                                  "description", view.getFlatView().getViewUiMap().get("description")
+                                                          ))
+                                                          .build())
+                .collect(toList());
     }
 
-    private Flux<Map<String, FlatView>> getAllFlattenedViews(String realm) {
-        return Flux.fromIterable(damClients.values()
-            .stream()
-            .map((damClient) -> damClient.getFlattenedViews(realm))
-            .collect(Collectors.toList()))
-            .flatMap(mono -> mono);
+    private Flux<FlatViewMetadata> getAllFlattenedViews(String realm) {
+        return Flux.fromStream(damClients.entrySet().stream())
+                   .flatMap(clientEntry -> clientEntry.getValue().getFlattenedViews(realm)
+                                                      .map(flatViewMap -> flatViewMap.entrySet()
+                                                                                     .stream()
+                                                                                     .map(e -> new FlatViewMetadata(clientEntry.getKey(), e.getKey(), e.getValue()))))
+                   .flatMap(Flux::fromStream);
     }
 
-    private List<SearchResourceResponseModel> toSearchResponseModels( Map<String, FlatView> views) {
-        return views.values()
-            .stream()
-            .filter(this::isSearchView)
-            .map((view) -> SearchResourceResponseModel.builder()
-                    .resourcePath(view.getResourcePath())
-                    .viewName(view.getViewName())
-                    .resourceName(view.getResourceName())
-                    .roleName(Optional.of(view.getRoleName()))
-                    .interfaceName(Optional.of(view.getInterfaceName()))
-                    .ui(Map.of(
-                    "label", view.getViewUiMap().get("label"),
-                    "description", view.getViewUiMap().get("description")
-                    ))
-                    .build())
-            .collect(Collectors.toList());
+    private boolean isSearchView(FlatViewMetadata viewMetadata) {
+        return isSearchView(viewMetadata.getFlatView());
     }
 
     private boolean isSearchView(FlatView view) {
@@ -68,47 +65,38 @@ public class SearchResourceService {
     }
 
     public Mono<URI> lookupFirstInterfaceUrlByResourcePath(String realm, String resourcePath) {
-        return getAllFlattenedViews(realm)
-            .map((flatViews) -> {
-                return flatViews.values()
-                    .stream()
-                    .filter((view) -> view.getResourcePath().equals(resourcePath))
-                    .map(FlatView::getInterfaceUri)
-                    .map(URI::create)
-                    .findFirst();
-            })
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .reduce((uri1, uri2) -> {
-                return uri1;
-            });
+        return Mono.from(getAllFlattenedViews(realm)
+                                 .filter((view) -> view.getFlatView().getResourcePath().equals(resourcePath))
+                                 .map((viewMeta) -> viewMeta.getFlatView().getInterfaceUri())
+                                 .map(URI::create)
+                                 .take(1));
     }
 
     public Mono<List<SearchResourceResponseModel>> getSearchResourceViews(String resourceName, String realm) {
         return getAllFlattenedViews(realm)
-                .map((flatViews) -> {
-                    return flatViews.values()
-                            .stream()
-                            .filter((view) -> view.getResourceName().equals(resourceName))
-                            .map(view -> {
-                                return SearchResourceResponseModel.builder()
-                                        .resourceName(view.getResourceName())
-                                        .viewName(view.getViewName())
-                                        .roleName(Optional.of(view.getRoleName()))
-                                        .interfaceName(Optional.of(view.getInterfaceName()))
-                                        .resourcePath(view.getResourcePath())
-                                        .isSearchView(Optional.of(isSearchView(view)))
-                                        .ui(Map.of(
-                                                "label", view.getViewUiMap().get("label"),
-                                                "description", view.getViewUiMap().get("description")
-                                        ))
-                                        .build();
-                            })
-                            .collect(Collectors.toList());
+                .filter((view) -> view.getFlatView().getResourceName().equals(resourceName))
+                .map(view -> {
+                    return SearchResourceResponseModel.builder()
+                                                      .damId(view.getDamId())
+                                                      .resourceName(view.getFlatView().getResourceName())
+                                                      .viewName(view.getFlatView().getViewName())
+                                                      .roleName(Optional.of(view.getFlatView().getRoleName()))
+                                                      .interfaceName(Optional.of(view.getFlatView().getInterfaceName()))
+                                                      .resourcePath(view.getFlatView().getResourcePath())
+                                                      .isSearchView(Optional.of(isSearchView(view)))
+                                                      .ui(Map.of(
+                                                              "label", view.getFlatView().getViewUiMap().get("label"),
+                                                              "description", view.getFlatView().getViewUiMap().get("description")
+                                                      ))
+                                                      .build();
                 })
-                .reduce((list1, list2) -> {
-                    return Stream.concat(list1.stream(), list2.stream())
-                            .collect(Collectors.toList());
-                });
+                .collect(toList());
+    }
+
+    @Value
+    private static class FlatViewMetadata {
+        private String damId;
+        private String resourcePath;
+        private FlatView FlatView;
     }
 }

@@ -1,4 +1,5 @@
 export class SearchResourceModel {
+  damId: string;
   resourcePath: string;
   resourceName: string;
   viewName: string;

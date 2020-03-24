@@ -41,14 +41,14 @@ export class SearchResourcesComponent implements OnInit {
 
   getUrlForAccessToken(resource: SearchResourceModel) {
     const realmId = this.route.root.firstChild.snapshot.params.realmId;
-    const redirectUri = `/${realmId}/search/resource/${resource.resourceName}/views/${resource.viewName}?checkout=true`;
+    const redirectUri = `/${realmId}/search/${resource.damId}/resource/${resource.resourceName}/views/${resource.viewName}?checkout=true`;
     const resourcesPath = [];
     return this.searchService.getResourceDetail(resource.resourceName)
       .pipe(
         map(views => {
           views.map(view => {
             resourcesPath.push(
-              `1;${view.resourceName}/views/` +
+              `${resource.damId};${view.resourceName}/views/` +
               `${view.viewName}/roles/${view.roleName}/interfaces/${view.interfaceName}`
             );
           });

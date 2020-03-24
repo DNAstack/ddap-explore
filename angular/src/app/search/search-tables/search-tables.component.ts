@@ -9,12 +9,13 @@ import { filter, flatMap, map, shareReplay } from 'rxjs/operators';
 
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
+import IResourceResults = dam.v1.IResourceResults;
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
+import { SearchResourceModel } from '../search-resources/search-resource.model';
 import { SearchService } from '../search.service';
 
 import { JsonViewerService } from './json-viewer/json-viewer.component';
 import { BeaconQuery, BeaconRegistry, SearchView } from './search-tables.model';
-import IResourceResults = dam.v1.IResourceResults;
-import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
   selector: 'ddap-search-detail',
@@ -41,6 +42,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   realm: string;
   accessToken;
   resourceName: string;
+  damId: string;
   viewName: string;
   resourceAccessMap;
   interfaceAccessTokensMap;
@@ -82,9 +84,10 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
       .queryParams
       .subscribe(params => {
         if (params['checkout']) {
+          this.damId = this.route.snapshot.params.damId;
           this.resourceName = this.route.snapshot.params.resourceName;
           this.viewName = this.route.snapshot.params.viewName;
-          this.searchService.getResourceDetail(this.resourceName).subscribe(views => {
+          this.searchService.getResourceDetail(this.resourceName).subscribe((views: SearchResourceModel[]) => {
             this.authorizeResource(views);
           });
         } else {
@@ -237,7 +240,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
     this.jsonViewerService.viewJSON(this.result);
   }
 
-  authorizeResource(views) {
+  authorizeResource(views: SearchResourceModel[]) {
     // const resourcePath = `1;${resource['resourceName']}/views/` +
     //   `${resource['viewName']}/roles/${resource['roleName']}/interfaces/${resource['interfaceName']}`;
     const resourcesPath = [];
@@ -246,7 +249,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
         this.currentView = view;
       }
       resourcesPath.push(
-        `1;${view.resourceName}/views/` +
+        `${view.damId};${view.resourceName}/views/` +
         `${view.viewName}/roles/${view.roleName}/interfaces/${view.interfaceName}`
       );
     });

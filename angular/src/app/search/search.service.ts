@@ -19,8 +19,8 @@ export class SearchService {
     this.tableData = new BehaviorSubject<object>({});
   }
 
-  getSearchResources(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/resources`)
+  getSearchResources(): Observable<SearchResourceModel[]> {
+    return this.http.get<SearchResourceModel[]>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/resources`)
       .pipe(
         this.errorHandler.notifyOnError()
       );

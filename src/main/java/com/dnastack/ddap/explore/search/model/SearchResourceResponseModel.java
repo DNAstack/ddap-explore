@@ -14,6 +14,7 @@ import java.util.Optional;
 @NoArgsConstructor
 public class SearchResourceResponseModel {
 
+    private String damId;
     private String resourcePath;
     private String resourceName;
     private String viewName;

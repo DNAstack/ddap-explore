@@ -1,12 +1,10 @@
 package com.dnastack.ddap.explore.wes.controller;
 
 import com.dnastack.ddap.common.client.ReactiveDamClient;
-import com.dnastack.ddap.explore.wes.client.ReactiveDrsClient;
-import com.dnastack.ddap.explore.wes.model.DrsObjectModel;
+import com.dnastack.ddap.explore.drs.DrsService;
 import com.dnastack.ddap.explore.wes.service.ViewsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -15,7 +13,6 @@ import java.net.URI;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -26,28 +23,27 @@ public class ViewsController {
 
     private final ViewsService viewsService;
     private Map<String, ReactiveDamClient> damClients;
-    private ReactiveDrsClient drsClient;
+    private final DrsService drsService;
 
     @Autowired
     public ViewsController(Map<String, ReactiveDamClient> damClients,
                            ViewsService viewsService,
-                           ReactiveDrsClient drsClient) {
+                           DrsService drsService) {
         this.damClients = damClients;
         this.viewsService = viewsService;
-        this.drsClient = drsClient;
+        this.drsService = drsService;
     }
 
     @PostMapping(path = "/lookup")
     public Mono<Map<String, Set<String>>> lookupViews(@PathVariable String realm,
-                                                      @RequestBody List<String> urls,
-                                                      ServerHttpRequest request) {
+                                                      @RequestBody List<String> urls) {
         if (urls == null || urls.isEmpty()) {
             throw new IllegalArgumentException("Urls cannot be empty or null");
         }
 
         final List<String> drsUrls = urls.stream()
             .distinct()
-            .filter((url) -> url.contains("/ga4gh/drs/"))
+            .filter(drsService::isDrsUri)
             .collect(toList());
         final List<String> otherUrls = urls.stream()
             .distinct()
@@ -55,31 +51,23 @@ public class ViewsController {
             .collect(toList());
 
         Mono<Map<String, String>> drsUrisByGcsAccessMethodUri =
-                Flux.fromStream(drsUrls.stream()
-                                       .map(URI::create)
-                                       .map(drsServerUrl -> Map.entry(drsServerUrl, drsClient.getDrsObject(drsServerUrl))))
-                    .flatMap((e) -> e.getValue()
-                                     .map(drsObject -> Map.entry(e.getKey(), drsObject)))
-                    .map(e -> {
-                        final URI drsUri = e.getKey();
-                        final DrsObjectModel drsObject = e.getValue();
-                        // Skip if there is no access method for GS
-                        if (drsObject.getAccessMethods() == null) {
-                            log.debug("No access methods for DRS Object with id {}", drsObject.getId());
-                        }
-
-                        // TODO: what if there are more GS accesses?
-                        return Optional.ofNullable(drsObject.getAccessMethods())
-                                       .stream()
-                                       .flatMap(Collection::stream)
-                                       .filter((accessMethod) -> accessMethod.getType().equalsIgnoreCase("gs"))
-                                       .map(DrsObjectModel.AccessMethod::getAccessUrl)
-                                       .map(DrsObjectModel.AccessUrl::getUrl)
-                                       .map(url -> Map.entry(url, drsUri.toString()))
-                                       .findFirst();
-                    })
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                Flux.fromStream(drsUrls.stream())
+                    .flatMap(drsUri ->
+                                     drsService.resolveAccessMethods(URI.create(drsUri), "gs")
+                                               // TODO: what if there are more GS accesses?
+                                               .flatMap(list -> {
+                                                            if (list.size() > 1) {
+                                                                return Mono.error(new UnsupportedOperationException("Cannot resolve DRS URI with multiple GS access methods"));
+                                                            }
+                                                            return Mono.just(list.stream()
+                                                                                 .sorted()
+                                                                                 .findFirst()
+                                                                                 .stream()
+                                                                                 .map(resolvedUri -> Map.entry(resolvedUri, drsUri)));
+                                                        }
+                                               )
+                    )
+                    .flatMap(Flux::fromStream)
                     .collectMap(Entry::getKey, Entry::getValue);
 
         return drsUrisByGcsAccessMethodUri
@@ -87,23 +75,16 @@ public class ViewsController {
                     final Set<String> allGsUrls = new HashSet<>(otherUrls);
                     allGsUrls.addAll(gsUrlsFromDrsObjects.keySet());
 
-                    return Flux.fromStream(damClients
-                                                   .entrySet()
-                                                   .stream())
+                    return Flux.fromStream(damClients.entrySet()
+                                                     .stream())
                                .flatMap(clientEntry -> {
                                    String damId = clientEntry.getKey();
                                    ReactiveDamClient damClient = clientEntry.getValue();
                                    return damClient.getFlattenedViews(realm)
-                                                   .flatMap(flatViews -> {
-                                                       return viewsService.getRelevantViewsForUrlsInDam(damId, realm, flatViews, new ArrayList<>(allGsUrls));
-                                                   })
+                                                   .flatMap(flatViews -> viewsService.getRelevantViewsForUrlsInDam(damId, realm, flatViews, new ArrayList<>(allGsUrls)))
                                                    .map(Map::entrySet);
                                })
-                               .map(set -> set.stream()
-                                              .collect(groupViewCoordinatesByUrl())
-                                              .entrySet()
-                                              .stream())
-                               .flatMap(Flux::fromStream)
+                               .flatMap(set -> Flux.fromStream(set.stream()))
                                .map(e -> {
                                    if (gsUrlsFromDrsObjects.containsKey(e.getKey())) {
                                        return Map.entry(gsUrlsFromDrsObjects.get(e.getKey()), e.getValue());

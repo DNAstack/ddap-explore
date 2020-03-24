@@ -1,16 +1,16 @@
-import {Component, Input} from '@angular/core';
-import {FormGroup} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import {flatten} from 'ddap-common-lib';
+import { Component, Input } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { flatten } from 'ddap-common-lib';
 import _cloneDeep from 'lodash.clonedeep';
 import _get from 'lodash.get';
 
-import {dam} from '../../../shared/proto/dam-service';
-import {ResourceService} from '../../../shared/resource/resource.service';
-import {WorkflowService} from '../../workflows.service';
-import {WorkflowsStateService} from '../workflows-state.service';
+import { dam } from '../../../shared/proto/dam-service';
+import { ResourceService } from '../../../shared/resource/resource.service';
+import { WorkflowService } from '../../workflows.service';
+import { WorkflowsStateService } from '../workflows-state.service';
 
-import {WorkflowExecution} from './workflow-execution.model';
+import { WorkflowExecution } from './workflow-execution.model';
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 @Component({
@@ -53,11 +53,11 @@ export class WorkflowExecutionStepComponent {
 
   createWorkflowExecutionModel(inputs: any): WorkflowExecution {
     const wdl = this.form.get('wdl').value;
-    const tokens = JSON.stringify(this.getTokensModel());
+    const tokens = this.getTokensModel();
 
     return {
       wdl,
-      inputsJson: JSON.stringify(inputs),
+      inputsJson: inputs,
       tokensJson: tokens,
     };
   }

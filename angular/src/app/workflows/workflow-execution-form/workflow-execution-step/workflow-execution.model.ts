@@ -1,5 +1,5 @@
 export interface WorkflowExecution {
   wdl: string;
-  inputsJson: string;
-  tokensJson: string;
+  inputsJson: object;
+  tokensJson: object;
 }

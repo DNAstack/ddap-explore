@@ -28,7 +28,7 @@ public class WorkflowRegistryPage extends AnyDdapPage {
     public void selectWorkflowTab(String name, int oneBasedTabIndex) {
         By selector = By.cssSelector(String.format("%s .mat-tab-label:nth-child(%d)", workflowSelector(name), oneBasedTabIndex));
         WebElement tab = driver.findElement(selector);
-        new WebDriverWait(driver, 5).until(ExpectedConditions.elementToBeClickable(tab));
+        new WebDriverWait(driver, 30).until(ExpectedConditions.elementToBeClickable(tab));
         tab.click();
     }
 
@@ -40,7 +40,7 @@ public class WorkflowRegistryPage extends AnyDdapPage {
                 descriptorType
         ));
         WebElement tab = driver.findElement(selector);
-        new WebDriverWait(driver, 5).until(ExpectedConditions.elementToBeClickable(tab));
+        new WebDriverWait(driver, 30).until(ExpectedConditions.elementToBeClickable(tab));
         tab.click();
     }
 
@@ -50,7 +50,7 @@ public class WorkflowRegistryPage extends AnyDdapPage {
         expectedElementList.add(By.xpath(String.format("//div[contains(@class, 'code-editor-header')]/h1/span[contains(@class, 'descriptor-type')][contains(text(), '%s')]", descriptorType)));
 
         expectedElementList.forEach(selector -> {
-            new WebDriverWait(driver, 5).until(ExpectedConditions.visibilityOfElementLocated(selector));
+            new WebDriverWait(driver, 30).until(ExpectedConditions.visibilityOfElementLocated(selector));
         });
     }
 

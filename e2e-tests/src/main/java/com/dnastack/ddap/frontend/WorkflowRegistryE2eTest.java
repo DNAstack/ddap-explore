@@ -10,6 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
+import static org.junit.Assert.assertTrue;
 
 public class WorkflowRegistryE2eTest extends AbstractFrontendE2eTest {
     private static WorkflowE2eTest.WorkflowTestConfig workflowTestConfig;
@@ -43,6 +44,7 @@ public class WorkflowRegistryE2eTest extends AbstractFrontendE2eTest {
 
         WorkflowManagePage managePage = registryPage.transferToWorkflowManagePage();
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
-        managePage.shouldContainInCodeEditor("workflow jointGenotype {"); // the first line
+
+        assertTrue(managePage.getNumberOfLinesInCodeEditor() > 10);
     }
 }

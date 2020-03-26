@@ -10,15 +10,20 @@ import com.dnastack.ddap.common.util.DdapBy;
 import com.dnastack.ddap.common.util.EnvUtil;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+@Slf4j
 public class SearchE2eTest extends AbstractFrontendE2eTest {
 
     private static SearchTestConfig testConfig;
@@ -31,35 +36,26 @@ public class SearchE2eTest extends AbstractFrontendE2eTest {
     }
 
     @Test
-    @Ignore
-    public void queryPrestoTable() throws MalformedURLException {
-        createSearchServiceTemplate();
-        createSearchResource();
+    public void queryPrestoTable() throws IOException {
         driver.navigate().to(new URL(driver.getCurrentUrl() + "?exp_flag=demo"));
         SearchResourcesPage searchResourcesPage= ddapPage.getNavBar().goToSearchResources();
-        searchResourcesPage.exploreResource();
-        ddapPage.waitForInflightRequests();
+        searchResourcesPage.waitForResources();
+        log.info("Workflow Execution Step: Authorizing for resources");
 
-        TablesPage tablesPage = new TablesPage(driver);
-        tablesPage.searchTable();
+        WebElement accessBtn = driver.findElement(DdapBy.se("explore-resource"));
+        new WebDriverWait(driver, 10)
+                .until(ExpectedConditions.attributeContains(DdapBy.se("explore-resource"), "href", "?resource"));
+        URI authorizeUrl = URI.create(accessBtn.getAttribute("href"));
+        System.out.println(authorizeUrl);
+
+
+        TablesPage tablesPage = loginStrategy
+                .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, TablesPage::new);
+        tablesPage.fillEditorWithQueryAndRun();
         ddapPage.waitForInflightRequests();
         assertTrue(driver.findElement(DdapBy.se("result-wrapper")).isDisplayed());
     }
 
-    // TODO get dam url and create resource with search view
-    private void createSearchResource() {
-
-    }
-
-    // TODO get dam url and create service template
-    private void createSearchServiceTemplate() {
-        new WebDriverWait(driver, 5)
-                .until(ExpectedConditions.elementToBeClickable(DdapBy.se("product-app-menu")));
-        driver.findElement(DdapBy.se("product-app-menu")).click();
-        new WebDriverWait(driver, 5)
-                .until(ExpectedConditions.presenceOfElementLocated(DdapBy.se("nav-data-access-manager")));
-        driver.findElement(DdapBy.se("nav-data-access-manager")).getAttribute("href");
-    }
     @Data
     public static class SearchTestConfig implements ConfigModel {
 

@@ -19,5 +19,5 @@ public class SearchResourcesPage extends AnyDdapPage {
                 .until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-se='explore-resource']")));
         driver.findElement(By.xpath("//button[@data-se='explore-resource']")).click();
     }
-
+    
 }

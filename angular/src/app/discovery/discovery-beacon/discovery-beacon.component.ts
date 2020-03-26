@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ILatLong, IMapOptions, MapAPILoader, MarkerTypeId } from 'angular-maps';
@@ -19,23 +20,31 @@ import { DiscoveryBeaconHelpDialogComponent } from './help/discovery-beacon.help
 })
 export class DiscoveryBeaconComponent implements OnInit {
   appConfig: AppConfigModel;
-  // assemblies: string[]; // marked for removal
-  // assembly: string; // marked for removal
 
-  query: BeaconRequest;
-  lastQuery: BeaconRequest;
-
+  beaconQueryInflight = false;
   searchBoxActive = false;
 
   beaconResponses: BeaconResponse[];
   cases: any[];
   caseColumnDefs: any;
   selectedCase: any;
-  // sample: any; // marked for removal
 
   infoPanelActivated: boolean;
 
-  // queryControls =
+  queryForm = new FormGroup({
+    start: new FormControl('',
+      {
+        validators: [Validators.required, Validators.pattern(/^\d+$/)],
+      }),
+    referenceBases: new FormControl('',
+      {
+        validators: [Validators.required, Validators.pattern(/^[ACGT]+$/i)],
+      }),
+    alternateBases: new FormControl('',
+      {
+        validators: [Validators.required, Validators.pattern(/^[ACGT]+$/i)],
+      }),
+  });
 
   view: {
     isSearching: boolean,
@@ -55,10 +64,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   private gridApi;
   private gridColumnApi;
 
-  // private queryParameters: any;
-
   /** Bing map */
-  // private _markerTypeId = MarkerTypeId;
   private _options: IMapOptions = {
     disableBirdseye: true,
     disableStreetside: true,
@@ -79,12 +85,8 @@ export class DiscoveryBeaconComponent implements OnInit {
               private route: ActivatedRoute,
               private geocodeService: GeocodeService,
               private changeDetector: ChangeDetectorRef,
-              public helpDialog: MatDialog,
-              private activatedRoute: ActivatedRoute
-              ) {
-
-
-
+              public helpDialog: MatDialog
+  ) {
     this.cases = [];
 
     const isMobile = this.isMobileWidth(window.innerWidth);
@@ -120,12 +122,11 @@ export class DiscoveryBeaconComponent implements OnInit {
       isGeocoding: false,
       errorGeocoding: false,
       isLocation: true,
-      isMobile : isMobile,
+      isMobile: isMobile,
     };
   }
 
   ngOnInit(): void {
-
     // Ensure that the user can only access this component when it is enabled.
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
       this.appConfig = data;
@@ -150,7 +151,9 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   doSearch() {
-    const query = this.query;
+    if (!this.beaconService.isReady() || this.view.isSearching || !this.queryForm.valid) {
+      return;
+    }
 
     this.setQueryParameters();
 
@@ -159,18 +162,20 @@ export class DiscoveryBeaconComponent implements OnInit {
     this.selectedCase = null;
     this.infoPanelActivated = false;
 
+    this.queryForm.disable();
+
+    const query = this.querySnapshot();
+
     this.beaconService.searchBeacon(
       'hCoV-19',
       '1',
-      this.query.start,
-      this.query.referenceBases,
-      this.query.alternateBases
+      query.start,
+      query.referenceBases,
+      query.alternateBases
     ).then(
       data => {
-        this.lastQuery = JSON.parse(JSON.stringify(query));
+        this.queryForm.enable();
 
-        // const beaconId = data['beaconId'] as string;
-        // const request = data['alleleRequest'] as BeaconRequest;
         const responses = data['datasetAlleleResponses'] as BeaconResponse[];
         const info = responses[0].info;
 
@@ -224,6 +229,8 @@ export class DiscoveryBeaconComponent implements OnInit {
         this.view.isSearching = false;
       },
       error => {
+        this.queryForm.enable();
+
         this.view.errorSearching = true;
         this.view.isSearching = false;
       }
@@ -362,6 +369,19 @@ export class DiscoveryBeaconComponent implements OnInit {
     this.grid.pagination = !this.view.isMobile;
   }
 
+  querySnapshot(): QuerySnapshot {
+    const snapshot = this.queryForm.value;
+    return {
+      start: parseInt(snapshot['start'], 10),
+      referenceBases: snapshot['referenceBases'].toUpperCase(),
+      alternateBases: snapshot['alternateBases'].toUpperCase(),
+    };
+  }
+
+  isQueryReadyForSubmission(): boolean {
+    return this.queryForm.enabled && this.queryForm.valid;
+  }
+
   private titleCase(str) {
     const splitStr = str.toLowerCase().split(' ');
     for (let i = 0; i < splitStr.length; i++) {
@@ -378,43 +398,45 @@ export class DiscoveryBeaconComponent implements OnInit {
       this.beaconService.setApiUrl(this.appConfig.covidBeaconUrl);
     }
 
-
-    const that = this;
-
     this.route.queryParams
       .subscribe(params => {
         const position = Number(params['position']);
         const reference = params['referenceBases'];
         const alternate = params['alternateBases'];
 
-        const q = new BeaconRequest();
+        let q: QuerySnapshot;
 
         if (position === 0 || !reference || !alternate) {
-          q.start = 3840;
-          q.referenceBases = 'A';
-          q.alternateBases = 'G';
+          q = {
+            start: 3840,
+            referenceBases: 'A',
+            alternateBases: 'G',
+          };
         } else {
-          q.start = position;
-          q.referenceBases = reference;
-          q.alternateBases = alternate;
+          q = {
+            start: position,
+            referenceBases: reference,
+            alternateBases: alternate,
+          };
         }
 
-        that.query = q;
+        this.queryForm.patchValue(q);
 
-        that.doSearch();
+        this.doSearch();
       });
-
   }
 
   private setQueryParameters() {
+    const query = this.querySnapshot();
+
     this.router.navigate(
       [],
       {
         relativeTo: this.route,
         queryParams: {
-          position : this.query.start,
-          referenceBases: this.query.referenceBases,
-          alternateBases: this.query.alternateBases,
+          position: query.start,
+          referenceBases: query.referenceBases,
+          alternateBases: query.alternateBases,
         },
         queryParamsHandling: 'merge', // remove to replace all query params by provided
       });
@@ -423,5 +445,10 @@ export class DiscoveryBeaconComponent implements OnInit {
   private isMobileWidth(width: number) {
     return width < 760;
   }
+}
 
+interface QuerySnapshot {
+  start: number;
+  referenceBases: string;
+  alternateBases: string;
 }

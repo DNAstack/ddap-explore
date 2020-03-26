@@ -21,4 +21,16 @@ public class TablesPage extends AnyDdapPage{
         driver.findElement(By.xpath("//button[@data-se='preview-table-3']")).click();
         driver.findElement(DdapBy.se("run-query")).click();
     }
+
+    public void fillEditorWithQueryAndRun() {
+        WebDriver driver = getDriver();
+        // wait until tables are loaded
+        new WebDriverWait(driver, 30)
+                .until(ExpectedConditions.elementToBeClickable(By.xpath("//mat-expansion-panel[1]")));
+        new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.presenceOfElementLocated(By.tagName("ace-editor")));
+        driver.findElement(By.className("ace_text-input"))
+                .sendKeys("SELECT * FROM search_cloud.clinvar.hgvs4variation LIMIT 50;");
+        driver.findElement(DdapBy.se("run-query")).click();
+    }
 }

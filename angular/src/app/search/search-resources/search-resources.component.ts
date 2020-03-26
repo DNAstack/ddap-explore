@@ -17,7 +17,7 @@ import { SearchResourceModel } from './search-resource.model';
 })
 export class SearchResourcesComponent implements OnInit {
 
-  resources: any[];
+  resources: SearchResourceModel[];
 
   constructor(private searchService: SearchService,
               private randomImageRetriever: ImagePlaceholderRetriever,

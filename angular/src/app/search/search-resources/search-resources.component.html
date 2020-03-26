@@ -10,11 +10,11 @@
          [src]="[resource.ui.imageUrl || randomImageRetriever.getPathToFixedRandomImage(resource.ui.label)]"
          alt="Photo">
     <mat-card-actions>
-      <a [href]="resource.accessUrl">
+      <a [href]="resource.accessUrl"
+         data-se="explore-resource">
         <button mat-button
               color="primary"
-              class="uppercase"
-              data-se="explore-resource">Explore</button>
+              class="uppercase">Explore</button>
       </a>
     </mat-card-actions>
   </mat-card>

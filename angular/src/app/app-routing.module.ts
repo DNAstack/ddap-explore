@@ -42,6 +42,11 @@ const routes: Routes = [
         loadChildren: () => import('./discovery/discovery.module')
           .then(mod => mod.DiscoveryModule),
       },
+      {
+        path: 'search',
+        loadChildren: () => import('./search/search.module')
+          .then(mod => mod.SearchModule),
+      },
     ],
   },
 ];

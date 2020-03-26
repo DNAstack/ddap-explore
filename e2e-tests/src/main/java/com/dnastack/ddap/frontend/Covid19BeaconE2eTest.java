@@ -30,7 +30,7 @@ public class Covid19BeaconE2eTest extends AbstractFrontendE2eTest {
     @Test
     public void walkthrough() {
         // In COVID-19 release, the UI may not have app switcher.
-        String startingUri = URI.create(driver.getCurrentUrl()).resolve("/_/discovery").toString();
+        String startingUri = URI.create(DDAP_BASE_URL).resolve("/_/discovery").toString();
         driver.navigate().to(startingUri);
 
         Covid19BeaconPage page = new Covid19BeaconPage(driver);

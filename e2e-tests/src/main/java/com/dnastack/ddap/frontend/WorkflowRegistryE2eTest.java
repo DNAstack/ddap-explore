@@ -17,14 +17,9 @@ public class WorkflowRegistryE2eTest extends AbstractFrontendE2eTest {
 
     @BeforeClass
     public static void oneTimeSetup() {
-        try {
-            workflowTestConfig = EnvUtil
-                    .optionalEnvConfig("E2E_TEST_WORKFLOW_CONFIG", new WorkflowE2eTest.WorkflowTestConfig(), WorkflowE2eTest.WorkflowTestConfig.class);
-            Assume.assumeTrue("RealmE2eTest has been disabled, and will not run.", workflowTestConfig.isEnabled());
-            ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
+        workflowTestConfig = EnvUtil.optionalEnvConfig("E2E_TEST_WORKFLOW_CONFIG", new WorkflowE2eTest.WorkflowTestConfig(), WorkflowE2eTest.WorkflowTestConfig.class);
+        Assume.assumeTrue("WorkflowRegistryE2eTest has been disabled, and will not run.", workflowTestConfig.isEnabled());
+        ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }
 
     @Test

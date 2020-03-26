@@ -18,12 +18,8 @@ public class Covid19BeaconE2eTest extends AbstractFrontendE2eTest {
 
     @BeforeClass
     public static void oneTimeSetup() {
-        testConfig = EnvUtil.optionalEnvConfig(
-                "E2E_TEST_COVID19_CONFIG",
-                new Covid19BeaconTestConfig(),
-                Covid19BeaconTestConfig.class
-        );
-        Assume.assumeTrue("RealmE2eTest has been disabled, and will not run.", testConfig.isEnabled());
+        testConfig = EnvUtil.optionalEnvConfig("E2E_TEST_COVID19_CONFIG", new Covid19BeaconTestConfig(), Covid19BeaconTestConfig.class);
+        Assume.assumeTrue("Covid19BeaconE2eTest has been disabled, and will not run.", testConfig.isEnabled());
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }
 

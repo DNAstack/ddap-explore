@@ -7,14 +7,18 @@ import { BeaconResponse } from './beacon.model';
   providedIn: 'root',
 })
 export class BeaconService {
-
   apiUrl: String;
 
   constructor(
     private httpClient: HttpClient
-  ) {}
+  ) {
+  }
 
-  setApiUrl (url: String) {
+  isReady(): boolean {
+    return this.apiUrl !== undefined && this.apiUrl !== null;
+  }
+
+  setApiUrl(url: String) {
     this.apiUrl = url;
   }
 
@@ -54,10 +58,10 @@ export class BeaconService {
       .set('start', start + '')
       .set('referenceBases', referenceBases)
       .set('alternateBases', alternateBases)
-      ;
+    ;
 
-      // /query?referenceName=1&start=9924&referenceBases=C&alternateBases=T&assemblyId=GRCh38
+    // /query?referenceName=1&start=9924&referenceBases=C&alternateBases=T&assemblyId=GRCh38
     return this.httpClient.get<BeaconResponse[]>(`${this.apiUrl}`
-    + '/query', { 'params': params, 'headers' : headers }).toPromise();
+      + '/query', {'params': params, 'headers': headers}).toPromise();
   }
 }

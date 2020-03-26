@@ -13,8 +13,10 @@ import com.dnastack.ddap.common.page.WorkflowManagePage;
 import com.dnastack.ddap.common.setup.ConfigModel;
 import com.dnastack.ddap.common.util.DdapBy;
 import com.dnastack.ddap.common.util.EnvUtil;
+
 import java.io.IOException;
 import java.net.URI;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
@@ -30,15 +32,10 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
     private static WorkflowTestConfig workflowTestConfig;
 
     @BeforeClass
-    public static void oneTimeSetup() throws IOException {
-        try {
-            workflowTestConfig = EnvUtil
-                .optionalEnvConfig("E2E_TEST_WORKFLOW_CONFIG", new WorkflowTestConfig(), WorkflowTestConfig.class);
-            Assume.assumeTrue("RealmE2eTest has been disabled, and will not run.", workflowTestConfig.isEnabled());
-            ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
+    public static void oneTimeSetup() {
+        workflowTestConfig = EnvUtil.optionalEnvConfig("E2E_TEST_WORKFLOW_CONFIG", new WorkflowTestConfig(), WorkflowTestConfig.class);
+        Assume.assumeTrue("WorkflowE2eTest has been disabled, and will not run.", workflowTestConfig.isEnabled());
+        ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }
 
 
@@ -55,7 +52,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
         managePage.typeInEditor(By
-            .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/simple-workflow.wdl"));
+                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/simple-workflow.wdl"));
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
@@ -68,7 +65,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         log.info("Workflow Execution Step: Authorizing for resources");
         URI authorizeUrl = managePage.requestAccess("btn-authorize");
         managePage = loginStrategy
-            .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
+                .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
         managePage.waitForInflightRequests();
 
         log.info("Workflow Execution Step: Execution");
@@ -81,8 +78,8 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
     @Test
     public void testSingleWorkflowExecutionWithTokens() throws IOException {
         Assume
-            .assumeTrue("Performing additional authorization for files in workflows has been disabled, and will not be tested", workflowTestConfig
-                .isAdditionalAuthorizationEnabled());
+                .assumeTrue("Performing additional authorization for files in workflows has been disabled, and will not be tested", workflowTestConfig
+                        .isAdditionalAuthorizationEnabled());
         ddapPage.getNavBar().goToApp("product-app-menu-analytics");
         // FIXME Assert that the right app is present
         WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
@@ -95,7 +92,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
         managePage.typeInEditor(By
-            .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
+                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
@@ -108,7 +105,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         log.info("Workflow Execution Step: Authorizing for resources");
         URI authorizeUrl = managePage.requestAccess("btn-authorize");
         managePage = loginStrategy
-            .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
+                .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
         managePage.waitForInflightRequests();
 
         log.info("Workflow Execution Step: Execution");
@@ -121,8 +118,8 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
     @Test
     public void testMultipleWorkflowExecutionWithTokens() throws IOException {
         Assume
-            .assumeTrue("Performing additional authorization for files in workflows has been disabled, and will not be tested", workflowTestConfig
-                .isAdditionalAuthorizationEnabled());
+                .assumeTrue("Performing additional authorization for files in workflows has been disabled, and will not be tested", workflowTestConfig
+                        .isAdditionalAuthorizationEnabled());
         ddapPage.getNavBar().goToApp("product-app-menu-analytics");
         // FIXME Assert that the right app is present
         WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
@@ -137,7 +134,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
         managePage.typeInEditor(By
-            .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
+                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
@@ -150,7 +147,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         log.info("Workflow Execution Step: Authorizing for resources");
         URI authorizeUrl = managePage.requestAccess("btn-authorize");
         managePage = loginStrategy
-            .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
+                .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
         managePage.waitForInflightRequests();
 
         log.info("Workflow Execution Step: Execution");
@@ -163,8 +160,8 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
     @Test
     public void testSingleWorkflowExecutionWithTokensFromSecuredDataset() throws IOException {
         Assume
-            .assumeTrue("Loading secured datasets for the current deployment has been disabled and will not be tested", workflowTestConfig
-                .isSecuredDatasetEnabled());
+                .assumeTrue("Loading secured datasets for the current deployment has been disabled and will not be tested", workflowTestConfig
+                        .isSecuredDatasetEnabled());
         ddapPage.getNavBar().goToApp("product-app-menu-analytics");
         // FIXME Assert that the right app is present
         WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
@@ -177,7 +174,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         log.info("Workflow Execution Step: Authorizing for dataset resource");
         URI authorizeDatasetUrl = managePage.requestAccess("btn-authorize-dataset");
         managePage = loginStrategy
-            .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeDatasetUrl, WorkflowManagePage::new);
+                .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeDatasetUrl, WorkflowManagePage::new);
         managePage.waitForInflightRequests();
 
         log.info("Workflow Execution Step: Secured dataset import");
@@ -189,7 +186,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
         managePage.typeInEditor(By
-            .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/simple-workflow.wdl"));
+                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/simple-workflow.wdl"));
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
@@ -202,7 +199,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         log.info("Workflow Execution Step: Authorizing for resources");
         URI authorizeUrl = managePage.requestAccess("btn-authorize");
         managePage = loginStrategy
-            .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
+                .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, WorkflowManagePage::new);
         managePage.waitForInflightRequests();
 
         log.info("Workflow Execution Step: Execution");

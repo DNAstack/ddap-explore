@@ -91,7 +91,7 @@ public class WorkflowManagePage extends AnyDdapPage {
     }
 
     private List<WebElement> datasetResultRows() {
-        new WebDriverWait(getDriver(), 10)
+        new WebDriverWait(getDriver(), 30)
                 .until(ExpectedConditions.presenceOfElementLocated(By.tagName("ddap-dataset-results")));
         WebElement datasetResults = driver.findElement(By.tagName("ddap-dataset-results"));
         datasetResults.click();
@@ -106,7 +106,7 @@ public class WorkflowManagePage extends AnyDdapPage {
     public void clickCheckbox(By checkboxSelector) {
         WebElement checkbox = driver.findElement(checkboxSelector);
         WebPageScroller.scrollTo(driver, checkbox);
-        new WebDriverWait(driver, 5).until(ExpectedConditions.elementToBeClickable(checkbox));
+        new WebDriverWait(driver, 30).until(ExpectedConditions.elementToBeClickable(checkbox));
         checkbox.click();
     }
 
@@ -116,7 +116,7 @@ public class WorkflowManagePage extends AnyDdapPage {
 
     public URI requestAccess(String selector) {
         WebElement accessBtn = driver.findElement(DdapBy.se(selector));
-        new WebDriverWait(driver, 5).until(ExpectedConditions.elementToBeClickable(accessBtn));
+        new WebDriverWait(driver, 30).until(ExpectedConditions.elementToBeClickable(accessBtn));
         return URI.create(accessBtn.getAttribute("href"));
     }
 

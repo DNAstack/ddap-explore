@@ -38,6 +38,10 @@ public class AnyDdapPage {
     private boolean retry = true;
 
     private void acknowledgeSandboxIfAvailable() {
+        if (driver.getCurrentUrl().startsWith("data:")) {
+            log.warn("Unable to check if the sandbox acknowledgement box.");
+            return;
+        }
         try {
             WebStorage webStorage = (WebStorage) new Augmenter().augment(driver);
             LocalStorage localStorage = webStorage.getLocalStorage();

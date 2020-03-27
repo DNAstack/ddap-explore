@@ -35,18 +35,17 @@ public class SearchE2eTest extends AbstractFrontendE2eTest {
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AdminDdapPage::new);
     }
 
+    @Ignore
     @Test
     public void queryPrestoTable() throws IOException {
         driver.navigate().to(new URL(driver.getCurrentUrl() + "?exp_flag=demo"));
-        SearchResourcesPage searchResourcesPage= ddapPage.getNavBar().goToSearchResources();
-        log.info("Workflow Execution Step: Authorizing for resources");
+        ddapPage.getNavBar().goToSearchResources();
+        log.info("Authorizing for search resources");
 
         WebElement accessBtn = driver.findElement(DdapBy.se("explore-resource"));
         new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.attributeContains(DdapBy.se("explore-resource"), "href", "?resource"));
         URI authorizeUrl = URI.create(accessBtn.getAttribute("href"));
-        System.out.println(authorizeUrl);
-
 
         TablesPage tablesPage = loginStrategy
                 .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, TablesPage::new);

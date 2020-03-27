@@ -21,7 +21,6 @@ import { DiscoveryBeaconHelpDialogComponent } from './help/discovery-beacon.help
 export class DiscoveryBeaconComponent implements OnInit {
   appConfig: AppConfigModel;
 
-  beaconQueryInflight = false;
   searchBoxActive = false;
 
   beaconResponses: BeaconResponse[];
@@ -380,6 +379,22 @@ export class DiscoveryBeaconComponent implements OnInit {
 
   isQueryReadyForSubmission(): boolean {
     return this.queryForm.enabled && this.queryForm.valid;
+  }
+
+  getTooltipMessageFor(fieldName: string, defaultMessage: string) {
+    const errors = this.queryForm.controls[fieldName].errors;
+
+    if (errors === null) {
+      return defaultMessage;
+    }
+
+    if (errors['required']) {
+      return defaultMessage;
+    } else if (errors['pattern']) {
+      return fieldName === 'start' ? 'Only accept numbers' : 'Must be a sequence of bases (e.g., TCAG)';
+    }
+
+    return defaultMessage; // handle unknown cases.
   }
 
   private titleCase(str) {

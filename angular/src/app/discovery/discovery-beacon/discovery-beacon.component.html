@@ -6,7 +6,7 @@
       <span class="input-control-label">Position</span>
       <input matInput
              name="position"
-             matTooltip="Start position (e.g., 3840)"
+             [matTooltip]="getTooltipMessageFor('start', 'Start position')"
              formControlName="start">
     </div>
 
@@ -14,7 +14,7 @@
       <span class="input-control-label">Reference</span>
       <input matInput
              name="reference"
-             matTooltip="Reference Alleles (e.g., A, TG)"
+             [matTooltip]="getTooltipMessageFor('referenceBases', 'Reference Bases')"
              formControlName="referenceBases">
     </div>
 
@@ -22,7 +22,7 @@
       <span class="input-control-label">Alternate</span>
       <input matInput
              name="alternate"
-             matTooltip="Alternate Alleles (e.g., A, TG)"
+             [matTooltip]="getTooltipMessageFor('alternateBases', 'Alternate Bases')"
              formControlName="alternateBases">
     </div>
 

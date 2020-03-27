@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DdapLayoutModule } from 'ddap-common-lib';
 import { AceEditorModule } from 'ng2-ace-editor';
 
+import { SearchEditorComponent } from './search-editor/search-editor.component';
 import { SearchResourcesComponent } from './search-resources/search-resources.component';
 import { SearchRoutingModule } from './search-routing.module';
 import { LinkifyPipe } from './search-tables/linkify.pipe';
@@ -25,6 +26,7 @@ import { SearchTablesComponent } from './search-tables/search-tables.component';
     ObjectToArrayPipe,
     LinkifyPipe,
     SearchResourcesComponent,
+    SearchEditorComponent,
   ],
   imports: [
     SearchRoutingModule,

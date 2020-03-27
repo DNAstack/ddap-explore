@@ -33,17 +33,17 @@
               </mat-expansion-panel-header>
               <div class="m-b">
                 <div class="h4 m-b-sm">Table</div>
-                <a (click)="addAtCursor(table.name)" tabindex="-1">
+                <a (click)="this.searchEditor.addAtCursor(table.name)" tabindex="-1">
                   {{table.name}}
                 </a>
               </div>
               <div class="h4 m-b-sm">Properties</div>
-              <a tabindex="-1" (click)='addAtCursor("\"" + property.key + "\"")'
+              <a tabindex="-1" (click)='this.searchEditor.addAtCursor("\"" + property.key + "\"")'
                  *ngFor="let property of table['properties'] | keyvalue : propertyOrder;">
                 <div *ngIf="property.key != 'description'">{{property.key}}</div>
               </a>
               <button class="m-t-sm" tabindex="-1" mat-icon-button
-                      (click)="addAtCursor(previewTableQuery(table.name))"
+                      (click)="this.searchEditor.addAtCursor(previewTableQuery(table.name))"
                       [attr.data-se]="'preview-table-'+(j+1)"
                       matTooltip="Preview Table">
                 <mat-icon>visibility</mat-icon>
@@ -85,7 +85,7 @@
                     <button tabindex="-1"
                             mat-stroked-button
                             color="accent"
-                            (click)="doSearchFromEditor()"
+                            (click)="this.searchEditor.doSearchFromEditor()"
                             matTooltip="Run query"
                             data-se="run-query"
                             style="display:inline">
@@ -93,11 +93,9 @@
                     </button>
                   </mat-toolbar-row>
                 </mat-toolbar>
-                <ace-editor #editor [(text)]="search.text" [mode]="'sql'" [theme]="'eclipse'"
-                            [options]="options" [readOnly]="false" [autoUpdateContent]="true"
-                            [durationBeforeCallback]="1000" (textChanged)="queryChanged($event)"
-                            style="min-height: 200px; width:100%; overflow: auto; flex-grow: 2">
-                </ace-editor>
+                <ddap-search-editor [searchText]="search.text"
+                                    [editorOptions]="options"
+                                    (doSearch)="doSearch($event)"></ddap-search-editor>
               </div>
               <mat-toolbar class="tertiary-toolbar">
                 <mat-toolbar-row style="position: sticky; position: -webkit-sticky; align-self: flex-start">

@@ -16,24 +16,28 @@ public class Covid19BeaconPage extends AnyDdapPage {
 
     public void getMoreDetailsOn(String sourceName) {
         String xpath = String.format("//span[@role='gridcell'][@aria-colindex='1'][contains(text(), '%s')]", sourceName);
-        driver.findElement(By.xpath(xpath)).click();
+        By selector = By.xpath(xpath);
+        new WebDriverWait(driver, 60).until(ExpectedConditions.visibilityOfElementLocated(selector));
+        driver.findElement(selector).click();
     }
 
     public void searchFor(String position, String referenceBases, String alternateBases) {
-        WebElement positionInput = driver.findElement(By.cssSelector(".beacon-search-parameters .input-control:nth-child(1) input"));
+        By submitButtonSelector = By.cssSelector(".beacon-search-actions button");
+        new WebDriverWait(driver, 60).until(ExpectedConditions.elementToBeClickable(submitButtonSelector));
+        WebElement submitButton = driver.findElement(submitButtonSelector);
+
+        WebElement positionInput = driver.findElement(By.cssSelector(".beacon-search-parameters input[name='position']"));
         positionInput.clear();
         positionInput.sendKeys(position);
 
-        WebElement referenceBasesInput = driver.findElement(By.cssSelector(".beacon-search-parameters .input-control:nth-child(2) input"));
+        WebElement referenceBasesInput = driver.findElement(By.cssSelector(".beacon-search-parameters input[name='reference']"));
         referenceBasesInput.clear();
         referenceBasesInput.sendKeys(referenceBases);
 
-        WebElement alternateBasesInput = driver.findElement(By.cssSelector(".beacon-search-parameters .input-control:nth-child(3) input"));
+        WebElement alternateBasesInput = driver.findElement(By.cssSelector(".beacon-search-parameters input[name='alternate']"));
         alternateBasesInput.clear();
         alternateBasesInput.sendKeys(alternateBases);
 
-        WebElement submitButton = driver.findElement(By.cssSelector(".beacon-search-actions button"));
-        new WebDriverWait(driver, 15).until(ExpectedConditions.elementToBeClickable(submitButton));
         submitButton.click();
 
         waitForInflightRequests();
@@ -41,7 +45,7 @@ public class Covid19BeaconPage extends AnyDdapPage {
 
     public void haveDetailsPanelShown() {
         By selector = By.cssSelector("mat-drawer");
-        new WebDriverWait(driver, 5).until(ExpectedConditions.numberOfElementsToBe(selector, 1));
+        new WebDriverWait(driver, 15).until(ExpectedConditions.numberOfElementsToBe(selector, 1));
     }
 
     public void seeInfoInDetailsPanel(String text) {

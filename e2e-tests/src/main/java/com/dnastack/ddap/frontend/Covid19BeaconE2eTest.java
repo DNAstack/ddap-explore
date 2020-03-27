@@ -30,15 +30,15 @@ public class Covid19BeaconE2eTest extends AbstractFrontendE2eTest {
         driver.navigate().to(startingUri);
 
         Covid19BeaconPage page = new Covid19BeaconPage(driver);
-        page.searchFor("3841", "A", "G");
+        page.searchFor("3847", "G", "A");
 
-        page.getMoreDetailsOn("bat-SL-CoVZC45");
+        page.getMoreDetailsOn("BetaCoV/pangolin/Guangxi/P4L/2017");
 
         page.haveDetailsPanelShown();
-        page.seeInfoInDetailsPanel("bat-SL-CoVZC45");
-        page.seeInfoInDetailsPanel("MG772933");
-        page.seeInfoInDetailsPanel("GenBank");
-        page.seeInfoInDetailsPanel("Rhinolophus affinis");
+        page.seeInfoInDetailsPanel("BetaCoV/pangolin/Guangxi/P4L/2017");
+        page.seeInfoInDetailsPanel("EPI_ISL_410538");
+        page.seeInfoInDetailsPanel("GISAID");
+        page.seeInfoInDetailsPanel("Manis javanica");
     }
 
     @Data

@@ -39,7 +39,6 @@ public class SearchE2eTest extends AbstractFrontendE2eTest {
     public void queryPrestoTable() throws IOException {
         driver.navigate().to(new URL(driver.getCurrentUrl() + "?exp_flag=demo"));
         SearchResourcesPage searchResourcesPage= ddapPage.getNavBar().goToSearchResources();
-        searchResourcesPage.waitForResources();
         log.info("Workflow Execution Step: Authorizing for resources");
 
         WebElement accessBtn = driver.findElement(DdapBy.se("explore-resource"));

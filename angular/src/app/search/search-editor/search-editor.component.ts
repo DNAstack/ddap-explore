@@ -29,8 +29,6 @@ export class SearchEditorComponent implements OnInit, AfterViewInit {
     this.editor.setMode('sql');
     this.editor.getEditor().setOptions({
       enableBasicAutocompletion: true,
-      /*enableLiveAutocompletion: true*/
-      // this introduces weird behaviour where multiple characters get typed with every keypressResults
     });
 
     this.editor.getEditor().commands.addCommand({
@@ -51,9 +49,11 @@ export class SearchEditorComponent implements OnInit, AfterViewInit {
 
   addAtCursor(text: string) {
     if (this.editor != null) {
-      const cursorPosition = this.editor.getEditor().session.doc.positionToIndex(this.editor.getEditor().selection.getCursor());
+      const cursorPosition = this.editor.getEditor()
+        .session.doc.positionToIndex(this.editor.getEditor().selection.getCursor());
 
-      if (cursorPosition > 0 && this.editor.getEditor().getValue()[cursorPosition - 1] === this.QUERY_EDITOR_DELIMITER) {
+      if (cursorPosition > 0 &&
+        this.editor.getEditor().getValue()[cursorPosition - 1] === this.QUERY_EDITOR_DELIMITER) {
         text = this.QUERY_EDITOR_NEWLINE + text;
       }
 

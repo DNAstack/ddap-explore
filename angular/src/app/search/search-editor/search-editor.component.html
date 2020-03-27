@@ -1,0 +1,9 @@
+<ace-editor #editor [(text)]="searchText"
+            [mode]="'sql'"
+            [theme]="'eclipse'"
+            [options]="editorOptions"
+            [readOnly]="false"
+            [autoUpdateContent]="true"
+            [durationBeforeCallback]="1000"
+            (textChanged)="queryChanged($event)">
+</ace-editor>

@@ -9,6 +9,7 @@ import { filter, flatMap, map, shareReplay } from 'rxjs/operators';
 
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
+import { SearchEditorComponent } from '../search-editor/search-editor.component';
 import IResourceResults = dam.v1.IResourceResults;
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 import { SearchResourceModel } from '../search-resources/search-resource.model';
@@ -22,8 +23,8 @@ import { BeaconQuery, BeaconRegistry, SearchView } from './search-tables.model';
   templateUrl: './search-tables.component.html',
   styleUrls: ['./search-tables.component.scss'],
 })
-export class SearchTablesComponent implements OnInit, AfterViewInit {
-  @ViewChild('editor', {static: false}) editor;
+export class SearchTablesComponent implements OnInit {
+  @ViewChild(SearchEditorComponent, {static: false}) searchEditor: SearchEditorComponent;
   searchTables: object[] = [];
   registry: BeaconRegistry;
 
@@ -49,9 +50,6 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   currentView;
   tableApiRequests = 0;
   connectorDetails: object = {};
-
-  private QUERY_EDITOR_DELIMITER = ';';
-  private QUERY_EDITOR_NEWLINE = '\n';
 
   private query: string;
   private properties: string[];
@@ -96,31 +94,6 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
       });
   }
 
-  ngAfterViewInit(): void {
-    this.editor.setTheme('eclipse');
-    this.editor.setMode('sql');
-    this.editor.getEditor().setOptions({
-      enableBasicAutocompletion: true,
-        /*enableLiveAutocompletion: true*/
-    // this introduces weird behaviour where multiple characters get typed with every keypressResults
-    });
-
-    this.editor.getEditor().commands.addCommand({
-        name: 'showOtherCompletions',
-        bindKey: 'Ctrl-.',
-        exec: function (editor) {
-        },
-    });
-
-    this.editor.getEditor().commands.addCommand({
-      name: 'run',
-      exec: (e) => {
-        this.doSearchFromEditor();
-      },
-      bindKey: {mac: 'cmd-return', win: 'ctrl-enter'},
-    });
-  }
-
   refreshBeacons() {
     // this.setRegistry(this.registry);
   }
@@ -129,18 +102,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
 
   }
 
-  addAtCursor(text: string) {
-    if (this.editor != null) {
-      const cursorPosition = this.editor.getEditor().session.doc.positionToIndex(this.editor.getEditor().selection.getCursor());
 
-      if (cursorPosition > 0 && this.editor.getEditor().getValue()[cursorPosition - 1] === this.QUERY_EDITOR_DELIMITER) {
-        text = this.QUERY_EDITOR_NEWLINE + text;
-      }
-
-      this.editor.getEditor().session.replace(this.editor.getEditor().selection.getRange(), text);
-      this.editor.getEditor().focus();
-    }
-  }
 
   propertyOrder = (a: KeyValue<string, any>, b: KeyValue<string, any>): number => {
     const positionKey = 'x-ga4gh-position';
@@ -158,56 +120,7 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
   }
 
 //  EDITOR STUFF
-  doSearchFromEditor() {
-    this.doSearch(this.getQueryFromEditor());
-  }
 
-  getQueryFromEditor() {
-
-    let query = this.editor.getEditor().getValue();
-
-    query = query.trim();
-    query = query.replace('/' + this.QUERY_EDITOR_DELIMITER + '+$/', '');
-
-    let cursorPosition = this.editor.getEditor()
-      .session.doc.positionToIndex(this.editor.getEditor().selection.getCursor());
-    if (cursorPosition >= query.length) {
-      cursorPosition = query.length - 1;
-    }
-
-    while (query[cursorPosition] === this.QUERY_EDITOR_NEWLINE || query[cursorPosition] === ' ') {
-      cursorPosition = cursorPosition - 1;
-      if (cursorPosition === 0) {
-        break;
-      }
-    }
-
-    if (cursorPosition > 0 && query[cursorPosition - 1] === this.QUERY_EDITOR_DELIMITER) {
-      cursorPosition = cursorPosition - 1;
-    }
-
-    let leftPosition = cursorPosition;
-
-    while (leftPosition > 0) {
-      if (query[leftPosition] === this.QUERY_EDITOR_DELIMITER && cursorPosition !== leftPosition) {
-        leftPosition = leftPosition + 1;
-        break;
-      }
-      leftPosition = leftPosition - 1;
-    }
-
-    let rightPosition = cursorPosition;
-    while (rightPosition <= query.length + 1) {
-      if (query[rightPosition] === this.QUERY_EDITOR_DELIMITER) {
-        break;
-      }
-      rightPosition = rightPosition + 1;
-    }
-
-    query = query.substring(leftPosition, rightPosition).trim();
-
-    return query;
-  }
 
   doSearch(query: string) {
 
@@ -233,16 +146,11 @@ export class SearchTablesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  queryChanged($event) {
-  }
-
   viewResultsJSON() {
     this.jsonViewerService.viewJSON(this.result);
   }
 
   authorizeResource(views: SearchResourceModel[]) {
-    // const resourcePath = `1;${resource['resourceName']}/views/` +
-    //   `${resource['viewName']}/roles/${resource['roleName']}/interfaces/${resource['interfaceName']}`;
     const resourcesPath = [];
     views.map(view => {
       if (view.viewName === this.viewName) {

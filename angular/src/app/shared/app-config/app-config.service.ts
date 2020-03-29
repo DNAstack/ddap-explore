@@ -179,7 +179,7 @@ export class AppConfigService {
       .registerModule({
         key: 'search',
         name: 'Search',
-        iconClasses: 'icon icon-search',
+        iconName: 'search',
         requiredFeatureFlags: ['featureSearchEnabled'],
         routerLink: 'search',
         isApp: true,

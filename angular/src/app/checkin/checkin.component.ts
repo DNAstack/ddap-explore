@@ -24,7 +24,7 @@ export class CheckinComponent implements OnInit {
       let targetRealm = defaultRealm;
 
       if (this.appConfig.inStandaloneMode) {
-        targetRealm = '_';
+        targetRealm = 'app';
       } else if (realmId) {
         targetRealm = realmId;
       }

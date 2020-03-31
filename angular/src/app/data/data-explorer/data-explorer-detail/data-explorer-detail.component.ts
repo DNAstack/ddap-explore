@@ -70,8 +70,7 @@ export class DataExplorerDetailComponent implements AfterViewInit {
     private snackBar: MatSnackBar,
     private dataAppConfigService: DataCollectionsConfigService,
     private jsonViewerService: JsonViewerService,
-    private route: ActivatedRoute,
-    private httpClient: HttpClient
+    private route: ActivatedRoute
   ) {
 
     this.tables = [];

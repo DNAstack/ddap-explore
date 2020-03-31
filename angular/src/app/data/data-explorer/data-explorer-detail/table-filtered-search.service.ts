@@ -4,12 +4,15 @@ import { Table, Tables } from '../search-service/ga4gh-discovery-search.models';
 import { Ga4ghDiscoverySearchService } from '../search-service/ga4gh-discovery-search.service';
 
 export class TableFilteredSearchService extends Ga4ghDiscoverySearchService {
+  private tableFilters: string[];
 
   constructor(
     client: HttpClient,
-    private tableFilters: string[]
+    tableFilters: string[]
   ) {
     super(client);
+
+    this.tableFilters = tableFilters;
   }
 
   getTables(headers?: any): Promise<Tables> {

@@ -14,9 +14,9 @@ public class AppConfig {
     private String googleAnalyticsId;
     private String theme;
     private String defaultModule;
+    private String tosUrl;
     private boolean inStandaloneMode;
     private boolean authorizationOnInitRequired;
-    private boolean sidebarEnabled;
     private boolean featureRealmInputEnabled;
     private boolean featureAdministrationEnabled;
     private boolean featureTermsEnabled;
@@ -25,7 +25,6 @@ public class AppConfig {
     private boolean featureWorkflowsEnabled;
     private boolean featureSearchEnabled;
     private boolean featureBeaconsEnabled;
-    private boolean featureWorkflowsTrsIntegrationEnabled;
     private String trsBaseUrl;
     private List<String> trsAcceptedToolClasses;
     private List<String> trsAcceptedVersionDescriptorTypes;

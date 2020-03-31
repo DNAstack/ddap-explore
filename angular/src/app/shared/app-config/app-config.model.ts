@@ -4,6 +4,7 @@ export interface AppConfigModel {
   googleAnalyticsId: string;
   theme: string;
   defaultModule: string;
+  tosUrl: string;
   inStandaloneMode: boolean;
   authorizationOnInitRequired: boolean;
   sidebarEnabled: boolean;
@@ -14,7 +15,6 @@ export interface AppConfigModel {
   featureBeaconsEnabled: boolean;
   featureDiscoveryEnabled: boolean;
   featureWorkflowsEnabled: boolean;
-  featureWorkflowsTrsIntegrationEnabled: boolean; // deprecated/obsolete
   trsBaseUrl: string;
   trsAcceptedToolClasses: string[];
   trsAcceptedVersionDescriptorTypes: string[];

@@ -43,6 +43,13 @@ ddaplib-header ddaplib-header-add-btn {
   right: 0;
 }
 
+.data-table-container {
+  ag-grid-angular {
+    width: 100%;
+    height: 100%;
+  }
+}
+
 .beacon-search-parameters {
   display: flex;
   flex-direction: row;

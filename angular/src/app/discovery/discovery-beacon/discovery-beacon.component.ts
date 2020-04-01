@@ -458,7 +458,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   private isMobileWidth(width: number) {
-    return width < 760;
+    return width <= 760;
   }
 }
 

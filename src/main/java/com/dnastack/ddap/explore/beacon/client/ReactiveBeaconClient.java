@@ -1,6 +1,6 @@
 package com.dnastack.ddap.explore.beacon.client;
 
-import com.dnastack.ddap.common.client.LoggingFilter;
+import com.dnastack.ddap.common.util.logging.LoggingFilter;
 import com.dnastack.ddap.explore.beacon.model.BeaconQueryResult;
 import com.dnastack.ddap.explore.beacon.model.BeaconRequestModel;
 import lombok.extern.slf4j.Slf4j;

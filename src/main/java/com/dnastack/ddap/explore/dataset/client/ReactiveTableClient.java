@@ -1,6 +1,6 @@
 package com.dnastack.ddap.explore.dataset.client;
 
-import com.dnastack.ddap.common.client.LoggingFilter;
+import com.dnastack.ddap.common.util.logging.LoggingFilter;
 import com.dnastack.ddap.explore.dataset.model.TableData;
 import com.dnastack.ddap.explore.dataset.model.Tuple;
 import lombok.extern.slf4j.Slf4j;

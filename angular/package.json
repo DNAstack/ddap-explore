@@ -40,7 +40,7 @@
     "bingmaps": "^2.0.3",
     "brace": "^0.11.1",
     "dayjs": "^1.8.16",
-    "ddap-common-lib": "0.0.19-72-g461e5a4",
+    "ddap-common-lib": "0.0.19-75-ged3a20a",
     "hammerjs": "^2.0.8",
     "highlight.js": "^9.15.10",
     "jsoneditor": "^7.5.0",

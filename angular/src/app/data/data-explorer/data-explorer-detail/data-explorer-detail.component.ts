@@ -126,7 +126,13 @@ export class DataExplorerDetailComponent implements AfterViewInit {
 
         let propertyNames = [];
         for (let i = 0; i < this.tables.length; i++) {
-          propertyNames = propertyNames.concat(Object.keys(this.tables[i].data_model.properties));
+          const data_model = this.tables[i].data_model;
+          if (data_model['$ref']) {
+            const ref = data_model['$ref'];
+            // TODO: resolve properties from url (perhaps recursively)
+          } else {
+            propertyNames = propertyNames.concat(Object.keys(this.tables[i].data_model.properties));
+          }
         }
         this.propertyNames = new Set<string>(propertyNames);
 

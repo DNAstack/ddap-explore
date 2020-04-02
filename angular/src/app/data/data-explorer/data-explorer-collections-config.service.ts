@@ -19,6 +19,23 @@ export class DataCollectionsConfigService {
     ) {
 
       this.collections = [
+
+        {
+          'id' : 'jhu-covid',
+          'searchServiceId' : 'dnastack-search-service',
+          'name' : 'JHU Coronavirus COVID-19 Global Cases',
+          'description': 'Repository of aggregated coronavirus COVID-19 cases by JHU',
+          'imgUrl' : 'https://brand.jhu.edu/assets/uploads/sites/5/2016/01/university.logo_.small_.vertical.white_.png',
+          'tableFilters' : [
+            'search_cloud.covid19_jhu_csse',
+          ],
+          'organization' :  {
+            'name' : 'Johns Hopkins University',
+            'contact' : {
+              'url' : 'https://www.jhu.edu/',
+            },
+          },
+        },
         {
           'id' : 'dnastack',
           'searchServiceId' : 'dnastack-search-service',
@@ -33,15 +50,15 @@ export class DataCollectionsConfigService {
           },
         },
         {
-          'id' : 'shgp',
+          'id' : 'aspen',
           'searchServiceId' : 'shgp-search-service',
-          'name' : 'DNAstack - SHGP',
-          'description': 'All collection of resources made searchable by the Secure Health and Genomics Platform.',
-          'imgUrl' : 'https://dnastack.com/assets/images/dnastack-logo-gotham.png',
+          'name' : 'Aspen',
+          'description': 'All collection of resources made searchable by the Aspen Platform.',
+          'imgUrl' : 'https://images.pexels.com/photos/2916826/pexels-photo-2916826.jpeg?auto=compress&cs=tinysrgb&dpr=3&w=800',
           'organization' :  {
-            'name' : 'DNAstack/SHGP',
+            'name' : 'Aspen',
             'contact' : {
-              'url' : 'https://www.dnastack.com',
+              'url' : 'https://www.digitalsupercluster.ca/wp-content/uploads/2019/09/Secure-Health-and-Genomics.pdf',
             },
           },
         },

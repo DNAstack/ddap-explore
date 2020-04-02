@@ -1,72 +1,63 @@
-<ddaplib-header label="{{collection.name}}" [backLink]="['../..']">
-</ddaplib-header>
-<ddaplib-main style="padding:0">
-    <mat-drawer-container style="height:100%" [autosize]="true">
-            <mat-drawer mode="side" [(opened)]="view.showTables" style="min-width:400px; max-width:400px">
-                <mat-toolbar class="tertiary-toolbar"
-                    style="height: 64px; position:absolute; top: 0;">
-                    <mat-toolbar-row>
-                        <div>Tables</div>
-                        <span class="fill-space"></span>
-                        <button tabindex="-1" mat-icon-button (click)="refreshTables()" matTooltip="Refresh Tables">
-                            <mat-icon>refresh</mat-icon>
-                        </button>
-                        <button tabindex="-1" mat-icon-button (click)="closeTables()" matTooltip="Close Tables">
-                            <mat-icon>close</mat-icon>
-                        </button>
-                    </mat-toolbar-row>
-                </mat-toolbar>
-                <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
-                    <mat-progress-bar *ngIf="view.isRefreshingTables" mode="indeterminate" color="accent"></mat-progress-bar>
-                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="view.errorLoadingTables" message="Error Loading Tables" icon="error_outline"></ddaplib-cover-message>
-                    <ddaplib-cover-message style="flex-grow: 1" *ngIf="!view.isRefreshingTables && tables.length == 0 && !view.errorLoadingTables" message="No Tables" icon="not_interested"></ddaplib-cover-message>
-                    <div style="flex:1; height:100%;" *ngIf="tables.length > 0">
-                        <mat-accordion>
-                            <mat-expansion-panel *ngFor="let table of tables; index as j;" tabindex="-1">
-                                <mat-expansion-panel-header>
-                                    <mat-panel-title>
-                                        <mat-icon class="m-r-sm">web_asset</mat-icon>{{table.name}}
-                                    </mat-panel-title>
-                                    <mat-panel-description>
-                                    </mat-panel-description>
-                                </mat-expansion-panel-header>
-                                <div class="m-b">
-                                    <div class="h4 m-b-sm">Table</div>
-                                    <a (click)="addAtCursor(table.name)" tabindex="-1">
-                                        {{table.name}}
+<div class="full-hw" style="display: flex; flex-direction: column;">
+    <ddaplib-header label="{{collection.name}}" [backLink]="['../']">
+    </ddaplib-header>
+    <div style="flex: 1">
+        <mat-drawer-container style="height:100%" [autosize]="true">
+                <mat-drawer mode="side" [(opened)]="view.showTables" style="min-width:400px; max-width:400px">
+                    <mat-toolbar class="tertiary-toolbar"
+                        style="height: 64px; position:absolute; top: 0;">
+                        <mat-toolbar-row>
+                            <div>Tables</div>
+                            <span class="fill-space"></span>
+                            <button tabindex="-1" mat-icon-button (click)="refreshTables()" matTooltip="Refresh Tables">
+                                <mat-icon>refresh</mat-icon>
+                            </button>
+                            <button tabindex="-1" mat-icon-button (click)="closeTables()" matTooltip="Close Tables">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-toolbar-row>
+                    </mat-toolbar>
+                    <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
+                        <ddaplib-cover-message style="flex-grow: 1" *ngIf="view.errorLoadingTables" message="Error Loading Tables" icon="error_outline"></ddaplib-cover-message>
+                        <ddaplib-cover-message style="flex-grow: 1" *ngIf="!view.isRefreshingTables && tables.length == 0 && !view.errorLoadingTables" message="No Tables" icon="not_interested"></ddaplib-cover-message>
+                        <div style="flex:1; height:100%;" *ngIf="tables.length > 0">
+                            <mat-accordion>
+                                <mat-expansion-panel *ngFor="let table of tables; index as j;" tabindex="-1">
+                                    <mat-expansion-panel-header>
+                                        <mat-panel-title>
+                                            <mat-icon class="m-r-sm">web_asset</mat-icon>{{table.name}}
+                                        </mat-panel-title>
+                                        <mat-panel-description>
+                                        </mat-panel-description>
+                                    </mat-expansion-panel-header>
+                                    <div class="m-b">
+                                        <div class="h4 m-b-sm">Table</div>
+                                        <a (click)="addAtCursor(table.name)" tabindex="-1">
+                                            {{table.name}}
+                                        </a>
+                                    </div>
+                                    <span *ngIf="properties && properties.length > 0">
+                                    <div class="h4 m-b-sm">Properties</div>
+                                    <a tabindex="-1" (click)='addAtCursor("\"" + property.key + "\"")'
+                                        *ngFor="let property of table['properties'] | keyvalue : propertyOrder;">
+                                        <div *ngIf="property.key != 'description'">{{property.key}}</div>
                                     </a>
-                                </div>
-                                <div class="h4 m-b-sm">Properties</div>
-                                <a tabindex="-1" (click)='addAtCursor("\"" + property.key + "\"")'
-                                    *ngFor="let property of table['properties'] | keyvalue : propertyOrder;">
-                                    <div *ngIf="property.key != 'description'">{{property.key}}</div>
-                                </a>
-                                <button class="m-t-sm" tabindex="-1" mat-icon-button
-                                    (click)="addAtCursor(previewTableQuery(table.name))" matTooltip="Preview Table">
-                                    <mat-icon>visibility</mat-icon>
-                                </button>
-                                <button tabindex="-1" mat-icon-button (click)="viewTableAsJSON(table)"
-                                                    matTooltip="View Table as JSON" style="display:inline">
-                                                    <mat-icon>launch</mat-icon>
-                                                </button>
-                            </mat-expansion-panel>
-                        </mat-accordion>
-                    </div>
-                </div>
-            </mat-drawer>
-            <mat-drawer-content>
-                <mat-drawer-container style="height:100%" [autosize]="true">
-                    <mat-drawer position="end" mode="side" [(opened)]="view.showSearchBar" style="min-width:400px;">
-                        <div style="display:flex; flex: 1; flex-direction: column">
-                            <mat-toolbar class="tertiary-toolbar">
-                                <mat-toolbar-row>
-                                    <div>Search</div>
-                                    <span class="fill-space"></span>
-                                </mat-toolbar-row>
-                            </mat-toolbar>
+                                    </span>
+                                    <button class="m-t-sm" tabindex="-1" mat-icon-button
+                                        (click)="addAtCursor(previewTableQuery(table.name))" matTooltip="Preview Table">
+                                        <mat-icon>visibility</mat-icon>
+                                    </button>
+                                    <button tabindex="-1" mat-icon-button (click)="viewTableAsJSON(table)"
+                                                        matTooltip="View Table as JSON" style="display:inline">
+                                                        <mat-icon>launch</mat-icon>
+                                                    </button>
+                                </mat-expansion-panel>
+                            </mat-accordion>
                         </div>
-                    </mat-drawer>
-                    <mat-drawer-content>
+                    </div>
+                </mat-drawer>
+                <mat-drawer-content>
+                    <mat-drawer-container style="height:100%" [autosize]="true">
                         <div style="display:flex; flex: 1; flex-direction: column;">
                             <mat-toolbar class="tertiary-toolbar"
                                 style="height: 64px; position:absolute; top: 0;">
@@ -182,8 +173,8 @@
                                 </div>
                             </div>
                         </div>
-                    </mat-drawer-content>
-                </mat-drawer-container>
-            </mat-drawer-content>
-    </mat-drawer-container>
-</ddaplib-main>
+                    </mat-drawer-container>
+                </mat-drawer-content>
+        </mat-drawer-container>
+    </div>
+</div>

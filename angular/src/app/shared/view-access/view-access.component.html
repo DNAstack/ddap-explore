@@ -1,37 +1,17 @@
 <div class="flex flex--column">
-  <div class="flex">
+  <div class="flex" *ngFor="let credential of credentials">
     <mat-form-field class="stretch">
       <input matInput
              readonly
              type="text"
-             [placeholder]="'Account'"
-             [value]="access.credentials?.account">
+             [placeholder]="credential.label"
+             [value]="credential.value">
     </mat-form-field>
     <button mat-flat-button
             matSuffix
             mat-icon-button
             ngxClipboard
-            [cbContent]="access.credentials?.account"
-            matTooltip="Copy to clipboard"
-            aria-label="Copy to clipboard">
-      <mat-icon class="icon icon-copy"></mat-icon>
-    </button>
-  </div>
-  <div class="flex"
-       *ngIf="access.credentials['access_token']">
-    <mat-form-field class="stretch">
-      <input matInput
-             readonly
-             type="text"
-             data-se="access-token"
-             [placeholder]="'Access token'"
-             [value]="access.credentials['access_token']">
-    </mat-form-field>
-    <button mat-flat-button
-            matSuffix
-            mat-icon-button
-            ngxClipboard
-            [cbContent]="access.credentials['access_token'] || url"
+            [cbContent]="credential.value"
             matTooltip="Copy to clipboard"
             aria-label="Copy to clipboard">
       <mat-icon class="icon icon-copy"></mat-icon>

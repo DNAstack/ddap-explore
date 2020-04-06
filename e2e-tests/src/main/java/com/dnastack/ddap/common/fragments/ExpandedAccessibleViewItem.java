@@ -33,8 +33,8 @@ public class ExpandedAccessibleViewItem {
 
     public void assertHasAccessToken() {
         new WebDriverWait(driver, 5)
-            .until(ExpectedConditions.visibilityOfElementLocated(DdapBy.se("access-token")));
-        WebElement accessTokenInput = driver.findElement(DdapBy.se("access-token"));
+            .until(ExpectedConditions.visibilityOfElementLocated(DdapBy.se("access_token")));
+        WebElement accessTokenInput = driver.findElement(DdapBy.se("access_token"));
         WebPageScroller.scrollTo(driver, accessTokenInput);
         String accessToken = accessTokenInput.getAttribute("value");
         assertThat(accessToken, not(isEmptyString()));

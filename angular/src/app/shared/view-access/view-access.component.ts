@@ -25,6 +25,7 @@ export class ViewAccessComponent implements OnInit {
             this.credentials.push({
               label: this.formatVal(name),
               value: credVal,
+              key: name,
             });
           }
         });

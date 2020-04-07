@@ -33,6 +33,7 @@ import { AccessDeniedScreenComponent } from './access-denied-screen/access-denie
 import { BeaconResultComponent } from './beacon-search/beacon-result/beacon-result.component';
 import { BeaconSearchBarComponent } from './beacon-search/beacon-search-bar/beacon-search-bar.component';
 import { LimitSearchComponent } from './beacon-search/beacon-search-bar/limit-search/limit-search.component';
+import { DataTableComponent } from './data-table/data-table.component';
 import { LayoutComponent } from './layout/layout.component';
 import { MarkdownPipe } from './markdown.pipe';
 import { MetadataFilterPipe } from './metadata-list/metadata-filter.pipe';
@@ -56,6 +57,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     PaginatorComponent,
     MarkdownPipe,
     AccessDeniedScreenComponent,
+    DataTableComponent,
   ],
   imports: [
     CommonModule,
@@ -141,6 +143,7 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     MarkdownPipe,
     MenuModule,
     AccessDeniedScreenComponent,
+    DataTableComponent,
   ],
   providers: [
     ViewControllerService,

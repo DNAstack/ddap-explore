@@ -126,6 +126,7 @@ export class AppConfigService {
         parentKey: 'data',
         isApp: false,
         isExperimental: true,
+        expFlag: 'saved',
       });
 
     this.viewController
@@ -185,6 +186,7 @@ export class AppConfigService {
         isApp: true,
         isExperimental: true,
         isSidebarEnabled: true,
+        expFlag: 'demo',
       })
       .registerModule({
         key: 'search-resources',
@@ -194,6 +196,7 @@ export class AppConfigService {
         parentKey: 'search',
         isApp: false,
         isExperimental: true,
+        expFlag: 'demo',
       });
   }
 }

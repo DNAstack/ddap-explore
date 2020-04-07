@@ -1,15 +1,16 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ILatLong, IMapOptions, MapAPILoader, MarkerTypeId } from 'angular-maps';
+import { ILatLong, IMapOptions } from 'angular-maps';
+import { ViewControllerService } from 'ddap-common-lib';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
-import { BeaconRequest, BeaconResponse } from '../beacon-service/beacon.model';
+import { DataTableComponent } from '../../shared/data-table/data-table.component';
 import { BeaconService } from '../beacon-service/beacon.service';
-import { DiscoveryConfigService } from '../discovery-config.service';
 
+import { DiscoveryBeaconDataTableController } from './discovery-beacon-data-table-controller';
 import { GeocodeService } from './geocode/geocode.service';
 import { DiscoveryBeaconHelpDialogComponent } from './help/discovery-beacon.help.dialog';
 
@@ -19,31 +20,22 @@ import { DiscoveryBeaconHelpDialogComponent } from './help/discovery-beacon.help
   styleUrls: ['./discovery-beacon.component.scss'],
 })
 export class DiscoveryBeaconComponent implements OnInit {
+  @ViewChild(DataTableComponent, {static: false})
+  dataTable: DataTableComponent;
+
   appConfig: AppConfigModel;
+  dataTableController: DiscoveryBeaconDataTableController;
 
   searchBoxActive = false;
 
-  beaconResponses: BeaconResponse[];
+  contentContainer: any; // an actual DOM element
+
   cases: any[];
-  caseColumnDefs: any;
   selectedCase: any;
 
   infoPanelActivated: boolean;
 
-  queryForm = new FormGroup({
-    start: new FormControl('',
-      {
-        validators: [Validators.required, Validators.pattern(/^\d+$/)],
-      }),
-    referenceBases: new FormControl('',
-      {
-        validators: [Validators.required, Validators.pattern(/^[ACGT]+$/i)],
-      }),
-    alternateBases: new FormControl('',
-      {
-        validators: [Validators.required, Validators.pattern(/^[ACGT]+$/i)],
-      }),
-  });
+  queryForm: FormGroup;
 
   view: {
     isSearching: boolean,
@@ -58,13 +50,8 @@ export class DiscoveryBeaconComponent implements OnInit {
 
   map: any;
 
-  grid: any;
-
-  private gridApi;
-  private gridColumnApi;
-
   /** Bing map */
-  private _options: IMapOptions = {
+  mapOptions: IMapOptions = {
     disableBirdseye: true,
     disableStreetside: true,
     showCopyright: false,
@@ -81,37 +68,42 @@ export class DiscoveryBeaconComponent implements OnInit {
   constructor(private router: Router,
               private appConfigService: AppConfigService,
               private beaconService: BeaconService,
+              private viewController: ViewControllerService,
               private route: ActivatedRoute,
               private geocodeService: GeocodeService,
               private changeDetector: ChangeDetectorRef,
               public helpDialog: MatDialog
   ) {
-    this.cases = [];
+    this.dataTableController = new DiscoveryBeaconDataTableController(
+      this.beaconService,
+      (selectedRow) => this.onRowSelectionChanged(selectedRow),
+      () => this.canSearch(),
+      () => {
+        this.dataTableController.setInflight(true);
 
-    const isMobile = this.isMobileWidth(window.innerWidth);
+        this.setQueryParameters();
 
-    this.infoPanelActivated = false;
+        this.searchBoxActive = false;
+        this.selectedCase = null;
+        this.infoPanelActivated = false;
 
-    this.onSelectionChanged = this.onSelectionChanged.bind(this);
-    this.navigateToCell = this.navigateToCell.bind(this);
-
-    this._options.center = {latitude: 0, longitude: 0};
-
-    this.grid = {
-      animateRows: false,
-      multiSortKey: 'ctrl',
-      defaultColumnDefinition: {
-        sortable: true,
-        resizable: true,
-        filter: true,
+        this.queryForm.disable();
       },
-      makeFullWidth: false,
-      pagination: !isMobile,
-      domLayout: 'normal',
-      enableStatusBar: true,
-      suppressCellSelection: true,
-      rowSelection: 'single',
-    };
+      () => {
+        this.dataTableController.setInflight(false);
+        this.view.errorSearching = false;
+      },
+      () => {
+        this.dataTableController.setInflight(false);
+        this.view.errorSearching = true;
+      }
+    );
+
+    this.cases = [];
+    this.infoPanelActivated = false;
+    this.queryForm = this.dataTableController.queryForm;
+
+    this.setMapCenterCoordinate(0, 0);
 
     this.view = {
       isSearching: false,
@@ -121,7 +113,7 @@ export class DiscoveryBeaconComponent implements OnInit {
       isGeocoding: false,
       errorGeocoding: false,
       isLocation: true,
-      isMobile: isMobile,
+      isMobile: this.viewController.isMobile(),
     };
   }
 
@@ -149,125 +141,8 @@ export class DiscoveryBeaconComponent implements OnInit {
     );
   }
 
-  doSearch() {
-    if (!this.beaconService.isReady() || this.view.isSearching || !this.queryForm.valid) {
-      return;
-    }
-
-    this.setQueryParameters();
-
-    this.view.isSearching = true;
-    this.searchBoxActive = false;
-    this.selectedCase = null;
-    this.infoPanelActivated = false;
-
-    this.queryForm.disable();
-
-    const query = this.querySnapshot();
-
-    this.beaconService.searchBeacon(
-      'hCoV-19',
-      '1',
-      query.start,
-      query.referenceBases,
-      query.alternateBases
-    ).then(
-      data => {
-        this.queryForm.enable();
-
-        const responses = data['datasetAlleleResponses'] as BeaconResponse[];
-        const info = responses[0].info;
-
-        const cases = [];
-        const caseColumnKeys = [];
-
-        for (let i = 0; i < info.length; i++) {
-          const key = info[i].key;
-          const keyTokens = key.split('=');
-          const keyType = keyTokens[0];
-
-          const value = info[i].value;
-          const valueTokens = value.split(':');
-
-          const valueDict = {};
-
-          for (let j = 0; j < valueTokens.length; j++) {
-
-            const valueToken = valueTokens[j];
-
-            const valueTokenTokens = valueToken.split('=');
-            const valueTokenKey = valueTokenTokens[0];
-            const valueTokenValue = valueTokenTokens[1];
-
-            valueDict[valueTokenKey] = valueTokenValue;
-
-            if (!caseColumnKeys.includes(valueTokenKey)) {
-              caseColumnKeys.push(valueTokenKey);
-            }
-          }
-
-          if (keyType === 'case') {
-            cases.push(valueDict);
-          }
-        }
-
-        const caseColumnDefs = [];
-        for (let k = 0; k < caseColumnKeys.length; k++) {
-          const keyStr = caseColumnKeys[k];
-          caseColumnDefs.push(
-            {
-              field: keyStr,
-              headerName: this.titleCase(keyStr.replace(/_/g, ' ')),
-            }
-          );
-        }
-
-        this.beaconResponses = data;
-        this.cases = cases;
-        this.caseColumnDefs = caseColumnDefs;
-        this.view.isSearching = false;
-      },
-      error => {
-        this.queryForm.enable();
-
-        this.view.errorSearching = true;
-        this.view.isSearching = false;
-      }
-    );
-  }
-
-  rowDataChanged(event) {
-    if (!this.gridApi) {
-      return;
-    }
-    this.hideAndResizeColumns();
-  }
-
-  hideAndResizeColumns() {
-
-    // Resize columns
-    const hiddenFieldIds = ['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness'];
-
-    const allColumnIds = [];
-    const hiddenColumnIds = [];
-
-    this.gridColumnApi.getAllColumns().forEach(function (column) {
-      allColumnIds.push(column.colId);
-      if (hiddenFieldIds.includes(column.userProvidedColDef.field)) {
-        hiddenColumnIds.push(column.colId);
-      }
-    });
-
-    this.gridColumnApi.setColumnsVisible(hiddenColumnIds, false);
-    this.gridColumnApi.autoSizeColumns(allColumnIds);
-  }
-
-  nextStrainUrl(source) {
-    const tokens = source.split('/');
-    if (tokens.length === 1) {
-      return null;
-    }
-    return 'https://nextstrain.org/ncov?s=' + tokens[1] + '/' + tokens[2] + '/' + tokens[3];
+  canSearch() {
+    return this.beaconService.isReady() && !this.dataTableController.inflight && this.queryForm.valid;
   }
 
   setSearchBoxActive(active: boolean) {
@@ -278,97 +153,46 @@ export class DiscoveryBeaconComponent implements OnInit {
     }
   }
 
-  onGridReady(params) {
-    this.gridApi = params.api;
-    this.gridColumnApi = params.columnApi;
-
-    if (this.grid.makeFullWidth) {
-      params.api.sizeColumnsToFit();
-      window.addEventListener('resize', function () {
-        setTimeout(function () {
-          params.api.sizeColumnsToFit();
-        });
-      });
-    }
-
-    this.hideAndResizeColumns();
-  }
-
-  onSelectionChanged(event) {
-    this.selectedCase = this.gridApi.getSelectedRows()[0];
+  onRowSelectionChanged(selectedRow: Map<string, any>) {
     this.infoPanelActivated = true;
-
-    const that = this;
+    this.selectedCase = selectedRow;
 
     const locationText = this.selectedCase['Location'];
 
     if (locationText) {
-      that.view.isGeocoding = true;
-      that.view.errorGeocoding = false;
-      that.view.isLocation = true;
+      this.view.errorGeocoding = false;
+      this.view.isLocation = true;
 
       // Geocode
-      that.view.isGeocoding = true;
+      this.view.isGeocoding = true;
       this.geocodeService.geocodeAddress(locationText)
         .subscribe((location: ILatLong) => {
-            that.setCaseLocation(location.latitude, location.longitude);
+            this.setMapCenterCoordinate(location.latitude, location.longitude);
             this.view.isGeocoding = false;
-            that.changeDetector.detectChanges();
+            this.changeDetector.detectChanges();
           }
         );
 
     } else {
-      that.view.isLocation = false;
-      that.setCaseLocation(0, 0);
+      this.view.isLocation = false;
+      this.setMapCenterCoordinate(0, 0);
     }
   }
 
-  setCaseLocation(lat: number, lng: number) {
-    this._options.center = {latitude: lat, longitude: lng};
-  }
-
-  navigateToCell(params) {
-    let previousCell = params.previousCellPosition;
-    const suggestedNextCell = params.nextCellPosition;
-
-    const KEY_UP = 38;
-    const KEY_DOWN = 40;
-    const KEY_LEFT = 37;
-    const KEY_RIGHT = 39;
-
-    switch (params.key) {
-      case KEY_DOWN:
-        previousCell = params.previousCellPosition;
-        // set selected cell on current cell + 1
-        this.gridApi.forEachNode(function (node) {
-          if (previousCell.rowIndex + 1 === node.rowIndex) {
-            node.setSelected(true);
-          }
-        });
-        return suggestedNextCell;
-      case KEY_UP:
-        previousCell = params.previousCellPosition;
-        // set selected cell on current cell - 1
-        this.gridApi.forEachNode(function (node) {
-          if (previousCell.rowIndex - 1 === node.rowIndex) {
-            node.setSelected(true);
-          }
-        });
-        return suggestedNextCell;
-      case KEY_LEFT:
-      case KEY_RIGHT:
-        return suggestedNextCell;
-      default:
-        throw new Error('this will never happen');
-    }
+  setMapCenterCoordinate(lat: number, lng: number) {
+    this.mapOptions.center = {latitude: lat, longitude: lng};
   }
 
   onResize(event) {
-    this.view.isMobile = this.isMobileWidth(event.target.innerWidth);
-    this.grid.pagination = !this.view.isMobile;
+    this.contentContainer = event.target;
+    this.view.isMobile = this.viewController.isMobileWidth(this.contentContainer.innerWidth);
+
+    if (this.dataTable) {
+      this.dataTable.enablePagination(!this.view.isMobile);
+    }
   }
 
-  querySnapshot(): QuerySnapshot {
+  getQuerySnapshot(): QuerySnapshot {
     const snapshot = this.queryForm.value;
     return {
       start: parseInt(snapshot['start'], 10),
@@ -395,17 +219,6 @@ export class DiscoveryBeaconComponent implements OnInit {
     }
 
     return defaultMessage; // handle unknown cases.
-  }
-
-  private titleCase(str) {
-    const splitStr = str.toLowerCase().split(' ');
-    for (let i = 0; i < splitStr.length; i++) {
-      // You do not need to check if i is larger than splitStr length, as your for does that for you
-      // Assign it back to the array
-      splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
-    }
-    // Directly return the joined string
-    return splitStr.join(' ');
   }
 
   private initialize() {
@@ -437,12 +250,12 @@ export class DiscoveryBeaconComponent implements OnInit {
 
         this.queryForm.patchValue(q);
 
-        this.doSearch();
+        this.dataTableController.beginQuery();
       });
   }
 
   private setQueryParameters() {
-    const query = this.querySnapshot();
+    const query = this.dataTableController.getQuerySnapshot();
 
     this.router.navigate(
       [],
@@ -456,14 +269,4 @@ export class DiscoveryBeaconComponent implements OnInit {
         queryParamsHandling: 'merge', // remove to replace all query params by provided
       });
   }
-
-  private isMobileWidth(width: number) {
-    return width <= 760;
-  }
-}
-
-interface QuerySnapshot {
-  start: number;
-  referenceBases: string;
-  alternateBases: string;
 }

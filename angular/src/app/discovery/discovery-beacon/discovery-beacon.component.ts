@@ -68,7 +68,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   constructor(private router: Router,
               private appConfigService: AppConfigService,
               private beaconService: BeaconService,
-              private viewController: ViewControllerService,
+              public viewController: ViewControllerService,
               private route: ActivatedRoute,
               private geocodeService: GeocodeService,
               private changeDetector: ChangeDetectorRef,

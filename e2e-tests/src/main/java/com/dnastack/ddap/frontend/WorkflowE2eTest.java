@@ -41,9 +41,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     @Test
     public void testSingleWorkflowExecution() throws Exception {
-        ddapPage.getNavBar().goToApp("product-app-menu-analytics");
-        // FIXME Assert that the right app is present
-        WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
+        WorkflowManagePage managePage = initialNavigation();
 
         log.info("Workflow Execution Step: Dataset import");
         managePage.fetchDatasetResult(workflowTestConfig.getDatasetUrl());
@@ -52,7 +50,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
         managePage.typeInEditor(By
-                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/simple-workflow.wdl"));
+                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate(workflowTestConfig.getTestTemplateForUnsecureDataset()));
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
@@ -80,9 +78,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         Assume
                 .assumeTrue("Performing additional authorization for files in workflows has been disabled, and will not be tested", workflowTestConfig
                         .isAdditionalAuthorizationEnabled());
-        ddapPage.getNavBar().goToApp("product-app-menu-analytics");
-        // FIXME Assert that the right app is present
-        WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
+        WorkflowManagePage managePage = initialNavigation();
 
         log.info("Workflow Execution Step: Dataset import");
         managePage.fetchDatasetResult(workflowTestConfig.getDatasetUrl());
@@ -92,7 +88,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
         managePage.typeInEditor(By
-                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
+                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate(workflowTestConfig.getTestTemplateForSecureDataset()));
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
@@ -120,9 +116,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         Assume
                 .assumeTrue("Performing additional authorization for files in workflows has been disabled, and will not be tested", workflowTestConfig
                         .isAdditionalAuthorizationEnabled());
-        ddapPage.getNavBar().goToApp("product-app-menu-analytics");
-        // FIXME Assert that the right app is present
-        WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
+        WorkflowManagePage managePage = initialNavigation();
 
         log.info("Workflow Execution Step: Dataset import");
         managePage.fetchDatasetResult(workflowTestConfig.getDatasetUrl());
@@ -134,7 +128,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
         managePage.typeInEditor(By
-                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/with-tokens-workflow.wdl"));
+                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate(workflowTestConfig.getTestTemplateForSecureDataset()));
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
@@ -162,9 +156,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         Assume
                 .assumeTrue("Loading secured datasets for the current deployment has been disabled and will not be tested", workflowTestConfig
                         .isSecuredDatasetEnabled());
-        ddapPage.getNavBar().goToApp("product-app-menu-analytics");
-        // FIXME Assert that the right app is present
-        WorkflowManagePage managePage = ddapPage.getNavBar().goToRun();
+        WorkflowManagePage managePage = initialNavigation();
 
         log.info("Workflow Execution Step: Dataset import");
         // Try to fetch without access token
@@ -186,7 +178,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         managePage.clickButton(DdapBy.se("btn-next-to-wdl"));
         log.info("Workflow Execution Step: WDL");
         managePage.typeInEditor(By
-                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate("/com/dnastack/ddap/workflow/simple-workflow.wdl"));
+                .cssSelector("ngx-monaco-editor .monaco-editor textarea"), loadTemplate(workflowTestConfig.getTestTemplateForUnsecureDataset()));
         managePage.clickButton(DdapBy.se("btn-next-to-inputs"));
         managePage.waitForInflightRequests();
         log.info("Workflow Execution Step: Inputs");
@@ -209,6 +201,14 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         workflowListPage.assertNewRunsInState(asList(QUEUED, RUNNING, COMPLETE), workflowTestConfig.getMaxWaitTime());
     }
 
+    private WorkflowManagePage initialNavigation() {
+        // ddapPage.getNavBar().goToApp("product-app-menu-analytics"); // FIXME Use a flag to whether or not intentionally use the app switcher for initial navigation
+        String startingUri = URI.create(DDAP_BASE_URL).resolve("/_/analyze").toString();
+        driver.navigate().to(startingUri);
+
+        // FIXME Assert that the right app is present
+        return ddapPage.getNavBar().goToRun();
+    }
 
     @Data
     public static class WorkflowTestConfig implements ConfigModel {
@@ -226,6 +226,9 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
         private String securedDataColumn;
 
         private int maxWaitTime = 2;
+
+        private String testTemplateForSecureDataset = "/com/dnastack/ddap/workflow/with-tokens-workflow.wdl";
+        private String testTemplateForUnsecureDataset = "/com/dnastack/ddap/workflow/simple-workflow.wdl";
 
         @Override
         public void validateConfig() {

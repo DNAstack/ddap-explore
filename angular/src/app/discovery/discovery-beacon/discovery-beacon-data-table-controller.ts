@@ -80,42 +80,26 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
         this.queryForm.enable();
 
         const responses = data['datasetAlleleResponses'] as BeaconResponse[];
-        const info = responses[0].info;
 
-        const resultList = [];
-        const columnKeyList = [];
-
-        for (let i = 0; i < info.length; i++) {
-          const key = info[i].key;
-          const keyTokens = key.split('=');
-          const keyType = keyTokens[0];
-
-          const value = info[i].value;
-          const valueTokens = value.split(':');
-
-          const valueDict = {};
-
-          for (let j = 0; j < valueTokens.length; j++) {
-
-            const valueToken = valueTokens[j];
-
-            const valueTokenTokens = valueToken.split('=');
-            const valueTokenKey = valueTokenTokens[0];
-            const valueTokenValue = valueTokenTokens[1];
-
-            valueDict[valueTokenKey] = valueTokenValue;
-
-            if (!columnKeyList.includes(valueTokenKey)) {
-              columnKeyList.push(valueTokenKey);
-            }
-          }
-
-          if (keyType === 'case') {
-            resultList.push(valueDict);
-          }
+        if (responses.length === 0) {
+          // No results
+          this.setResultList([]);
+          this.setColumnDefinitionList([]);
+          return;
         }
 
-        const columnDefinitionList: ColumnDefinition[] = columnKeyList.map(keyStr => {
+        const info = responses[0].info;
+
+        if (info.length === 0) {
+          // No results
+          this.setResultList([]);
+          this.setColumnDefinitionList([]);
+          return;
+        }
+
+        const { resultList, columnList } = (info['data'] === undefined) ? this.parseLegacyResponse(info) : this.parseTableResponse(info);
+
+        const columnDefinitionList: ColumnDefinition[] = columnList.map(keyStr => {
           return {
             field: keyStr,
             headerName: this.titleCase(keyStr.replace(/_/g, ' ')),
@@ -146,6 +130,87 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
       return null;
     }
     return 'https://nextstrain.org/ncov?s=' + tokens[1] + '/' + tokens[2] + '/' + tokens[3];
+  }
+
+  private parseTableResponse(info) {
+    const resultList: object[] = info['data'];
+    const columnList: string[] = [];
+
+    const propertyTypeMap: Map<string, string> = new Map<string, string>();
+    let propertyMap: object = {};
+
+    if (info && info['data_model'] && info['data_model']['properties']) {
+      propertyMap = info['data_model']['properties'];
+    }
+
+    for (const name in propertyMap) {
+      propertyTypeMap.set(name, propertyMap[name]['type']);
+      columnList.push(name);
+    }
+
+    resultList.forEach(result => {
+      propertyTypeMap.forEach((name, type) => {
+        if (result[name] === undefined) {
+          result[name] = null; // Fill in a missing property.
+        } else if (type === 'integer') {
+          result[name] = parseInt(result[name], 10);
+        }
+      });
+
+      Object.keys(result).forEach(name => {
+        if (!columnList.includes(name)) {
+          columnList.push(name);
+        }
+      });
+    });
+
+
+
+    return {
+      resultList,
+      columnList,
+    };
+  }
+
+  // FIXME This will soon be deprecated.
+  private parseLegacyResponse(info) {
+    const resultList = [];
+    const columnList: string[] = [];
+
+    for (let i = 0; i < info.length; i++) {
+      const key = info[i].key;
+      const keyTokens = key.split('=');
+      const keyType = keyTokens[0];
+
+      const value = info[i].value;
+      const valueTokens = value.split(':');
+
+      const valueDict = {};
+
+      for (let j = 0; j < valueTokens.length; j++) {
+
+        const valueToken = valueTokens[j];
+
+        const valueTokenTokens = valueToken.split('=');
+        const valueTokenKey = valueTokenTokens[0];
+        const valueTokenValue = valueTokenTokens[1];
+
+        valueDict[valueTokenKey] = valueTokenValue;
+
+        if (!columnList.includes(valueTokenKey)) {
+          columnList.push(valueTokenKey);
+        }
+      }
+
+      if (keyType === 'case') {
+        resultList.push(valueDict);
+      }
+    }
+
+    return {
+      resultList,
+      columnList,
+    };
   }
 
   private titleCase(str) {

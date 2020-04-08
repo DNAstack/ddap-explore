@@ -15,7 +15,7 @@ public class Covid19BeaconPage extends AnyDdapPage {
     }
 
     public void getMoreDetailsOn(String sourceName) {
-        String xpath = String.format("//span[@role='gridcell'][@aria-colindex='1'][contains(text(), '%s')]", sourceName);
+        String xpath = String.format("//span[@role='gridcell'][@aria-colindex='1' or @aria-colindex='2'][contains(text(), '%s')]", sourceName);
         By selector = By.xpath(xpath);
         new WebDriverWait(driver, 60).until(ExpectedConditions.visibilityOfElementLocated(selector));
         driver.findElement(selector).click();

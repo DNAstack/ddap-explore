@@ -13,13 +13,13 @@ export class BeaconResponse {
 }
 
 export interface BeaconAPIResponse {
-  beaconId: string;
-  alleleRequest: {
-    referenceName: string,
-    referenceBases: string,
-    alternateBases: string,
-    assemblyId: string,
-    start: number,
-  };
+  // beaconId: string;
+  // alleleRequest: {
+  //   referenceName: string,
+  //   referenceBases: string,
+  //   alternateBases: string,
+  //   assemblyId: string,
+  //   start: number,
+  // };
   datasetAlleleResponses: BeaconResponse[];
 }

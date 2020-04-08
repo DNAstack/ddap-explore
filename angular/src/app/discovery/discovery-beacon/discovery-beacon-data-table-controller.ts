@@ -79,7 +79,7 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
       data => {
         this.queryForm.enable();
 
-        const responses = data['datasetAlleleResponses'] as BeaconResponse[];
+        const responses: BeaconResponse[] = data['datasetAlleleResponses'];
 
         if (responses.length === 0) {
           // No results

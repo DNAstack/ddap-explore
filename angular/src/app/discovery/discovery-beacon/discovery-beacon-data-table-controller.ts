@@ -97,7 +97,7 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
           return;
         }
 
-        const { resultList, columnList } = (info['data'] === undefined) ? this.parseLegacyResponse(info) : this.parseTableResponse(info);
+        const {resultList, columnList} = (info['data'] === undefined) ? this.parseLegacyResponse(info) : this.parseTableResponse(info);
 
         const columnDefinitionList: ColumnDefinition[] = columnList.map(keyStr => {
           return {
@@ -149,7 +149,12 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
     }
 
     resultList.forEach(result => {
-      propertyTypeMap.forEach((name, type) => {
+      // Please note that Map.prototype.forEach gives value, and then key to the callback function. For example,
+      //
+      //  map.forEach((value, key) => { ... });
+      //
+      // See more https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/forEach
+      propertyTypeMap.forEach((type, name) => {
         if (result[name] === undefined) {
           result[name] = null; // Fill in a missing property.
         } else if (type === 'integer') {
@@ -157,13 +162,14 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
         }
       });
 
-      Object.keys(result).forEach(name => {
-        if (!columnList.includes(name)) {
-          columnList.push(name);
-        }
-      });
+      if (propertyTypeMap.size === 0) {
+        Object.keys(result).forEach(name => {
+          if (!columnList.includes(name)) {
+            columnList.push(name);
+          }
+        });
+      }
     });
-
 
 
     return {

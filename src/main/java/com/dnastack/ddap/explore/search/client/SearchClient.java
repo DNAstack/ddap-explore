@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -22,14 +23,24 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @Component
 public class SearchClient {
 
+    public Mono<SearchTablesResponseModel> getTables(URI resourceUri) {
+        return handleResponse(WebClientFactory.getWebClient()
+                .get()
+                .uri(resourceUri)
+                .retrieve());
+    }
+
     public Mono<SearchTablesResponseModel> getTables(URI resourceUri, String accessToken, String connectorKey, String connectorToken) {
-        return WebClientFactory.getWebClient()
+        return handleResponse(WebClientFactory.getWebClient()
                 .get()
                 .uri(resourceUri)
                 .header(AUTHORIZATION, "Bearer " + accessToken)
                 .header("GA4GH-Search-Authorization", connectorKey + "="+ connectorToken)
-                .retrieve()
-                .bodyToMono(SearchTablesResponseModel.class)
+                .retrieve());
+    }
+
+    private Mono<SearchTablesResponseModel> handleResponse(WebClient.ResponseSpec responseSpec) {
+        return responseSpec.bodyToMono(SearchTablesResponseModel.class)
                 .onErrorMap(ex -> {
                     try {
                         throw ex;

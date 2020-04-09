@@ -20,6 +20,7 @@ public class SearchResourceResponseModel {
     private String viewName;
     private Optional<String> roleName;
     private Optional<String> interfaceName;
+    private Optional<String> interfaceUri; // This is only defined if the interface is publicly accessible.
     private Optional<Boolean> isSearchView;
     private Map<String, String> ui;
 

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import 'brace';
 import 'brace/mode/sql';
 import 'brace/theme/eclipse';
+import { Observable } from 'rxjs';
 import Table = WebAssembly.Table;
 import { filter, flatMap, map, shareReplay } from 'rxjs/operators';
 
@@ -55,22 +56,22 @@ export class SearchTablesComponent implements OnInit {
   private properties: string[];
 
 
-  constructor( private searchService: SearchService,
-               private route: ActivatedRoute,
-               private jsonViewerService: JsonViewerService,
-               private router: Router,
-               private resourceService: ResourceService) {
+  constructor(private searchService: SearchService,
+              private route: ActivatedRoute,
+              private jsonViewerService: JsonViewerService,
+              private router: Router,
+              private resourceService: ResourceService) {
 
-    this.search = { text : '' };
+    this.search = {text: ''};
 
     this.view = {
-      errorLoadingTables : true,
-      errorQueryingTables : true,
-      showQueryEditor : true,
-      showTables : true,
-      wrapSearchResults : false,
-      isSearching : false,
-      isRefreshingTables : false,
+      errorLoadingTables: true,
+      errorQueryingTables: true,
+      showQueryEditor: true,
+      showTables: true,
+      wrapSearchResults: false,
+      isSearching: false,
+      isRefreshingTables: false,
     };
 
     this.queryHistory = [];
@@ -103,7 +104,6 @@ export class SearchTablesComponent implements OnInit {
   }
 
 
-
   propertyOrder = (a: KeyValue<string, any>, b: KeyValue<string, any>): number => {
     const positionKey = 'x-ga4gh-position';
     const aPos = a[positionKey];
@@ -133,8 +133,16 @@ export class SearchTablesComponent implements OnInit {
 
     this.view.isSearching = true;
     this.view.errorQueryingTables = false;
-    this.searchService.search(this.currentView.resourcePath,
-      { 'query' : query }, this.accessToken, this.connectorDetails).subscribe(result => {
+
+    let observableResults: Observable<any>;
+
+    if (this.isUsingPublicView()) {
+      observableResults = this.searchService.makeDirectSearch(this.currentView.interfaceUri, {query: query});
+    } else {
+      observableResults = this.searchService.search(this.currentView.resourcePath, {query: query}, this.accessToken, this.connectorDetails);
+    }
+
+    observableResults.subscribe(result => {
       this.query = query;
       this.result = result;
       this.searchService.updateTableData(result);
@@ -152,15 +160,21 @@ export class SearchTablesComponent implements OnInit {
 
   authorizeResource(views: SearchResourceModel[]) {
     const resourcesPath = [];
+
     views.map(view => {
       if (view.viewName === this.viewName) {
         this.currentView = view;
       }
-      resourcesPath.push(
-        `${view.damId};${view.resourceName}/views/` +
-        `${view.viewName}/roles/${view.roleName}/interfaces/${view.interfaceName}`
-      );
+      resourcesPath.push(this.searchService.buildResourcePath(view.damId, view));
     });
+
+    if (this.currentView.interfaceUri) {
+      // It is publicly accessible.
+      this.tableApiRequests = 0;
+      this.getTables();
+      return;
+    }
+
     this.resourceService.getAccessTokensForAuthorizedResources(resourcesPath).subscribe(data => {
       this.resourceAccessMap = this.resourceService.toResourceAccessMap(data);
       this.interfaceAccessTokensMap = this.interfaceAccessMap(data);
@@ -176,7 +190,7 @@ export class SearchTablesComponent implements OnInit {
   }
 
   // FIXME: Done for demo, remove this
-  interfaceAccessMap(resourceTokens: IResourceResults): {[key: string]: IResourceAccess} {
+  interfaceAccessMap(resourceTokens: IResourceResults): { [key: string]: IResourceAccess } {
     const accessMap = {};
     Object.entries(resourceTokens.resources)
       .forEach(([resource, value]) => {
@@ -196,11 +210,15 @@ export class SearchTablesComponent implements OnInit {
       this.connectorDetails['token'] = this.interfaceAccessTokensMap[additionalAuthDetails['resource-description']['interface-uri']]
         .credentials.access_token;
     }
-    this.searchService.getTables(
-      this.currentView.resourcePath,
-      this.accessToken,
-      this.connectorDetails
-    ).subscribe(
+    let observableTables: Observable<any>;
+
+    if (this.isUsingPublicView()) {
+      observableTables = this.searchService.getPublicTables(this.currentView.interfaceUri);
+    } else {
+      observableTables = this.searchService.getTables(this.currentView.resourcePath, this.accessToken, this.connectorDetails);
+    }
+
+    observableTables.subscribe(
       ({tables}) => {
         this.searchTables = tables;
       },
@@ -214,5 +232,9 @@ export class SearchTablesComponent implements OnInit {
         }
       }
     );
+  }
+
+  isUsingPublicView() {
+    return this.accessToken === undefined || this.accessToken === null;
   }
 }

@@ -15,6 +15,7 @@ export interface AppConfigModel {
   featureBeaconsEnabled: boolean;
   featureDiscoveryEnabled: boolean;
   featureWorkflowsEnabled: boolean;
+  featureSearchEnabled: boolean;
   trsBaseUrl: string;
   trsAcceptedToolClasses: string[];
   trsAcceptedVersionDescriptorTypes: string[];

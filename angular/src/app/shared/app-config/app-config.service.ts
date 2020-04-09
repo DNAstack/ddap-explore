@@ -92,6 +92,7 @@ export class AppConfigService {
       featureBeaconsEnabled: true,
       featureDiscoveryEnabled: true,
       featureWorkflowsEnabled: true,
+      featureSearchEnabled: true,
       trsBaseUrl: null,
       trsAcceptedToolClasses: [],
       trsAcceptedVersionDescriptorTypes: [],

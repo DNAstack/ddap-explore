@@ -44,6 +44,7 @@ ic:
   ui-url: http://localhost:8086/
 
 dam-facade:
+  label: "DAM Facade"
   base-url: ${ddap.public-uri}
   oauth2:
     issuer: https://sample-oauth-server/common
@@ -53,6 +54,34 @@ dam-facade:
     client-id: foo
     client-secret: bar
     default-scope: openid profile email
+  resources:
+    wes:
+      id: 0000-0000-0000-0000-0000
+      name: "WES"
+      description: "Workflow Execution Service"
+      views:
+        wes-solo:
+          name: "WES-SOLO"
+          description: "Standalone Mode"
+          url: "https://wes.experimental.dnastack.com"  # This is a fake location.
+          service-template: "wes"
+          interface-name: "http:wes"
+          permissions: ["list", "metadata", "read", "write"]
+          controlled-access: true
+    search:
+      id: 0000-0000-0000-0000-0000
+      name: "search"
+      description: "Search Services"
+      views:
+        public:
+          name: "public"
+          description: "Public Search Service"
+          url: "https://ga4gh-search-adapter-presto-public.staging.dnastack.com"  # This is a fake location.
+          service-template: "search"
+          interface-name: "http:search"
+          permissions: ["list", "metadata", "read", "write"]
+          controlled-access: false
+  # FIXME replace the rest with "resources"
   resource-name: WES
   resource-description: Workflow Execution Service
   view-name: WES-SOLO

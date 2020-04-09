@@ -31,19 +31,28 @@ public class SearchResourceService {
     public Mono<List<SearchResourceResponseModel>> getSearchResources(String realm) {
         return getAllFlattenedViews(realm)
                 .filter(this::isSearchView)
-                .map((view) -> SearchResourceResponseModel.builder()
-                                                          .damId(view.getDamId())
-                                                          .resourcePath(view.getResourcePath())
-                                                          .viewName(view.getFlatView().getViewName())
-                                                          .resourceName(view.getFlatView().getResourceName())
-                                                          .roleName(Optional.of(view.getFlatView().getRoleName()))
-                                                          .interfaceName(Optional.of(view.getFlatView().getInterfaceName()))
-                                                          .ui(Map.of(
-                                                                  "label", view.getFlatView().getViewUiMap().get("label"),
-                                                                  "description", view.getFlatView().getViewUiMap().get("description")
-                                                          ))
-                                                          .build())
+                .map((view) -> {
+                    var flatView = view.getFlatView();
+                    return SearchResourceResponseModel.builder()
+                            .damId(view.getDamId())
+                            .resourcePath(view.getResourcePath())
+                            .viewName(flatView.getViewName())
+                            .resourceName(flatView.getResourceName())
+                            .roleName(Optional.of(flatView.getRoleName()))
+                            .interfaceName(Optional.of(flatView.getInterfaceName()))
+                            .interfaceUri(Optional.of(flatView.getInterfaceUri()))
+                            .ui(Map.of(
+                                    "label", flatView.getViewUiMap().get("label"),
+                                    "description", flatView.getViewUiMap().get("description"),
+                                    "accessControlType", getAccessControlType(flatView)
+                            ))
+                            .build();
+                })
                 .collect(toList());
+    }
+
+    private String getAccessControlType(FlatView flatView) {
+        return flatView.getLabelsMap().containsKey("accessControlType") ? flatView.getLabelsMap().get("accessControlType") : "protected";
     }
 
     private Flux<FlatViewMetadata> getAllFlattenedViews(String realm) {
@@ -76,17 +85,20 @@ public class SearchResourceService {
         return getAllFlattenedViews(realm)
                 .filter((view) -> view.getFlatView().getResourceName().equals(resourceName))
                 .map(view -> {
+                    var flatView = view.getFlatView();
                     return SearchResourceResponseModel.builder()
                                                       .damId(view.getDamId())
-                                                      .resourceName(view.getFlatView().getResourceName())
-                                                      .viewName(view.getFlatView().getViewName())
-                                                      .roleName(Optional.of(view.getFlatView().getRoleName()))
-                                                      .interfaceName(Optional.of(view.getFlatView().getInterfaceName()))
-                                                      .resourcePath(view.getFlatView().getResourcePath())
+                                                      .resourceName(flatView.getResourceName())
+                                                      .viewName(flatView.getViewName())
+                                                      .roleName(Optional.of(flatView.getRoleName()))
+                                                      .interfaceName(Optional.of(flatView.getInterfaceName()))
+                                                      .interfaceUri(Optional.of(flatView.getInterfaceUri()))
+                                                      .resourcePath(flatView.getResourcePath())
                                                       .isSearchView(Optional.of(isSearchView(view)))
                                                       .ui(Map.of(
-                                                              "label", view.getFlatView().getViewUiMap().get("label"),
-                                                              "description", view.getFlatView().getViewUiMap().get("description")
+                                                              "label", flatView.getViewUiMap().get("label"),
+                                                              "description", flatView.getViewUiMap().get("description"),
+                                                              "accessControlType", getAccessControlType(flatView)
                                                       ))
                                                       .build();
                 })

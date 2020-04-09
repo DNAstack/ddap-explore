@@ -7,9 +7,7 @@ import com.dnastack.ddap.explore.search.service.SearchResourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import dam.v1.DamService.GetFlatViewsResponse.FlatView;
 
 
 import java.net.URI;
@@ -22,7 +20,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1alpha/realm/{realm}/search")
 public class SearchController {
-
     private SearchClient searchClient;
     private SearchResourceService searchResourceService;
 
@@ -47,29 +44,33 @@ public class SearchController {
     @GetMapping("/tables")
     public Mono<SearchTablesResponseModel> getTables(@PathVariable String realm,
                                                      @RequestParam("resource") String resourcePath,
-                                                     @RequestParam("connectorKey") String connectorKey,
-                                                     @RequestParam("connectorToken") String connectorToken,
-                                                     @RequestParam("accessToken") String accessToken) {
+                                                     @RequestParam(value = "connectorKey", required = false) String connectorKey,
+                                                     @RequestParam(value = "connectorToken", required = false) String connectorToken,
+                                                     @RequestParam(value = "accessToken", required = false) String accessToken) {
         String urlDecodedResourcePath = URLDecoder.decode(resourcePath, Charset.defaultCharset());
         Mono<URI> interfaceUriMono = searchResourceService.lookupFirstInterfaceUrlByResourcePath(realm, urlDecodedResourcePath);
 
         return interfaceUriMono
-            .flatMap((rootUri) -> searchClient.getTables(URI.create(rootUri + "/tables"), accessToken, connectorKey, connectorToken));
+            .flatMap((rootUri) -> {
+                URI destinationUri = URI.create(rootUri + "/tables");
+                if (accessToken == null || connectorKey == null || connectorToken == null) {
+                    return searchClient.getTables(destinationUri);
+                }
+                return searchClient.getTables(destinationUri, accessToken, connectorKey, connectorToken);
+            });
     }
 
     @PostMapping("/query")
     public Mono<Object> query(@PathVariable String realm,
                               @RequestParam("resource") String resourcePath,
-                              @RequestParam("connectorKey") String connectorKey,
-                              @RequestParam("connectorToken") String connectorToken,
-                              @RequestParam("accessToken") String accessToken,
+                              @RequestParam(value = "connectorKey", required = false) String connectorKey,
+                              @RequestParam(value = "connectorToken", required = false) String connectorToken,
+                              @RequestParam(value = "accessToken", required = false) String accessToken,
                               @RequestBody Map<String, String> queryData) {
         String urlDecodedResourcePath = URLDecoder.decode(resourcePath, Charset.defaultCharset());
         Mono<URI> interfaceUriMono = searchResourceService.lookupFirstInterfaceUrlByResourcePath(realm, urlDecodedResourcePath);
 
         return interfaceUriMono
-            .flatMap((rootUri) -> searchClient.query(
-                    URI.create(rootUri + "/search"),
-                    queryData, accessToken, connectorKey, connectorToken));
+            .flatMap((rootUri) -> searchClient.query(URI.create(rootUri + "/search"), queryData, accessToken, connectorKey, connectorToken));
     }
 }

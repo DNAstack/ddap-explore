@@ -45,6 +45,10 @@ export class SearchService {
         }});
   }
 
+  getPublicTables(resource: string): Observable<any> {
+    return this.http.get<any>(resource + '/tables');
+  }
+
   search(resource: string, query, accessToken, connectorDetails: object = {}): Observable<any> {
     return this.http.post<any>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/query`, query,
       { params: {
@@ -58,11 +62,22 @@ export class SearchService {
       );
   }
 
+  makeDirectSearch(resource: string, query): Observable<any> {
+    return this.http.post<any>(resource + '/search', query)
+      .pipe(
+        this.errorHandler.notifyOnError()
+      );
+  }
+
   updateTableData(tableData) {
     this.tableData.next(tableData);
   }
 
-  authorizeResource(resirectUri: string, resourceName: string) {
+  buildResourcePath(damId: string, view: {resourceName: string, viewName: string, roleName?: string, interfaceName?: string}) {
+    return `${damId};${view.resourceName}/views/${view.viewName}/roles/${view.roleName}/interfaces/${view.interfaceName}`;
+  }
+
+  authorizeResource(redirectUri: string, resourceName: string) {
     return;
   }
 }

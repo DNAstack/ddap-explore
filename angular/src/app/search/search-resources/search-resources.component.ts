@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map, shareReplay } from 'rxjs/operators';
 
+import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { DamInfoService } from '../../shared/dam/dam-info.service';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
 import { ResourceService } from '../../shared/resource/resource.service';
@@ -16,10 +18,11 @@ import { SearchResourceModel } from './search-resource.model';
   providers: [ImagePlaceholderRetriever],
 })
 export class SearchResourcesComponent implements OnInit {
-
+  appConfig: AppConfigModel;
   resources: SearchResourceModel[];
 
   constructor(private searchService: SearchService,
+              private appConfigService: AppConfigService,
               private randomImageRetriever: ImagePlaceholderRetriever,
               private router: Router,
               private resourceService: ResourceService,
@@ -28,32 +31,50 @@ export class SearchResourcesComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.appConfigService.get().subscribe((data: AppConfigModel) => {
+      this.appConfig = data;
+
+      if (this.appConfig.featureSearchEnabled) {
+        this.initialize();
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
+  }
+
+  initialize() {
     this.searchService.getSearchResources()
       .subscribe((resources) => {
         this.resources = resources;
         this.resources.map(resource => {
-          this.getUrlForAccessToken(resource).subscribe(url => {
-            resource['accessUrl'] = url;
-          });
+          if (resource['ui']['accessControlType'] === 'none' && resource['interfaceUri']) {
+            resource['accessUrl'] = this.getViewUri(resource);
+          } else {
+            this.getUrlForAccessToken(resource).subscribe(url => {
+              resource['accessUrl'] = url;
+            });
+          }
         });
       });
   }
 
   getUrlForAccessToken(resource: SearchResourceModel) {
     const realmId = this.route.root.firstChild.snapshot.params.realmId;
-    const redirectUri = `/${realmId}/search/${resource.damId}/resource/${resource.resourceName}/views/${resource.viewName}?checkout=true`;
+    const redirectUri = this.getViewUri(resource);
     const resourcesPath = [];
     return this.searchService.getResourceDetail(resource.resourceName)
       .pipe(
         map(views => {
           views.map(view => {
-            resourcesPath.push(
-              `${resource.damId};${view.resourceName}/views/` +
-              `${view.viewName}/roles/${view.roleName}/interfaces/${view.interfaceName}`
-            );
+            resourcesPath.push(this.searchService.buildResourcePath(resource.damId, view));
           });
           return this.resourceService.getUrlForObtainingAccessToken(resourcesPath, redirectUri);
         })
       );
+  }
+
+  getViewUri(resource: SearchResourceModel): string {
+    const realmId = this.route.root.firstChild.snapshot.params.realmId;
+    return `/${realmId}/search/${resource.damId}/resource/${resource.resourceName}/views/${resource.viewName}?checkout=true`;
   }
 }

@@ -68,14 +68,21 @@
     <mat-sidenav
       position="start"
       mode="side"
-      [opened]="viewController.getCurrentApp().isSidebarEnabled"
+      [opened]="viewController.getCurrentApp() && viewController.getCurrentApp().isSidebarEnabled"
     >
       <app-sidenav-left></app-sidenav-left>
     </mat-sidenav>
     <mat-sidenav-content>
-      <!-- Middle Content -->
-      <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
-      <router-outlet></router-outlet>
+      <ng-container *ngIf="viewController.getCurrentApp(); else inaccessibleApp">
+        <!-- Middle Content -->
+        <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
+        <router-outlet></router-outlet>
+      </ng-container>
+      <ng-template #inaccessibleApp>
+        <ddap-access-denied-screen class="disabled-feature" message="This feature is currently unavailable" align="center">
+          <p>Thank you for your interest in this feature but it is currently unavailable. Stay tuned.</p>
+        </ddap-access-denied-screen>
+      </ng-template>
     </mat-sidenav-content>
   </mat-sidenav-container>
 

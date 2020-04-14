@@ -1,4 +1,4 @@
-<div class="access-denied">
+<div class="access-denied" *ngIf="!message; else customMessage">
   <div class="icon-side">
     <mat-icon>warning</mat-icon>
   </div>
@@ -19,3 +19,10 @@
     </ng-template>
   </div>
 </div>
+
+<ng-template #customMessage>
+  <div class="custom-message" [style]="{alignItems: align || 'flex-start'}">
+    <h1>{{ message }}</h1>
+    <ng-content></ng-content>
+  </div>
+</ng-template>

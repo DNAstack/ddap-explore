@@ -8,4 +8,10 @@ import { Component, Input } from '@angular/core';
 export class AccessDeniedScreenComponent {
   @Input()
   authorizationUrl: string;
+
+  @Input()
+  message: string;
+
+  @Input()
+  align = '';
 }

@@ -27,9 +27,11 @@ export class SearchEditorComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.editor.setTheme('eclipse');
     this.editor.setMode('sql');
-    this.editor.getEditor().setOptions({
-      enableBasicAutocompletion: true,
-    });
+
+    // DISABLED as the extension is not enabled.
+    // this.editor.getEditor().setOptions({
+    //   enableBasicAutocompletion: true,
+    // });
 
     this.editor.getEditor().commands.addCommand({
       name: 'showOtherCompletions',

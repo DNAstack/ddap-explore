@@ -27,6 +27,13 @@ import { BeaconQuery, BeaconRegistry, SearchView } from './search-tables.model';
 export class SearchTablesComponent implements OnInit {
   @ViewChild(SearchEditorComponent, {static: false}) searchEditor: SearchEditorComponent;
   searchTables: object[] = [];
+
+  fixedFlags = {
+    workflowIntegrationEnabled: false,
+    viewResultsAsJSON: false,  // This is set to false until we have an official approval to use the data for search.
+  };
+
+
   registry: BeaconRegistry;
 
   view: SearchView;

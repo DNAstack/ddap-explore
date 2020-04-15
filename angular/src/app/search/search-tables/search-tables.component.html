@@ -136,7 +136,8 @@
                               mat-menu-item>{{q}}</button>
                     </mat-menu>
                     <button tabindex="-1" mat-icon-button (click)="viewResultsJSON()"
-                            matTooltip="View Results as JSON" style="display:inline">
+                            matTooltip="View Results as JSON"
+                            *ngIf="fixedFlags.viewResultsAsJSON">
                       <mat-icon>launch</mat-icon>
                     </button>
                   </div>
@@ -148,7 +149,7 @@
                     <div class="m-b-sm"
                          style="display:flex; flex-direction: row; align-items: center;">
                       <pre><code>{{query}}</code></pre>
-                      <button *ngIf="result"
+                      <button *ngIf="result && fixedFlags.workflowIntegrationEnabled"
                               mat-stroked-button
                               color="accent"
                               matTooltip="Run query"

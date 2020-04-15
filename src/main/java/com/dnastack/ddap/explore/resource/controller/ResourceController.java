@@ -1,6 +1,9 @@
 package com.dnastack.ddap.explore.resource.controller;
 
+import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
+
 import com.dnastack.ddap.common.client.ReactiveDamClient;
+import com.dnastack.ddap.common.util.http.UriUtil;
 import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.PaginatedResponse;
@@ -29,11 +32,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -174,8 +180,75 @@ public class ResourceController {
         if (damClient == null) {
             throw new IllegalArgumentException("No configured dam with id: " + id.getSpiKey());
         }
-        return damClient.getResource(realm,id.getCollectionId())
-            .map(resource -> resourceToCollection(id,resource));
+        return damClient.getResource(realm, id.getCollectionId())
+            .map(resource -> resourceToCollection(id, resource));
+    }
+
+    @GetMapping("/{realm}/resources/checkout")
+    public ResponseEntity<?> checkout(ServerHttpRequest request,
+        @PathVariable String realm,
+        @RequestParam("resource") List<String> authorizationIds) {
+
+        final String damResourceTemplate = "%s;%s/views/%s/roles/%s/interfaces/%s";
+        List<DamId> damAuthorizationIds = authorizationIds.stream()
+            .map(authorizationId -> new DamId(decodeId(authorizationId)))
+            .collect(Collectors.toList());
+        URI v1AlphaCheckoutUri = UriUtil.selfLinkToApi(request, realm, "resources/checkout");
+        UriComponentsBuilder v1AlphaCheckoutUriBuilder = UriComponentsBuilder.fromUri(v1AlphaCheckoutUri);
+        damAuthorizationIds.stream().forEach(id -> {
+            String damIdResourcePair = String
+                .format(damResourceTemplate, id.getSpiKey(), id.getCollectionId(), id.getViewName(), id
+                    .getRoleName(), id.getInterfaceType());
+            v1AlphaCheckoutUriBuilder.queryParam("resource", damIdResourcePair);
+        });
+
+        return ResponseEntity.status(TEMPORARY_REDIRECT)
+            .location(v1AlphaCheckoutUriBuilder.build().toUri())
+            .build();
+    }
+
+
+    @GetMapping("/{realm}/resources/authorize")
+    public ResponseEntity<?> authorizeResources(ServerHttpRequest request,
+        @PathVariable String realm,
+        @RequestParam(required = false, name = "login_hint") String loginHint,
+        @RequestParam(required = false, name = "redirect_uri") URI redirectUri,
+        @RequestParam(required = false) String scope,
+        @RequestParam("resource") List<String> authorizationIds,
+        @RequestParam(defaultValue = "1h") String ttl) {
+
+        final String damResourceTemplate = "%s;%s/views/%s/roles/%s/interfaces/%s";
+        List<DamId> damAuthorizationIds = authorizationIds.stream()
+            .map(authorizationId -> new DamId(decodeId(authorizationId)))
+            .collect(Collectors.toList());
+        URI v1AlphaAuthorizeUri = UriUtil.selfLinkToApi(request, realm, "resources/authorize");
+        UriComponentsBuilder v1AlphaAuthorizeUriBuilder = UriComponentsBuilder.fromUri(v1AlphaAuthorizeUri);
+        if (loginHint != null && !loginHint.isEmpty()) {
+            v1AlphaAuthorizeUriBuilder.queryParam("loginHint", loginHint);
+        }
+
+        if (redirectUri != null) {
+            v1AlphaAuthorizeUriBuilder.queryParam("redirectUri", redirectUri.toString());
+        }
+
+        if (scope != null) {
+            v1AlphaAuthorizeUriBuilder.queryParam("scope", scope);
+        }
+
+        if (ttl != null) {
+            v1AlphaAuthorizeUriBuilder.queryParam("ttl", ttl);
+        }
+
+        damAuthorizationIds.stream().forEach(id -> {
+            String damIdResourcePair = String
+                .format(damResourceTemplate, id.getSpiKey(), id.getCollectionId(), id.getViewName(), id
+                    .getRoleName(), id.getInterfaceType());
+            v1AlphaAuthorizeUriBuilder.queryParam("resource", damIdResourcePair);
+        });
+
+        return ResponseEntity.status(TEMPORARY_REDIRECT)
+            .location(v1AlphaAuthorizeUriBuilder.build().toUri())
+            .build();
     }
 
 

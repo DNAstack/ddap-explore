@@ -53,6 +53,7 @@ public class ResourceController {
     @Autowired
     private ObjectMapper mapper;
 
+
     @GetMapping(value = "/{realm}/resources", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<PaginatedResponse<Resource>> listResources(@PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) String collection, @RequestParam(value = "interface_type", required = false) String interfaceType, @RequestParam(value = "interface_uri", required = false) String interfaceUri, @RequestParam(value = "page_token", required = false) String pageToken) {
         Id collectionId = collection != null ? decodeId(collection) : null;
@@ -75,7 +76,7 @@ public class ResourceController {
                     }).collect(Collectors.toList());
                 })
                 .map((views) -> {
-                    LinkedHashMap<DamId, Resource> resources = new LinkedHashMap<>();
+                    LinkedHashMap<String, Resource> resources = new LinkedHashMap<>();
                     views.forEach((view) -> {
                         Id viewColId = new Id();
                         viewColId.setSpiKey(entry.getKey());
@@ -83,9 +84,11 @@ public class ResourceController {
                         DamId id = new DamId(viewColId);
                         id.setViewName(view.getViewName());
                         id.setRoleName(view.getRoleName());
+                        String stringifiedId = encodeId(id);
+                        String stringifiedColId = encodeId(viewColId);
 
                         Resource resource = resources
-                            .computeIfAbsent(id, (idKey) -> viewToResource(viewColId, idKey, view));
+                            .computeIfAbsent(stringifiedId, (idKey) -> viewToResource(stringifiedColId, stringifiedId, view));
                         DamId authorizationId = new DamId(id);
                         authorizationId.setInterfaceType(view.getInterfaceName());
                         AccessInterface accessInterface = new AccessInterface();
@@ -132,7 +135,8 @@ public class ResourceController {
                     Id collectionId = new Id();
                     collectionId.setSpiKey(damId.getSpiKey());
                     collectionId.setCollectionId(damId.getCollectionId());
-                    resource = viewToResource(collectionId, damId, entry.getValue());
+                    String stringifiedCollectionId = encodeId(collectionId);
+                    resource = viewToResource(stringifiedCollectionId, resourceId, entry.getValue());
                 }
 
                 DamId authorizationId = new DamId(damId);
@@ -270,7 +274,7 @@ public class ResourceController {
         return collection;
     }
 
-    private Resource viewToResource(Id collectionId, DamId id, FlatView view) {
+    private Resource viewToResource(String collectionId, String id, FlatView view) {
         String description = view.getViewUiOrDefault("description", "") + " - " + view
             .getRoleUiOrDefault("description", "");
         String name =
@@ -286,7 +290,7 @@ public class ResourceController {
         metadata.put("platformService", view.getPlatformService());
         metadata.put("contentType", view.getContentType());
         metadata.putAll(view.getLabelsMap());
-        return Resource.newBuilder().id(encodeId(id)).collectionId(encodeId(collectionId)).description(description)
+        return Resource.newBuilder().id(id).collectionId(collectionId).description(description)
             .name(name).imageUrl(
                 imageUrlString != null && !imageUrlString.isEmpty() ? URI.create(imageUrlString)
                     : null)

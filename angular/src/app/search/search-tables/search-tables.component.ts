@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import Table = WebAssembly.Table;
 import { filter, flatMap, map, shareReplay } from 'rxjs/operators';
 
+import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
 import { SearchEditorComponent } from '../search-editor/search-editor.component';
@@ -33,18 +34,16 @@ export class SearchTablesComponent implements OnInit {
     viewResultsAsJSON: false,  // This is set to false until we have an official approval to use the data for search.
   };
 
-
   registry: BeaconRegistry;
 
   view: SearchView;
+
+  currentQuery = '';
 
   options: {
     wrapBehavioursEnabled: true
   };
 
-  search: {
-    text: string,
-  };
   result: any;
   queryHistory: string[];
   resourcePath: string;
@@ -59,18 +58,15 @@ export class SearchTablesComponent implements OnInit {
   tableApiRequests = 0;
   connectorDetails: object = {};
 
-  private query: string;
-  private properties: string[];
+  completedQuery: string;
+  properties: string[];
 
-
-  constructor(private searchService: SearchService,
+  constructor(private appConfigService: AppConfigService,
+              private searchService: SearchService,
               private route: ActivatedRoute,
               private jsonViewerService: JsonViewerService,
               private router: Router,
               private resourceService: ResourceService) {
-
-    this.search = {text: ''};
-
     this.view = {
       errorLoadingTables: true,
       errorQueryingTables: true,
@@ -103,11 +99,11 @@ export class SearchTablesComponent implements OnInit {
   }
 
   refreshBeacons() {
-    // this.setRegistry(this.registry);
+    // ...
   }
 
   closeTables() {
-
+    // ...
   }
 
 
@@ -126,18 +122,8 @@ export class SearchTablesComponent implements OnInit {
     this.jsonViewerService.viewJSON(table);
   }
 
-//  EDITOR STUFF
-
-
   doSearch(query: string) {
-
-    // if (query.length === 0) {
-    //   this.snackBar.open('Empty query', 'Dismiss', {
-    //     panelClass: 'error-snack',
-    //   });
-    //   return;
-    // }
-
+    query = query.replace(/;\s*$/, '');
     this.view.isSearching = true;
     this.view.errorQueryingTables = false;
 
@@ -150,7 +136,7 @@ export class SearchTablesComponent implements OnInit {
     }
 
     observableResults.subscribe(result => {
-      this.query = query;
+      this.completedQuery = query;
       this.result = result;
       this.searchService.updateTableData(result);
       this.view.isSearching = false;
@@ -175,13 +161,13 @@ export class SearchTablesComponent implements OnInit {
       resourcesPath.push(this.searchService.buildResourcePath(view.damId, view));
     });
 
+    // It is publicly accessible.
     if (this.currentView.interfaceUri) {
-      // It is publicly accessible.
-      this.tableApiRequests = 0;
-      this.getTables();
+      this.initializeTableList();
       return;
     }
 
+    // From this point, the access to the resource is controlled.
     this.resourceService.getAccessTokensForAuthorizedResources(resourcesPath).subscribe(data => {
       this.resourceAccessMap = this.resourceService.toResourceAccessMap(data);
       this.interfaceAccessTokensMap = this.interfaceAccessMap(data);
@@ -191,8 +177,7 @@ export class SearchTablesComponent implements OnInit {
         }
       });
 
-      this.tableApiRequests = 0;
-      this.getTables();
+      this.initializeTableList();
     });
   }
 
@@ -205,7 +190,6 @@ export class SearchTablesComponent implements OnInit {
         items.map(item => {
           accessMap[item.uri] = resourceTokens.access[value.access];
         });
-        // accessMap[resource] = resourceTokens.access[value.access];
       });
     return accessMap;
   }
@@ -243,5 +227,18 @@ export class SearchTablesComponent implements OnInit {
 
   isUsingPublicView() {
     return this.accessToken === undefined || this.accessToken === null;
+  }
+
+  private initializeTableList() {
+    this.tableApiRequests = 0;
+    this.getTables();
+
+    this.appConfigService.get().subscribe(config => {
+      this.currentQuery = config.search.defaultQuery;
+
+      if (this.currentQuery && this.currentQuery.length > 0) {
+        this.doSearch(this.currentQuery);
+      }
+    });
   }
 }

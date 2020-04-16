@@ -98,6 +98,9 @@ export class AppConfigService {
       trsAcceptedVersionDescriptorTypes: [],
       listPageSize: 14,
       covidBeaconUrl: null,
+      search: {
+        defaultQuery: null,
+      },
     };
   }
 

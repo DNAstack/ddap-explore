@@ -31,4 +31,11 @@ public class AppConfig {
     private int listPageSize;
     private String covidBeaconUrl;
 
+    private SearchConfig search;
+
+    @Data
+    public static class SearchConfig {
+        private String defaultQuery;
+    }
+
 }

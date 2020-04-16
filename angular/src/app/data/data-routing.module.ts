@@ -12,7 +12,7 @@ export const routes: Routes = [
   { path: 'explorer/:id', component: DataExplorerDetailComponent },
   { path: 'collections', component: DataListComponent },
   { path: 'collections/search', component: DataSearchComponent },
-  { path: 'collections/:damId/:resourceName', component: DataDetailComponent },
+  { path: 'collections/:collectionId', component: DataDetailComponent },
   { path: '', redirectTo: 'collections' },
 ];
 

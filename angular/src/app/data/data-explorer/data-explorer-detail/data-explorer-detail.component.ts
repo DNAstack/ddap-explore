@@ -3,8 +3,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AfterViewInit, Component, Pipe, PipeTransform, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
-import linkifyStr from 'linkifyjs/string';
-import { catchError, delay, map } from 'rxjs/operators';
 
 import { Collection } from '../../model/collection';
 import { ServiceInfo } from '../../model/service-info';

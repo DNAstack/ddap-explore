@@ -24,7 +24,7 @@ export class SearchService {
   }
 
   getSearchResources(): Observable<SearchResourceModel[]> {
-    return this.http.get<SearchResourceModel[]>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/resources`)
+    return this.http.get<SearchResourceModel[]>(`${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/search/resources`)
       .pipe(
         this.errorHandler.notifyOnError()
       );
@@ -32,7 +32,7 @@ export class SearchService {
 
   getResourceDetail(resourceName: string): Observable<SearchResourceModel[]> {
     return this.http.get<SearchResourceModel[]>(
-      `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/resource/${resourceName}`);
+      `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/search/resource/${resourceName}`);
   }
 
   getTables(resource: string, accessToken, connectorDetails: object = {}): Observable<TableList> {
@@ -40,9 +40,9 @@ export class SearchService {
       console.warn('No access token');
       return;
     }
-    return this.http.get<any>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/tables`,
-      {
-        params: {
+
+    return this.http.get<any>(`${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/search/tables`,
+      { params: {
           resource: encodeURIComponent(resource),
           accessToken: accessToken,
           connectorKey: connectorDetails['key'],
@@ -56,7 +56,7 @@ export class SearchService {
   }
 
   search(resource: string, query, accessToken, connectorDetails: object = {}): Observable<TableModel> {
-    return this.http.post<TableModel>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/query`, query,
+    return this.http.post<TableModel>(`${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/search/query`, query,
       {
         params: {
           resource: encodeURIComponent(resource),

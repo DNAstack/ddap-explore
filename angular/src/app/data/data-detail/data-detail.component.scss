@@ -7,6 +7,12 @@ h3 {
  }
 }
 
+::ng-deep ddap-resource-logo {
+  & > div.resource-logo {
+    margin: -2.5rem -2.5rem 0rem;
+  }
+}
+
 mat-list.mat-list-base .mat-list-item .mat-list-item-content {
   padding: 2rem 0;
 
@@ -14,10 +20,6 @@ mat-list.mat-list-base .mat-list-item .mat-list-item-content {
     font-weight: 400;
     font-size: 1.5rem;
   }
-}
-
-.ddap-resource {
-  padding: 0 2rem;
 }
 
 .ddap-column-panel {
@@ -37,29 +39,6 @@ mat-list.mat-list-base .mat-list-item .mat-list-item-content {
       padding: 0;
     }
   }
-}
-
-.ddap-resource-title {
-  padding-top: 1rem;
-  padding-bottom: 0.5rem;
-
-  &:empty {
-    display: none;
-
-    & + * {
-      display: none;
-    }
-  }
-}
-
-mat-divider.ddap-main-divider {
-  border-top-width: 1px;
-  background-color: $color-grey;
-  margin-bottom: 1rem;
-}
-
-ddap-resource-views {
-  width: 100%;
 }
 
 ::ng-deep .mat-list-base {

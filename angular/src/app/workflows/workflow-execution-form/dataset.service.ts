@@ -17,7 +17,8 @@ export class DatasetService {
 
   fetchDataset(url: string, accessToken: string): Observable<Dataset> {
     const encodedUrl = encodeURIComponent(url);
-    const targetUrl = `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/table?dataset_url=${encodedUrl}&access_token=${accessToken}`;
+    const targetUrl = `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/table`
+      + `?dataset_url=${encodedUrl}&access_token=${accessToken}`;
     return this.http.get<Dataset>(targetUrl)
       .pipe(
         this.errorHandler.notifyOnError(`Can't fetch tables.`)
@@ -25,8 +26,9 @@ export class DatasetService {
   }
 
   getViews(urls: string[]): Observable<{[url: string]: string[]}> {
-    return this.http.post<{[url: string]: string[]}>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/views/lookup`, urls)
-      .pipe(
+    return this.http.post<{[url: string]: string[]}>(
+      `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/views/lookup`, urls
+      ).pipe(
         this.errorHandler.notifyOnError()
       );
   }

@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EntityModel, flatten } from 'ddap-common-lib';
-import { zip } from 'rxjs';
 import { Observable } from 'rxjs';
-import { flatMap, map } from 'rxjs/operators';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
-import { DamInfoService } from '../../shared/dam/dam-info.service';
+import { CollectionsResponseModel } from '../../shared/collection.model';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
 import { DataService } from '../data.service';
 
@@ -20,68 +17,36 @@ import { DataService } from '../data.service';
 })
 export class DataListComponent implements OnInit {
 
-  qualifiedResources$: Observable<{damId: string, entity: EntityModel}[]>;
+  collections$: Observable<CollectionsResponseModel>;
 
   constructor(
+    public randomImageRetriever: ImagePlaceholderRetriever,
     private dataService: DataService,
     private route: ActivatedRoute,
-    public randomImageRetriever: ImagePlaceholderRetriever,
-    private appConfigService: AppConfigService,
     private router: Router,
-    private damInfoService: DamInfoService
+    private appConfigService: AppConfigService
   ) {
   }
 
   ngOnInit() {
     // Ensure that the user can only access this component when it is enabled.
+    // FIXME: causing multiple subscriptions
     this.appConfigService.get()
       .subscribe((data: AppConfigModel) => {
       if (data.featureExploreDataEnabled) {
-        this.initialize();
+        this.collections$ = this.dataService.getCollections();
       } else {
         this.router.navigate(['/']);
       }
     });
   }
 
+  // TODO: Move to common lib
   ellipseIfLongerThan(text: string, maxLength: number): string {
     if (text && text.length > maxLength) {
       return `${text.substring(0, maxLength)}...`;
     }
     return text;
-  }
-
-  private initialize() {
-    // FIXME I think this should be a piped Observable and not a subscription
-    // Needed to reload the data every time the realm in the URL changes (conditionIndex.e. using the realm selector)
-    this.route.parent.params.subscribe(() => {
-      this.qualifiedResources$ =
-        this.damInfoService.getDamUrls()
-          .pipe(
-            flatMap(damApiUrls => {
-              const damIds: string[] = Array.from(damApiUrls.keys());
-              const unzippedQualifiedModels: Observable<{ damId: string, entity: EntityModel }[]>[] =
-                damIds.map(damId =>
-                  this.dataService.get(damId)
-                    .pipe(map((ems: EntityModel[]) => ems.map(DataListComponent.qualifier(damId)))));
-
-              // Need to pass in all args separately, not as array
-              return zip(...unzippedQualifiedModels)
-                .pipe(
-                  map(flatten)
-                );
-            })
-          );
-    });
-  }
-
-  private static qualifier(damId: string): (em: EntityModel) => { damId: string, entity: EntityModel } {
-    return em => {
-      return {
-        damId: damId,
-        entity: em,
-      };
-    };
   }
 
 }

@@ -18,18 +18,20 @@ export class ViewAccessComponent implements OnInit {
   credentials: object[] = [];
 
   ngOnInit(): void {
-    if (this.access.credentials) {
-      Object.entries(this.access.credentials)
-        .map(([name, credVal]) => {
-          if (credVal.length > 0) {
-            this.credentials.push({
-              label: this.formatVal(name),
-              value: credVal,
-              key: name,
-            });
-          }
-        });
+    if (!this.access.credentials) {
+      return;
     }
+
+    Object.entries(this.access.credentials)
+      .map(([name, credVal]) => {
+        if (credVal.length > 0) {
+          this.credentials.push({
+            label: this.formatVal(name),
+            value: credVal,
+            key: name,
+          });
+        }
+      });
   }
 
   // format keys with _ to Start Case

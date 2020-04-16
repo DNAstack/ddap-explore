@@ -30,7 +30,7 @@ export class WorkflowService {
   }
 
   public getAllWesViews(): Observable<SimplifiedWesResourceViews[]> {
-    return this.http.get<WesResourceViews[]>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/views`)
+    return this.http.get<WesResourceViews[]>(`${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/wes/views`)
       .pipe(
         map((wesResources: WesResourceViews[]) => {
           return wesResources.map(SimplifiedWesResourceViews.fromWesResourceViews);
@@ -84,11 +84,11 @@ export class WorkflowService {
   }
 
   private getBaseUrl(): string {
-    return `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes`;
+    return `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/wes`;
   }
 
   private resolveUrl(path: string, queryStringMap?: any) {
-    const url = `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/wes/${path}`;
+    const url = `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/wes/${path}`;
 
     if (queryStringMap) {
       return url + '?' + Object.keys(queryStringMap).map(key => `${key}=${queryStringMap[key]}`).join('&');

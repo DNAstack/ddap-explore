@@ -1,14 +1,14 @@
-<ng-container *ngIf="resource">
-  <ddaplib-searchable-header class="no-border"
-                  [backLink]="'../..'"
-                  [label]="resource.dto.ui.label"
-                  [searchable]="true"
-                  (searchOpenChange)="searchOpenedChange($event)">
-    <ddap-beacon-search-bar [limitSearch]="limitSearch">
-    </ddap-beacon-search-bar>
-  </ddaplib-searchable-header>
+<ddaplib-searchable-header class="no-border"
+                           [backLink]="'../..'"
+                           [label]="(collection$ | async)?.name"
+                           [searchable]="true"
+                           (searchOpenChange)="searchOpenedChange($event)">
+  <ddap-beacon-search-bar [limitSearch]="limitSearch">
+  </ddap-beacon-search-bar>
+</ddaplib-searchable-header>
 
-  <ddap-resource-logo [imageUrl]="resource.dto.ui.imageUrl">
+<ddaplib-main *ngIf="collection$ | async as collection">
+  <ddap-resource-logo [imageUrl]="(collection$ | async)?.imageUrl">
     <ddap-limit-search *ngIf="searchOpened"
                        [checked]="limitSearch"
                        (change)="toggleLimitSearch()"
@@ -17,15 +17,11 @@
     </ddap-limit-search>
   </ddap-resource-logo>
 
-  <div class="ddap-resource">
-    <p class="ddap-resource-title">{{ resource.dto.ui.owner }}</p>
-
-    <mat-divider class="ddap-main-divider"></mat-divider>
-
+  <ng-container *ngIf="collectionResources$ | async as collectionResourcesResponse">
     <div class="ddap-column-panel">
       <div class="ddap-column">
-        <p>{{ resource.dto.ui.description }}</p>
-        <ddap-metadata-list [metadata]="resource.dto.ui"></ddap-metadata-list>
+        <p>{{ collection.description }}</p>
+        <ddap-metadata-list [metadata]="collection.metadata"></ddap-metadata-list>
       </div>
       <div class="ddap-column">
         <h3 class="flex vertical-center">
@@ -33,14 +29,12 @@
           <span>Views</span>
         </h3>
         <mat-list class="ddap-resource-views">
-          <mat-list-item *ngFor="let view of views">
-            <ddap-resource-view-item [view]="view"
-                                     [resource]="resource"
-                                     [damId]="damId">
+          <mat-list-item *ngFor="let resource of collectionResourcesResponse.data">
+            <ddap-resource-view-item [resource]="resource">
             </ddap-resource-view-item>
           </mat-list-item>
         </mat-list>
       </div>
     </div>
-  </div>
-</ng-container>
+  </ng-container>
+</ddaplib-main>

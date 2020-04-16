@@ -13,7 +13,7 @@ export class IdentityService {
   }
 
   getIdentityConcentratorInfo(): Observable<any> {
-    return this.http.get(`${environment.ddapApiUrl}/identity-concentrator/info`);
+    return this.http.get(`${environment.ddapApiUrlOld}/identity-concentrator/info`);
   }
 
 }

@@ -20,4 +20,9 @@ export interface AppConfigModel {
   trsAcceptedVersionDescriptorTypes: string[];
   listPageSize: number;
   covidBeaconUrl: string;
+  search: SearchConfig;
+}
+
+interface SearchConfig {
+  defaultQuery: string;
 }

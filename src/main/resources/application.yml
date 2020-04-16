@@ -28,6 +28,10 @@ ui:
   list-page-size: 20
   covid-beacon-url: null
 
+  search:
+    # The default query, IF DEFINED, will make the UI to run the first query automatically on initialization.
+    default-query: null
+
 dams:
   1:
     # If you try to run the DAM and IC locally, they need to use different domain names,

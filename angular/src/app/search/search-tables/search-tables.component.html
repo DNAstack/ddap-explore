@@ -93,7 +93,7 @@
                     </button>
                   </mat-toolbar-row>
                 </mat-toolbar>
-                <ddap-search-editor [searchText]="search.text"
+                <ddap-search-editor [searchText]="currentQuery"
                                     [editorOptions]="options"
                                     (doSearch)="doSearch($event)"></ddap-search-editor>
               </div>
@@ -148,7 +148,7 @@
                   <div style="flex:1; height:100%">
                     <div class="m-b-sm"
                          style="display:flex; flex-direction: row; align-items: center;">
-                      <pre><code>{{query}}</code></pre>
+                      <pre><code>{{completedQuery}}</code></pre>
                       <button *ngIf="result && fixedFlags.workflowIntegrationEnabled"
                               mat-stroked-button
                               color="accent"

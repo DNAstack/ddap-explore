@@ -1,89 +1,74 @@
 <mat-accordion>
   <mat-expansion-panel>
     <mat-expansion-panel-header collapsedHeight="4rem">
-      <mat-progress-bar mode="indeterminate"
-                        *ngIf="pending">
-      </mat-progress-bar>
       <mat-panel-title>
-        <h3>{{ view.dto.ui.label || view.name }}</h3>
+        <h3>{{ resource.name }}</h3>
       </mat-panel-title>
-      <mat-panel-description class="flex vertical-center">
-        {{ role }}
-      </mat-panel-description>
     </mat-expansion-panel-header>
 
-    <div class="flex">
-      <mat-form-field>
-        <input matInput
-               type="number"
-               min="1"
-               placeholder="Duration of an access token"
-               [formControl]="ttlForm">
-        <mat-hint align="start"><strong>Maximum duration is 90 days</strong> </mat-hint>
-        <mat-error *ngIf="ttlForm.hasError('required')">
-          Duration is required
-        </mat-error>
-        <mat-error *ngIf="ttlForm.hasError('min')">
-          Duration must be a positive integer
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Time unit</mat-label>
-        <mat-select [(value)]="selectedTimeUnit">
-          <mat-option value="s">second</mat-option>
-          <mat-option value="m">minute</mat-option>
-          <mat-option value="h">hour</mat-option>
-          <mat-option value="d">day</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-    <div class="flex">
-      <mat-form-field *ngIf="roles.length > 0">
-        <mat-label>Role</mat-label>
-        <mat-select [(value)]="role">
-          <mat-option *ngFor="let role of roles"
-                      [value]="role">{{role}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field *ngIf="interfaces.length > 0">
-        <mat-label>Interface</mat-label>
-        <mat-select [(value)]="interfaceId">
-          <mat-option *ngFor="let interfaceName of interfaces"
-                      [value]="interfaceName">{{interfaceName}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+    <ng-container [formGroup]="form">
+      <div class="flex">
+        <mat-form-field>
+          <input formControlName="ttl"
+                 matInput
+                 type="number"
+                 min="1"
+                 placeholder="Duration of an access token">
+          <mat-hint align="start"><strong>Maximum duration is 90 days</strong> </mat-hint>
+          <mat-error *ngIf="form.get('ttl').hasError('required')">
+            Duration is required
+          </mat-error>
+          <mat-error *ngIf="form.get('ttl').hasError('min')">
+            Duration must be a positive integer
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Time unit</mat-label>
+          <mat-select formControlName="timeUnit">
+            <mat-option value="s">second</mat-option>
+            <mat-option value="m">minute</mat-option>
+            <mat-option value="h">hour</mat-option>
+            <mat-option value="d">day</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div *ngIf="resource.interfaces"
+           class="flex">
+        <mat-form-field>
+          <mat-label>Interface</mat-label>
+          <mat-select formControlName="interfaceType">
+            <mat-option *ngFor="let resourceInterface of resource.interfaces"
+                        [value]="resourceInterface.type">
+              {{ resourceInterface.type }}
+            </mat-option>
+          </mat-select>
+          <mat-hint *ngIf="selectedResourceInterface">
+            {{ selectedResourceInterface.uri }}
+          </mat-hint>
+        </mat-form-field>
+      </div>
+    </ng-container>
 
-    <div *ngIf="resourceAccess && (resourceAccess | async)"
+    <div *ngIf="resourceAccesses$ | async as resourceAccesses"
          class="expansion-footer-content">
-      <ddap-view-access [access]="(resourceAccess | async)"
-                        [url]="url | async">
+      <ddap-view-access *ngFor="let resourceAccess of resourceAccesses | keyvalue"
+                        [access]="resourceAccess.value">
       </ddap-view-access>
     </div>
 
     <mat-action-row>
-      <a *ngIf="(resourceAccess | async) && (url | async)"
-         href="{{ url | async }}"
-         data-se="access-btn"
-         target='_blank'
-         rel='noopener noreferrer'>
-        <button mat-button
-                color="primary"
-                class="uppercase">
-          View
-        </button>
-      </a>
-      <a *ngIf="!(resourceAccess | async)"
-         [href]="getUrlForObtainingAccessToken()"
-         class="stretch"
-         data-se="get-access-btn">
-        <button mat-flat-button
-                color="primary"
-                class="uppercase">
-          Access
-        </button>
-      </a>
-      <a href="{{ downloadCliUrl }}"
+      <ng-container *ngIf="selectedResourceInterface">
+        <a [href]="getUrlForResourceAuthorization()"
+           class="stretch"
+           data-se="get-access-btn">
+          <button mat-flat-button
+                  color="primary"
+                  class="uppercase">
+            Access
+          </button>
+        </a>
+      </ng-container>
+      <a [href]="downloadCliUrl"
          data-se="download-cli-button"
          target='_blank'
          rel='noopener noreferrer'>

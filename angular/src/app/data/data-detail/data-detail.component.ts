@@ -2,11 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntityModel } from 'ddap-common-lib';
 import { Observable, of } from 'rxjs';
+import { share } from 'rxjs/operators';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { ResourceBeaconService } from '../../shared/beacon-search/resource-beacon.service';
+import { CollectionModel } from '../../shared/collection.model';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
+import { ResourcesResponseModel } from '../../shared/resource.model';
 import { DataService } from '../data.service';
 
 @Component({
@@ -17,6 +20,9 @@ import { DataService } from '../data.service';
 })
 export class DataDetailComponent implements OnInit {
 
+  collectionResources$: Observable<ResourcesResponseModel>;
+  collection$: Observable<CollectionModel>;
+
   resourceLabel$: Observable<string>;
   searchOpened = false;
   views: any;
@@ -24,17 +30,23 @@ export class DataDetailComponent implements OnInit {
   limitSearch = true;
   damId: string;
 
-  constructor(private route: ActivatedRoute,
-              private appConfigService: AppConfigService,
-              private router: Router,
-              private dataService: DataService) {
+  constructor(
+    private route: ActivatedRoute,
+    private appConfigService: AppConfigService,
+    private router: Router,
+    private dataService: DataService
+  ) {
   }
 
   ngOnInit() {
     // Ensure that the user can only access this component when it is enabled.
+    // FIXME: causing multiple subscriptions
     this.appConfigService.get().subscribe((data: AppConfigModel) => {
       if (data.featureExploreDataEnabled) {
-        this.initialize();
+        const collectionId = this.route.snapshot.params.collectionId;
+        this.collection$ = this.dataService.getCollection(collectionId)
+          .pipe(share());
+        this.collectionResources$ = this.dataService.getResources({ collection: collectionId });
       } else {
         this.router.navigate(['/']);
       }
@@ -49,22 +61,4 @@ export class DataDetailComponent implements OnInit {
     this.limitSearch = !this.limitSearch;
   }
 
-  private initialize() {
-    const resourceName = this.route.snapshot.params.resourceName;
-    const realmId = this.route.root.firstChild.snapshot.params.realmId;
-    this.damId = this.route.snapshot.params.damId;
-
-    this.dataService.getResource(this.damId, resourceName, realmId)
-      .subscribe((resource) => {
-        this.resource = resource;
-        this.resourceLabel$ = of(this.resource.dto.ui.label);
-        this.views = this.getViews(this.resource);
-      });
-  }
-
-  private getViews(resource: EntityModel): EntityModel[] {
-    return Object
-      .keys(resource.dto.views)
-      .map((key) => new EntityModel(key, resource.dto.views[key]));
-  }
 }

@@ -8,7 +8,7 @@ import { DataSearchComponent } from './data-search/data-search.component';
 export const routes: Routes = [
   { path: 'collections', component: DataListComponent },
   { path: 'collections/search', component: DataSearchComponent },
-  { path: 'collections/:damId/:resourceName', component: DataDetailComponent },
+  { path: 'collections/:collectionId', component: DataDetailComponent },
   { path: '', redirectTo: 'collections' },
 ];
 

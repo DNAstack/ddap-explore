@@ -11,7 +11,7 @@ export class LimitSearchComponent {
   @Input()
   checked;
   @Input()
-  resourceName$: Observable<string>;
+  collectionName: string;
 
   @Output()
   readonly change: EventEmitter<any> = new EventEmitter<any>();

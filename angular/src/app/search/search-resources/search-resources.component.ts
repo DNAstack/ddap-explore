@@ -14,7 +14,7 @@ import { SearchResourceModel } from './search-resource.model';
 @Component({
   selector: 'ddap-search-resources',
   templateUrl: './search-resources.component.html',
-  styleUrls: ['../../data/data-list/data-list.component.scss'],
+  styleUrls: ['./search-resources.component.scss'],
   providers: [ImagePlaceholderRetriever],
 })
 export class SearchResourcesComponent implements OnInit {

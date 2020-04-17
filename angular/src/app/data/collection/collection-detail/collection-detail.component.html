@@ -1,8 +1,8 @@
-<ddaplib-searchable-header class="no-border"
-                           [backLink]="'../..'"
-                           [label]="(collection$ | async)?.name"
+<ddaplib-searchable-header (searchOpenChange)="searchOpened = $event"
                            [searchable]="true"
-                           (searchOpenChange)="searchOpenedChange($event)">
+                           [backLink]="'..'"
+                           [label]="(collection$ | async)?.name"
+                           class="no-border">
   <ddap-beacon-search-bar [limitSearch]="limitSearch">
   </ddap-beacon-search-bar>
 </ddaplib-searchable-header>
@@ -10,10 +10,10 @@
 <ddaplib-main *ngIf="collection$ | async as collection">
   <ddap-resource-logo [imageUrl]="(collection$ | async)?.imageUrl">
     <ddap-limit-search *ngIf="searchOpened"
+                       (change)="limitSearch = !limitSearch"
+                       [collectionName]="(collection$ | async)?.name"
                        [checked]="limitSearch"
-                       (change)="toggleLimitSearch()"
-                       class="filter-top-border filter-inline"
-                       [resourceName$]="resourceLabel$">
+                       class="filter-top-border filter-inline">
     </ddap-limit-search>
   </ddap-resource-logo>
 

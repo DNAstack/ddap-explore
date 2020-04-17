@@ -1,39 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EntityModel } from 'ddap-common-lib';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { share } from 'rxjs/operators';
 
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
-import { ResourceBeaconService } from '../../shared/beacon-search/resource-beacon.service';
-import { CollectionModel } from '../../shared/collection.model';
-import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
-import { ResourcesResponseModel } from '../../shared/resource.model';
-import { DataService } from '../data.service';
+import { AppConfigModel } from '../../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../../shared/app-config/app-config.service';
+import { ResourceBeaconService } from '../../../shared/beacon-search/resource-beacon.service';
+import { CollectionModel } from '../../../shared/collection.model';
+import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.service';
+import { ResourcesResponseModel } from '../../../shared/resource.model';
+import { DataService } from '../../data.service';
 
 @Component({
-  selector: 'ddap-resource-detail',
-  templateUrl: './data-detail.component.html',
-  styleUrls: ['./data-detail.component.scss'],
+  selector: 'ddap-collection-detail',
+  templateUrl: './collection-detail.component.html',
+  styleUrls: ['./collection-detail.component.scss'],
   providers: [ImagePlaceholderRetriever, ResourceBeaconService],
 })
-export class DataDetailComponent implements OnInit {
+export class CollectionDetailComponent implements OnInit {
 
   collectionResources$: Observable<ResourcesResponseModel>;
   collection$: Observable<CollectionModel>;
-
-  resourceLabel$: Observable<string>;
   searchOpened = false;
-  views: any;
-  resource: EntityModel;
   limitSearch = true;
-  damId: string;
 
   constructor(
     private route: ActivatedRoute,
-    private appConfigService: AppConfigService,
     private router: Router,
+    private appConfigService: AppConfigService,
     private dataService: DataService
   ) {
   }
@@ -51,14 +45,6 @@ export class DataDetailComponent implements OnInit {
         this.router.navigate(['/']);
       }
     });
-  }
-
-  searchOpenedChange($event) {
-    this.searchOpened = $event;
-  }
-
-  toggleLimitSearch() {
-    this.limitSearch = !this.limitSearch;
   }
 
 }

@@ -6,10 +6,10 @@
 </ddaplib-searchable-header>
 
 <ddaplib-main>
-  <ddap-limit-search *ngIf="resource"
+  <ddap-limit-search *ngIf="collectionName$ | async as collectionName"
                      (change)="limitSearchChange($event)"
                      [checked]="limitSearch"
-                     [resourceName$]="resourceName$">
+                     [collectionName]="collectionName">
   </ddap-limit-search>
 
   <div *ngIf="!resultsAction.closed"

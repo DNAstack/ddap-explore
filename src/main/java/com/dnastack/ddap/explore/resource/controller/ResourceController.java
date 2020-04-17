@@ -8,6 +8,7 @@ import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.PaginatedResponse;
 import com.dnastack.ddap.explore.resource.model.Resource;
+import com.dnastack.ddap.explore.session.UserStateService;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.http.MediaType;
@@ -44,6 +46,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1beta")
 public class ResourceController {
@@ -53,11 +56,13 @@ public class ResourceController {
     private Map<String, ReactiveDamClient> damClients;
     @Autowired
     private ObjectMapper mapper;
+    @Autowired
+    private UserStateService stateService;
+
 
 
     @GetMapping(value = "/{realm}/resources", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<PaginatedResponse<Resource>> listResources(WebSession session, @PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) String collection, @RequestParam(value = "interface_type", required = false) String interfaceType, @RequestParam(value = "interface_uri", required = false) String interfaceUri, @RequestParam(value = "page_token", required = false) String pageToken) {
-
+    public Mono<PaginatedResponse<Resource>> listResources(@PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) String collection, @RequestParam(value = "interface_type", required = false) String interfaceType, @RequestParam(value = "interface_uri", required = false) String interfaceUri, @RequestParam(value = "page_token", required = false) String pageToken) {
         Id collectionId = collection != null ? decodeId(collection) : null;
         return Flux.concat(damClients.entrySet().stream().map(entry -> {
             return entry.getValue().getFlattenedViews(realm)

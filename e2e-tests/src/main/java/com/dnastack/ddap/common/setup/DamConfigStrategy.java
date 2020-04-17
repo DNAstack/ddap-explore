@@ -62,7 +62,7 @@ public class DamConfigStrategy implements ConfigStrategy {
         final CookieStore cookieStore = StrategyFactory.getLoginStrategy()
             .performPersonaLogin(TestingPersona.ADMINISTRATOR.getId(), "master");
 
-        damRealmJson = appendMaterRealmClientsToExistingClientsInConfig(cookieStore, damRealmJson);
+        damRealmJson = appendRealmClientsToExistingClientsInConfig(cookieStore, damRealmJson, AbstractBaseE2eTest.REALM);
 
         final String modificationPayload = format("{ \"item\": %s }", damRealmJson);
 
@@ -82,12 +82,12 @@ public class DamConfigStrategy implements ConfigStrategy {
     }
 
 
-    private JSONObject getClientsFromMasterRealm(CookieStore cookieStore) throws IOException {
+    private JSONObject getExistingClients(CookieStore cookieStore, String realm) throws IOException {
         HttpClient httpclient = HttpClientBuilder.create()
             .setDefaultCookieStore(cookieStore)
             .build();
 
-        HttpGet request = new HttpGet(format("%s/dam/v1alpha/master/config", damConfig.getDamBaseUrl()));
+        HttpGet request = new HttpGet(format("%s/dam/v1alpha/%s/config", damConfig.getDamBaseUrl(), realm));
         HttpResponse response = httpclient.execute(request);
         String responseBody = EntityUtils.toString(response.getEntity());
 
@@ -99,9 +99,9 @@ public class DamConfigStrategy implements ConfigStrategy {
         return clients;
     }
 
-    private String appendMaterRealmClientsToExistingClientsInConfig(CookieStore cookieStore, String damConfig) throws IOException {
+    private String appendRealmClientsToExistingClientsInConfig(CookieStore cookieStore, String damConfig, String realm) throws IOException {
         JSONObject damConfigClients = new JSONObject(damConfig).getJSONObject("clients");
-        JSONObject masterRealmClients = getClientsFromMasterRealm(cookieStore);
+        JSONObject masterRealmClients = getExistingClients(cookieStore, realm);
         masterRealmClients.keySet()
             .forEach((masterRealmClient) -> {
                 damConfigClients.put(masterRealmClient, masterRealmClients.get(masterRealmClient));

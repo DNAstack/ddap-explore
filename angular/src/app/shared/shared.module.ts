@@ -30,9 +30,6 @@ import { TagInputModule } from 'ngx-chips';
 import { ClipboardModule } from 'ngx-clipboard';
 
 import { AccessDeniedScreenComponent } from './access-denied-screen/access-denied-screen.component';
-import { BeaconResultComponent } from './beacon-search/beacon-result/beacon-result.component';
-import { BeaconSearchBarComponent } from './beacon-search/beacon-search-bar/beacon-search-bar.component';
-import { LimitSearchComponent } from './beacon-search/beacon-search-bar/limit-search/limit-search.component';
 import { DataTableComponent } from './data-table/data-table.component';
 import { LayoutComponent } from './layout/layout.component';
 import { MarkdownPipe } from './markdown.pipe';
@@ -49,9 +46,6 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     ResourceLogoComponent,
     ResourceViewItemComponent,
     ViewAccessComponent,
-    BeaconSearchBarComponent,
-    BeaconResultComponent,
-    LimitSearchComponent,
     MetadataListComponent,
     MetadataFilterPipe,
     PaginatorComponent,
@@ -131,12 +125,9 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     DdapLayoutModule,
     DdapFormModule,
 
-    BeaconSearchBarComponent,
-    BeaconResultComponent,
     ResourceLogoComponent,
     ResourceViewItemComponent,
     ViewAccessComponent,
-    LimitSearchComponent,
     MetadataListComponent,
     MetadataFilterPipe,
     PaginatorComponent,

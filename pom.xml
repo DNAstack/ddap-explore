@@ -26,6 +26,7 @@
         <jwt.version>0.10.5</jwt.version>
         <ddap-cli.version>1.0-23-g53026a0</ddap-cli.version>
         <ddap-common.version>0.0.1-41-g051d0ee</ddap-common.version>
+        <jdbi.version>3.12.1</jdbi.version>
     </properties>
 
     <repositories>
@@ -40,6 +41,8 @@
             <url>https://nexus.dnastack.com/content/repositories/releases/</url>
         </repository>
     </repositories>
+
+
 
     <dependencies>
         <dependency>
@@ -74,6 +77,15 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jdbc</artifactId>
+        </dependency>
+
 
         <!-- JWT -->
         <dependency>
@@ -110,6 +122,33 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+
+        <!-- JDBI & Postgres -->
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-postgres</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-sqlobject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.4-1206-jdbc42</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
         </dependency>
 
         <dependency>
@@ -150,6 +189,13 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>27.1-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jdbi</groupId>
+                <artifactId>jdbi3-bom</artifactId>
+                <type>pom</type>
+                <version>3.12.2</version>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

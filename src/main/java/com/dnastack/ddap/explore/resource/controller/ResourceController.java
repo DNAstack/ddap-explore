@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -55,7 +56,8 @@ public class ResourceController {
 
 
     @GetMapping(value = "/{realm}/resources", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<PaginatedResponse<Resource>> listResources(@PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) String collection, @RequestParam(value = "interface_type", required = false) String interfaceType, @RequestParam(value = "interface_uri", required = false) String interfaceUri, @RequestParam(value = "page_token", required = false) String pageToken) {
+    public Mono<PaginatedResponse<Resource>> listResources(WebSession session, @PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) String collection, @RequestParam(value = "interface_type", required = false) String interfaceType, @RequestParam(value = "interface_uri", required = false) String interfaceUri, @RequestParam(value = "page_token", required = false) String pageToken) {
+
         Id collectionId = collection != null ? decodeId(collection) : null;
         return Flux.concat(damClients.entrySet().stream().map(entry -> {
             return entry.getValue().getFlattenedViews(realm)

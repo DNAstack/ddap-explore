@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Patrick Magee
+      changes:
+        - createTable:
+            tableName: sessions
+            columns:
+              - column:
+                  name: principal_id
+                  type: varchar
+                  constraints:
+                    nullable: false
+                  remarks: |-
+                      The Unique Id tied to this user access, potentially spanning multiple sessions
+              - column:
+                  name: session_id
+                  type: varchar
+                  constraints:
+                    nullable: false
+                  remarks: |-
+                    The Session id
+              - column:
+                  name: last_accessed_time
+                  type: timestamp
+                  remarks: the last time this session was accessed
+              - column:
+                  name: creation_time
+                  type: timestamp
+                  remarks: the time this session was first created
+              - column:
+                  name: max_inactive_interval
+                  type: interval
+                  remarks: the maximum interval of time to keep this session valid
+              - column:
+                  name: attributes
+                  type: bytea
+                  remarks: |-
+                    A byte array of the serialized attribues.
+              - addPrimaryKey:
+                  constraintName: pk_principal_id
+                  tableName: sessions
+                  columnNames: ["principal_id"]
+        - createIndex:
+            tableName: sessions
+            columns:
+              - column:
+                  name: principal_id
+            indexName: principal_id_session_index
+        - createIndex:
+            tableName: sessions
+            columns:
+              - column:
+                  name: session_id
+            indexName: session_id_session_index

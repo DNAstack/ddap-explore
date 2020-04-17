@@ -1,29 +1,29 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Observable, Subscription} from 'rxjs';
-import {filter, flatMap, mergeAll} from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
+import { filter, flatMap, mergeAll, pluck } from 'rxjs/operators';
 
-import {AppConfigModel} from '../../shared/app-config/app-config.model';
-import {AppConfigService} from '../../shared/app-config/app-config.service';
-import {BeaconResponse} from '../../shared/beacon-search/beacon-response.model';
-import {BeaconSearchParams} from '../../shared/beacon-search/beacon-search-params.model';
-import {ResourceBeaconService} from '../../shared/beacon-search/resource-beacon.service';
-import {ImagePlaceholderRetriever} from '../../shared/image-placeholder.service';
-import {dam} from '../../shared/proto/dam-service';
-import {ResourceService} from '../../shared/resource/resource.service';
-import {DataService} from '../data.service';
+import { AppConfigModel } from '../../../shared/app-config/app-config.model';
+import { AppConfigService } from '../../../shared/app-config/app-config.service';
+import { BeaconResponse } from '../../../shared/beacon-search/beacon-response.model';
+import { BeaconSearchParams } from '../../../shared/beacon-search/beacon-search-params.model';
+import { ResourceBeaconService } from '../../../shared/beacon-search/resource-beacon.service';
+import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.service';
+import { dam } from '../../../shared/proto/dam-service';
+import { ResourceService } from '../../../shared/resource/resource.service';
+import { DataService } from '../../data.service';
 import IResourceResults = dam.v1.IResourceResults;
 
 @Component({
-  selector: 'ddap-resource-detail',
-  templateUrl: './data-search.component.html',
-  styleUrls: ['./data-search.component.scss'],
+  selector: 'ddap-collection-beacon-search',
+  templateUrl: './collection-beacon-search.component.html',
+  styleUrls: ['./collection-beacon-search.component.scss'],
   providers: [ImagePlaceholderRetriever, ResourceBeaconService],
 })
-export class DataSearchComponent implements OnDestroy, OnInit {
+export class CollectionBeaconSearchComponent implements OnDestroy, OnInit {
 
-  resource: string;
-  resourceName$:  Observable<string>;
+  collectionName$: Observable<string>;
+
   views: any;
   results: BeaconResponse[] = [];
   resultsAction: Subscription;
@@ -118,9 +118,10 @@ export class DataSearchComponent implements OnDestroy, OnInit {
   }
 
   private initializeComponentFields(searchParams: BeaconSearchParams) {
-    this.resource = searchParams.resource;
-    if (this.resource) {
-      this.resourceName$ = this.dataService.getName(searchParams.damId, this.resource);
+    const collectionId = searchParams.collection;
+    if (collectionId) {
+      this.collectionName$ = this.dataService.getCollection(collectionId)
+        .pipe(pluck('name'));
     }
     this.searchParams = searchParams;
     this.limitSearch = searchParams.limitSearch === 'true';

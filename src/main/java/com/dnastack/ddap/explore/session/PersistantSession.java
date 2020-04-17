@@ -24,6 +24,7 @@ import org.springframework.session.Session;
 @AllArgsConstructor
 public class PersistantSession implements Session {
 
+    public static final String USER_IDENTIFIER_KEY = "_session_user_identifier";
     public static final int DEFAULT_MAX_INACTIVE_INTERVAL_SECONDS = 3600;
 
     private String principalId;
@@ -70,16 +71,24 @@ public class PersistantSession implements Session {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getAttribute(String attributeName) {
+        if (Objects.equals(attributeName,USER_IDENTIFIER_KEY)){
+            return (T) principalId;
+        }
         return (T) this.attributes.get(attributeName);
     }
 
     @Override
     public Set<String> getAttributeNames() {
-        return new HashSet<>(this.attributes.keySet());
+        Set<String> attributeNames = new HashSet<>(this.attributes.keySet());
+        attributeNames.add(USER_IDENTIFIER_KEY);
+        return attributeNames;
     }
 
     @Override
     public void setAttribute(String attributeName, Object attributeValue) {
+        if (Objects.equals(attributeName,USER_IDENTIFIER_KEY)){
+            throw new IllegalArgumentException("Cannot set the user identifier");
+        }
         if (attributeValue == null) {
             removeAttribute(attributeName);
         } else {
@@ -93,6 +102,9 @@ public class PersistantSession implements Session {
 
     @Override
     public void removeAttribute(String attributeName) {
+        if (Objects.equals(attributeName,USER_IDENTIFIER_KEY)){
+            throw new IllegalArgumentException("Cannot remove the user identifier");
+        }
         this.changed = true;
         this.attributes.remove(attributeName);
     }

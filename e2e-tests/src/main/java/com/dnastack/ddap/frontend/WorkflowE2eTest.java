@@ -203,7 +203,7 @@ public class WorkflowE2eTest extends AbstractFrontendE2eTest {
 
     private WorkflowManagePage initialNavigation() {
         // ddapPage.getNavBar().goToApp("product-app-menu-analytics"); // FIXME Use a flag to whether or not intentionally use the app switcher for initial navigation
-        String startingUri = URI.create(DDAP_BASE_URL).resolve("/_/analyze").toString();
+        String startingUri = URI.create(DDAP_BASE_URL).resolve("/" + REALM + "/analyze").toString();
         driver.navigate().to(startingUri);
 
         // FIXME Assert that the right app is present

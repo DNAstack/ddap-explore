@@ -1,19 +1,17 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { DataDetailComponent } from './data-detail/data-detail.component';
-import { DataExplorerDetailComponent } from './data-explorer/data-explorer-detail/data-explorer-detail.component';
-import { DataExplorerComponent } from './data-explorer/data-explorer.component';
-import { DataListComponent } from './data-list/data-list.component';
-import { DataSearchComponent } from './data-search/data-search.component';
-
 export const routes: Routes = [
-  { path: 'explorer', component: DataExplorerComponent },
-  { path: 'explorer/:id', component: DataExplorerDetailComponent },
-  { path: 'collections', component: DataListComponent },
-  { path: 'collections/search', component: DataSearchComponent },
-  { path: 'collections/:collectionId', component: DataDetailComponent },
-  { path: '', redirectTo: 'collections' },
+  {
+    path: 'collections',
+    loadChildren: () => import('./collection/collections.module')
+      .then(mod => mod.CollectionsModule),
+  },
+  {
+    path: 'explorer',
+    loadChildren: () => import('./explorer/explorer.module')
+      .then(mod => mod.ExplorerModule),
+  },
 ];
 
 @NgModule({
@@ -22,4 +20,5 @@ export const routes: Routes = [
   ],
   exports: [RouterModule],
 })
-export class DataRoutingModule { }
+export class DataRoutingModule {
+}

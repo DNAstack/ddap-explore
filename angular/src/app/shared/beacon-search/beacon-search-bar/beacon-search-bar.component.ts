@@ -1,13 +1,13 @@
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntityModel } from 'ddap-common-lib';
+import { Subscription } from 'rxjs';
 
 import { assemblyIds } from '../assembly.model';
 import { BeaconSearchParams } from '../beacon-search-params.model';
 
 import { VariantValidators } from './variant.validator';
-import { Subscription } from "rxjs";
 
 @Component({
   selector: 'ddap-beacon-search-bar',
@@ -49,7 +49,7 @@ export class BeaconSearchBarComponent implements OnInit, OnDestroy {
     };
 
     if (resourceName) {
-      searchParams.resource = resourceName;
+      searchParams.collection = resourceName;
     }
     if (damId) {
       searchParams.damId = damId;
@@ -62,14 +62,14 @@ export class BeaconSearchBarComponent implements OnInit, OnDestroy {
           return;
         }
         if (!resourceName && params.resource) {
-          searchParams.resource = params.resource;
+          searchParams.collection = params.resource;
         }
         if (!damId && params.damId) {
           searchParams.damId = params.damId;
         }
       });
 
-    this.router.navigate([realmId, 'data', 'search'],  {
+    this.router.navigate([realmId, 'data', 'collections', 'search'],  {
       replaceUrl: this.replaceUrl,
       queryParams: { ...searchParams },
     });

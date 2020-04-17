@@ -1,13 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { EntityModel, ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
-import { Observable, of } from 'rxjs';
-import { flatMap, map, pluck, tap } from 'rxjs/operators';
+import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
+import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { AppConfigService } from '../shared/app-config/app-config.service';
 import { CollectionModel, CollectionsRequestModel, CollectionsResponseModel } from '../shared/collection.model';
-import { DamInfoService } from '../shared/dam/dam-info.service';
 import { ResourceModel, ResourcesRequestModel, ResourcesResponseModel } from '../shared/resource.model';
 
 @Injectable({
@@ -15,55 +13,11 @@ import { ResourceModel, ResourcesRequestModel, ResourcesResponseModel } from '..
 })
 export class DataService {
 
-  constructor(private http: HttpClient,
-              private appConfigService: AppConfigService,
-              private errorHandler: ErrorHandlerService,
-              private damInfoService: DamInfoService) {
-
-  }
-
-  // TODO: to be removed
-  getName(damId: string, resourceId: string): Observable<string> {
-    return this.getResourceOld(damId, resourceId)
-      .pipe(
-        map((entity: EntityModel) => entity.dto.ui.label)
-      );
-  }
-
-  // TODO: to be removed
-  get(damId: string, params = {}): Observable<EntityModel[]> {
-    return this.damInfoService.getDamUrls()
-      .pipe(
-        flatMap(damApiUrls => {
-          const damApiUrl = damApiUrls.get(damId);
-
-          return this.http.get<any>(`${damApiUrl}/${realmIdPlaceholder}/resources`, {params})
-            .pipe(
-              this.errorHandler.notifyOnError(`Can't load resources.`),
-              pluck('resources'),
-              map(EntityModel.objectToMap),
-              map(EntityModel.arrayFromMap)
-            );
-        })
-      );
-  }
-
-  // TODO: to be removed
-  getResourceOld(damId: string, resourceId: string, realmId = null, params = {}): Observable<EntityModel> {
-    return this.damInfoService.getDamUrls()
-      .pipe(
-        flatMap(damApiUrls => {
-          const damApiUrl = damApiUrls.get(damId);
-          return this.http.get<any>(
-            `${damApiUrl}/${realmId || realmIdPlaceholder}/resources/${resourceId}`,
-            {params}
-          ).pipe(
-            this.errorHandler.notifyOnError(`Can't load resource ${resourceId}.`),
-            pluck('resource'),
-            map((resource) => new EntityModel(resourceId, resource))
-          );
-        })
-      );
+  constructor(
+    private http: HttpClient,
+    private appConfigService: AppConfigService,
+    private errorHandler: ErrorHandlerService
+  ) {
   }
 
   getCollections(params?: CollectionsRequestModel): Observable<CollectionsResponseModel> {

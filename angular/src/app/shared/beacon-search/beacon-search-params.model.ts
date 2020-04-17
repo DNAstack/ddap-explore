@@ -1,6 +1,6 @@
 export interface BeaconSearchParams {
   limitSearch: string;
-  resource?: string;
+  collection?: string;
   damId?: string;
   query: string;
   assembly: string;

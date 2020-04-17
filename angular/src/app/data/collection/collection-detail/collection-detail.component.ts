@@ -5,11 +5,11 @@ import { share } from 'rxjs/operators';
 
 import { AppConfigModel } from '../../../shared/app-config/app-config.model';
 import { AppConfigService } from '../../../shared/app-config/app-config.service';
-import { ResourceBeaconService } from '../../../shared/beacon-search/resource-beacon.service';
 import { CollectionModel } from '../../../shared/collection.model';
 import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.service';
 import { ResourcesResponseModel } from '../../../shared/resource.model';
 import { DataService } from '../../data.service';
+import { ResourceBeaconService } from '../beacon-search/resource-beacon.service';
 
 @Component({
   selector: 'ddap-collection-detail',

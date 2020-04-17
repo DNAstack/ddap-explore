@@ -126,7 +126,14 @@ logging:
     com:
       dnastack:
         ddap: DEBUG
-
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ddap-explore
+    password: ""
+    url: jdbc:postgresql://localhost/ddap-explore
 ---
 
 spring:
@@ -135,3 +142,10 @@ spring:
     user:
       name: dev
       password: dev
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ddap-explore
+    password: ""
+    url: jdbc:postgresql://localhost/ddap-explore

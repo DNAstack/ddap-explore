@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
 import { Observable, of } from 'rxjs';
 
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 import { BeaconResponse } from './beacon-response.model';
 import { DnaChangeQueryParser } from './dna-change-query.parser';

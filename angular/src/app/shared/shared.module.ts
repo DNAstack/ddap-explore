@@ -36,16 +36,10 @@ import { MarkdownPipe } from './markdown.pipe';
 import { MetadataFilterPipe } from './metadata-list/metadata-filter.pipe';
 import { MetadataListComponent } from './metadata-list/metadata-list.component';
 import { PaginatorComponent } from './paginator/paginator.component';
-import { ResourceLogoComponent } from './resource/resource-logo/resource-logo.component';
-import { ResourceViewItemComponent } from './resource/resource-view-item/resource-view-item.component';
-import { ViewAccessComponent } from './view-access/view-access.component';
 
 @NgModule({
   declarations: [
     LayoutComponent,
-    ResourceLogoComponent,
-    ResourceViewItemComponent,
-    ViewAccessComponent,
     MetadataListComponent,
     MetadataFilterPipe,
     PaginatorComponent,
@@ -125,9 +119,6 @@ import { ViewAccessComponent } from './view-access/view-access.component';
     DdapLayoutModule,
     DdapFormModule,
 
-    ResourceLogoComponent,
-    ResourceViewItemComponent,
-    ViewAccessComponent,
     MetadataListComponent,
     MetadataFilterPipe,
     PaginatorComponent,

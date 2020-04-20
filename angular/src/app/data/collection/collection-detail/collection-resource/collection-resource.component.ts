@@ -4,19 +4,19 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, flatMap, pluck, share } from 'rxjs/operators';
 
-import { environment } from '../../../../environments/environment';
-import { dam } from '../../proto/dam-service';
-import { InterfaceModel, ResourceModel } from '../../resource.model';
-import { ResourceAuthService } from '../resource-auth.service';
+import { environment } from '../../../../../environments/environment';
+import { dam } from '../../../../shared/proto/dam-service';
+import { InterfaceModel, ResourceModel } from '../../../../shared/resource.model';
+import { ResourceAuthService } from '../../../../shared/resource/resource-auth.service';
 
-import { ResourceAccessFormBuilder } from './resource-access-form-builder.service';
+import { CollectionResourceFormBuilder } from './collection-resource-form-builder.service';
 
 @Component({
-  selector: 'ddap-resource-view-item',
-  templateUrl: './resource-view-item.component.html',
-  styleUrls: ['./resource-view-item.component.scss'],
+  selector: 'ddap-collection-resource',
+  templateUrl: './collection-resource.component.html',
+  styleUrls: ['./collection-resource.component.scss'],
 })
-export class ResourceViewItemComponent implements OnInit {
+export class CollectionResourceComponent implements OnInit {
 
   @Input()
   resource: ResourceModel;
@@ -28,7 +28,7 @@ export class ResourceViewItemComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private resourceAuthService: ResourceAuthService,
-    private resourceAccessFormBuilder: ResourceAccessFormBuilder
+    private resourceAccessFormBuilder: CollectionResourceFormBuilder
   ) {
   }
 

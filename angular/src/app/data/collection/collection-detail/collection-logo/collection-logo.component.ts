@@ -1,13 +1,13 @@
 import { AfterViewInit, Component, Input, Renderer2, ViewChild } from '@angular/core';
 
-import { ImagePlaceholderRetriever } from '../../image-placeholder.service';
+import { ImagePlaceholderRetriever } from '../../../../shared/image-placeholder.service';
 
 @Component({
-  selector: 'ddap-resource-logo',
-  templateUrl: './resource-logo.component.html',
-  styleUrls: ['./resource-logo.component.scss'],
+  selector: 'ddap-collection-logo',
+  templateUrl: './collection-logo.component.html',
+  styleUrls: ['./collection-logo.component.scss'],
 })
-export class ResourceLogoComponent implements AfterViewInit {
+export class CollectionLogoComponent implements AfterViewInit {
 
   @Input()
   imageUrl: string;

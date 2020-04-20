@@ -48,6 +48,16 @@ public class SessionEncryptionUtils {
         exchange.getResponse().getCookies().set(COOKIE_NAME, cookieBuilder.build());
     }
 
+    public static void expireSessionDecryption(ServerWebExchange exchange){
+        ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from(COOKIE_NAME, "")
+            .path(exchange.getRequest().getPath().contextPath().value() + "/")
+            .maxAge(Duration.ZERO)
+            .httpOnly(true)
+            .secure("https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme()))
+            .sameSite("Lax");
+        exchange.getResponse().getCookies().set(COOKIE_NAME, cookieBuilder.build());
+    }
+
     public static KeyPair createNewKeyPair() {
         try {
             RSAKey key = new RSAKeyGenerator(2048)

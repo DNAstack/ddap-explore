@@ -64,6 +64,7 @@ public class EagerWebSessionManager implements WebSessionManager {
             if (!ids.isEmpty()) {
                 // Expired on retrieve or while processing request, or invalidated..
                 this.sessionIdResolver.expireSession(exchange);
+                SessionEncryptionUtils.expireSessionDecryption(exchange);
             }
             return Mono.empty();
         }

@@ -34,8 +34,21 @@ public interface UserCredentialDao {
     Optional<UserCredential> getCredentialForResource(@Bind("principalId") String principalId, @Bind("authorizationId") String resources);
 
     @Transaction
+    @SqlUpdate("DELETE\n"
+        + "from user_credentials u\n"
+        + "WHERE u.expiration_time\n"
+        + "    < NOW()\n"
+        + "   OR u.principal_id in (\n"
+        + "    SELECT uc.principal_id\n"
+        + "    FROM user_credentials uc\n"
+        + "             LEFT JOIN sessions s on s.principal_id = uc.principal_id\n"
+        + "    WHERE s.principal_id IS NULL\n"
+        + ")")
+    int deleteExpiredCredentials();
+
+    @Transaction
     @SqlUpdate("DELETE FROM user_credentials WHERE expiration_time < NOW()")
-    void deleteExpiredCredentials();
+    void delete();
 
     @Transaction
     @SqlUpdate("DELETE FROM user_credentials WHERE principal_id = :principalId AND authorization_id = :authorizationId")

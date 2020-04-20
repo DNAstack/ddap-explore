@@ -34,16 +34,13 @@ public interface SessionDao {
     @SqlQuery("SELECT * FROM sessions where session_id = :sessionId")
     Optional<PersistantSession> getSession(@Bind("sessionId") String sessionId);
 
-    @SqlQuery("SELECT * FROM sessions where principal_id = :principalId")
-    Optional<PersistantSession> getSessionByPrincipalId(@Bind("principalId") String principalId);
-
     @Transaction
     @SqlUpdate("DELETE FROM sessions where session_id = :sessionId")
     void deleteSession(@Bind("sessionId") String id);
 
     @Transaction
-    @SqlUpdate("DELETE FROM sessions where principal_id = :principalId")
-    void deleteSessionByPrincipalId(@Bind("principalId") String principalId);
+    @SqlUpdate("DELETE FROM sessions where (last_accessed_time + max_inactive_interval) < NOW()")
+    int deleteExpiredSessions();
 
     @Transaction
     @SqlUpdate("UPDATE sessions SET session_id = :sessionId, last_accessed_time = :lastAccessedTime, attributes = :attributes  WHERE principal_id = :principalId")

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.WebSession;
 
@@ -69,7 +70,13 @@ public class UserCredentialService {
         });
     }
 
-    public void deleteSessionBoundTokens(WebSession session) {
+    @Scheduled(fixedDelay = 300000)
+    public void deleteSessionBoundTokens() {
+        jdbi.useExtension(UserCredentialDao.class, dao -> {
+            log.info("Cleaning up expired or orphaned session resource tokens");
+            int tokensDeleted = dao.deleteExpiredCredentials();
+            log.info("Removed " + tokensDeleted + " expired or orphaned tokens");
+        });
 
     }
 }

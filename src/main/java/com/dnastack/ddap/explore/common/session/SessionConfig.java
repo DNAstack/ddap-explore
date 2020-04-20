@@ -1,4 +1,4 @@
-package com.dnastack.ddap.explore.session;
+package com.dnastack.ddap.explore.common.session;
 
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.context.annotation.Bean;

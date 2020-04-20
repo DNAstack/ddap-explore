@@ -1,6 +1,6 @@
-package com.dnastack.ddap.explore.session.data;
+package com.dnastack.ddap.explore.common.session.data;
 
-import com.dnastack.ddap.explore.session.PersistantSession;
+import com.dnastack.ddap.explore.common.session.PersistantSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;

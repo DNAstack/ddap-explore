@@ -1,12 +1,11 @@
-package com.dnastack.ddap.explore.session.data;
+package com.dnastack.ddap.explore.common.session.data;
 
-import com.dnastack.ddap.explore.session.PersistantSession;
-import com.dnastack.ddap.explore.session.PersistantSession.SessionAttributes;
+import com.dnastack.ddap.explore.common.session.PersistantSession;
+import com.dnastack.ddap.explore.common.session.PersistantSession.SessionAttributes;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Optional;
 import org.jdbi.v3.core.config.ConfigRegistry;
 import org.jdbi.v3.core.mapper.ColumnMapper;

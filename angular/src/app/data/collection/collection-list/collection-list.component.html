@@ -7,6 +7,7 @@
 <ddaplib-main>
   <ng-container *ngIf="collections$ | async as collectionsResponse">
     <mat-card *ngFor="let collection of collectionsResponse.data"
+              [routerLink]="[collection.id]"
               class="ddap-card">
       <mat-card-header>
         <mat-card-title>
@@ -21,17 +22,6 @@
       <mat-card-content>
         <p>{{ ellipseIfLongerThan(collection.description, 100) }}</p>
       </mat-card-content>
-
-      <mat-card-actions>
-        <button [routerLink]="[collection.id]"
-                mat-button
-                color="primary"
-                class="uppercase"
-                data-se="view-set-btn">
-          View Set
-        </button>
-        <mat-icon class="icon icon-add"></mat-icon>
-      </mat-card-actions>
     </mat-card>
   </ng-container>
 </ddaplib-main>

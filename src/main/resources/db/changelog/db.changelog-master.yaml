@@ -53,3 +53,40 @@ databaseChangeLog:
               - column:
                   name: session_id
             indexName: session_id_session_index
+  - changeSet:
+      id: 2
+      author: Patrick Magee
+      changes:
+        - createTable:
+            tableName: user_credentials
+            columns:
+              - column:
+                  name: principal_id
+                  type: varchar
+                  constraints:
+                    nullable: false
+                  remarks: |-
+                    The Unique Id tied to this user access, potentially spanning multiple sessions
+              - column:
+                  name: authorization_id
+                  type: varchar
+                  constraints:
+                    nullable: false
+                  remarks: |-
+                    The authorization id for a resource
+              - column:
+                  name: expiration_time
+                  type: timestamp
+                  remarks: the time this credential will expire
+              - column:
+                  name: creation_time
+                  type: timestamp
+                  remarks: the time this credential was first created
+              - column:
+                  name: token
+                  type: varchar
+                  remarks: the actual token for a user
+              - addPrimaryKey:
+                  constraintName: pk_principal_id_authorization_id_credentials
+                  tableName: sessions
+                  columnNames: ["principal_id","authorization_id"]

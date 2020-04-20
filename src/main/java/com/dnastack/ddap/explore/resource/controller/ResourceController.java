@@ -3,12 +3,21 @@ package com.dnastack.ddap.explore.resource.controller;
 import static org.springframework.http.HttpStatus.TEMPORARY_REDIRECT;
 
 import com.dnastack.ddap.common.client.ReactiveDamClient;
+import com.dnastack.ddap.common.config.DamProperties;
+import com.dnastack.ddap.common.config.DamsConfig;
+import com.dnastack.ddap.common.security.InvalidOAuthStateException;
+import com.dnastack.ddap.common.security.OAuthStateHandler;
 import com.dnastack.ddap.common.util.http.UriUtil;
+import com.dnastack.ddap.common.util.http.XForwardUtil;
+import com.dnastack.ddap.explore.dam.client.DamClientFactory;
+import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.PaginatedResponse;
 import com.dnastack.ddap.explore.resource.model.Resource;
-import com.dnastack.ddap.explore.session.UserStateService;
+import com.dnastack.ddap.explore.resource.service.UserCredentialService;
+import com.dnastack.ddap.explore.session.SessionEncryptionUtils;
+import com.dnastack.ddap.ic.oauth.model.TokenResponse;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -16,20 +25,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dam.v1.DamService;
 import dam.v1.DamService.GetFlatViewsResponse.FlatView;
+import dam.v1.DamService.ResourceResults.ResourceAccess;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.support.NotFoundException;
@@ -52,18 +68,29 @@ import reactor.core.publisher.Mono;
 public class ResourceController {
 
 
-    @Autowired
-    private Map<String, ReactiveDamClient> damClients;
-    @Autowired
-    private ObjectMapper mapper;
-    @Autowired
-    private UserStateService stateService;
+    private static final String RESOURCE_LOGIN_STATE_KEY = "_resource_login_state_";
 
+    private Map<String, ReactiveDamClient> damClients;
+    private DamClientFactory damClientFactory;
+    private final OAuthStateHandler stateHandler;
+    private Map<String, DamProperties> dams;
+    private ObjectMapper mapper;
+    private UserCredentialService stateService;
+
+    @Autowired
+    public ResourceController(Map<String, ReactiveDamClient> damClients, OAuthStateHandler stateHandler, DamClientFactory damClientFactory, DamsConfig damsConfig, ObjectMapper objectMapper, UserCredentialService userCredentialService) {
+        this.damClients = damClients;
+        this.damClientFactory = damClientFactory;
+        this.dams = Map.copyOf(damsConfig.getStaticDamsConfig());
+        this.mapper = objectMapper;
+        this.stateService = userCredentialService;
+        this.stateHandler = stateHandler;
+    }
 
 
     @GetMapping(value = "/{realm}/resources", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<PaginatedResponse<Resource>> listResources(@PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) String collection, @RequestParam(value = "interface_type", required = false) String interfaceType, @RequestParam(value = "interface_uri", required = false) String interfaceUri, @RequestParam(value = "page_token", required = false) String pageToken) {
-        Id collectionId = collection != null ? decodeId(collection) : null;
+        Id collectionId = collection != null ? Id.decodeId(collection) : null;
         return Flux.concat(damClients.entrySet().stream().map(entry -> {
             return entry.getValue().getFlattenedViews(realm)
                 .map(views -> {
@@ -87,19 +114,20 @@ public class ResourceController {
                     views.forEach((view) -> {
                         Id viewColId = new Id();
                         viewColId.setSpiKey(entry.getKey());
+                        viewColId.setRealm(realm);
                         viewColId.setCollectionId(view.getResourceName());
                         DamId id = new DamId(viewColId);
                         id.setViewName(view.getViewName());
                         id.setRoleName(view.getRoleName());
-                        String stringifiedId = encodeId(id);
-                        String stringifiedColId = encodeId(viewColId);
+                        String stringifiedId = id.encodeId();
+                        String stringifiedColId = viewColId.encodeId();
 
                         Resource resource = resources
                             .computeIfAbsent(stringifiedId, (idKey) -> viewToResource(stringifiedColId, stringifiedId, view));
                         DamId authorizationId = new DamId(id);
                         authorizationId.setInterfaceType(view.getInterfaceName());
                         AccessInterface accessInterface = new AccessInterface();
-                        accessInterface.setAuthorizationId(encodeId(authorizationId));
+                        accessInterface.setAuthorizationId(authorizationId.encodeId());
                         accessInterface.setType(view.getInterfaceName());
                         accessInterface
                             .setUri(view.getInterfaceUri() != null ? URI.create(view.getInterfaceUri()) : null);
@@ -120,7 +148,10 @@ public class ResourceController {
 
     @GetMapping(value = "/{realm}/resources/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Resource> getResource(@PathVariable("realm") String realm, @PathVariable("id") String resourceId) {
-        DamId damId = new DamId(decodeId(resourceId));
+        DamId damId = new DamId(Id.decodeId(resourceId));
+        if (!Objects.equals(realm, damId.getRealm())) {
+            return Mono.error(() -> new NotFoundException("Resource does not exist within this realm"));
+        }
         ReactiveDamClient damClient = damClients.get(damId.getSpiKey());
         if (damClient == null) {
             throw new IllegalArgumentException("No configured dam with id: " + damId.getSpiKey());
@@ -141,15 +172,16 @@ public class ResourceController {
                 if (resource == null) {
                     Id collectionId = new Id();
                     collectionId.setSpiKey(damId.getSpiKey());
+                    collectionId.setRealm(realm);
                     collectionId.setCollectionId(damId.getCollectionId());
-                    String stringifiedCollectionId = encodeId(collectionId);
+                    String stringifiedCollectionId = collectionId.encodeId();
                     resource = viewToResource(stringifiedCollectionId, resourceId, entry.getValue());
                 }
 
                 DamId authorizationId = new DamId(damId);
                 authorizationId.setInterfaceType(view.getInterfaceName());
                 AccessInterface accessInterface = new AccessInterface();
-                accessInterface.setAuthorizationId(encodeId(authorizationId));
+                accessInterface.setAuthorizationId(authorizationId.encodeId());
                 accessInterface.setType(view.getInterfaceName());
                 accessInterface
                     .setUri(view.getInterfaceUri() != null ? URI.create(view.getInterfaceUri()) : null);
@@ -171,6 +203,7 @@ public class ResourceController {
                         Id id = new Id();
                         id.setSpiKey(entry.getKey());
                         id.setCollectionId(k);
+                        id.setRealm(realm);
                         Collection collection = resourceToCollection(id, resource);
                         collections.add(collection);
                     });
@@ -186,7 +219,10 @@ public class ResourceController {
 
     @GetMapping(value = "/{realm}/collections/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Collection> getCollection(@PathVariable("realm") String realm, @PathVariable("id") String collectionId) {
-        Id id = decodeId(collectionId);
+        Id id = Id.decodeId(collectionId);
+        if (!Objects.equals(realm, id.getRealm())) {
+            return Mono.error(() -> new NotFoundException("Resource does not exist within this realm"));
+        }
         ReactiveDamClient damClient = damClients.get(id.getSpiKey());
         if (damClient == null) {
             throw new IllegalArgumentException("No configured dam with id: " + id.getSpiKey());
@@ -202,7 +238,7 @@ public class ResourceController {
 
         final String damResourceTemplate = "%s;%s/views/%s/roles/%s/interfaces/%s";
         List<DamId> damAuthorizationIds = authorizationIds.stream()
-            .map(authorizationId -> new DamId(decodeId(authorizationId)))
+            .map(authorizationId -> new DamId(Id.decodeId(authorizationId)))
             .collect(Collectors.toList());
         URI v1AlphaCheckoutUri = UriUtil.selfLinkToApi(request, realm, "resources/checkout");
         UriComponentsBuilder v1AlphaCheckoutUriBuilder = UriComponentsBuilder.fromUri(v1AlphaCheckoutUri);
@@ -220,7 +256,7 @@ public class ResourceController {
 
 
     @GetMapping("/{realm}/resources/authorize")
-    public ResponseEntity<?> authorizeResources(ServerHttpRequest request,
+    public ResponseEntity<?> authorizeResources(WebSession session, ServerHttpRequest request,
         @PathVariable String realm,
         @RequestParam(required = false, name = "login_hint") String loginHint,
         @RequestParam(required = false, name = "redirect_uri") URI redirectUri,
@@ -228,44 +264,156 @@ public class ResourceController {
         @RequestParam("resource") List<String> authorizationIds,
         @RequestParam(defaultValue = "1h") String ttl) {
 
-        final String damResourceTemplate = "%s;%s/views/%s/roles/%s/interfaces/%s";
-        List<DamId> damAuthorizationIds = authorizationIds.stream()
-            .map(authorizationId -> new DamId(decodeId(authorizationId)))
-            .collect(Collectors.toList());
-        URI v1AlphaAuthorizeUri = UriUtil.selfLinkToApi(request, realm, "resources/authorize");
-        UriComponentsBuilder v1AlphaAuthorizeUriBuilder = UriComponentsBuilder.fromUri(v1AlphaAuthorizeUri);
-        if (loginHint != null && !loginHint.isEmpty()) {
-            v1AlphaAuthorizeUriBuilder.queryParam("loginHint", loginHint);
+        final URI nonNullRedirectUri = redirectUri != null ? redirectUri : UriUtil.selfLinkToUi(request, realm, "");
+        final URI postLoginEndpoint = getRedirectUri(request);
+        Map<String, List<DamId>> damResourceGroups = new HashMap<>();
+        authorizationIds.stream()
+            .map(authorizationId -> new DamId(Id.decodeId(authorizationId)))
+            .collect(Collectors.toList())
+            .forEach(id -> damResourceGroups.computeIfAbsent(id.getSpiKey(), (key) -> new ArrayList<>()).add(id));
+
+        OauthState lastState = null;
+        for (var e : damResourceGroups.entrySet()) {
+            final ReactiveDamOAuthClient client = damClientFactory.getDamOAuthClient(e.getKey());
+            final List<DamId> resources = e.getValue();
+            final List<URI> uris = resources.stream().map(id -> URI.create(String
+                .format("/dam/%s/resources/%s/views/%s/roles/%s/interfaces/%s", realm, id.getCollectionId(), id
+                    .getViewName(), id
+                    .getRoleName(), id.getInterfaceType())))
+                .map(uri -> dams.get(e.getKey()).getBaseUrl().resolve(uri)).collect(Collectors.toList());
+            final String stateString = UUID.randomUUID().toString();
+            final ZonedDateTime validUntil = ZonedDateTime.now().plusMinutes(10);
+            final URI authUrl = client
+                .getAuthorizeUrl(realm, stateString, scope, postLoginEndpoint, uris, loginHint, ttl);
+            final OauthState state = new OauthState(stateString, validUntil, realm, authUrl, nonNullRedirectUri, resources, lastState);
+            lastState = state;
         }
 
-        if (redirectUri != null) {
-            v1AlphaAuthorizeUriBuilder.queryParam("redirectUri", redirectUri.toString());
+        Map<String, Object> sessionAttributes = session.getAttributes();
+        sessionAttributes.put(RESOURCE_LOGIN_STATE_KEY, lastState);
+        return ResponseEntity.status(TEMPORARY_REDIRECT).location(lastState.getAuthUrl()).build();
+
+    }
+
+    @GetMapping("/_/resources/authorize/callback")
+    public Mono<? extends ResponseEntity<?>> handleTokenRequest(ServerHttpRequest request, WebSession session,
+        @RequestParam String code) {
+
+        final OauthState storedState = verifyStateAndClearSession(request, session);
+        final ReactiveDamOAuthClient oAuthClient = damClientFactory.getDamOAuthClient(storedState.getSpiKey());
+        final URI redirectUri = getRedirectUri(request);
+        final String realm = storedState.getRealm();
+
+        return oAuthClient.exchangeAuthorizationCodeForTokens(realm, redirectUri, code)
+            .flatMap(tokenResponse -> assembleResponse(request, session, storedState, tokenResponse))
+            .doOnError(exception -> {
+                log.info("Failed to negotiate token", exception);
+                throw new IllegalArgumentException(exception);
+            });
+    }
+
+    private Mono<ResponseEntity<?>> assembleResponse(ServerHttpRequest request, WebSession session, OauthState currentState, TokenResponse token) {
+        Set<String> missingItems = new HashSet<>();
+        if (token == null) {
+            missingItems.add("token");
+        } else {
+            if (token.getAccessToken() == null) {
+                missingItems.add("access_token");
+            }
         }
 
-        if (scope != null) {
-            v1AlphaAuthorizeUriBuilder.queryParam("scope", scope);
+        if (!missingItems.isEmpty()) {
+            throw new IllegalArgumentException("Incomplete token response: missing " + missingItems);
         }
 
-        if (ttl != null) {
-            v1AlphaAuthorizeUriBuilder.queryParam("ttl", ttl);
-        }
+        return eagerlyFetchAndPersistCartTokens(session, currentState, token.getAccessToken())
+            .then(Mono.defer(() -> {
 
-        damAuthorizationIds.stream().forEach(id -> {
-            String damIdResourcePair = String
-                .format(damResourceTemplate, id.getSpiKey(), id.getCollectionId(), id.getViewName(), id
-                    .getRoleName(), id.getInterfaceType());
-            v1AlphaAuthorizeUriBuilder.queryParam("resource", damIdResourcePair);
-        });
+                Optional<OauthState> nextStateOpt = currentState.getNextState();
+                if (nextStateOpt.isPresent()) {
 
-        return ResponseEntity.status(TEMPORARY_REDIRECT)
-            .location(v1AlphaAuthorizeUriBuilder.build().toUri())
-            .build();
+                    OauthState nextState = nextStateOpt.get();
+                    session.getAttributes().put(RESOURCE_LOGIN_STATE_KEY, nextState);
+                    return Mono
+                        .just(ResponseEntity.status(TEMPORARY_REDIRECT).location(nextState.getAuthUrl()).build());
+                } else {
+                    URI redirectTo = currentState.getDestinationAfterLogin()
+                        .map(possiblyRelativeUrl -> UriUtil.selfLinkToUi(request, currentState.getRealm(), "")
+                            .resolve(possiblyRelativeUrl))
+                        .orElseGet(() -> UriUtil.selfLinkToUi(request, currentState.getRealm(), ""));
+
+                    return Mono.just(ResponseEntity.status(TEMPORARY_REDIRECT).location(redirectTo).build());
+                }
+            }));
     }
 
 
+    private Mono<Void> eagerlyFetchAndPersistCartTokens(WebSession session, OauthState currentState, String token) {
+
+        return damClientFactory.getDamClient(currentState.getSpiKey()).checkoutCart(token)
+            .map(result -> {
+                result.getResourcesMap()
+                    .forEach((key, value) -> {
+                        DamId damAuthorizationId = getDamIdForResourceUri(URI.create(key), currentState
+                            .getResourceList());
+                        ResourceAccess resourceAccess = result.getAccessMap().get(value.getAccess());
+                        String accessToken = resourceAccess.getCredentialsMap().get("access_token");
+
+                        stateService.storeSessionBoundTokenForResource(session, damAuthorizationId, null, SessionEncryptionUtils
+                            .encryptData(session, accessToken));
+                    });
+                return Mono.empty();
+            }).then(Mono.empty());
+
+    }
+
+    private DamId getDamIdForResourceUri(URI baseUri, List<DamId> ids) {
+        final String template = "/dam/%s/resources/%s/views/%s/roles/%s/interfaces/%s";
+        return ids.stream().filter(id -> {
+            URI toResolve = URI
+                .create(String
+                    .format(template, id.getRealm(), id.getCollectionId(), id.getViewName(), id.getRoleName(), id
+                        .getInterfaceType()));
+            return baseUri.equals(baseUri.resolve(toResolve));
+        })
+            .findFirst().orElseThrow(() -> new IllegalArgumentException("Could not find dam id"));
+    }
+
+
+    private OauthState verifyStateAndClearSession(ServerHttpRequest request, WebSession session) {
+        final String stateStringParam = request.getQueryParams()
+            .getFirst("state");
+        final OauthState storedState = session.getAttribute(RESOURCE_LOGIN_STATE_KEY);
+        try {
+            if (storedState == null) {
+                throw new InvalidOAuthStateException("Missing 'state' in User's Session", null, null);
+            }
+
+            if (stateStringParam == null) {
+                throw new InvalidOAuthStateException("Missing 'state' parameter", null, null);
+            }
+
+            if (!Objects.equals(stateStringParam, storedState.getStateString())) {
+                throw new InvalidOAuthStateException("CSRF state cookie mismatch", null, null);
+            }
+
+            if (storedState.getValidUntil().isBefore(ZonedDateTime.now())) {
+                throw new InvalidOAuthStateException("Stale 'state' parameter", null, null);
+            }
+
+            return storedState;
+        } finally {
+            session.getAttributes().put(RESOURCE_LOGIN_STATE_KEY, null);
+        }
+    }
+
+    private URI getRedirectUri(ServerHttpRequest request) {
+        return URI.create(XForwardUtil.getExternalPath(request, "/api/v1beta/_/resources/authorize/callback"));
+    }
+
     private Collection resourceToCollection(Id id, DamService.Resource resource) {
         Collection collection = new Collection();
-        collection.setId(encodeId(id));
+        collection.setId(id.encodeId());
         collection.setName(resource.getUiOrDefault("label", ""));
         String imageUrlString = resource.getUiOrDefault("imageUrl", null);
         collection.setImageUrl(imageUrlString == null ? null : URI.create(imageUrlString));
@@ -306,32 +454,21 @@ public class ResourceController {
     }
 
 
-    public Id decodeId(String idString) {
-        String decodedIdString = new String(Base64.getUrlDecoder().decode(idString), StandardCharsets.UTF_8);
-        try {
-            return mapper.readValue(decodedIdString, Id.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public String encodeId(Id id) {
-        try {
-            return Base64.getUrlEncoder().withoutPadding()
-                .encodeToString(mapper.writeValueAsString(id).getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Data
-    public static class Id {
+    public static class Id implements Serializable {
+
+
+        private static final ObjectMapper mapper = new ObjectMapper();
+        private static final long serialVersionUID = -1479218240983143860L;
 
         /**
          * SPI Skey
          */
         @JsonProperty("k")
         String spiKey;
+
+        @JsonProperty("r")
+        String realm;
 
         /**
          * Collection Id
@@ -364,17 +501,41 @@ public class ResourceController {
             }
         }
 
+        public static Id decodeId(String idString) {
+            String decodedIdString = new String(Base64.getUrlDecoder().decode(idString), StandardCharsets.UTF_8);
+            try {
+                return mapper.readValue(decodedIdString, Id.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public String encodeId() {
+            try {
+                return Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(mapper.writeValueAsString(this).getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
 
     @Data
-    @NoArgsConstructor
     @EqualsAndHashCode(callSuper = true)
     public static class DamId extends Id {
+
+        private static final long serialVersionUID = 5610629031925135439L;
+
+        public DamId() {
+            additionalProperties = new HashMap<>();
+        }
 
         public DamId(Id id) {
             spiKey = id.getSpiKey();
             collectionId = id.getCollectionId();
+            realm = id.getRealm();
             if (id.getAdditionalProperties() == null) {
                 additionalProperties = new HashMap<>();
             } else {
@@ -389,7 +550,7 @@ public class ResourceController {
 
         @JsonIgnore
         public String getRoleName() {
-            return additionalProperties.get("r");
+            return additionalProperties.get("ro");
         }
 
         @JsonIgnore
@@ -404,7 +565,7 @@ public class ResourceController {
 
         @JsonIgnore
         public void setRoleName(String role) {
-            additionalProperties.put("r", role);
+            additionalProperties.put("ro", role);
         }
 
         @JsonIgnore
@@ -415,7 +576,31 @@ public class ResourceController {
         public String toFlatViewPrefix() {
             return String.format("/%s/%s/%s", collectionId, getViewName(), getRoleName());
         }
+    }
 
+    @Data
+    public static class OauthState implements Serializable {
+
+        private static final long serialVersionUID = 2882933228196739671L;
+        private final String stateString;
+        private final ZonedDateTime validUntil;
+        private final String realm;
+        private final URI authUrl;
+        private final URI destinationAfterLogin;
+        private final List<DamId> resourceList;
+        private final OauthState nextState;
+
+        public String getSpiKey() {
+            return resourceList != null ? resourceList.get(0).getSpiKey() : null;
+        }
+
+        public Optional<URI> getDestinationAfterLogin() {
+            return Optional.of(destinationAfterLogin);
+        }
+
+        public Optional<OauthState> getNextState() {
+            return Optional.ofNullable(nextState);
+        }
     }
 
 }

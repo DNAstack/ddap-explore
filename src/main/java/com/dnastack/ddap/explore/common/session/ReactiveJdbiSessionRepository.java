@@ -1,10 +1,9 @@
-package com.dnastack.ddap.explore.session;
+package com.dnastack.ddap.explore.common.session;
 
-import com.dnastack.ddap.explore.session.data.SessionDao;
+import com.dnastack.ddap.explore.common.session.data.SessionDao;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.parameters.P;
 import org.springframework.session.ReactiveSessionRepository;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;

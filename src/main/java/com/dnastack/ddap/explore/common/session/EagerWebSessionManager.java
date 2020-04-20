@@ -1,7 +1,5 @@
-package com.dnastack.ddap.explore.session;
+package com.dnastack.ddap.explore.common.session;
 
-import com.dnastack.ddap.ic.common.security.JwtUtil;
-import io.jsonwebtoken.Jwt;
 import java.util.List;
 import lombok.Getter;
 import org.springframework.util.Assert;

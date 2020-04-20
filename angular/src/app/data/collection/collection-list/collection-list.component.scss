@@ -10,6 +10,11 @@
   margin-right: 1rem;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+  }
 
   mat-card-title {
     min-height: 3rem;
@@ -20,10 +25,6 @@
     min-width: 20rem;
     height: 10rem;
     object-fit: cover;
-  }
-
-  .mat-card-actions {
-    margin: 0;
   }
 
   mat-icon {

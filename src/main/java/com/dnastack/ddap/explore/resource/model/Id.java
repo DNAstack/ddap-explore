@@ -27,6 +27,7 @@ public class Id implements Serializable {
     public Id(Id id) {
         this.spiKey = id.spiKey;
         this.collectionId = id.collectionId;
+        this.realm = id.realm;
         this.additionalProperties =
             id.additionalProperties != null ? new HashMap<>(id.additionalProperties) : new HashMap<>();
     }

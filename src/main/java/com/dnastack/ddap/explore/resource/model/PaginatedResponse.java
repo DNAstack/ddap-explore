@@ -10,4 +10,5 @@ public class PaginatedResponse<T> {
     @NonNull
     private List<T> data;
     private String nextPageToken;
+
 }

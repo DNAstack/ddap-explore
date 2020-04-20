@@ -14,7 +14,7 @@
                  type="number"
                  min="1"
                  placeholder="Duration of an access token">
-          <mat-hint align="start"><strong>Maximum duration is 90 days</strong> </mat-hint>
+          <mat-hint align="start"><strong>Maximum duration is 90 days</strong></mat-hint>
           <mat-error *ngIf="form.get('ttl').hasError('required')">
             Duration is required
           </mat-error>
@@ -51,9 +51,9 @@
 
     <div *ngIf="resourceAccesses$ | async as resourceAccesses"
          class="expansion-footer-content">
-      <ddap-view-access *ngFor="let resourceAccess of resourceAccesses | keyvalue"
-                        [access]="resourceAccess.value">
-      </ddap-view-access>
+      <ddap-collection-resource-credentials *ngFor="let resourceAccess of resourceAccesses | keyvalue"
+                                            [access]="resourceAccess.value">
+      </ddap-collection-resource-credentials>
     </div>
 
     <mat-action-row>

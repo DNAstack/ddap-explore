@@ -27,6 +27,7 @@
         <ddap-cli.version>1.0-23-g53026a0</ddap-cli.version>
         <ddap-common.version>0.0.1-41-g051d0ee</ddap-common.version>
         <jdbi.version>3.12.1</jdbi.version>
+        <version.nimbus>8.6</version.nimbus>
     </properties>
 
     <repositories>
@@ -104,6 +105,13 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>${jwt.version}</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <!--JWE-->
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>${version.nimbus}</version>
         </dependency>
 
         <!-- Proto -->

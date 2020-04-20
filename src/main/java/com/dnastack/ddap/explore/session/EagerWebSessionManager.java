@@ -1,5 +1,7 @@
 package com.dnastack.ddap.explore.session;
 
+import com.dnastack.ddap.ic.common.security.JwtUtil;
+import io.jsonwebtoken.Jwt;
 import java.util.List;
 import lombok.Getter;
 import org.springframework.util.Assert;
@@ -70,6 +72,10 @@ public class EagerWebSessionManager implements WebSessionManager {
 
         if (!session.isStarted()){
             session.start();
+        }
+
+        if (session.getAttribute(SessionEncryptionUtils.SESSION_ENCRYPT_KEY_NAME) == null){
+            SessionEncryptionUtils.setSessionEncryption(exchange,session);
         }
 
         if (ids.isEmpty() || !session.getId().equals(ids.get(0))) {

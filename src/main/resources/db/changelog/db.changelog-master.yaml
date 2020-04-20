@@ -22,11 +22,11 @@ databaseChangeLog:
                     The Session id
               - column:
                   name: last_accessed_time
-                  type: timestamp
+                  type: timestamptz
                   remarks: the last time this session was accessed
               - column:
                   name: creation_time
-                  type: timestamp
+                  type: timestamptz
                   remarks: the time this session was first created
               - column:
                   name: max_inactive_interval
@@ -76,11 +76,11 @@ databaseChangeLog:
                     The authorization id for a resource
               - column:
                   name: expiration_time
-                  type: timestamp
+                  type: timestamptz
                   remarks: the time this credential will expire
               - column:
                   name: creation_time
-                  type: timestamp
+                  type: timestamptz
                   remarks: the time this credential was first created
               - column:
                   name: token

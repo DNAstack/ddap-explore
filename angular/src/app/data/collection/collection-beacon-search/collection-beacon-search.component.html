@@ -6,18 +6,18 @@
 </ddaplib-searchable-header>
 
 <ddaplib-main>
-  <ddap-limit-search *ngIf="collectionName$ | async as collectionName"
-                     (change)="limitSearchChange($event)"
-                     [checked]="limitSearch"
-                     [collectionName]="collectionName">
-  </ddap-limit-search>
+  <ddap-beacon-limit-search *ngIf="collectionName$ | async as collectionName"
+                            (change)="limitSearchChange($event)"
+                            [checked]="limitSearch"
+                            [collectionName]="collectionName">
+  </ddap-beacon-limit-search>
 
-  <div *ngIf="!resultsAction.closed"
+  <div *ngIf="!queryResultsSubscription.closed"
        class="ddap-center">
     <mat-spinner></mat-spinner>
   </div>
 
-  <div *ngIf="resultsAction.closed && !results?.length"
+  <div *ngIf="queryResultsSubscription.closed && !results?.length"
        class="ddap-center">
     <h3>No results</h3>
     <p>
@@ -31,7 +31,6 @@
   </div>
 
   <ng-template [ngIf]="results?.length">
-
     <a *ngIf="resourceAuthUrl && requireAuth"
        [href]="resourceAuthUrl"
        data-se="btn-authorize">

@@ -5,26 +5,28 @@ import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 
-import { BeaconResponse } from './beacon-response.model';
-import { DnaChangeQueryParser } from './dna-change-query.parser';
+import { BeaconSearchQueryParser } from './beacon-search-query.parser';
+import { BeaconSearchRequestModel, BeaconSearchResponseModel } from './beacon-search.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ResourceBeaconService {
+export class BeaconSearchService {
 
-  constructor(private http: HttpClient,
-              private errorHandler: ErrorHandlerService) {
+  constructor(
+    private http: HttpClient,
+    private errorHandler: ErrorHandlerService
+  ) {
   }
 
-  query(queryValue: BeaconServiceQuery, accessToken?: string): Observable<BeaconResponse[]> {
-    const {query, assembly, resource, damId} = queryValue;
+  query(queryValue: BeaconSearchRequestModel, accessToken?: string): Observable<BeaconSearchResponseModel[]> {
+    const { query, assembly, resource, damId } = queryValue;
 
-    if (!DnaChangeQueryParser.validate(query)) {
+    if (!BeaconSearchQueryParser.validate(query)) {
       return of([]);
     }
 
-    const params = DnaChangeQueryParser.parseParams(query);
+    const params = BeaconSearchQueryParser.parseParams(query);
     params.assemblyId = assembly;
     if (accessToken) {
       params.accessToken = accessToken;
@@ -37,29 +39,21 @@ export class ResourceBeaconService {
     return this.queryAll(params);
   }
 
-  private queryBeacon(damId: string, resourceId: string, params?): Observable<BeaconResponse[]> {
-    return this.http.get<BeaconResponse[]>(
+  private queryBeacon(damId: string, resourceId: string, params?: BeaconSearchRequestModel): Observable<BeaconSearchResponseModel[]> {
+    return this.http.get<BeaconSearchResponseModel[]>(
       `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/resources/${damId}/${resourceId}/search`,
-      {params}
+      { params }
     ).pipe(
       this.errorHandler.notifyOnError(`Can't query beacon for resource ${resourceId}.`)
     );
   }
 
-  private queryAll(params = {}): Observable<BeaconResponse[]> {
-    return this.http.get<BeaconResponse[]>(
+  private queryAll(params?: BeaconSearchRequestModel): Observable<BeaconSearchResponseModel[]> {
+    return this.http.get<BeaconSearchResponseModel[]>(
       `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/resources/search`,
-      {params}
+      { params }
     ).pipe(
       this.errorHandler.notifyOnError(`Can't query beacons.`)
     );
   }
-}
-
-export interface BeaconServiceQuery {
-  query: string;
-  assembly: string;
-  resource?: string;
-  damId?: string;
-  limitSearch?: boolean;
 }

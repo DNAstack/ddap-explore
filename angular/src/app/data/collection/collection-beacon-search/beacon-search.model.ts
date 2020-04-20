@@ -1,5 +1,6 @@
+import { KeyValuePair } from '../../../shared/key-value-pair.model';
 
-export interface BeaconResponse {
+export interface BeaconSearchResponseModel {
   beaconInfo: {
     name: string,
     damId: string,
@@ -22,4 +23,19 @@ export interface BeaconResponse {
     errorMessage: string
   };
   exists: boolean;
+}
+
+export interface BeaconSearchRequestModel extends KeyValuePair<string> {
+  limitSearch: string;
+  query: string;
+  assembly: string;
+  resource?: string;
+  collection?: string;
+  damId?: string;
+}
+
+export enum Assembly {
+  grch37 = 'GRCh37',
+  grch38 = 'GRCh38',
+  ncbi36 = 'NCBI36',
 }

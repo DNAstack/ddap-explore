@@ -9,13 +9,12 @@ import { CollectionModel } from '../../../shared/collection.model';
 import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.service';
 import { ResourcesResponseModel } from '../../../shared/resource.model';
 import { DataService } from '../../data.service';
-import { ResourceBeaconService } from '../beacon-search/resource-beacon.service';
 
 @Component({
   selector: 'ddap-collection-detail',
   templateUrl: './collection-detail.component.html',
   styleUrls: ['./collection-detail.component.scss'],
-  providers: [ImagePlaceholderRetriever, ResourceBeaconService],
+  providers: [ImagePlaceholderRetriever],
 })
 export class CollectionDetailComponent implements OnInit {
 

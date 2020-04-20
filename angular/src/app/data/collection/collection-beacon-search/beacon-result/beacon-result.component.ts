@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { BeaconResponse } from '../beacon-response.model';
+import { BeaconSearchResponseModel } from '../beacon-search.model';
 
 @Component({
   selector: 'ddap-beacon-result',
@@ -11,7 +11,7 @@ import { BeaconResponse } from '../beacon-response.model';
 export class BeaconResultComponent implements OnInit {
 
   @Input()
-  beacon: BeaconResponse;
+  beacon: BeaconSearchResponseModel;
 
   realm: string;
 
@@ -26,8 +26,9 @@ export class BeaconResultComponent implements OnInit {
   }
 
   getLinkToResource() {
+    // FIXME: to be updated
     const { damId, resourceId } = this.beacon.beaconInfo;
-    return `/${this.realm}/data/${damId}/${resourceId}`;
+    return `/${this.realm}/data/collections/${resourceId}`;
   }
 
 }

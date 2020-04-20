@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 @Injectable({
   providedIn: 'root',
 })
-export class ResourceAccessFormBuilder {
+export class CollectionResourceFormBuilder {
 
   constructor(private formBuilder: FormBuilder) {
   }

@@ -8,14 +8,14 @@
 </ddaplib-searchable-header>
 
 <ddaplib-main *ngIf="collection$ | async as collection">
-  <ddap-resource-logo [imageUrl]="(collection$ | async)?.imageUrl">
+  <ddap-collection-logo [imageUrl]="(collection$ | async)?.imageUrl">
     <ddap-beacon-limit-search *ngIf="searchOpened"
                               (change)="limitSearch = !limitSearch"
                               [collectionName]="(collection$ | async)?.name"
                               [checked]="limitSearch"
                               class="filter-top-border filter-inline">
     </ddap-beacon-limit-search>
-  </ddap-resource-logo>
+  </ddap-collection-logo>
 
   <ng-container *ngIf="collectionResources$ | async as collectionResourcesResponse">
     <div class="ddap-column-panel">
@@ -30,8 +30,8 @@
         </h3>
         <mat-list class="ddap-resource-views">
           <mat-list-item *ngFor="let resource of collectionResourcesResponse.data">
-            <ddap-resource-view-item [resource]="resource">
-            </ddap-resource-view-item>
+            <ddap-collection-resource [resource]="resource">
+            </ddap-collection-resource>
           </mat-list-item>
         </mat-list>
       </div>

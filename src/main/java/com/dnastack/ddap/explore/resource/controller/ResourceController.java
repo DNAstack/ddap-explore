@@ -6,33 +6,26 @@ import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.config.DamProperties;
 import com.dnastack.ddap.common.config.DamsConfig;
 import com.dnastack.ddap.common.security.InvalidOAuthStateException;
-import com.dnastack.ddap.common.security.OAuthStateHandler;
 import com.dnastack.ddap.common.util.http.UriUtil;
 import com.dnastack.ddap.common.util.http.XForwardUtil;
 import com.dnastack.ddap.explore.dam.client.DamClientFactory;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Collection;
+import com.dnastack.ddap.explore.resource.model.DamId;
+import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.OauthState;
 import com.dnastack.ddap.explore.resource.model.PaginatedResponse;
 import com.dnastack.ddap.explore.resource.model.Resource;
 import com.dnastack.ddap.explore.resource.service.UserCredentialService;
-import com.dnastack.ddap.explore.common.session.SessionEncryptionUtils;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dam.v1.DamService;
 import dam.v1.DamService.GetFlatViewsResponse.FlatView;
 import dam.v1.DamService.ResourceResults.ResourceAccess;
-import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -44,21 +37,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.WebSession;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -72,43 +63,43 @@ public class ResourceController {
 
     private Map<String, ReactiveDamClient> damClients;
     private DamClientFactory damClientFactory;
-    private final OAuthStateHandler stateHandler;
     private Map<String, DamProperties> dams;
-    private ObjectMapper mapper;
-    private UserCredentialService stateService;
+    private UserCredentialService userCredentialService;
 
     @Autowired
-    public ResourceController(Map<String, ReactiveDamClient> damClients, OAuthStateHandler stateHandler, DamClientFactory damClientFactory, DamsConfig damsConfig, ObjectMapper objectMapper, UserCredentialService userCredentialService) {
+    public ResourceController(Map<String, ReactiveDamClient> damClients, DamClientFactory damClientFactory, DamsConfig damsConfig, UserCredentialService userCredentialService) {
         this.damClients = damClients;
         this.damClientFactory = damClientFactory;
         this.dams = Map.copyOf(damsConfig.getStaticDamsConfig());
-        this.mapper = objectMapper;
-        this.stateService = userCredentialService;
-        this.stateHandler = stateHandler;
+        this.userCredentialService = userCredentialService;
     }
 
 
     @GetMapping(value = "/{realm}/resources", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<PaginatedResponse<Resource>> listResources(@PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) String collection, @RequestParam(value = "interface_type", required = false) String interfaceType, @RequestParam(value = "interface_uri", required = false) String interfaceUri, @RequestParam(value = "page_token", required = false) String pageToken) {
-        Id collectionId = collection != null ? Id.decodeId(collection) : null;
+    public Mono<PaginatedResponse<Resource>> listResources(@PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) List<String> collections, @RequestParam(value = "interface_type", required = false) List<String> interfaceTypesToFilter, @RequestParam(value = "interface_uri", required = false) List<String> interfaceUrisToFilter, @RequestParam(value = "page_token", required = false) String pageToken) {
         return Flux.concat(damClients.entrySet().stream().map(entry -> {
-            return entry.getValue().getFlattenedViews(realm)
-                .map(views -> {
-                    return views.entrySet().stream().map(Entry::getValue).filter(view -> {
-                        boolean keep = true;
-                        if (collectionId != null) {
-                            keep &= collectionId.getCollectionId().equals(view.getResourceName());
-                        }
-                        if (interfaceType != null) {
-                            keep &= interfaceType.equals(view.getInterfaceName());
-                        }
+            List<Id> collectionIdsToFilter = new ArrayList<>();
+            if (collections != null && !collections.isEmpty()) {
+                collections.stream().map(Id::decodeId).forEach(collectionIdsToFilter::add);
+            }
 
-                        if (interfaceUri != null) {
-                            keep &= interfaceUri.equals(view.getInterfaceUri());
-                        }
-                        return keep;
-                    }).collect(Collectors.toList());
-                })
+            return entry.getValue().getFlattenedViews(realm)
+                .map(views -> views.values().stream().filter(view -> {
+                    boolean keep = true;
+                    if (!collectionIdsToFilter.isEmpty()) {
+                        keep = collectionIdsToFilter.stream()
+                            .anyMatch(id -> id.getCollectionId().equals(view.getResourceName()));
+                    }
+                    if (interfaceTypesToFilter != null && !interfaceTypesToFilter.isEmpty()) {
+                        keep &= interfaceTypesToFilter.stream()
+                            .anyMatch(type -> type.equals(view.getInterfaceName()));
+                    }
+
+                    if (interfaceUrisToFilter != null && !interfaceUrisToFilter.isEmpty()) {
+                        keep &= shouldKeepInterfaceUri(view.getInterfaceUri(), interfaceUrisToFilter);
+                    }
+                    return keep;
+                }).collect(Collectors.toList()))
                 .map((views) -> {
                     LinkedHashMap<String, Resource> resources = new LinkedHashMap<>();
                     views.forEach((view) -> {
@@ -121,9 +112,8 @@ public class ResourceController {
                         id.setRoleName(view.getRoleName());
                         String stringifiedId = id.encodeId();
                         String stringifiedColId = viewColId.encodeId();
-
                         Resource resource = resources
-                            .computeIfAbsent(stringifiedId, (idKey) -> viewToResource(stringifiedColId, stringifiedId, view));
+                            .computeIfAbsent(stringifiedId, (idKey -> viewToResource(stringifiedColId, stringifiedId, view)));
                         DamId authorizationId = new DamId(id);
                         authorizationId.setInterfaceType(view.getInterfaceName());
                         AccessInterface accessInterface = new AccessInterface();
@@ -133,7 +123,6 @@ public class ResourceController {
                             .setUri(view.getInterfaceUri() != null ? URI.create(view.getInterfaceUri()) : null);
 
                         resource.getInterfaces().add(accessInterface);
-                        return;
                     });
                     return resources.values();
                 });
@@ -145,6 +134,16 @@ public class ResourceController {
 
     }
 
+
+    private boolean shouldKeepInterfaceUri(String interfaceUri, List<String> testUris) {
+        return testUris.stream().anyMatch(testUri -> {
+            String testInerfaceUri = interfaceUri;
+            if (!testInerfaceUri.endsWith("/") && testUri.length() > testInerfaceUri.length()) {
+                testInerfaceUri = testInerfaceUri + "/";
+            }
+            return testUri.startsWith(testInerfaceUri);
+        });
+    }
 
     @GetMapping(value = "/{realm}/resources/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Resource> getResource(@PathVariable("realm") String realm, @PathVariable("id") String resourceId) {
@@ -195,21 +194,19 @@ public class ResourceController {
 
     @GetMapping(value = "/{realm}/collections", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<PaginatedResponse<Collection>> listCollections(@PathVariable("realm") String realm) {
-        return Flux.concat(damClients.entrySet().stream().map(entry -> {
-            return entry.getValue().getResources(realm)
-                .map(resources -> {
-                    List<Collection> collections = new ArrayList<>();
-                    resources.forEach((k, resource) -> {
-                        Id id = new Id();
-                        id.setSpiKey(entry.getKey());
-                        id.setCollectionId(k);
-                        id.setRealm(realm);
-                        Collection collection = resourceToCollection(id, resource);
-                        collections.add(collection);
-                    });
-                    return collections;
+        return Flux.concat(damClients.entrySet().stream().map(entry -> entry.getValue().getResources(realm)
+            .map(resources -> {
+                List<Collection> collections = new ArrayList<>();
+                resources.forEach((k, resource) -> {
+                    Id id = new Id();
+                    id.setSpiKey(entry.getKey());
+                    id.setCollectionId(k);
+                    id.setRealm(realm);
+                    Collection collection = resourceToCollection(id, resource);
+                    collections.add(collection);
                 });
-        }).collect(Collectors.toList()))
+                return collections;
+            })).collect(Collectors.toList()))
             .reduce(new ArrayList<Collection>(), (initial, collections) -> {
                 initial.addAll(collections);
                 return initial;
@@ -230,30 +227,6 @@ public class ResourceController {
         return damClient.getResource(realm, id.getCollectionId())
             .map(resource -> resourceToCollection(id, resource));
     }
-
-    @GetMapping("/{realm}/resources/checkout")
-    public ResponseEntity<?> checkout(ServerHttpRequest request,
-        @PathVariable String realm,
-        @RequestParam("resource") List<String> authorizationIds) {
-
-        final String damResourceTemplate = "%s;%s/views/%s/roles/%s/interfaces/%s";
-        List<DamId> damAuthorizationIds = authorizationIds.stream()
-            .map(authorizationId -> new DamId(Id.decodeId(authorizationId)))
-            .collect(Collectors.toList());
-        URI v1AlphaCheckoutUri = UriUtil.selfLinkToApi(request, realm, "resources/checkout");
-        UriComponentsBuilder v1AlphaCheckoutUriBuilder = UriComponentsBuilder.fromUri(v1AlphaCheckoutUri);
-        damAuthorizationIds.stream().forEach(id -> {
-            String damIdResourcePair = String
-                .format(damResourceTemplate, id.getSpiKey(), id.getCollectionId(), id.getViewName(), id
-                    .getRoleName(), id.getInterfaceType());
-            v1AlphaCheckoutUriBuilder.queryParam("resource", damIdResourcePair);
-        });
-
-        return ResponseEntity.status(TEMPORARY_REDIRECT)
-            .location(v1AlphaCheckoutUriBuilder.build().toUri())
-            .build();
-    }
-
 
     @GetMapping("/{realm}/resources/authorize")
     public ResponseEntity<?> authorizeResources(WebSession session, ServerHttpRequest request,
@@ -285,8 +258,7 @@ public class ResourceController {
             final ZonedDateTime validUntil = ZonedDateTime.now().plusMinutes(10);
             final URI authUrl = client
                 .getAuthorizeUrl(realm, stateString, scope, postLoginEndpoint, uris, loginHint, ttl);
-            final OauthState state = new OauthState(stateString, validUntil, realm, authUrl, nonNullRedirectUri, resources, lastState);
-            lastState = state;
+            lastState = new OauthState(stateString, validUntil, parseDuration(ttl), realm, authUrl, nonNullRedirectUri, resources, lastState);
         }
 
         Map<String, Object> sessionAttributes = session.getAttributes();
@@ -310,6 +282,18 @@ public class ResourceController {
                 log.info("Failed to negotiate token", exception);
                 throw new IllegalArgumentException(exception);
             });
+    }
+
+    private Duration parseDuration(String period) {
+        try {
+            if (!period.startsWith("PT")) {
+                period = "PT" + period;
+
+            }
+            return Duration.parse(period);
+        } catch (Exception e) {
+            return Duration.ofHours(1);
+        }
     }
 
     private Mono<ResponseEntity<?>> assembleResponse(ServerHttpRequest request, WebSession session, OauthState currentState, TokenResponse token) {
@@ -358,9 +342,9 @@ public class ResourceController {
                             .getResourceList());
                         ResourceAccess resourceAccess = result.getAccessMap().get(value.getAccess());
                         String accessToken = resourceAccess.getCredentialsMap().get("access_token");
-
-                        stateService.storeSessionBoundTokenForResource(session, damAuthorizationId, null, SessionEncryptionUtils
-                            .encryptData(session, accessToken));
+                        userCredentialService
+                            .storeSessionBoundTokenForResource(session, damAuthorizationId, ZonedDateTime.now()
+                                .plus(currentState.getTtl()), accessToken);
                     });
                 return Mono.empty();
             }).then(Mono.empty());
@@ -453,154 +437,5 @@ public class ResourceController {
             .metadata(metadata).build();
     }
 
-
-    @Data
-    public static class Id implements Serializable {
-
-
-        private static final ObjectMapper mapper = new ObjectMapper();
-        private static final long serialVersionUID = -1479218240983143860L;
-
-        /**
-         * SPI Skey
-         */
-        @JsonProperty("k")
-        String spiKey;
-
-        @JsonProperty("r")
-        String realm;
-
-        /**
-         * Collection Id
-         */
-        @JsonProperty("c")
-        String collectionId;
-
-        @JsonIgnore
-        Map<String, String> additionalProperties;
-
-        @JsonAnyGetter
-        public Map<String, String> getAdditionalProperties() {
-            return additionalProperties;
-        }
-
-        @JsonAnySetter
-        public void setAdditionalProperties(String key, String value) {
-            if (additionalProperties == null) {
-                additionalProperties = new HashMap<>();
-            }
-            additionalProperties.put(key, value);
-        }
-
-        @JsonAnySetter
-        public void setAdditionalProperties(Map<String, String> additionalProperties) {
-            if (this.additionalProperties == null) {
-                this.additionalProperties = additionalProperties;
-            } else {
-                this.additionalProperties.putAll(additionalProperties);
-            }
-        }
-
-        public static Id decodeId(String idString) {
-            String decodedIdString = new String(Base64.getUrlDecoder().decode(idString), StandardCharsets.UTF_8);
-            try {
-                return mapper.readValue(decodedIdString, Id.class);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        public String encodeId() {
-            try {
-                return Base64.getUrlEncoder().withoutPadding()
-                    .encodeToString(mapper.writeValueAsString(this).getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-    }
-
-
-    @Data
-    @EqualsAndHashCode(callSuper = true)
-    public static class DamId extends Id {
-
-        private static final long serialVersionUID = 5610629031925135439L;
-
-        public DamId() {
-            additionalProperties = new HashMap<>();
-        }
-
-        public DamId(Id id) {
-            spiKey = id.getSpiKey();
-            collectionId = id.getCollectionId();
-            realm = id.getRealm();
-            if (id.getAdditionalProperties() == null) {
-                additionalProperties = new HashMap<>();
-            } else {
-                additionalProperties = id.getAdditionalProperties();
-            }
-        }
-
-        @JsonIgnore
-        public String getViewName() {
-            return additionalProperties.get("v");
-        }
-
-        @JsonIgnore
-        public String getRoleName() {
-            return additionalProperties.get("ro");
-        }
-
-        @JsonIgnore
-        public String getInterfaceType() {
-            return additionalProperties.get("i");
-        }
-
-        @JsonIgnore
-        public void setViewName(String view) {
-            additionalProperties.put("v", view);
-        }
-
-        @JsonIgnore
-        public void setRoleName(String role) {
-            additionalProperties.put("ro", role);
-        }
-
-        @JsonIgnore
-        public void setInterfaceType(String interfaceType) {
-            additionalProperties.put("i", interfaceType);
-        }
-
-        public String toFlatViewPrefix() {
-            return String.format("/%s/%s/%s", collectionId, getViewName(), getRoleName());
-        }
-    }
-
-    @Data
-    public static class OauthState implements Serializable {
-
-        private static final long serialVersionUID = 2882933228196739671L;
-        private final String stateString;
-        private final ZonedDateTime validUntil;
-        private final String realm;
-        private final URI authUrl;
-        private final URI destinationAfterLogin;
-        private final List<DamId> resourceList;
-        private final OauthState nextState;
-
-        public String getSpiKey() {
-            return resourceList != null ? resourceList.get(0).getSpiKey() : null;
-        }
-
-        public Optional<URI> getDestinationAfterLogin() {
-            return Optional.of(destinationAfterLogin);
-        }
-
-        public Optional<OauthState> getNextState() {
-            return Optional.ofNullable(nextState);
-        }
-    }
 
 }

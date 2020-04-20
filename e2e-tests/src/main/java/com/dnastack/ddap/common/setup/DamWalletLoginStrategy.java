@@ -1,30 +1,11 @@
 package com.dnastack.ddap.common.setup;
 
-import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_BASE_URL;
-import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_PASSWORD;
-import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_USERNAME;
-import static java.lang.String.format;
-import static java.lang.String.join;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertTrue;
-
 import com.dnastack.ddap.common.PolicyRequirementFailedException;
 import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
 import com.dnastack.ddap.common.util.EnvUtil;
 import com.dnastack.ddap.common.util.WebDriverCookieHelper;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,6 +22,22 @@ import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.openqa.selenium.WebDriver;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.*;
+import static java.lang.String.format;
+import static java.lang.String.join;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 @Slf4j
 public class DamWalletLoginStrategy implements LoginStrategy {
@@ -94,9 +91,7 @@ public class DamWalletLoginStrategy implements LoginStrategy {
             assertThat("Response body: " + responseBody, response.getStatusLine().getStatusCode(), is(200));
         }
 
-        final CsrfToken csrfToken = walletLogin(httpclient, loginInfo);
-
-        acceptPermissions(httpclient, csrfToken);
+        walletLogin(httpclient, loginInfo);
 
         return cookieStore;
     }
@@ -146,9 +141,7 @@ public class DamWalletLoginStrategy implements LoginStrategy {
             assertThat("Response body: " + responseBody, response.getStatusLine().getStatusCode(), is(200));
         }
 
-        final CsrfToken csrfToken = walletLogin(httpclient, loginInfo);
-
-        final URI finalLocation = acceptPermissions(httpclient, csrfToken);
+        final URI finalLocation = walletLogin(httpclient, loginInfo);
 
         WebDriverCookieHelper.addCookiesFromStoreToSelenium(cookieStore, driver);
         driver.get(finalLocation.toString());
@@ -166,34 +159,24 @@ public class DamWalletLoginStrategy implements LoginStrategy {
             .build();
     }
 
-    private CsrfToken walletLogin(HttpClient httpClient, LoginInfo loginInfo) throws IOException {
+    private URI walletLogin(HttpClient httpClient, LoginInfo loginInfo) throws IOException {
         final HttpGet request = new HttpGet(format("%s/login/token?token=%s", walletConfig.getWalletUrl(), loginInfo
             .getPersonalAccessToken()));
 
         final HttpClientContext context = new HttpClientContext();
         final HttpResponse response = httpClient.execute(request, context);
         String responseBody = EntityUtils.toString(response.getEntity());
+        final List<URI> redirectLocations = context.getRedirectLocations();
         final String responseMessage = format("Redirects:\n%s\n\nHeaders: %s\nResponse body: %s",
-            context.getRedirectLocations()
-                .stream()
-                .map(uri -> "\t" + uri)
-                .collect(Collectors.joining("\n")),
-            Arrays.toString(response.getAllHeaders()),
-            responseBody);
+                                              redirectLocations
+                                                     .stream()
+                                                     .map(uri -> "\t" + uri)
+                                                     .collect(Collectors.joining("\n")),
+                                              Arrays.toString(response.getAllHeaders()),
+                                              responseBody);
         assertThat(responseMessage, response.getStatusLine().getStatusCode(), is(200));
 
-            /*
-             There is a form for consenting to sharing claims with DDAP that must be clicked. It contains a CSRF
-             token in the page within a JavaScript function. This was a quick way to workaround the issue but it is brittle.
-             We need to figure out a proper way for test users to log in non-interactively in the DAM.
-             */
-        final Matcher pathMatcher = PATH_PATTERN.matcher(responseBody);
-        final Matcher stateMatcher = STATE_PATTERN.matcher(responseBody);
-
-        assertTrue(responseBody, pathMatcher.find());
-        assertTrue(responseBody, stateMatcher.find());
-
-        return new CsrfToken(pathMatcher.group(1), stateMatcher.group(1));
+        return redirectLocations.get(redirectLocations.size()-1);
     }
 
     private URI acceptPermissions(HttpClient httpClient, CsrfToken csrfToken) throws IOException {

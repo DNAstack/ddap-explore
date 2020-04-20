@@ -9,37 +9,36 @@ import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.ser
 import { dam } from '../../../shared/proto/dam-service';
 import { ResourceService } from '../../../shared/resource/resource.service';
 import { DataService } from '../../data.service';
-import { BeaconResponse } from '../beacon-search/beacon-response.model';
-import { BeaconSearchParams } from '../beacon-search/beacon-search-params.model';
-import { ResourceBeaconService } from '../beacon-search/resource-beacon.service';
+
 import IResourceResults = dam.v1.IResourceResults;
+import { BeaconSearchRequestModel, BeaconSearchResponseModel } from './beacon-search.model';
+import { BeaconSearchService } from './beacon-search.service';
 
 @Component({
   selector: 'ddap-collection-beacon-search',
   templateUrl: './collection-beacon-search.component.html',
   styleUrls: ['./collection-beacon-search.component.scss'],
-  providers: [ImagePlaceholderRetriever, ResourceBeaconService],
+  providers: [ImagePlaceholderRetriever],
 })
-export class CollectionBeaconSearchComponent implements OnDestroy, OnInit {
+export class CollectionBeaconSearchComponent implements OnInit {
 
   collectionName$: Observable<string>;
+  queryResultsSubscription: Subscription;
 
   views: any;
-  results: BeaconResponse[] = [];
-  resultsAction: Subscription;
+  results: BeaconSearchResponseModel[] = [];
   limitSearch = false;
   resourceAuthUrl: string;
   requireAuth = true;
 
-  private queryParamsSubscription: Subscription;
-  private searchParams: BeaconSearchParams;
+  private searchParams: BeaconSearchRequestModel;
 
   constructor(private route: ActivatedRoute,
               private appConfigService: AppConfigService,
               private router: Router,
               private activatedRoute: ActivatedRoute,
               private dataService: DataService,
-              private beaconService: ResourceBeaconService,
+              private beaconService: BeaconSearchService,
               private resourceService: ResourceService) {
   }
 
@@ -54,25 +53,22 @@ export class CollectionBeaconSearchComponent implements OnDestroy, OnInit {
     });
   }
 
-  ngOnDestroy() {
-    this.queryParamsSubscription.unsubscribe();
-  }
-
   limitSearchChange($event) {
     const limitSearch = $event.checked;
-    const searchParams: BeaconSearchParams = {
+    const searchParams: BeaconSearchRequestModel = {
       ...this.searchParams,
        // Don't put a boolean into this map, so that we are always pulling out the limitSearch as a string
-      limitSearch: limitSearch + '',
+      limitSearch: `${limitSearch}`,
     };
     this.router.navigate(['.'], {
-      relativeTo: this.activatedRoute, replaceUrl: true,
+      relativeTo: this.activatedRoute,
+      replaceUrl: true,
       queryParams: { ...searchParams },
     });
   }
 
   private initialize() {
-    this.queryParamsSubscription = this.route.queryParams
+    this.route.queryParams
       .subscribe(({ auth, ...searchState }: any) => {
         this.results = [];
         this.initializeComponentFields(searchState);
@@ -80,10 +76,10 @@ export class CollectionBeaconSearchComponent implements OnDestroy, OnInit {
 
         let allBeaconsResponse = [];
         let damIdResourcePathPairs: string[];
-        this.resultsAction = this.beaconService.query(queryParams)
+        this.queryResultsSubscription = this.beaconService.query(queryParams)
           .pipe(
             filter((beaconResponse) => beaconResponse && beaconResponse.length > 0),
-            flatMap((beaconResponse: BeaconResponse[]) => {
+            flatMap((beaconResponse: BeaconSearchResponseModel[]) => {
               allBeaconsResponse = beaconResponse;
               damIdResourcePathPairs = beaconResponse.map((result) => {
                 return `${result.beaconInfo.damId};${result.beaconInfo.resourcePath}`;
@@ -106,7 +102,7 @@ export class CollectionBeaconSearchComponent implements OnDestroy, OnInit {
                 });
             }),
             mergeAll()
-          ).subscribe((beaconResponse: BeaconResponse[]) => {
+          ).subscribe((beaconResponse: BeaconSearchResponseModel[]) => {
               beaconResponse.forEach((response) => this.results.push(response));
           },
           (error) => {
@@ -117,7 +113,7 @@ export class CollectionBeaconSearchComponent implements OnDestroy, OnInit {
       });
   }
 
-  private initializeComponentFields(searchParams: BeaconSearchParams) {
+  private initializeComponentFields(searchParams: BeaconSearchRequestModel) {
     const collectionId = searchParams.collection;
     if (collectionId) {
       this.collectionName$ = this.dataService.getCollection(collectionId)
@@ -127,7 +123,7 @@ export class CollectionBeaconSearchComponent implements OnDestroy, OnInit {
     this.limitSearch = searchParams.limitSearch === 'true';
   }
 
-  private getResourcePathsFrom(queryResponse: BeaconResponse[]): string[] {
+  private getResourcePathsFrom(queryResponse: BeaconSearchResponseModel[]): string[] {
     return queryResponse.map((beaconResponse) => {
       const { beaconInfo } = beaconResponse;
       return `${beaconInfo.damId};${beaconInfo.resourcePath}`;

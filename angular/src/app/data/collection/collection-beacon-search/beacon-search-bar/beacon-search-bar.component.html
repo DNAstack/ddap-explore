@@ -1,27 +1,27 @@
-<form novalidate
-      class="flex vertical-center"
-      (ngSubmit)="onSubmit(searchForm)"
-      [formGroup]="searchForm">
-  <mat-form-field class="input-select" appearance="outline">
+<form [formGroup]="form"
+      novalidate
+      class="flex vertical-center">
+  <mat-form-field class="input-select"
+                  appearance="outline">
     <mat-select class="mat-button-wrapper"
                 name="assembly"
                 formControlName="assembly">
-      <mat-option *ngFor="let assemblyId of assemblyIds"
-                  [value]="assemblyId">
-        {{ assemblyId }}
+      <mat-option *ngFor="let assembly of assemblies"
+                  [value]="assembly">
+        {{ assembly }}
       </mat-option>
     </mat-select>
   </mat-form-field>
   <mat-form-field class="stretch">
-    <input name="query"
+    <!-- FIXME: placeholder color is overwritten to black -->
+    <input [placeholder]="form.get('query').value ? '' : placeholder"
            matInput
-           type="search"
            formControlName="query"
-           [placeholder]="searchForm.get('query').value ? '' : placeholder"
            data-se="search-input">
   </mat-form-field>
   <span class="fill-space"></span>
-  <button mat-button
+  <button (click)="submitQuery()"
+          mat-button
           mat-stroked-button
           color="accent"
           class="uppercase"

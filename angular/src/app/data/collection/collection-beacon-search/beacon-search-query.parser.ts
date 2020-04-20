@@ -1,5 +1,5 @@
 
-export class DnaChangeQueryParser {
+export class BeaconSearchQueryParser {
 
   // example of valid string: "1 : 123456 T > C"
   static readonly regex = new RegExp(/^\s*(\w+)\s*:\s*(\d+.*)\s+([a-zA-Z]+)\s*>\s*([a-zA-Z]+)\s*$/);

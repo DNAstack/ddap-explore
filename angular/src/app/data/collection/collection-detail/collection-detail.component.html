@@ -9,12 +9,12 @@
 
 <ddaplib-main *ngIf="collection$ | async as collection">
   <ddap-resource-logo [imageUrl]="(collection$ | async)?.imageUrl">
-    <ddap-limit-search *ngIf="searchOpened"
-                       (change)="limitSearch = !limitSearch"
-                       [collectionName]="(collection$ | async)?.name"
-                       [checked]="limitSearch"
-                       class="filter-top-border filter-inline">
-    </ddap-limit-search>
+    <ddap-beacon-limit-search *ngIf="searchOpened"
+                              (change)="limitSearch = !limitSearch"
+                              [collectionName]="(collection$ | async)?.name"
+                              [checked]="limitSearch"
+                              class="filter-top-border filter-inline">
+    </ddap-beacon-limit-search>
   </ddap-resource-logo>
 
   <ng-container *ngIf="collectionResources$ | async as collectionResourcesResponse">

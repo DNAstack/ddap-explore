@@ -1,6 +1,6 @@
-package com.dnastack.ddap.explore.session.data;
+package com.dnastack.ddap.explore.common.session.data;
 
-import com.dnastack.ddap.explore.session.PersistantSession;
+import com.dnastack.ddap.explore.common.session.PersistantSession;
 import java.util.Optional;
 import org.jdbi.v3.sqlobject.config.RegisterArgumentFactories;
 import org.jdbi.v3.sqlobject.config.RegisterArgumentFactory;

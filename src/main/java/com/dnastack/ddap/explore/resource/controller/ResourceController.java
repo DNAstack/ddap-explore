@@ -16,7 +16,7 @@ import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.PaginatedResponse;
 import com.dnastack.ddap.explore.resource.model.Resource;
 import com.dnastack.ddap.explore.resource.service.UserCredentialService;
-import com.dnastack.ddap.explore.session.SessionEncryptionUtils;
+import com.dnastack.ddap.explore.common.session.SessionEncryptionUtils;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;

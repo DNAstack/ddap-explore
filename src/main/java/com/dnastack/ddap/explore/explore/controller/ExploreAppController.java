@@ -4,7 +4,7 @@ import com.dnastack.ddap.common.util.http.XForwardUtil;
 import com.dnastack.ddap.explore.explore.model.ExploreTokenResponse;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
 import com.dnastack.ddap.explore.resource.service.UserCredentialService;
-import com.dnastack.ddap.explore.session.SessionEncryptionUtils;
+import com.dnastack.ddap.explore.common.session.SessionEncryptionUtils;
 import java.net.URI;
 import java.time.Duration;
 import java.time.ZonedDateTime;

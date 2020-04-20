@@ -1,4 +1,4 @@
-package com.dnastack.ddap.explore.session;
+package com.dnastack.ddap.explore.common.session;
 
 import java.io.Serializable;
 import java.time.Duration;

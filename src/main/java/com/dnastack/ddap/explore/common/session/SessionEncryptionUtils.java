@@ -1,4 +1,4 @@
-package com.dnastack.ddap.explore.session;
+package com.dnastack.ddap.explore.common.session;
 
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEException;

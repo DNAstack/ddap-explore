@@ -3,7 +3,7 @@ package com.dnastack.ddap.explore.resource.service;
 import com.dnastack.ddap.explore.resource.controller.ResourceController.Id;
 import com.dnastack.ddap.explore.resource.data.UserCredentialDao;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
-import com.dnastack.ddap.explore.session.PersistantSession;
+import com.dnastack.ddap.explore.common.session.PersistantSession;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;

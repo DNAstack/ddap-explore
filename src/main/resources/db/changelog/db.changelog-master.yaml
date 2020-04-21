@@ -83,9 +83,9 @@ databaseChangeLog:
                   type: timestamptz
                   remarks: the time this credential was first created
               - column:
-                  name: token
+                  name: encrypted_credentials
                   type: varchar
-                  remarks: the actual token for a user
+                  remarks: an encrypted credential map
               - addPrimaryKey:
                   constraintName: pk_principal_id_authorization_id_credentials
                   tableName: sessions

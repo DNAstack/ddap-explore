@@ -98,7 +98,7 @@ export class SearchService {
 
   followUp(url: string, accessToken: string, connectorDetails: ConnectorDetails = {}, subscriber: Subscriber<Table>, delay: number = 1) {
     if (delay > 32) {
-      console.warn('The server took too long to respond. No more follow-up requests.');
+      this.errorHandler.openSnackBar('The server took too long to respond. No more follow-up requests.');
       subscriber.next({data: []});
       subscriber.complete();
       return;

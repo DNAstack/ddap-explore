@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import lombok.Data;
 
 @Data
@@ -21,15 +22,13 @@ public class Id implements Serializable {
     private static final long serialVersionUID = -1479218240983143860L;
 
     public Id() {
-        additionalProperties = new HashMap<>();
     }
 
     public Id(Id id) {
         this.spiKey = id.spiKey;
         this.collectionId = id.collectionId;
         this.realm = id.realm;
-        this.additionalProperties =
-            id.additionalProperties != null ? new HashMap<>(id.additionalProperties) : new HashMap<>();
+        this.additionalProperties.putAll(id.additionalProperties);
     }
 
     /**
@@ -48,7 +47,7 @@ public class Id implements Serializable {
     String collectionId;
 
     @JsonIgnore
-    Map<String, String> additionalProperties;
+    Map<String, String> additionalProperties = new TreeMap<>();
 
     @JsonAnyGetter
     public Map<String, String> getAdditionalProperties() {

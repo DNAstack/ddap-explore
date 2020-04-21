@@ -45,7 +45,7 @@ public class ExploreAppController {
             final Duration enforceTtl = parseDuration(minimumTtl);
             final ExploreTokenResponse tokenResponse = new ExploreTokenResponse();
             List<UserCredential> existingCredentials = userCredentialService
-                .getAndDecryptSessionBoundTokens(httpRequest, session, authorizationIds);
+                .getAndDecryptSessionBoundCredentials(httpRequest, session, authorizationIds);
             List<String> reauthenticate = new ArrayList<>();
             authorizationIds.forEach(id -> {
                 Optional<UserCredential> existingOpt = existingCredentials.stream()
@@ -68,10 +68,10 @@ public class ExploreAppController {
                 tokenResponse.setRequiresAdditionalAuth(true);
                 tokenResponse.setAuthorizationUrlBase(componentsBuilder.build().toUri());
             } else {
-                Map<String, String> tokens = new HashMap<>();
+                Map<String, UserCredential> access = new HashMap<>();
                 existingCredentials
-                    .forEach(credential -> tokens.put(credential.getAuthorizationId(), credential.getToken()));
-                tokenResponse.setTokens(tokens);
+                    .forEach(credential -> access.put(credential.getAuthorizationId(), credential));
+                tokenResponse.setAccess(access);
             }
 
             return Mono.just(tokenResponse);

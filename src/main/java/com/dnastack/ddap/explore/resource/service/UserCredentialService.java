@@ -2,11 +2,15 @@ package com.dnastack.ddap.explore.resource.service;
 
 import com.dnastack.ddap.explore.common.session.PersistantSession;
 import com.dnastack.ddap.explore.common.session.SessionEncryptionUtils;
-import com.dnastack.ddap.explore.resource.model.Id;
 import com.dnastack.ddap.explore.resource.data.UserCredentialDao;
+import com.dnastack.ddap.explore.resource.model.Id;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +26,16 @@ import org.springframework.web.server.WebSession;
 @Slf4j
 public class UserCredentialService {
 
+    private final Jdbi jdbi;
+
+    private final ObjectMapper mapper;
+
+
     @Autowired
-    private Jdbi jdbi;
+    public UserCredentialService(Jdbi jdbi, ObjectMapper mapper) {
+        this.mapper = mapper;
+        this.jdbi = jdbi;
+    }
 
 
     public String getUserIdentifier(WebSession session) {
@@ -34,28 +46,29 @@ public class UserCredentialService {
         return userIdentifier;
     }
 
-    public Optional<UserCredential> getSessionBoundTokenForResource(WebSession session, Id resourceId) {
+    public Optional<UserCredential> getSessionBoundCredentialsForResource(WebSession session, Id resourceId) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao
             .getCredentialForResource(getUserIdentifier(session), resourceId.encodeId()));
     }
 
-    public List<UserCredential> getSessionBoundTokens(WebSession session, List<String> authorizationIds) {
+    public List<UserCredential> getSessionBoundCredentials(WebSession session, List<String> authorizationIds) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao
             .getCredentialsForResources(getUserIdentifier(session), authorizationIds));
     }
 
-    public List<UserCredential> getAndDecryptSessionBoundTokens(ServerHttpRequest request, WebSession session, List<String> authorizationIds) {
+    public List<UserCredential> getAndDecryptSessionBoundCredentials(ServerHttpRequest request, WebSession session, List<String> authorizationIds) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao
             .getCredentialsForResources(getUserIdentifier(session), authorizationIds))
-            .stream().map(userCredential -> decryptSessionBoundToken(request, userCredential))
+            .stream().map(userCredential -> decryptSessionBoundCredentials(request, userCredential))
             .collect(Collectors.toList());
     }
 
 
-    private UserCredential decryptSessionBoundToken(ServerHttpRequest request, UserCredential userCredential) {
+    private UserCredential decryptSessionBoundCredentials(ServerHttpRequest request, UserCredential userCredential) {
         String privateKey = requirePrivateKeyInCookie(request);
-        String decryptedToken = SessionEncryptionUtils.decryptData(privateKey, userCredential.getToken());
-        userCredential.setToken(decryptedToken);
+        String decryptedCredentials = SessionEncryptionUtils
+            .decryptData(privateKey, userCredential.getEncryptedCredentials());
+        userCredential.setCredentials(parseCredentialString(decryptedCredentials));
         return userCredential;
     }
 
@@ -69,26 +82,58 @@ public class UserCredentialService {
         return privateKey.getValue();
     }
 
-    public void storeSessionBoundTokenForResource(WebSession session, Id authorizationId, ZonedDateTime expires, String token) {
-        String encryptedToken = SessionEncryptionUtils.encryptData(session, token);
+    public void storeSessionBoundCredentialsForResource(WebSession session, List<UserCredential> userCredentials) {
         String principal = getUserIdentifier(session);
-        UserCredential credential = new UserCredential();
-        credential.setCreationTime(ZonedDateTime.now());
-        credential.setPrincipalId(principal);
-        credential.setAuthorizationId(authorizationId.encodeId());
-        credential.setExpirationTime(expires != null ? expires : ZonedDateTime.now().plusHours(1));
-        credential.setToken(encryptedToken);
+        List<String> ids = userCredentials.stream().map(UserCredential::getAuthorizationId)
+            .collect(Collectors.toList());
+        userCredentials.forEach(userCredential -> {
+            userCredential.setPrincipalId(getUserIdentifier(session));
+            String encryptedCredentials = SessionEncryptionUtils
+                .encryptData(session, serializeCredentialMap(userCredential.getCredentials()));
+            userCredential.setEncryptedCredentials(encryptedCredentials);
+            userCredential.setCreationTime(ZonedDateTime.now());
+            if (userCredential.getExpirationTime() == null) {
+                userCredential.setExpirationTime(ZonedDateTime.now().plusHours(1));
+            }
+        });
 
         jdbi.useExtension(UserCredentialDao.class, dao -> {
-            dao.getCredentialForResource(principal, credential.getAuthorizationId()).ifPresent(_cred -> {
-                dao.deleteCredential(principal, credential.getAuthorizationId());
-            });
-            dao.createUserCredential(credential);
+
+            List<UserCredential> credentials = dao.getCredentialsForResources(principal, ids);
+            if (credentials != null && !credentials.isEmpty()) {
+                List<String> idsToDelete = credentials.stream().map(UserCredential::getAuthorizationId)
+                    .collect(Collectors.toList());
+                dao.deleteCredentials(principal, idsToDelete);
+            }
+            dao.createUserCredentials(userCredentials);
         });
     }
 
+    private Map<String, String> parseCredentialString(String credentialString) {
+        try {
+            TypeReference<Map<String, String>> typeReference = new TypeReference<>() {
+            };
+            return mapper.readValue(credentialString, typeReference);
+        } catch (IOException e) {
+            log.error(
+                "Encountered an error while parsing credential string: " + e.getMessage() + ", returning empty Map", e);
+            return Map.of();
+        }
+    }
+
+    private String serializeCredentialMap(Map<String, String> credentialMap) {
+        try {
+            return mapper.writeValueAsString(credentialMap);
+        } catch (IOException e) {
+            log.error(
+                "Encountered an error while parsing credential string: " + e.getMessage()
+                    + ", returning empty representation", e);
+            return "{}";
+        }
+    }
+
     @Scheduled(fixedDelay = 300000)
-    public void deleteSessionBoundTokens() {
+    public void deleteSessionBoundCredentialss() {
         jdbi.useExtension(UserCredentialDao.class, dao -> {
             log.info("Cleaning up expired or orphaned session resource tokens");
             int tokensDeleted = dao.deleteExpiredCredentials();
@@ -96,4 +141,6 @@ public class UserCredentialService {
         });
 
     }
+
+
 }

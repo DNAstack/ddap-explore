@@ -115,7 +115,7 @@ export class SearchTablesComponent implements OnInit {
   }
 
   previewTableQuery(tableName: string) {
-    return 'SELECT * FROM ' + tableName + ' LIMIT 50;';
+    return `SELECT * FROM ${tableName} LIMIT 50;`;
   }
 
   viewTableAsJSON(table: Table) {
@@ -132,7 +132,12 @@ export class SearchTablesComponent implements OnInit {
     if (this.isUsingPublicView()) {
       observableResults = this.searchService.makeDirectSearch(this.currentView.interfaceUri, {query: query});
     } else {
-      observableResults = this.searchService.search(this.currentView.resourcePath, {query: query}, this.accessToken, this.connectorDetails);
+      observableResults = this.searchService.observableSearch(
+        this.currentView.resourcePath,
+        {query: query},
+        this.accessToken,
+        this.connectorDetails
+      );
     }
 
     observableResults.subscribe(result => {

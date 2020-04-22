@@ -10,7 +10,7 @@ public class DataDetailPage extends AnyDdapPage {
 
     public DataDetailPage(WebDriver driver) {
         super(driver);
-        driver.findElement(By.xpath("//ddap-resource-detail"));
+        driver.findElement(By.xpath("//ddap-collection-detail"));
     }
 
     public void assertResourcePage(String resourceName) {

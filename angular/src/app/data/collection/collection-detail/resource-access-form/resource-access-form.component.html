@@ -36,7 +36,8 @@
            class="flex">
         <mat-form-field>
           <mat-label>Interface</mat-label>
-          <mat-select formControlName="interfaceType">
+          <mat-select formControlName="interfaceType"
+                      data-se="inp-interfaceType">
             <mat-option *ngFor="let resourceInterface of resource.interfaces"
                         [value]="resourceInterface.type">
               {{ resourceInterface.type }}

@@ -1,11 +1,5 @@
 package com.dnastack.ddap.frontend;
 
-import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
-import static com.dnastack.ddap.common.fragments.NavBar.dataLink;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertTrue;
-
 import com.dnastack.ddap.common.fragments.DataListItem;
 import com.dnastack.ddap.common.page.AdminDdapPage;
 import com.dnastack.ddap.common.page.DataDetailPage;
@@ -15,10 +9,6 @@ import com.dnastack.ddap.common.setup.ConfigModel;
 import com.dnastack.ddap.common.util.DdapBy;
 import com.dnastack.ddap.common.util.EnvUtil;
 import com.dnastack.ddap.common.util.WebDriverCookieHelper;
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
@@ -29,6 +19,17 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
+import static com.dnastack.ddap.common.fragments.NavBar.dataLink;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertTrue;
 
 @Slf4j
 @SuppressWarnings("Duplicates")
@@ -114,7 +115,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
         DataListPage dataListPage = new DataListPage(driver);
         final DataListItem data = dataListPage.findDataByName(testConfig.getBeaconResourceName());
-        DataDetailPage dataDetailPage = data.clickViewButton();
+        DataDetailPage dataDetailPage = data.goToDetails();
         dataDetailPage.assertResourcePage(testConfig.getBeaconResourceName());
 
         SearchPage searchPage = new SearchPage(driver);
@@ -134,7 +135,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
         DataListPage dataListPage = new DataListPage(driver);
         final DataListItem data = dataListPage.findDataByName(testConfig.getBeaconResourceName());
-        DataDetailPage dataDetailPage = data.clickViewButton();
+        DataDetailPage dataDetailPage = data.goToDetails();
         dataDetailPage.assertResourcePage(testConfig.getBeaconResourceName());
 
         SearchPage searchPage = new SearchPage(driver);
@@ -165,7 +166,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
         DataListPage dataListPage = new DataListPage(driver);
         final DataListItem data = dataListPage.findDataByName(testConfig.getBeaconResourceName());
-        DataDetailPage dataDetailPage = data.clickViewButton();
+        DataDetailPage dataDetailPage = data.goToDetails();
         dataDetailPage.assertResourcePage(testConfig.getBeaconResourceName());
 
         SearchPage searchPage = new SearchPage(driver);
@@ -237,7 +238,7 @@ public class BeaconSearchE2eTest extends AbstractFrontendE2eTest {
 
         DataListPage dataListPage = new DataListPage(driver);
         final DataListItem data = dataListPage.findDataByName(testConfig.getSecureBeaconResourceName());
-        DataDetailPage dataDetailPage = data.clickViewButton();
+        DataDetailPage dataDetailPage = data.goToDetails();
         dataDetailPage.assertResourcePage(testConfig.getSecureBeaconResourceName());
 
         String query = testConfig.getSecureBeaconQuery();

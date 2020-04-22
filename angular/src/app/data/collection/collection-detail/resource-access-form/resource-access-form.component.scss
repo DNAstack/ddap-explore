@@ -13,8 +13,14 @@ a button {
   margin-left: 0;
 }
 
-button.reset-btn {
-  line-height: 0;
-  margin-left: 0;
-  color: $color-grey;
+.mat-action-row {
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem;
+  align-items: center;
+
+  button.reset-btn {
+    line-height: 0;
+    margin-left: 0;
+    color: $color-grey;
+  }
 }

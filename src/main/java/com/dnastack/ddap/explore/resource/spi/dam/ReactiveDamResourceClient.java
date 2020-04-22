@@ -1,7 +1,10 @@
-package com.dnastack.ddap.explore.resource.service;
+package com.dnastack.ddap.explore.resource.spi.dam;
 
+import com.dnastack.ddap.common.client.AuthAwareWebClientFactory;
+import com.dnastack.ddap.common.client.HttpReactiveDamClient;
 import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.config.DamProperties;
+import com.dnastack.ddap.explore.dam.client.HttpReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Collection;
@@ -9,7 +12,7 @@ import com.dnastack.ddap.explore.resource.model.Id;
 import com.dnastack.ddap.explore.resource.model.OAuthState;
 import com.dnastack.ddap.explore.resource.model.Resource;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
-import com.dnastack.ddap.explore.resource.spi.ReactiveResourceClient;
+import com.dnastack.ddap.explore.resource.spi.ResourceClient;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dam.v1.DamService;
@@ -32,30 +35,28 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import reactor.core.publisher.Mono;
 
-public class ReactiveDamResourceClient implements ReactiveResourceClient {
+public class ReactiveDamResourceClient implements ResourceClient {
 
     private static final String INTERFACE_PATH_TEMPLATE = "/dam/%s/resources/%s/views/%s/roles/%s/interfaces/%s";
 
-    private String spiKey;
-    private ReactiveDamClient damClient;
-    private ReactiveDamOAuthClient damOAuthClient;
-    private DamProperties damProperties;
+    @Getter
+    private final String spiKey;
+    private final ReactiveDamClient damClient;
+    private final ReactiveDamOAuthClient damOAuthClient;
+    private final DamProperties damProperties;
 
-    public ReactiveDamResourceClient(String spiKey, ReactiveDamClient damClient, ReactiveDamOAuthClient damOAuthClient, DamProperties damProperties) {
-        this.damClient = damClient;
-        this.damOAuthClient = damOAuthClient;
+    public ReactiveDamResourceClient(String spiKey, DamProperties config, AuthAwareWebClientFactory authAwareWebClientFactory) {
         this.spiKey = spiKey;
-        this.damProperties = damProperties;
+        this.damClient = new HttpReactiveDamClient(config, authAwareWebClientFactory);
+        this.damOAuthClient = new HttpReactiveDamOAuthClient(config);
+        this.damProperties = config;
     }
 
-    @Override
-    public String getSpiKey() {
-        return spiKey;
-    }
 
     @Override
     public Mono<List<Resource>> listResources(String realm, List<Id> collectionIdsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
@@ -63,7 +64,9 @@ public class ReactiveDamResourceClient implements ReactiveResourceClient {
             boolean keep = true;
             if (!collectionIdsToFilter.isEmpty()) {
                 keep = collectionIdsToFilter.stream()
-                    .anyMatch(id -> id.getCollectionId().equals(view.getResourceName()));
+                    .anyMatch(id -> id.getRealm().equals(realm) && id.getCollectionId().equals(view.getResourceName())
+                        && id.getSpiKey()
+                        .equals(getSpiKey()));
             }
             if (interfaceTypesToFilter != null && !interfaceTypesToFilter.isEmpty()) {
                 keep &= interfaceTypesToFilter.stream()
@@ -104,7 +107,7 @@ public class ReactiveDamResourceClient implements ReactiveResourceClient {
                 .collect(Collectors.toList());
 
             if (matchingEntries.isEmpty()) {
-                throw new NotFoundException("Could not locate resource with id: " + resourceId);
+                throw new NotFoundException("Could not locate resource with id: " + resourceId.encodeId());
             }
 
             Resource resource = null;
@@ -151,11 +154,6 @@ public class ReactiveDamResourceClient implements ReactiveResourceClient {
         return damClient.getResource(realm, id.getCollectionId())
             .map(resource -> resourceToCollection(id, resource));
 
-    }
-
-    @Override
-    public boolean resourceRequiresAutorization(Id resourceId) {
-        return true;
     }
 
     @Override
@@ -287,16 +285,6 @@ public class ReactiveDamResourceClient implements ReactiveResourceClient {
             id.validate(DamResourceType.INTERFACE);
         }
         return id;
-    }
-
-    private boolean shouldKeepInterfaceUri(String interfaceUri, List<String> testUris) {
-        return testUris.stream().anyMatch(testUri -> {
-            String testInerfaceUri = interfaceUri;
-            if (!testInerfaceUri.endsWith("/") && testUri.length() > testInerfaceUri.length()) {
-                testInerfaceUri = testInerfaceUri + "/";
-            }
-            return testUri.startsWith(testInerfaceUri);
-        });
     }
 
 

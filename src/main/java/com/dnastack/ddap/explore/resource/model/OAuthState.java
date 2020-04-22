@@ -1,7 +1,5 @@
 package com.dnastack.ddap.explore.resource.model;
 
-import com.dnastack.ddap.explore.resource.service.ReactiveDamResourceClient;
-import com.dnastack.ddap.explore.resource.service.ReactiveDamResourceClient.DamId;
 import java.io.Serializable;
 import java.net.URI;
 import java.time.Duration;

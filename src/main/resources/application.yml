@@ -44,6 +44,53 @@ dams:
     client-secret: 0000-0000-0000-0000-0000
     ui-url: http://localhost:8087/
 
+resources:
+  spi:
+    clients:
+      dam-1:
+        factory-name: dam-resource-client-factory
+        spi-properties:
+          baseUrl: ${dams.1.base-url}
+          clientId: ${dams.1.client-id}
+          clientSecret: ${dams.1.client-secret}
+          uiUrl: ${dams.1.ui-url}
+
+      wallet-1:
+        factory-name: wallet-resource-client-factory
+        spi-properties:
+          tokenUrl: "http://localhost:8081/oauth/token"
+          authorizationUrl: "http://localhost:8081/oauth/authorize"
+          clientId: ddap-local
+          clientSecret: ddap-local
+          resources:
+            0:
+              name: WES API Reader
+              description: Read from local wes server
+              collectionName: Local Resources
+              audience: aud1
+              scope: read
+              interfaceType: http:wes
+              interfaceUri: http://localhost:8080
+            1:
+              name: WES API Executor
+              description: Executre on the local wes server
+              collectionName: Local Resources
+              audience: aud1
+              scope: write
+              interfaceType: http:wes
+              interfaceUri: http://localhost:8080
+            2:
+              name: Search API Spender
+              description: Execute queries on the search api
+              collectionName: Local Resources
+              audience: aud2
+              scope: explode
+              interfaceType: http:search
+              interfaceUri: http://localhost:8082
+          collections:
+            0:
+              name: Local Resources From Wallet
+              description: A collection of local resources
 ic:
   ui-url: http://localhost:8086/
 

@@ -13,19 +13,23 @@ import reactor.core.publisher.Mono;
 
 /**
  * Interface defining a client which can be used for interacting with resources served by an underlying resource server.
- * This interface provides an abstraction layer ontop of existing clients (such as {@link
- * com.dnastack.ddap.common.client.ReactiveDamClient}, and {@link com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient})
+ * This interface provides an abstraction layer ontop of existing clients
  * to present a unified mechanism for  interacting with {@code Resources}, {@code Collections}, as well as providing an
  * approach to generate and store interface specific credentials.
+ *
+ * ResourceClients should be configured using a concrete instance of {@link ResourceClientFactory} in order to properly
+ * handle autowiring of required beans, as well as enforement of required configuration properties
  * <p/>
  */
-public interface ReactiveResourceClient {
+public interface ResourceClient {
+
 
     /**
      * Retrieve the SPI Key uniquely identifying this Client. The key is used to attribute resources to this client, as
      * well as for performing configuration at startup
      */
     String getSpiKey();
+
 
     /**
      * List All of the resources from the underlying resource server, optionally filtering the resources by the supplied
@@ -84,11 +88,13 @@ public interface ReactiveResourceClient {
      * their underlying resources and therefore will not require an authorizaiton flow. In these cases, this method
      * should return false
      */
-    boolean resourceRequiresAutorization(Id resourceId);
+    default boolean resourceRequiresAutorization(Id resourceId) {
+        return true;
+    }
 
     /**
      * Prepare the OAuthState which will be used to perform the authorization of one or more resources. This method
-     * should not actually perform any of the authorizatiom
+     * should not actually perform any of the authorization.
      *
      * @param realm realm The realm to retrieve resources from
      * @param resources The list of resources to authorize
@@ -107,5 +113,15 @@ public interface ReactiveResourceClient {
      * <b>Directly</b> applicable to the <code>interfaceUri</code> and not require any additional steps for access
      */
     Mono<List<UserCredential>> handleResponseAndGetCredentials(ServerHttpRequest exchange, URI redirectUri, OAuthState currentState, String code);
+
+    default boolean shouldKeepInterfaceUri(String interfaceUri, List<String> testUris) {
+        return testUris.stream().anyMatch(testUri -> {
+            String testInerfaceUri = interfaceUri;
+            if (!testInerfaceUri.endsWith("/") && testUri.length() > testInerfaceUri.length()) {
+                testInerfaceUri = testInerfaceUri + "/";
+            }
+            return testUri.startsWith(testInerfaceUri);
+        });
+    }
 
 }

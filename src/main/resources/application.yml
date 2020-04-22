@@ -11,7 +11,7 @@ ui:
   logo-url: null
   google-analytics-id: null
   theme: null
-  default-module: data
+  default-module: 'data/collections'
   tos-url: 'https://beacon-network.org/#/terms'  # Alternatively, tos-url: 'https://dnastack.com/#/legal/terms'
   in-standalone-mode: ${ddap.dam-facade}
   authorization-on-init-required: false

@@ -6,7 +6,6 @@ import org.jdbi.v3.core.Jdbi;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.session.ReactiveSessionRepository;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 public class ReactiveJdbiSessionRepository implements ReactiveSessionRepository<PersistantSession> {
@@ -23,7 +22,7 @@ public class ReactiveJdbiSessionRepository implements ReactiveSessionRepository<
             PersistantSession newSession = new PersistantSession();
             jdbi.useExtension(SessionDao.class, dao -> dao.createSession(newSession));
             return Mono.just(newSession);
-        }).publishOn(Schedulers.elastic());
+        });
     }
 
     @Override
@@ -33,7 +32,7 @@ public class ReactiveJdbiSessionRepository implements ReactiveSessionRepository<
                 jdbi.useExtension(SessionDao.class, dao -> dao.updateSession(session));
                 session.clearChanged();
             }
-        }).publishOn(Schedulers.elastic()).then(Mono.empty());
+        });
     }
 
     @Override
@@ -41,19 +40,17 @@ public class ReactiveJdbiSessionRepository implements ReactiveSessionRepository<
         return Mono.defer(() -> Mono
             .justOrEmpty(jdbi.withExtension(SessionDao.class, dao -> dao.getSession(id))))
             .filter(session -> !session.isExpired())
-            .switchIfEmpty(deleteById(id).then(Mono.empty()))
-            .publishOn(Schedulers.elastic());
+            .switchIfEmpty(deleteById(id).then(Mono.empty()));
     }
 
     @Override
     public Mono<Void> deleteById(String id) {
-        return Mono.fromRunnable(() -> jdbi.useExtension(SessionDao.class, dao -> dao.deleteSession(id)))
-            .publishOn(Schedulers.elastic()).then(Mono.empty());
+        return Mono.fromRunnable(() -> jdbi.useExtension(SessionDao.class, dao -> dao.deleteSession(id)));
     }
 
     @Scheduled(fixedDelay = 300000)
-    public void cleanupSessions(){
-        jdbi.useExtension(SessionDao.class,dao -> {
+    public void cleanupSessions() {
+        jdbi.useExtension(SessionDao.class, dao -> {
             log.info("Cleaning up expired sessions");
             int sessionsDeleted = dao.deleteExpiredSessions();
             log.info("Removed " + sessionsDeleted + " expired sessions");

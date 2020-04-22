@@ -18,8 +18,8 @@ import { DataService } from '../../data.service';
 })
 export class CollectionDetailComponent implements OnInit {
 
-  collectionResources$: Observable<ResourcesResponseModel>;
   collection$: Observable<CollectionModel>;
+  collectionResources$: Observable<ResourcesResponseModel>;
   searchOpened = false;
   limitSearch = true;
 

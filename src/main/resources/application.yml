@@ -65,7 +65,7 @@ resources:
             0:
               name: WES API Reader
               description: Read from local wes server
-              collectionName: Local Resources
+              collectionName: Local Resources From Wallet
               audience: aud1
               scope: read
               interfaceType: http:wes
@@ -73,7 +73,7 @@ resources:
             1:
               name: WES API Executor
               description: Executre on the local wes server
-              collectionName: Local Resources
+              collectionName: Local Resources From Wallet
               audience: aud1
               scope: write
               interfaceType: http:wes
@@ -81,7 +81,7 @@ resources:
             2:
               name: Search API Spender
               description: Execute queries on the search api
-              collectionName: Local Resources
+              collectionName: Local Resources From Wallet
               audience: aud2
               scope: explode
               interfaceType: http:search
@@ -90,6 +90,21 @@ resources:
             0:
               name: Local Resources From Wallet
               description: A collection of local resources
+      open-1:
+        factory-name: open-resource-client-factory
+        spi-properties:
+          resources:
+            0:
+              name: Covid Beacon
+              description: Read From public covid Beacon
+              collectionName: Covid Resources
+              interfaceType: http:beacon
+              interfaceUri: https://beacon.covid-19.dnastack.com
+
+          collections:
+            0:
+              name: Covid Resources
+              description: A collection of Public Resources for dealing with Covid
 ic:
   ui-url: http://localhost:8086/
 

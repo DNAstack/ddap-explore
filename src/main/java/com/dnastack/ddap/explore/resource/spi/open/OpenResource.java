@@ -1,4 +1,4 @@
-package com.dnastack.ddap.explore.resource.spi.wallet;
+package com.dnastack.ddap.explore.resource.spi.open;
 
 import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Id;
@@ -10,12 +10,8 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Data;
 
-/**
- * An internal representation providing additional configuration of a resource to be served by the {@link
- * ReactiveWalletResourceClient}
- */
 @Data
-public class WalletResource {
+public class OpenResource {
 
     private String collectionName;
     private String name;
@@ -23,10 +19,7 @@ public class WalletResource {
     private URI imageUrl;
     private String interfaceType;
     private URI interfaceUri;
-    private String audience;
-    private String scope;
     private Map<String, String> metadata;
-
 
     public boolean idEquals(Id id) {
         return Objects.equals(id.getResourceId(), name) && Objects.equals(id.getCollectionId(), collectionName)
@@ -39,20 +32,15 @@ public class WalletResource {
         collectionId.setRealm(realm);
         collectionId.setSpiKey(spiKey);
         collectionId.setCollectionId(collectionName);
-
         Id id = new Id(collectionId);
         id.setResourceId(name);
-
-        Id authorizationId = new Id(id);
-        authorizationId.setInterfaceType(interfaceType);
-
         return Resource.newBuilder()
             .id(id.encodeId())
             .collectionId(collectionId.encodeId())
             .name(name)
             .imageUrl(imageUrl)
             .description(description)
-            .interfaces(List.of(new AccessInterface(interfaceType, interfaceUri, authorizationId.encodeId())))
+            .interfaces(List.of(new AccessInterface(interfaceType, interfaceUri, null)))
             .metadata(metadata != null ? new HashMap<>(metadata) : null)
             .build();
     }

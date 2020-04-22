@@ -93,10 +93,12 @@ public class ResourceController {
         @RequestParam("resource") List<String> authorizationIds,
         @RequestParam(defaultValue = "1h") String ttl) {
 
+        //Guarantee there was not an issue sent from the front end
         final URI nonNullRedirectUri = redirectUri != null ? redirectUri : UriUtil.selfLinkToUi(request, realm, "");
         final URI postLoginEndpoint = getRedirectUri(request);
         Map<String, List<Id>> spiResourcesToAuthorize = new HashMap<>();
         authorizationIds.stream()
+            .filter(id -> !Objects.equals("undefined", id))
             .map(Id::decodeId)
             .filter(id -> resourceClientService.getClient(id.getSpiKey()).resourceRequiresAutorization(id))
             .collect(Collectors.toList())
@@ -111,9 +113,13 @@ public class ResourceController {
             lastState = state;
         }
 
-        Map<String, Object> sessionAttributes = session.getAttributes();
-        sessionAttributes.put(RESOURCE_LOGIN_STATE_KEY, lastState);
-        return ResponseEntity.status(TEMPORARY_REDIRECT).location(lastState.getAuthUrl()).build();
+        if (lastState == null) {
+            return ResponseEntity.status(TEMPORARY_REDIRECT).location(nonNullRedirectUri).build();
+        } else {
+            Map<String, Object> sessionAttributes = session.getAttributes();
+            sessionAttributes.put(RESOURCE_LOGIN_STATE_KEY, lastState);
+            return ResponseEntity.status(TEMPORARY_REDIRECT).location(lastState.getAuthUrl()).build();
+        }
 
     }
 
@@ -137,7 +143,8 @@ public class ResourceController {
                 });
             } else {
                 if (code == null) {
-                    return Mono.error(() -> new IllegalArgumentException("Could not complete authorization callback, missing required propert: code, in repsosne"));
+                    return Mono
+                        .error(() -> new IllegalArgumentException("Could not complete authorization callback, missing required propert: code, in repsosne"));
                 }
                 return resourceClient.handleResponseAndGetCredentials(request, redirectUri, storedState, code)
                     .doOnNext(userCredentials -> {

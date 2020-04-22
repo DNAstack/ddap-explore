@@ -329,7 +329,7 @@ public class ReactiveDamResourceClient implements ResourceClient {
 
         @JsonIgnore
         public String getViewName() {
-            return getAdditionalProperties().get("v");
+            return getResourceId();
         }
 
         @JsonIgnore
@@ -338,23 +338,13 @@ public class ReactiveDamResourceClient implements ResourceClient {
         }
 
         @JsonIgnore
-        public String getInterfaceType() {
-            return getAdditionalProperties().get("i");
-        }
-
-        @JsonIgnore
         public void setViewName(String view) {
-            setAdditionalProperties("v", view);
+            setResourceId(view);
         }
 
         @JsonIgnore
         public void setRoleName(String role) {
             setAdditionalProperties("ro", role);
-        }
-
-        @JsonIgnore
-        public void setInterfaceType(String interfaceType) {
-            setAdditionalProperties("i", interfaceType);
         }
 
         public String toFlatViewPrefix() {

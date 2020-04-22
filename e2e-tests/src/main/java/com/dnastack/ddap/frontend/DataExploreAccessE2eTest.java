@@ -1,23 +1,25 @@
 package com.dnastack.ddap.frontend;
 
-import static com.dnastack.ddap.common.TestingPersona.USER_WITHOUT_ACCESS;
-import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import com.dnastack.ddap.common.PolicyRequirementFailedException;
 import com.dnastack.ddap.common.fragments.ExpandedAccessibleViewItem;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.DataDetailPage;
 import com.dnastack.ddap.common.page.DataListPage;
 import com.dnastack.ddap.common.setup.ConfigModel;
+import com.dnastack.ddap.common.util.DdapBy;
 import com.dnastack.ddap.common.util.EnvUtil;
-import java.io.IOException;
-import java.net.URI;
 import lombok.Data;
 import org.hamcrest.Matchers;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.net.URI;
+
+import static com.dnastack.ddap.common.TestingPersona.USER_WITHOUT_ACCESS;
+import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
@@ -26,7 +28,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
 
     @BeforeClass
     public static void oneTimeSetup() throws IOException {
-        testConfig = EnvUtil.optionalEnvConfig("E2E_TEST_DATA_EXPLORE_CONFIG",new DataExploreTestConfig(),  DataExploreTestConfig.class);
+        testConfig = EnvUtil.optionalEnvConfig("E2E_TEST_DATA_EXPLORE_CONFIG", new DataExploreTestConfig(),  DataExploreTestConfig.class);
         Assume.assumeTrue("DataExploreAccessE2eTest has been disabled, and will not run.",testConfig.isEnabled());
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }
@@ -36,9 +38,10 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage detailPage = dataListPage
             .findDataByName(testConfig.getResourceName())
-            .clickViewButton();
+            .goToDetails();
 
         ExpandedAccessibleViewItem discoveryView = detailPage.expandViewItem(testConfig.getDiscoveryView());
+        discoveryView.fillFieldWithFirstValueFromDropdown(DdapBy.se("inp-interfaceType"));
         URI authorizeUrl = discoveryView.requestAccess();
         detailPage = loginStrategy
             .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, DataDetailPage::new);
@@ -60,7 +63,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage detailPage = dataListPage
             .findDataByName(testConfig.getResourceName())
-            .clickViewButton();
+            .goToDetails();
 
         ExpandedAccessibleViewItem discoveryView = detailPage.expandViewItem(testConfig.getViewWithDownloadLink());
         URI authorizeUrl = discoveryView.requestAccess();
@@ -72,7 +75,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage detailPage = dataListPage
             .findDataByName(testConfig.getResourceName())
-            .clickViewButton();
+            .goToDetails();
 
         ExpandedAccessibleViewItem fullFileReadView = detailPage.expandViewItem(testConfig.getViewWithDownloadLink());
         String downloadHref = fullFileReadView.getDownloadLink();

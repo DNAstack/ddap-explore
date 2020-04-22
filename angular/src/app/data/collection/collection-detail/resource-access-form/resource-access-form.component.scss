@@ -24,3 +24,13 @@ a button {
     color: $color-grey;
   }
 }
+
+span.resource-interface-type {
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
+span.resource-interface-uri {
+  font-size: 0.9rem;
+  color: $color-grey;
+}

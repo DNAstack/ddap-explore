@@ -1,3 +1,5 @@
+@import '~ddap-common-lib/styles/modules/colors';
+
 h4 {
   font-size: 1.25rem;
   font-weight: 400;
@@ -11,5 +13,8 @@ a button {
   margin-left: 0;
 }
 
-
-
+button.reset-btn {
+  line-height: 0;
+  margin-left: 0;
+  color: $color-grey;
+}

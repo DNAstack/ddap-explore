@@ -79,17 +79,13 @@ public class ReactiveWalletResourceClient implements ResourceClient {
     }
 
     @Override
-    public Mono<Resource> getResource(String realm, Id resourceId) {
+    public Mono<Resource> getResource(String realm, Id id) {
         return Mono.fromCallable(() -> {
-            WalletId id = new WalletId(resourceId);
             if (!realm.equals(id.getRealm())) {
                 throw new IllegalArgumentException("Resource does not exist in this realm");
             }
 
-            return config.getResources().stream()
-                .filter(walletResource -> walletResource.getName().equals(id.getName()) && walletResource
-                    .getCollectionName().equals(id.getCollectionId()))
-                .findFirst()
+            return idToResource(realm, id)
                 .map(walletResource -> walletResource.toResource(realm, getSpiKey()))
                 .orElseThrow(() -> new NotFoundException("Could not locate resource with id: " + id.encodeId()));
 
@@ -270,7 +266,7 @@ public class ReactiveWalletResourceClient implements ResourceClient {
 
 
     private Collection copyCollectionFromConfig(String realm, Collection collection) {
-        WalletId collectionId = new WalletId();
+        Id collectionId = new Id();
         collectionId.setRealm(realm);
         collectionId.setSpiKey(getSpiKey());
         collectionId.setCollectionId(collection.getName());

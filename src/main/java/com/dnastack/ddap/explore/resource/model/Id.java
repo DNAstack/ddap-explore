@@ -1,5 +1,6 @@
 package com.dnastack.ddap.explore.resource.model;
 
+import com.dnastack.ddap.explore.resource.exception.ResourceIdEncodingException;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,6 +29,8 @@ public class Id implements Serializable {
         this.spiKey = id.spiKey;
         this.collectionId = id.collectionId;
         this.realm = id.realm;
+        this.resourceId = id.resourceId;
+        this.interfaceType = id.interfaceType;
         this.additionalProperties.putAll(id.additionalProperties);
     }
 
@@ -39,12 +42,17 @@ public class Id implements Serializable {
 
     @JsonProperty("r")
     String realm;
-
     /**
      * Collection Id
      */
     @JsonProperty("c")
     String collectionId;
+
+    @JsonProperty("n")
+    String resourceId;
+
+    @JsonProperty("i")
+    String interfaceType;
 
     @JsonIgnore
     Map<String, String> additionalProperties = new TreeMap<>();
@@ -76,7 +84,8 @@ public class Id implements Serializable {
         try {
             return mapper.readValue(decodedIdString, Id.class);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ResourceIdEncodingException(
+                "Could not decode resource id: " + idString + " - " + e.getMessage(), e);
         }
     }
 
@@ -85,7 +94,7 @@ public class Id implements Serializable {
             return Base64.getUrlEncoder().withoutPadding()
                 .encodeToString(mapper.writeValueAsString(this).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ResourceIdEncodingException("Could not encode resource Id", e);
         }
     }
 

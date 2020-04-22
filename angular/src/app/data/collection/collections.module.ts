@@ -9,9 +9,9 @@ import { CollectionBeaconSearchComponent } from './collection-beacon-search/coll
 import { CollectionDetailComponent } from './collection-detail/collection-detail.component';
 import { CollectionLogoComponent } from './collection-detail/collection-logo/collection-logo.component';
 import {
-  CollectionResourceCredentialsComponent
-} from './collection-detail/collection-resource-credentials/collection-resource-credentials.component';
-import { CollectionResourceComponent } from './collection-detail/collection-resource/collection-resource.component';
+  ResourceAccessCredentialsComponent
+} from './collection-detail/resource-access-credentials/resource-access-credentials.component';
+import { ResourceAccessFormComponent } from './collection-detail/resource-access-form/resource-access-form.component';
 import { CollectionListComponent } from './collection-list/collection-list.component';
 import { CollectionsRoutingModule } from './collections-routing.module';
 
@@ -21,8 +21,8 @@ import { CollectionsRoutingModule } from './collections-routing.module';
     CollectionDetailComponent,
     CollectionBeaconSearchComponent,
     CollectionLogoComponent,
-    CollectionResourceComponent,
-    CollectionResourceCredentialsComponent,
+    ResourceAccessFormComponent,
+    ResourceAccessCredentialsComponent,
     BeaconSearchBarComponent,
     BeaconResultComponent,
     BeaconLimitSearchComponent,

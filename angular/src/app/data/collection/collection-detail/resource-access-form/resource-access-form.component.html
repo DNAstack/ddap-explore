@@ -7,25 +7,25 @@
     </mat-expansion-panel-header>
 
     <ng-container [formGroup]="form">
-      <div class="flex">
+      <div class="flex"
+           formGroupName="ttl">
         <mat-form-field>
-          <input formControlName="ttl"
+          <input formControlName="numericValue"
                  matInput
                  type="number"
                  min="1"
                  placeholder="Duration of an access token">
           <mat-hint align="start"><strong>Maximum duration is 90 days</strong></mat-hint>
-          <mat-error *ngIf="form.get('ttl').hasError('required')">
+          <mat-error *ngIf="form.get('ttl.numericValue').hasError('required')">
             Duration is required
           </mat-error>
-          <mat-error *ngIf="form.get('ttl').hasError('min')">
+          <mat-error *ngIf="form.get('ttl.numericValue').hasError('min')">
             Duration must be a positive integer
           </mat-error>
         </mat-form-field>
         <mat-form-field>
           <mat-label>Time unit</mat-label>
           <mat-select formControlName="timeUnit">
-            <mat-option value="s">second</mat-option>
             <mat-option value="m">minute</mat-option>
             <mat-option value="h">hour</mat-option>
             <mat-option value="d">day</mat-option>
@@ -49,16 +49,15 @@
       </div>
     </ng-container>
 
-    <div *ngIf="resourceAccesses$ | async as resourceAccesses"
+    <div *ngIf="resourceAccess"
          class="expansion-footer-content">
-      <ddap-collection-resource-credentials *ngFor="let resourceAccess of resourceAccesses | keyvalue"
-                                            [access]="resourceAccess.value">
-      </ddap-collection-resource-credentials>
+      <ddap-resource-access-credentials [access]="resourceAccess">
+      </ddap-resource-access-credentials>
     </div>
 
     <mat-action-row>
-      <ng-container *ngIf="selectedResourceInterface">
-        <a [href]="getUrlForResourceAuthorization()"
+      <ng-container *ngIf="selectedResourceInterface && authUrl">
+        <a [href]="authUrl"
            class="stretch"
            data-se="get-access-btn">
           <button mat-flat-button
@@ -75,9 +74,16 @@
         <button mat-button
                 color="primary"
                 class="uppercase">
-          Download Command Line Client
+          Download CLI Client
         </button>
       </a>
+      <button (click)="resetFormStateToDefaults()"
+              mat-icon-button
+              color="primary"
+              class="uppercase reset-btn"
+              matTooltip="Reset form to defaults">
+        <mat-icon>replay</mat-icon>
+      </button>
     </mat-action-row>
   </mat-expansion-panel>
 </mat-accordion>

@@ -6,7 +6,18 @@
       </mat-panel-title>
     </mat-expansion-panel-header>
 
-    <ng-container [formGroup]="form">
+    <ng-container *ngIf="isPublicAccess">
+      <div class="expansion-footer-content">
+        <div *ngFor="let resourceInterface of resource.interfaces"
+             class="flex">
+          <span class="resource-interface-type">{{ resourceInterface.type }}:</span>
+          <span class="resource-interface-uri">{{ resourceInterface.uri }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!isPublicAccess"
+                  [formGroup]="form">
       <div class="flex"
            formGroupName="ttl">
         <mat-form-field>
@@ -57,8 +68,9 @@
     </div>
 
     <mat-action-row>
-      <ng-container *ngIf="selectedResourceInterface && authUrl">
-        <a [href]="authUrl"
+      <ng-container *ngIf="!isPublicAccess">
+        <a *ngIf="selectedResourceInterface && authUrl"
+           [href]="authUrl"
            class="stretch"
            data-se="get-access-btn">
           <button mat-flat-button
@@ -78,7 +90,8 @@
           Download CLI Client
         </button>
       </a>
-      <button (click)="resetFormStateToDefaults()"
+      <button *ngIf="!isPublicAccess"
+              (click)="resetFormStateToDefaults()"
               mat-icon-button
               color="primary"
               class="uppercase reset-btn"

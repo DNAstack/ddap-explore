@@ -21,6 +21,8 @@ export class ResourceAccessFormComponent implements OnInit {
 
   @Input()
   resource: ResourceModel;
+  @Input()
+  isPublicAccess = false;
 
   resourceAccess: AccessModel;
   form: FormGroup;
@@ -56,6 +58,11 @@ export class ResourceAccessFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.isPublicAccess) {
+      // Do not continue setting up access form if resource is public
+      return;
+    }
+
     const formState = this.resourceAccessFormStateService.getFormState(this.resource.id);
     this.form = this.resourceAccessFormBuilder.buildForm(formState);
 

@@ -189,7 +189,7 @@ export class AppConfigService {
         routerLink: 'search',
         isApp: true,
         isExperimental: true,
-        isSidebarEnabled: true,
+        isSidebarEnabled: false,
         expFlag: 'demo',
       })
       .registerModule({

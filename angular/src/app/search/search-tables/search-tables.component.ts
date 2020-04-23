@@ -1,6 +1,6 @@
 import { KeyValue } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import 'brace';
 import 'brace/mode/sql';
@@ -12,6 +12,8 @@ import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
 import { TableInfo } from '../../shared/search/table-info.model';
+import Table = WebAssembly.Table;
+import { TableModel } from '../../shared/search/table.model';
 import { SearchEditorComponent } from '../search-editor/search-editor.component';
 import IResourceResults = dam.v1.IResourceResults;
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
@@ -20,7 +22,6 @@ import { SearchService } from '../search.service';
 
 import { JsonViewerService } from './json-viewer/json-viewer.component';
 import { BeaconRegistry, SearchView } from './search-tables.model';
-import Table = WebAssembly.Table;
 
 
 @Component({
@@ -34,13 +35,12 @@ export class SearchTablesComponent implements OnInit {
 
   tableInfoList: TableInfo[] = [];
   uiTableInfoList: UITableInfo[] = [];
+  queryError: ParsedBackendError;
 
   fixedFlags = {
     workflowIntegrationEnabled: false,
     viewResultsAsJSON: false,  // This is set to false until we have an official approval to use the data for search.
   };
-
-  registry: BeaconRegistry;
 
   view: SearchView;
 
@@ -50,7 +50,7 @@ export class SearchTablesComponent implements OnInit {
     wrapBehavioursEnabled: true
   };
 
-  result: any;
+  result: TableModel;
   queryHistory: string[];
   resourcePath: string;
   realm: string;
@@ -130,6 +130,22 @@ export class SearchTablesComponent implements OnInit {
     });
   }
 
+  onResourceListButtonClick() {
+    const urlSegments: string[] = this.router.routerState.snapshot.url.split(/\//);
+    const resourceListUrl = urlSegments.slice(0, 3).join('/');
+    this.router.navigateByUrl(resourceListUrl);
+  }
+
+  onResultTableFullscreenButtonToggle() {
+    this.view.showQueryEditor = !this.view.showQueryEditor;
+
+    this.showFeedback(
+      this.view.showQueryEditor
+        ? 'Now, the query editor is visible.'
+        : 'The query editor is now hidden. Click the same button again to edit the query.'
+    );
+  }
+
   isTablePropertyListFinal(table: UITableInfo): boolean {
     return this.searchService.isTableInfoPropertyListFinal(table.metadata);
   }
@@ -171,29 +187,18 @@ export class SearchTablesComponent implements OnInit {
       this.accessToken,
       this.connectorDetails,
       catchError(error => {
-        const actualError: {errorName: string, message: string} = JSON.parse(error.error.message);
-        console.error('CUSTOM ERROR HANDLER: actualError:', actualError);
-
-        this.showFeedback(
-          `${actualError.errorName.replace(/_/, ' ')}: ${actualError.message}`,
-          {
-            label: 'Try again',
-            callback: () => {
-              this.doSearch(this.currentQuery, false);
-            },
-          }
-        );
+        this.queryError = JSON.parse(error.error.message);
+        this.view.isSearching = false;
         throw error;
       })
     ).subscribe(result => {
+      this.queryError = null;
       this.completedQuery = query;
       this.result = result;
       this.searchService.updateTableData(result);
       this.view.isSearching = false;
 
-      // if (addToQueryHistory) {
-        this.queryHistory.unshift(query);
-      // }
+      this.queryHistory.unshift(query);
 
       this.properties = Object
         .keys(result.data_model ? result.data_model.properties : {})
@@ -326,4 +331,9 @@ interface FeedbackAction {
 interface UITableInfo {
   label: string;
   metadata: TableInfo;
+}
+
+interface ParsedBackendError {
+  errorName: string;
+  message: string;
 }

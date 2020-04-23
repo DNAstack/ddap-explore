@@ -1,4 +1,5 @@
-<form [formGroup]="form"
+<form (submit)="submitQuery()"
+      [formGroup]="form"
       novalidate
       class="flex vertical-center">
   <mat-form-field class="input-select"
@@ -23,6 +24,7 @@
   <button (click)="submitQuery()"
           mat-button
           mat-stroked-button
+          data-se="submit-search-btn"
           color="accent"
           class="uppercase"
           type="submit">

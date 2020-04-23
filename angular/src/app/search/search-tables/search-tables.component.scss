@@ -49,19 +49,45 @@ td, th {
   top: 64px;
   bottom: 0;
   overflow-y: auto;
+
+  mat-panel-title {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.table-info-details {
+  margin-left: calc(24px + 0.75rem);
+
+  .table-info-detail {
+    margin-bottom: 16px;
+
+    h4 {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+  }
 }
 
 .table-property-list {
-  margin: 0 0 1rem 0;
+  margin: 0;
 }
 
 ul.table-property-list {
-  padding: 0 0 0 2rem;
+  padding: 0;
+  list-style: none;
 
-  a {
+  li {
+    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: block;
+    margin-bottom: 4px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -73,4 +99,90 @@ ul.table-property-list:empty:after {
 div.table-property-list.init {
   display: flex;
   color: $color-grey-light;
+}
+
+.search-query-result-combo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.query-editor-container {
+  height: 64px;
+  position: absolute;
+  top: 0;
+}
+
+.query-result-container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  bottom: 0;
+
+  &.editor-visible {
+    top: 64px;
+  }
+}
+
+.result-header {
+  position: sticky;
+  position: -webkit-sticky;
+  align-self: flex-start;
+}
+
+.result-header-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.result-counter {
+  margin: 0 10px;
+}
+
+.query-error {
+  color: #fff;
+  background-color: $failure-color;
+
+  mat-icon {
+    float: left;
+    margin: 16px 8px 16px 16px;
+  }
+
+  .type {
+    margin: 16px 16px 0 8px;
+    font-weight: 700;
+  }
+
+  .message {
+    margin: 0 16px 16px 8px;
+  }
+}
+
+.sync-in-progress {
+  color: #fff;
+  background-color: $warn-color;
+  padding: 16px;
+  margin-bottom: -24px;
+  box-shadow: rgba(0,0,0,0.3) 0 0 20px;
+}
+
+.result-outer-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.completed-query {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  pre {
+    margin-top: 0;
+  }
 }

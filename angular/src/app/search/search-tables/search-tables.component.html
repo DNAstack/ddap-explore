@@ -4,7 +4,12 @@
     <mat-drawer mode="side" class="search-drawer" opened>
       <mat-toolbar class="tertiary-toolbar search-toolbar">
         <mat-toolbar-row>
-          <div>Tables</div>
+          <div>
+            <button mat-icon-button (click)="onResourceListButtonClick()">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            Search Resources
+          </div>
           <span class="fill-space"></span>
           <button tabindex="-1"
                   mat-icon-button
@@ -24,37 +29,39 @@
                   <mat-icon class="m-r-sm">web_asset</mat-icon>
                   <span title="{{table.metadata.name}}">{{table.label}}</span>
                 </mat-panel-title>
-                <mat-panel-description>
-                </mat-panel-description>
               </mat-expansion-panel-header>
-              <div class="m-b">
-                <div class="h4 m-b-sm">Table</div>
-                <a (click)="onTableNameClick(table.metadata.name)" tabindex="-1">
-                  {{table.metadata.name}}
-                </a>
-              </div>
-              <div class="h4 m-b-sm">Properties</div>
-              <div class="table-property-list init" *ngIf="!isTablePropertyListFinal(table)">
-                Loading...
-              </div>
-              <ul class="table-property-list" *ngIf="isTablePropertyListFinal(table)">
-                <li *ngFor="let property of table.metadata.data_model.properties | keyvalue : propertyOrder;">
-                  <a (click)='onTableColumnNameClick(property.key)'
-                     tabindex="-1">
-                    <span [title]="property.key">{{property.key}}</span>
+              <div class="table-info-details">
+                <div class="table-info-detail">
+                  <h4>Table</h4>
+                  <a (click)="onTableNameClick(table.metadata.name)" tabindex="-1">
+                    {{table.metadata.name}}
                   </a>
-                </li>
-              </ul>
-              <button class="m-t-sm" tabindex="-1" mat-icon-button
-                      (click)="onPreviewQueryClick(table.metadata.name)"
-                      [attr.data-se]="'preview-table-'+(j+1)"
-                      matTooltip="Preview Table">
-                <mat-icon>visibility</mat-icon>
-              </button>
-              <button tabindex="-1" mat-icon-button (click)="viewTableAsJSON(table.metadata)"
-                      matTooltip="View Table as JSON" style="display:inline">
-                <mat-icon>launch</mat-icon>
-              </button>
+                </div>
+                <div class="table-info-detail">
+                  <h4>Properties</h4>
+                  <div class="table-property-list init" *ngIf="!isTablePropertyListFinal(table)">
+                    Loading...
+                  </div>
+                  <ul class="table-property-list" *ngIf="isTablePropertyListFinal(table)">
+                    <li *ngFor="let property of table.metadata.data_model.properties | keyvalue : propertyOrder;">
+                      <a (click)='onTableColumnNameClick(property.key)'
+                         tabindex="-1">
+                        <span [title]="property.key">{{property.key}}</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <button class="m-t-sm" tabindex="-1" mat-icon-button
+                        (click)="onPreviewQueryClick(table.metadata.name)"
+                        [attr.data-se]="'preview-table-'+(j+1)"
+                        matTooltip="Preview Table">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button tabindex="-1" mat-icon-button (click)="viewTableAsJSON(table.metadata)"
+                        matTooltip="View Table as JSON" style="display:inline">
+                  <mat-icon>launch</mat-icon>
+                </button>
+              </div>
             </mat-expansion-panel>
           </mat-accordion>
         </ng-container>
@@ -63,14 +70,9 @@
     <mat-drawer-content>
       <mat-drawer-container style="height:100%" [autosize]="true">
         <mat-drawer-content>
-          <div style="display:flex; flex: 1; flex-direction: column;">
-            <mat-toolbar class="tertiary-toolbar"
-                         style="height: 64px; position:absolute; top: 0;">
+          <div class="search-query-result-combo">
+            <mat-toolbar class="tertiary-toolbar query-editor-container">
               <mat-toolbar-row>
-                <button class="m-r-sm" tabindex="-1" mat-icon-button
-                        (click)="view.showTables = !view.showTables">
-                  <mat-icon>web_asset</mat-icon>
-                </button>
                 <div>Query</div>
                 <span class="fill-space"></span>
                 <button tabindex="-1"
@@ -79,28 +81,38 @@
                         (click)="this.searchEditor.doSearchFromEditor()"
                         matTooltip="Run query"
                         data-se="run-query"
-                        style="display:inline"
+                        [disabled]="view.isSearching"
                         *ngIf="view.showQueryEditor">
                   <mat-icon>play_arrow</mat-icon>
                   Run
                 </button>
               </mat-toolbar-row>
             </mat-toolbar>
-            <div style="display: flex; flex-direction:column; position:absolute; width:100%; top:64px; bottom:0;">
+            <div class="query-result-container {{view.showQueryEditor ? 'editor-visible' : ''}}">
               <ddap-search-editor *ngIf="view.showQueryEditor"
                                   class="b-b"
                                   [searchText]="currentQuery"
                                   [editorOptions]="options"
                                   (doSearch)="doSearch($event, true)">
               </ddap-search-editor>
+
+              <div class="query-error"
+                   *ngIf="view.showQueryEditor && queryError">
+                <mat-icon>error</mat-icon>
+                <div class="type">{{queryError.errorName}}</div>
+                <div class="message">{{queryError.message}}</div>
+              </div>
+
+              <!-- Result Header -->
               <mat-toolbar class="tertiary-toolbar result-header">
-                <mat-toolbar-row style="position: sticky; position: -webkit-sticky; align-self: flex-start">
+                <mat-toolbar-row>
                   <div>Results</div>
                   <span class="fill-space"></span>
-                  <div *ngIf="result" style="display:flex; flex-direction: row">
-                    <mat-chip-list class="m-s-sm" [hidden]="">
-                      <mat-chip color="primary">{{result['data']?.length}}
-                        results
+                  <!-- Result View Controls -->
+                  <div *ngIf="result" class="result-header-controls">
+                    <mat-chip-list class="result-counter">
+                      <mat-chip color="primary">
+                        {{result.data?.length}} results
                       </mat-chip>
                     </mat-chip-list>
                     <button tabindex="-1" mat-icon-button
@@ -110,16 +122,9 @@
                       <mat-icon>wrap_text</mat-icon>
                     </button>
                     <button tabindex="-1" mat-icon-button
-                            (click)="view.showQueryEditor = false; view.showTables = false"
-                            *ngIf="view.showTables || view.showQueryEditor"
-                            matTooltip="Fullscreen">
-                      <mat-icon>fullscreen</mat-icon>
-                    </button>
-                    <button tabindex="-1" mat-icon-button
-                            (click)="view.showQueryEditor = true; view.showTables = true"
-                            *ngIf="!view.showTables && !view.showQueryEditor"
-                            matTooltip="Exit Fullscreen">
-                      <mat-icon>fullscreen_exit</mat-icon>
+                            (click)="onResultTableFullscreenButtonToggle()"
+                            matTooltip="{{ view.showQueryEditor ? 'Only show the results' : 'Show both query editor and results' }}">
+                      <mat-icon>{{ view.showQueryEditor ? 'fullscreen' : 'fullscreen_exit' }}</mat-icon>
                     </button>
                     <button mat-icon-button matTooltip="Query History"
                             [matMenuTriggerFor]="menu">
@@ -139,37 +144,48 @@
                   </div>
                 </mat-toolbar-row>
               </mat-toolbar>
-              <div style="flex: 1; display:flex; flex-direction: column; overflow-y:auto">
-                <div class="p-a" *ngIf="queryHistory.length > 0 && !view.isSearching">
-                  <div style="flex:1; height:100%">
-                    <div class="m-b-sm"
-                         style="display:flex; flex-direction: row; align-items: center;">
-                      <pre><code>{{completedQuery}}</code></pre>
-                      <button *ngIf="result && fixedFlags.workflowIntegrationEnabled"
-                              mat-stroked-button
-                              color="accent"
-                              matTooltip="Run query"
-                              class="run-workflow"
-                              [routerLink]="['/'+realm, 'analyze', 'run']"
-                              [queryParams]="{'source': 'search'}">
-                        <mat-icon>launch</mat-icon>
-                        Run Workflow
-                      </button>
-                    </div>
-                    <table *ngIf="result" data-se="result-wrapper">
-                      <tr>
-                        <th *ngFor="let property of properties;">{{property}}</th>
-                      </tr>
-                      <tr *ngFor="let row of result['data']">
-                        <td [ngClass]="{'no-wrap': !view.wrapSearchResults}"
-                            *ngFor="let value of row | objectToArray : properties"
-                            [innerHTML]="value | linkify">
-                        </td>
-                      </tr>
-                    </table>
-                    <div data-se="result-wrapper" *ngIf="!result">No results</div>
+
+              <div *ngIf="result != null && view.isSearching" class="sync-in-progress">
+                Updating...
+              </div>
+
+              <!-- Result Container -->
+              <div class="result-outer-wrapper">
+                <ng-container *ngIf="queryHistory.length > 0">
+                  <!-- Completed Query -->
+                  <div class="completed-query">
+                    <pre><code>{{completedQuery}}</code></pre>
+                    <button *ngIf="result && fixedFlags.workflowIntegrationEnabled"
+                            mat-stroked-button
+                            color="accent"
+                            matTooltip="Run query"
+                            class="run-workflow"
+                            [routerLink]="['/'+realm, 'analyze', 'run']"
+                            [queryParams]="{'source': 'search'}">
+                      <mat-icon>launch</mat-icon>
+                      Run Workflow
+                    </button>
                   </div>
-                </div>
+
+                  <!-- Result Table -->
+                  <table *ngIf="result"
+                         data-se="result-wrapper">
+                    <tr>
+                      <th *ngFor="let property of properties;">{{property}}</th>
+                    </tr>
+                    <tr *ngFor="let row of result['data']">
+                      <td [ngClass]="{'no-wrap': !view.wrapSearchResults}"
+                          *ngFor="let value of row | objectToArray : properties"
+                          [innerHTML]="value | linkify">
+                      </td>
+                    </tr>
+                  </table>
+
+                  <div *ngIf="!result"
+                       data-se="result-wrapper">
+                    No results
+                  </div>
+                </ng-container>
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ILatLong, IMapOptions } from 'angular-maps';
 import { ViewControllerService } from 'ddap-common-lib';
@@ -70,6 +71,7 @@ export class DiscoveryBeaconComponent implements OnInit {
               private beaconService: BeaconService,
               public viewController: ViewControllerService,
               private route: ActivatedRoute,
+              private snackBar: MatSnackBar,
               private geocodeService: GeocodeService,
               private changeDetector: ChangeDetectorRef,
               public helpDialog: MatDialog
@@ -92,10 +94,28 @@ export class DiscoveryBeaconComponent implements OnInit {
       () => {
         this.dataTableController.setInflight(false);
         this.view.errorSearching = false;
+        this.queryForm.enable();
       },
-      () => {
+      (error?: BeaconSearchError) => {
         this.dataTableController.setInflight(false);
         this.view.errorSearching = true;
+        this.queryForm.enable();
+
+        if (error) {
+          const actualError = error.error.error;
+          let message = 'Experienced a technical error. Please try again in a few moment.';
+
+          if (error.status === 400) {
+            const invalidFieldValuePairs = actualError.validationErrors.map(
+              validationError => `"${validationError.field}" (${validationError.rejectedValue})`
+            );
+
+            message = `The field${actualError.validationErrors.length === 1 ? '' : 's'}`
+              + ` ${invalidFieldValuePairs.join(', ')}. Please check your query and try again.`;
+          }
+
+          this.snackBar.open('⚠️ ' + message, null, {duration: 10000});
+        }
       }
     );
 
@@ -269,4 +289,17 @@ export class DiscoveryBeaconComponent implements OnInit {
         queryParamsHandling: 'merge', // remove to replace all query params by provided
       });
   }
+}
+
+interface BeaconSearchError {
+  status: number;
+  ok: boolean;
+  error: {
+    error: {
+      validationErrors?: {
+        field: string;
+        rejectedValue: any;
+      }[]
+    }
+  };
 }

@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { BeaconAPIResponse, BeaconResponse } from './beacon.model';
 
@@ -26,32 +27,8 @@ export class BeaconService {
     return this.apiUrl;
   }
 
-  searchBeacon(
-    assembly: string,
-    referenceName: string,
-    start: number,
-    referenceBases: string,
-    alternateBases: string,
-    headers?: HttpHeaders)
-    : Promise<BeaconAPIResponse> {
-    return this.searchBeacons(
-      assembly,
-      referenceName,
-      start,
-      referenceBases,
-      alternateBases,
-      headers);
-  }
-
-  searchBeacons(
-    assembly: string,
-    referenceName: string,
-    start: number,
-    referenceBases: string,
-    alternateBases: string,
-    headers?: HttpHeaders)
-    : Promise<BeaconAPIResponse> {
-
+  runObservableBeaconSearch(assembly: string, referenceName: string, start: number, referenceBases: string,
+                            alternateBases: string, headers?: HttpHeaders): Observable<BeaconAPIResponse> {
     const params = new HttpParams()
       .set('assemblyId', assembly)
       .set('referenceName', referenceName)
@@ -62,6 +39,6 @@ export class BeaconService {
 
     // /query?referenceName=1&start=9924&referenceBases=C&alternateBases=T&assemblyId=GRCh38
     return this.httpClient.get<BeaconAPIResponse>(`${this.apiUrl}`
-      + '/query', {'params': params, 'headers': headers}).toPromise();
+      + '/query', {'params': params, 'headers': headers});
   }
 }

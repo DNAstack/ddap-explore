@@ -1,11 +1,28 @@
 package com.dnastack.ddap.common.setup;
 
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_BASE_URL;
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_PASSWORD;
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_USERNAME;
+import static java.lang.String.format;
+import static java.lang.String.join;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import com.dnastack.ddap.common.PolicyRequirementFailedException;
 import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
 import com.dnastack.ddap.common.util.EnvUtil;
 import com.dnastack.ddap.common.util.WebDriverCookieHelper;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,26 +35,9 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.openqa.selenium.WebDriver;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static com.dnastack.ddap.common.AbstractBaseE2eTest.*;
-import static java.lang.String.format;
-import static java.lang.String.join;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 @Slf4j
 public class DamWalletLoginStrategy implements LoginStrategy {
@@ -70,10 +70,8 @@ public class DamWalletLoginStrategy implements LoginStrategy {
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(personaName);
-        Cookie session = DdapLoginUtil
-            .loginToDdap(damConfig.getDamBaseUrl(), damConfig.getDamUsername(), damConfig.getDamPassword())
-            .orElse(null);
-        final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session);
+        final CookieStore cookieStore = DdapLoginUtil
+            .loginToDdap(damConfig.getDamBaseUrl(), damConfig.getDamUsername(), damConfig.getDamPassword());
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {
@@ -106,8 +104,7 @@ public class DamWalletLoginStrategy implements LoginStrategy {
         driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s", realmName)).toString());
         {
             // Need to add session cookie separately
-            DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD)
-                .ifPresent(cookie -> WebDriverCookieHelper.addBrowserCookie(driver, cookie));
+            WebDriverCookieHelper.addCookiesFromStoreToSelenium(DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD),driver);
         }
         // Visit again with session cookie
         driver.get(URI.create(DDAP_BASE_URL).resolve(format("/%s", realmName)).toString());
@@ -118,8 +115,7 @@ public class DamWalletLoginStrategy implements LoginStrategy {
     @Override
     public <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException {
         final LoginInfo loginInfo = personalAccessTokens.get(persona.getId());
-        Cookie session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD).orElse(null);
-        final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session);
+        final CookieStore cookieStore = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {

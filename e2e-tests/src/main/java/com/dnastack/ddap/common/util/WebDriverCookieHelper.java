@@ -11,6 +11,7 @@ import org.openqa.selenium.WebDriver;
 public class WebDriverCookieHelper {
 
     public static final String SESSION_COOKIE_NAME = "SESSION";
+    public static final String SESSION_DRECRYPTION_COOKIE_NAME = "SESSION_DECRYPTION_KEY";
 
     public static Optional<Cookie> getCookie(WebDriver driver, String cookieName) {
         return Optional.ofNullable(driver.manage().getCookieNamed(cookieName));

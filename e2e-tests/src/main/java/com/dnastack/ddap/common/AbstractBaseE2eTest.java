@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.config.RestAssuredConfig;
+import io.restassured.http.Cookies;
 import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -74,13 +76,14 @@ public abstract class AbstractBaseE2eTest {
     }
 
     public static RequestSpecification getRequestSpecWithBasicAuthIfNeeded() throws IOException {
-        Optional<Cookie> sessionCookie = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
+        CookieStore cookieStore = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         RequestSpecification request = given()
             .log().method()
             .log().uri();
 
-        sessionCookie.ifPresent(cookie -> request.cookie(WebDriverCookieHelper.SESSION_COOKIE_NAME, cookie.getValue()));
-
+        cookieStore.getCookies().forEach(cookie -> {
+            request.cookie(cookie.getName(),cookie.getValue());
+        });
         return request;
     }
 

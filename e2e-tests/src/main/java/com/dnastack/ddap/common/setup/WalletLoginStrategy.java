@@ -17,7 +17,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -32,8 +31,6 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.openqa.selenium.WebDriver;
@@ -72,15 +69,13 @@ public class WalletLoginStrategy implements LoginStrategy {
             doWait(2_000L);
             String currentPage = driver.getCurrentUrl();
             if (currentPage.startsWith(DDAP_BASE_URL) && currentPage.endsWith("/login")) {
-                DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD)
-                    .ifPresent(cookie -> WebDriverCookieHelper.addBrowserCookie(driver, cookie));
+                WebDriverCookieHelper.addCookiesFromStoreToSelenium(DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD),driver);
                 driver.get(DDAP_BASE_URL);
                 doWait(2_000L);
             }
 
             if (driver.getCurrentUrl().startsWith(walletConfig.getWalletUrl())) {
-                Optional<Cookie> session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-                final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session.orElse(null));
+                final CookieStore cookieStore = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
                 final HttpClient httpclient = setupHttpClient(cookieStore);
                 walletLogin(httpclient, personalAccessTokens.get(persona.getId()));
                 WebDriverCookieHelper.addCookiesFromStoreToSelenium(cookieStore, driver);
@@ -95,8 +90,7 @@ public class WalletLoginStrategy implements LoginStrategy {
 
     @Override
     public <T extends AnyDdapPage> T authorizeForResources(WebDriver driver, TestingPersona persona, String realmName, URI authorizeUri, Function<WebDriver, T> pageFactory) throws IOException {
-        Optional<Cookie> session = DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
-        final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session.orElse(null));
+        final CookieStore cookieStore =DdapLoginUtil.loginToDdap(DDAP_BASE_URL, DDAP_USERNAME, DDAP_PASSWORD);
         final HttpClient httpclient = setupHttpClient(cookieStore);
 
         {

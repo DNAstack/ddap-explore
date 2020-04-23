@@ -1,33 +1,31 @@
 package com.dnastack.ddap.common.setup;
 
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_BASE_URL;
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_PASSWORD;
+import static com.dnastack.ddap.common.AbstractBaseE2eTest.DDAP_USERNAME;
+import static java.lang.String.format;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertTrue;
+
 import com.dnastack.ddap.common.TestingPersona;
 import com.dnastack.ddap.common.page.AnyDdapPage;
 import com.dnastack.ddap.common.page.ICLoginPage;
 import com.dnastack.ddap.common.util.DdapLoginUtil;
 import com.dnastack.ddap.common.util.EnvUtil;
-import com.dnastack.ddap.common.util.WebDriverCookieHelper;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-import org.openqa.selenium.WebDriver;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.dnastack.ddap.common.AbstractBaseE2eTest.*;
-import static java.lang.String.format;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertTrue;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+import org.openqa.selenium.WebDriver;
 
 public class PersonaLoginStrategy implements LoginStrategy {
 
@@ -36,7 +34,7 @@ public class PersonaLoginStrategy implements LoginStrategy {
 
     private String icBaseUrl;
 
-    public PersonaLoginStrategy(){
+    public PersonaLoginStrategy() {
         icBaseUrl = EnvUtil.requiredEnv("E2E_IC_BASE_URL");
     }
 
@@ -44,15 +42,15 @@ public class PersonaLoginStrategy implements LoginStrategy {
     @Override
     public CookieStore performPersonaLogin(String personaName, String realmName, String... scopes) throws IOException {
         String baseUrl = EnvUtil.stripTrailingSlash(DDAP_BASE_URL);
-        org.apache.http.cookie.Cookie session = DdapLoginUtil.loginToDdap(baseUrl, DDAP_USERNAME, DDAP_PASSWORD).orElse(null);
-        final CookieStore cookieStore = WebDriverCookieHelper.setupCookieStore(session);
+        final CookieStore cookieStore = DdapLoginUtil.loginToDdap(baseUrl, DDAP_USERNAME, DDAP_PASSWORD);
         final HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
         final String scopeString = (scopes.length == 0) ? "" : "&scope=" + String.join("+", scopes);
         final String path;
         final String state;
 
         {
-            HttpGet request = new HttpGet(String.format("%s/api/v1alpha/realm/%s/identity/login?loginHint=persona:%s%s", baseUrl, realmName, personaName, scopeString));
+            HttpGet request = new HttpGet(String
+                .format("%s/api/v1alpha/realm/%s/identity/login?loginHint=persona:%s%s", baseUrl, realmName, personaName, scopeString));
 
             HttpResponse response = httpclient.execute(request);
 
@@ -73,7 +71,8 @@ public class PersonaLoginStrategy implements LoginStrategy {
 
             final HttpResponse response = httpclient.execute(request);
             String responseBody = EntityUtils.toString(response.getEntity());
-            final String responseMessage = "Headers: " + Arrays.toString(response.getAllHeaders()) + "\nResponse body: " + responseBody;
+            final String responseMessage =
+                "Headers: " + Arrays.toString(response.getAllHeaders()) + "\nResponse body: " + responseBody;
             assertThat(responseMessage, response.getStatusLine().getStatusCode(), is(200));
         }
 

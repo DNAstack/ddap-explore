@@ -179,7 +179,47 @@ export class AppConfigService {
         requiredFeatureFlags: ['featureDiscoveryEnabled'],
         routerLink: 'discovery',
         isApp: true,
-        isSidebarEnabled: false,
+        isSidebarEnabled: true,
+      })
+      .registerModule({
+        key: 'sequences',
+        name: 'Sequences',
+        iconName: 'sync_alt',
+        routerLink: 'discovery/sequences',
+        parentKey: 'discovery',
+        isApp: false,
+        isExperimental: true,
+        expFlag: 'demo',
+      })
+      .registerModule({
+        key: 'files',
+        name: 'Files',
+        iconName: 'layers',
+        routerLink: 'discovery/sequences',
+        parentKey: 'discovery',
+        isApp: false,
+        isExperimental: true,
+        expFlag: 'demo',
+      })
+      .registerModule({
+        key: 'variants',
+        name: 'Variants',
+        iconName: 'wifi_tethering',
+        routerLink: 'discovery/beacon',
+        parentKey: 'discovery',
+        isApp: false,
+        isExperimental: true,
+        expFlag: 'demo',
+      })
+      .registerModule({
+        key: 'proteins',
+        name: 'Proteins',
+        iconName: '360',
+        routerLink: 'discovery/proteins',
+        parentKey: 'discovery',
+        isApp: false,
+        isExperimental: true,
+        expFlag: 'demo',
       });
 
     this.viewController

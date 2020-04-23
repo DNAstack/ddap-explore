@@ -1,0 +1,51 @@
+export const proteins = [
+
+    { name : 'ORF1ab polyprotein', id: 'YP_009724389.1',
+        parts: [
+            { name : 'leader protein nsp1', id: 'YP_009725297.1' },
+            { name : 'nsp2', id: 'YP_009725298.1' },
+            { name : 'nsp3', id: 'YP_009725299.1' },
+            { name : 'nsp4', id: 'YP_009725300.1' },
+            { name : '3C-like proteinase', id: 'YP_009725301.1' },
+            { name : 'nsp6', id: 'YP_009725302.1' },
+            { name : 'nsp7', id: 'YP_009725303.1' },
+            { name : 'nsp8', id: 'YP_009725304.1' },
+            { name : 'nsp9', id: 'YP_009725305.1' },
+            { name : 'nsp10', id: 'YP_009725306.1' },
+            { name : 'RNA-dependent RNA polymerase', id: 'YP_009725307.1' },
+            { name : 'helicase', id: 'YP_009725308.1' },
+            { name : '3\' to 5\' exonuclease', id: 'YP_009725309.1' },
+            { name : 'endoRNAse', id: 'YP_009725310.1' },
+            { name : '2\'-O-ribose methyltransferase', id: 'YP_009725311.1' },
+        ],
+    },
+    { name : 'ORF1a polyprotein', id: 'YP_009725295.1',
+        parts : [
+            { name : 'leader protein nsp1', id: 'YP_009742608.1' },
+            { name : 'nsp2', id: 'YP_009742609.1' },
+            { name : 'nsp3', id: 'YP_009742610.1' },
+            { name : 'nsp4', id: 'YP_009742611.1' },
+            { name : '3C-like proteinase', id: 'YP_009742612.1' },
+            { name : 'nsp6', id: 'YP_009742613.1' },
+            { name : 'nsp7', id: 'YP_009742614.1' },
+            { name : 'nsp8', id: 'YP_009742615.1' },
+            { name : 'nsp9', id: 'YP_009742616.1' },
+            { name : 'nsp10', id: 'YP_009742617.1' },
+            { name : 'nsp11', id: 'YP_009725312.1' },
+
+        ],
+    },
+
+    { name : 'surface glycoprotein', id: 'YP_009724390.1' },
+    { name : 'ORF3a protein', id: 'YP_009724391.1' },
+    { name : 'envelope protein', id: 'YP_009724392.1' },
+    { name : 'membrane glycoprotein', id: 'YP_009724393.1' },
+
+    { name : 'ORF6 protein', id: 'YP_009724394.1' },
+    { name : 'ORF7a protein', id: 'YP_009724395.1' },
+    { name : 'ORF7b', id: 'YP_009725318.1' },
+    { name : 'ORF8 protein', id: 'YP_009724396.1' },
+    { name : 'nucleocapsid phosphoprotein', id: 'YP_009724397.2' },
+    { name : 'ORF10 protein', id: 'YP_009725255.1' },
+
+];

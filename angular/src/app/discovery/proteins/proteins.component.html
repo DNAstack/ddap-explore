@@ -1,0 +1,28 @@
+
+<div class="full-hw" style="display:flex; flex-direction:column;">
+    <ddaplib-header icon="navigation" label="Proteins">
+    </ddaplib-header>
+    <!--<mat-progress-bar mode="indeterminate"></mat-progress-bar>-->
+    <ddaplib-cover-message style="flex-grow: 1" *ngIf="proteins.length == 0" message="No Proteins"
+        icon="not_interested"></ddaplib-cover-message>
+    <div style="display:flex; flex: 1" *ngIf="proteins.length > 0">
+        <mat-drawer-container class="full-hw" [autosize]="true">
+            <mat-drawer mode="side" [(opened)]="view.showLeftSidebar" style="min-width:400px; max-width:400px">
+                <mat-toolbar class="tertiary-toolbar"
+                    style="height: 64px; position:absolute; top: 0;">
+                    <mat-toolbar-row>
+                        <div>Structures</div>
+                        <span class="fill-space"></span>
+                        <button tabindex="-1" mat-icon-button (click)="closeTables()" matTooltip="Close Tables">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </mat-toolbar-row>
+                </mat-toolbar>
+            </mat-drawer>
+            <mat-drawer-content>
+                Hello proteins
+                {{ proteins }}
+            </mat-drawer-content>
+        </mat-drawer-container>
+    </div>
+</div>

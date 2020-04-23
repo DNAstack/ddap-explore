@@ -13,11 +13,10 @@
     <ddaplib-cover-message style="flex-grow: 1" *ngIf="molecules.length == 0" message="No Molecules"
         icon="not_interested"></ddaplib-cover-message>
     <div style="display:flex; flex: 1" *ngIf="molecules.length > 0">
-        <mat-drawer-container class="full-hw" [autosize]="true">
+        <mat-drawer-container style="flex:1" [autosize]="true">
             <mat-drawer mode="side" [(opened)]="view.showLeftSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
                 <mat-toolbar class="tertiary-toolbar">
                     <mat-toolbar-row>
-                        
                         <div>Proteins</div>
                         <span class="fill-space"></span>
                         <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false" matTooltip="Close Structures">
@@ -26,11 +25,42 @@
                     </mat-toolbar-row>
                 </mat-toolbar>
                 <div style="flex: 1; overflow-y: auto;">
-                    <button *ngFor="let molecule of molecules; index as j;" mat-menu-item (click)="selectMolecules(molecule)"><mat-icon class="m-r-sm">gesture</mat-icon>{{molecule.name}}</button>
+                    <button *ngFor="let molecule of molecules; index as j;" mat-menu-item (click)="selectMolecule(molecule)"><mat-icon class="m-r-sm">gesture</mat-icon>{{molecule.name}}</button>
                 </div>
             </mat-drawer>
-            <mat-drawer-content class="p-a">
-                Selected molecule {{ selectedMolecule | json }}
+            <mat-drawer-content style="display:flex; flex: 1">
+                <mat-drawer-container style="flex:1" [autosize]="true">
+                    <mat-drawer mode="side" position="end" [(opened)]="view.showRightSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
+                        <mat-toolbar class="tertiary-toolbar">
+                            <mat-toolbar-row>
+                                <div>Configuration</div>
+                                <span class="fill-space"></span>
+                                <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = false" matTooltip="Close Configuration">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </mat-toolbar-row>
+                        </mat-toolbar>
+                        <div class="p-a">
+                            <div *ngIf="selectedMolecule && selectedMolecule.parts">
+                                <div class="h3 m-b-sm">Parts</div>
+                                <mat-form-field appearance="outline" floatLabel="always">
+                                    <mat-label>Sub-Molecule</mat-label>
+                                    <mat-select [(ngModel)]="selectedSubMolecule">
+                                        <mat-option *ngFor="let molecule of selectedMolecule.parts" [value]="molecule">
+                                            {{molecule.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>  
+                        </div>
+                    </mat-drawer>
+                    <mat-drawer-content class="full-hw p-a">
+                        <ddaplib-cover-message style="flex-grow: 1" *ngIf="!getMoleculeToRender()" message="No Molecule Selected" icon="not_interested"></ddaplib-cover-message>
+                        <div class="full-hw p-a" style="background-color: black; color:white" *ngIf="getMoleculeToRender()">
+                            Viewing {{getMoleculeToRender().name}} with ID {{getMoleculeToRender().id}}
+                        </div>
+                    </mat-drawer-content>
+                </mat-drawer-container>
             </mat-drawer-content>
         </mat-drawer-container>
     </div>

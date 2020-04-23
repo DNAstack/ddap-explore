@@ -1,5 +1,6 @@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ILatLong } from 'angular-maps';
+import { catchError } from 'rxjs/operators';
 
 import { ColumnDefinition, DataTableController } from '../../shared/data-table/data-table-controller';
 import { BeaconResponse } from '../beacon-service/beacon.model';
@@ -69,13 +70,18 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
   find(query: QuerySnapshot) {
     this._beforeSearch();
 
-    this.beaconService.searchBeacon(
+    this.beaconService.runObservableBeaconSearch(
       'hCoV-19',
       '1',
       query.start,
       query.referenceBases,
       query.alternateBases
-    ).then(
+    ).pipe(
+      catchError((e) => {
+        this._afterFailedSearch(e);
+        throw e;
+      })
+    ).subscribe(
       data => {
         this.queryForm.enable();
 

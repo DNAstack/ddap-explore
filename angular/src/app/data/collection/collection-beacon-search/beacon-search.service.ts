@@ -41,7 +41,7 @@ export class BeaconSearchService {
 
   private queryBeacon(damId: string, resourceId: string, params?: BeaconSearchRequestModel): Observable<BeaconSearchResponseModel[]> {
     return this.http.get<BeaconSearchResponseModel[]>(
-      `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/resources/${damId}/${resourceId}/search`,
+      `${environment.ddapAlphaApiUrl}/realm/${realmIdPlaceholder}/resources/${damId}/${resourceId}/search`,
       { params }
     ).pipe(
       this.errorHandler.notifyOnError(`Can't query beacon for resource ${resourceId}.`)
@@ -50,7 +50,7 @@ export class BeaconSearchService {
 
   private queryAll(params?: BeaconSearchRequestModel): Observable<BeaconSearchResponseModel[]> {
     return this.http.get<BeaconSearchResponseModel[]>(
-      `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/resources/search`,
+      `${environment.ddapAlphaApiUrl}/realm/${realmIdPlaceholder}/resources/search`,
       { params }
     ).pipe(
       this.errorHandler.notifyOnError(`Can't query beacons.`)

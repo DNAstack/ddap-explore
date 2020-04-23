@@ -62,7 +62,7 @@ export class AppConfigService {
 
     this.inflight = true;
 
-    return this.http.get<AppConfigModel>(`${environment.ddapApiUrlOld}/config`)
+    return this.http.get<AppConfigModel>(`${environment.ddapAlphaApiUrl}/config`)
       .pipe(
         map(config => {
           this.inflight = false;

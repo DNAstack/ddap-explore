@@ -8,47 +8,50 @@
           <span class="fill-space"></span>
           <button tabindex="-1"
                   mat-icon-button
-                  (click)="refreshBeacons()"
+                  (click)="getTables()"
                   matTooltip="Refresh Tables">
             <mat-icon>refresh</mat-icon>
           </button>
-          <button tabindex="-1"
-                  mat-icon-button
-                  (click)="closeTables()"
-                  matTooltip="Close Tables">
-            <mat-icon>close</mat-icon>
-          </button>
         </mat-toolbar-row>
       </mat-toolbar>
-      <div style="position:absolute; width:100%; top:64px; bottom:0; overflow-y: auto;">
-        <ng-container style="flex:1; height:100%;" *ngIf="searchTables.length > 0">
-          <mat-accordion>
-            <mat-expansion-panel *ngFor="let table of searchTables; index as j;" tabindex="-1">
+      <div class="table-list-container">
+        <ng-container> <!-- FIXME remove ng-container -->
+          <mat-accordion *ngIf="tableInfoList.length > 0">
+            <mat-expansion-panel *ngFor="let table of uiTableInfoList; index as j;" tabindex="-1"
+                                 (opened)="onTableInfoExpanded(table)">
               <mat-expansion-panel-header>
                 <mat-panel-title>
-                  <mat-icon class="m-r-sm">web_asset</mat-icon>{{table.name}}
+                  <mat-icon class="m-r-sm">web_asset</mat-icon>
+                  <span title="{{table.metadata.name}}">{{table.label}}</span>
                 </mat-panel-title>
                 <mat-panel-description>
                 </mat-panel-description>
               </mat-expansion-panel-header>
               <div class="m-b">
                 <div class="h4 m-b-sm">Table</div>
-                <a (click)="this.searchEditor.addAtCursor(table.name)" tabindex="-1">
-                  {{table.name}}
+                <a (click)="onTableNameClick(table.metadata.name)" tabindex="-1">
+                  {{table.metadata.name}}
                 </a>
               </div>
               <div class="h4 m-b-sm">Properties</div>
-              <a tabindex="-1" (click)='this.searchEditor.addAtCursor("\"" + property.key + "\"")'
-                 *ngFor="let property of table['properties'] | keyvalue : propertyOrder;">
-                <div *ngIf="property.key != 'description'">{{property.key}}</div>
-              </a>
+              <div class="table-property-list init" *ngIf="!isTablePropertyListFinal(table)">
+                Loading...
+              </div>
+              <ul class="table-property-list" *ngIf="isTablePropertyListFinal(table)">
+                <li *ngFor="let property of table.metadata.data_model.properties | keyvalue : propertyOrder;">
+                  <a (click)='onTableColumnNameClick(property.key)'
+                     tabindex="-1">
+                    <span [title]="property.key">{{property.key}}</span>
+                  </a>
+                </li>
+              </ul>
               <button class="m-t-sm" tabindex="-1" mat-icon-button
-                      (click)="this.searchEditor.addAtCursor(previewTableQuery(table.name))"
+                      (click)="onPreviewQueryClick(table.metadata.name)"
                       [attr.data-se]="'preview-table-'+(j+1)"
                       matTooltip="Preview Table">
                 <mat-icon>visibility</mat-icon>
               </button>
-              <button tabindex="-1" mat-icon-button (click)="viewTableAsJSON(table)"
+              <button tabindex="-1" mat-icon-button (click)="viewTableAsJSON(table.metadata)"
                       matTooltip="View Table as JSON" style="display:inline">
                 <mat-icon>launch</mat-icon>
               </button>
@@ -68,36 +71,29 @@
                         (click)="view.showTables = !view.showTables">
                   <mat-icon>web_asset</mat-icon>
                 </button>
-                <div>Search</div>
+                <div>Query</div>
                 <span class="fill-space"></span>
-                <button tabindex="-1" mat-icon-button
-                        (click)="view.showQueryEditor = !view.showQueryEditor">
-                  <mat-icon>code</mat-icon>
+                <button tabindex="-1"
+                        mat-stroked-button
+                        color="accent"
+                        (click)="this.searchEditor.doSearchFromEditor()"
+                        matTooltip="Run query"
+                        data-se="run-query"
+                        style="display:inline"
+                        *ngIf="view.showQueryEditor">
+                  <mat-icon>play_arrow</mat-icon>
+                  Run
                 </button>
               </mat-toolbar-row>
             </mat-toolbar>
             <div style="display: flex; flex-direction:column; position:absolute; width:100%; top:64px; bottom:0;">
-              <div [hidden]="!view.showQueryEditor" class="b-b">
-                <mat-toolbar class="tertiary-toolbar">
-                  <mat-toolbar-row class="b-b">
-                    <div>Query Editor</div>
-                    <span class="fill-space"></span>
-                    <button tabindex="-1"
-                            mat-stroked-button
-                            color="accent"
-                            (click)="this.searchEditor.doSearchFromEditor()"
-                            matTooltip="Run query"
-                            data-se="run-query"
-                            style="display:inline">
-                      <mat-icon>play_arrow</mat-icon> Run
-                    </button>
-                  </mat-toolbar-row>
-                </mat-toolbar>
-                <ddap-search-editor [searchText]="currentQuery"
-                                    [editorOptions]="options"
-                                    (doSearch)="doSearch($event)"></ddap-search-editor>
-              </div>
-              <mat-toolbar class="tertiary-toolbar">
+              <ddap-search-editor *ngIf="view.showQueryEditor"
+                                  class="b-b"
+                                  [searchText]="currentQuery"
+                                  [editorOptions]="options"
+                                  (doSearch)="doSearch($event, true)">
+              </ddap-search-editor>
+              <mat-toolbar class="tertiary-toolbar result-header">
                 <mat-toolbar-row style="position: sticky; position: -webkit-sticky; align-self: flex-start">
                   <div>Results</div>
                   <span class="fill-space"></span>
@@ -132,7 +128,7 @@
                       </i>
                     </button>
                     <mat-menu #menu="matMenu" class="menu-width-lg">
-                      <button *ngFor="let q of queryHistory" (click)="doSearch(q)"
+                      <button *ngFor="let q of queryHistory" (click)="doSearch(q, false)"
                               mat-menu-item>{{q}}</button>
                     </mat-menu>
                     <button tabindex="-1" mat-icon-button (click)="viewResultsJSON()"

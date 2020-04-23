@@ -1,16 +1,17 @@
 import { KeyValue } from '@angular/common';
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import 'brace';
 import 'brace/mode/sql';
 import 'brace/theme/eclipse';
 import { Observable } from 'rxjs';
-import Table = WebAssembly.Table;
-import { filter, flatMap, map, shareReplay } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 
 import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
+import { TableInfo } from '../../shared/search/table-info.model';
 import { SearchEditorComponent } from '../search-editor/search-editor.component';
 import IResourceResults = dam.v1.IResourceResults;
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
@@ -18,7 +19,9 @@ import { SearchResourceModel } from '../search-resources/search-resource.model';
 import { SearchService } from '../search.service';
 
 import { JsonViewerService } from './json-viewer/json-viewer.component';
-import { BeaconQuery, BeaconRegistry, SearchView } from './search-tables.model';
+import { BeaconRegistry, SearchView } from './search-tables.model';
+import Table = WebAssembly.Table;
+
 
 @Component({
   selector: 'ddap-search-detail',
@@ -26,8 +29,11 @@ import { BeaconQuery, BeaconRegistry, SearchView } from './search-tables.model';
   styleUrls: ['./search-tables.component.scss'],
 })
 export class SearchTablesComponent implements OnInit {
-  @ViewChild(SearchEditorComponent, {static: false}) searchEditor: SearchEditorComponent;
-  searchTables: object[] = [];
+  @ViewChild(SearchEditorComponent, {static: false})
+  searchEditor: SearchEditorComponent;
+
+  tableInfoList: TableInfo[] = [];
+  uiTableInfoList: UITableInfo[] = [];
 
   fixedFlags = {
     workflowIntegrationEnabled: false,
@@ -61,11 +67,14 @@ export class SearchTablesComponent implements OnInit {
   completedQuery: string;
   properties: string[];
 
+  private snackBarRef: any;
+
   constructor(private appConfigService: AppConfigService,
               private searchService: SearchService,
               private route: ActivatedRoute,
               private jsonViewerService: JsonViewerService,
               private router: Router,
+              private snackBar: MatSnackBar,
               private resourceService: ResourceService) {
     this.view = {
       errorLoadingTables: true,
@@ -98,14 +107,32 @@ export class SearchTablesComponent implements OnInit {
       });
   }
 
-  refreshBeacons() {
-    // ...
+  onTableNameClick(tableName: string) {
+    this.searchEditor.addAtCursor(tableName);
   }
 
-  closeTables() {
-    // ...
+  onTableColumnNameClick(columnName: string) {
+    this.searchEditor.addAtCursor(`"${columnName}"`);
   }
 
+  onPreviewQueryClick(tableName: string) {
+    const previewQuery = this.previewTableQuery(tableName);
+
+    // NOTE If we want to have the query also display in the query editor, we can set the preview query to the current query.
+    // this.currentQuery = previewQuery;
+
+    this.doSearch(previewQuery, false);
+  }
+
+  onTableInfoExpanded(table: UITableInfo) {
+    this.searchService.resolveJsonSchemaReference(table.metadata).subscribe(newSchema => {
+      table.metadata.data_model.properties = newSchema.data_model.properties;
+    });
+  }
+
+  isTablePropertyListFinal(table: UITableInfo): boolean {
+    return this.searchService.isTableInfoPropertyListFinal(table.metadata);
+  }
 
   propertyOrder = (a: KeyValue<string, any>, b: KeyValue<string, any>): number => {
     const positionKey = 'x-ga4gh-position';
@@ -122,33 +149,56 @@ export class SearchTablesComponent implements OnInit {
     this.jsonViewerService.viewJSON(table);
   }
 
-  doSearch(query: string) {
+  buildUiTableInfoList() {
+    this.uiTableInfoList = this.tableInfoList.map(tableInfo => {
+      const tableNameSegments = tableInfo.name.split(/\./);
+      return {
+        label: tableNameSegments[tableNameSegments.length - 1],
+        metadata: tableInfo,
+      };
+    });
+  }
+
+  doSearch(query: string, addToQueryHistory: boolean) {
     query = query.replace(/;\s*$/, '');
+
     this.view.isSearching = true;
     this.view.errorQueryingTables = false;
 
-    let observableResults: Observable<any>;
+    this.searchService.observableSearch(
+      this.isUsingPublicView() ? this.currentView.interfaceUri : this.currentView.resourcePath,
+      {query: query},
+      this.accessToken,
+      this.connectorDetails,
+      catchError(error => {
+        const actualError: {errorName: string, message: string} = JSON.parse(error.error.message);
+        console.error('CUSTOM ERROR HANDLER: actualError:', actualError);
 
-    if (this.isUsingPublicView()) {
-      observableResults = this.searchService.makeDirectSearch(this.currentView.interfaceUri, {query: query});
-    } else {
-      observableResults = this.searchService.observableSearch(
-        this.currentView.resourcePath,
-        {query: query},
-        this.accessToken,
-        this.connectorDetails
-      );
-    }
-
-    observableResults.subscribe(result => {
+        this.showFeedback(
+          `${actualError.errorName.replace(/_/, ' ')}: ${actualError.message}`,
+          {
+            label: 'Try again',
+            callback: () => {
+              this.doSearch(this.currentQuery, false);
+            },
+          }
+        );
+        throw error;
+      })
+    ).subscribe(result => {
       this.completedQuery = query;
       this.result = result;
       this.searchService.updateTableData(result);
       this.view.isSearching = false;
-      this.queryHistory.unshift(query);
-      const schema = result['data_model'] ? result['data_model']['properties'] : {};
-      const properties = Object.keys(schema);
-      this.properties = properties.filter(e => e !== 'description');
+
+      // if (addToQueryHistory) {
+        this.queryHistory.unshift(query);
+      // }
+
+      this.properties = Object
+        .keys(result.data_model ? result.data_model.properties : {})
+        .filter(e => e !== 'description')
+      ;
     });
   }
 
@@ -216,7 +266,8 @@ export class SearchTablesComponent implements OnInit {
 
     observableTables.subscribe(
       ({tables}) => {
-        this.searchTables = tables;
+        this.tableInfoList = tables;
+        this.buildUiTableInfoList();
       },
       ({error}) => {
         if (error && error.message) {
@@ -234,6 +285,25 @@ export class SearchTablesComponent implements OnInit {
     return this.accessToken === undefined || this.accessToken === null;
   }
 
+  private showFeedback(message, action?: FeedbackAction) {
+    if (!action) {
+      action = {
+        label: 'Dismiss',
+        callback: () => {
+          this.snackBarRef.dismiss();
+          this.snackBarRef = null;
+        },
+      };
+    }
+
+    if (this.snackBarRef) {
+      this.snackBarRef.dismiss();
+    }
+
+    this.snackBarRef = this.snackBar.open(message, action.label, {panelClass: 'ddap-error'});
+    this.snackBarRef.onAction().subscribe();
+  }
+
   private initializeTableList() {
     this.tableApiRequests = 0;
     this.getTables();
@@ -242,8 +312,18 @@ export class SearchTablesComponent implements OnInit {
       this.currentQuery = config.search.defaultQuery;
 
       if (this.currentQuery && this.currentQuery.length > 0) {
-        this.doSearch(this.currentQuery);
+        this.doSearch(this.currentQuery, false);
       }
     });
   }
+}
+
+interface FeedbackAction {
+  label: string;
+  callback: Function;
+}
+
+interface UITableInfo {
+  label: string;
+  metadata: TableInfo;
 }

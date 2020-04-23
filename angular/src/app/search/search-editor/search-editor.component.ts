@@ -51,16 +51,17 @@ export class SearchEditorComponent implements OnInit, AfterViewInit {
 
   addAtCursor(text: string) {
     if (this.editor != null) {
-      const cursorPosition = this.editor.getEditor()
-        .session.doc.positionToIndex(this.editor.getEditor().selection.getCursor());
+      const editor = this.editor.getEditor();
+      const cursorPosition = editor
+        .session.doc.positionToIndex(editor.selection.getCursor());
 
       if (cursorPosition > 0 &&
-        this.editor.getEditor().getValue()[cursorPosition - 1] === this.QUERY_EDITOR_DELIMITER) {
+        editor.getValue()[cursorPosition - 1] === this.QUERY_EDITOR_DELIMITER) {
         text = this.QUERY_EDITOR_NEWLINE + text;
       }
 
-      this.editor.getEditor().session.replace(this.editor.getEditor().selection.getRange(), text);
-      this.editor.getEditor().focus();
+      editor.session.replace(editor.selection.getRange(), text);
+      editor.focus();
     }
   }
 

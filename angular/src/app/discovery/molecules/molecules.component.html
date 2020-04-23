@@ -25,7 +25,7 @@
                     </mat-toolbar-row>
                 </mat-toolbar>
                 <div style="flex: 1; overflow-y: auto;">
-                    <button *ngFor="let molecule of molecules; index as j;" mat-menu-item (click)="selectMolecule(molecule)"><mat-icon class="m-r-sm">gesture</mat-icon>{{molecule.name}}</button>
+                    <button *ngFor="let molecule of molecules; index as j;" mat-menu-item (click)="selectMolecule(molecule)"><mat-icon style="margin:0" class="m-r-sm">gesture</mat-icon> {{molecule.name}}</button>
                 </div>
             </mat-drawer>
             <mat-drawer-content style="display:flex; flex: 1">

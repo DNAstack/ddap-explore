@@ -12,9 +12,9 @@ import org.junit.Test;
 public class DatasetApiTest extends AbstractBaseE2eTest {
 
     private static final String DATASET_URL_WITH_INLINE_SCHEMA = "https://storage.googleapis"
-        + ".com/ddap-e2etest-objects/table/subjects/data";
+        + ".com/ddap-e2etest-public-objects/table/subjects/data";
     private static final String DATASET_URL_WITH_RESOLVED_SCHEMA = "https://storage.googleapis"
-        + ".com/ddap-e2etest-objects/table/subjects-referenced-schema/data";
+        + ".com/ddap-e2etest-public-objects/table/subjects-referenced-schema/data";
 
 
     @Test

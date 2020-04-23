@@ -2,10 +2,10 @@
 <div class="full-hw" style="display:flex; flex-direction:column;">
     <ddaplib-header icon="navigation" label="Molecules">
         <span class="fill-space"></span>
-        <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = !view.showLeftSidebar" matTooltip="{{view.showLeftSidebar ? 'Hide' : 'Show'}} Structures">
+        <button class="m-r-sm" tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = !view.showLeftSidebar" matTooltip="{{view.showLeftSidebar ? 'Hide' : 'Show'}} Proteins" color="{{view.showLeftSidebar ? 'accent' : ''}}">
             <mat-icon>gesture</mat-icon>
         </button>
-        <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = !view.showRightSidebar" matTooltip="{{view.showRightSidebar ? 'Hide' : 'Show'}} Configuration">
+        <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = !view.showRightSidebar" matTooltip="{{view.showRightSidebar ? 'Hide' : 'Show'}} Configuration" color="{{view.showRightSidebar ? 'accent' : ''}}">
             <mat-icon>tune</mat-icon>
         </button>
     </ddaplib-header>

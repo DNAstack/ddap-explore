@@ -24,6 +24,8 @@ import { proteins } from './proteins';
 
     proteins: any[];
 
+    selectedProtein: any;
+
     view: {
         showLeftSidebar: boolean
     };
@@ -42,5 +44,9 @@ import { proteins } from './proteins';
     }
 
     ngOnInit(): void {
+    }
+
+    selectProtein(protein) {
+        this.selectedProtein = protein;
     }
 }

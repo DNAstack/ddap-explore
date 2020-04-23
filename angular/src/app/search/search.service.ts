@@ -24,7 +24,7 @@ export class SearchService {
   }
 
   getSearchResources(): Observable<SearchResourceModel[]> {
-    return this.http.get<SearchResourceModel[]>(`${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/search/resources`)
+    return this.http.get<SearchResourceModel[]>(`${environment.ddapAlphaApiUrl}/realm/${realmIdPlaceholder}/search/resources`)
       .pipe(
         this.errorHandler.notifyOnError()
       );
@@ -32,7 +32,7 @@ export class SearchService {
 
   getResourceDetail(resourceName: string): Observable<SearchResourceModel[]> {
     return this.http.get<SearchResourceModel[]>(
-      `${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/search/resource/${resourceName}`);
+      `${environment.ddapAlphaApiUrl}/realm/${realmIdPlaceholder}/search/resource/${resourceName}`);
   }
 
   getTables(resource: string, accessToken, connectorDetails: object = {}): Observable<TableList> {
@@ -41,7 +41,7 @@ export class SearchService {
       return;
     }
 
-    return this.http.get<any>(`${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/search/tables`,
+    return this.http.get<any>(`${environment.ddapAlphaApiUrl}/realm/${realmIdPlaceholder}/search/tables`,
       { params: {
           resource: encodeURIComponent(resource),
           accessToken: accessToken,
@@ -56,7 +56,7 @@ export class SearchService {
   }
 
   search(resource: string, query, accessToken, connectorDetails: object = {}): Observable<TableModel> {
-    return this.http.post<TableModel>(`${environment.ddapApiUrlOld}/realm/${realmIdPlaceholder}/search/query`, query,
+    return this.http.post<TableModel>(`${environment.ddapAlphaApiUrl}/realm/${realmIdPlaceholder}/search/query`, query,
       {
         params: {
           resource: encodeURIComponent(resource),
@@ -176,7 +176,7 @@ export class SearchService {
     if (resourceUrl) {
       return `${resourceUrl}/search`;
     } else {
-      return `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/query`;
+      return `${environment.ddapAlphaApiUrl}/realm/${realmIdPlaceholder}/search/query`;
     }
   }
 

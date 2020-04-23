@@ -1,6 +1,7 @@
 package com.dnastack.ddap.common.util;
 
 import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_COOKIE_NAME;
+import static com.dnastack.ddap.common.util.WebDriverCookieHelper.SESSION_DRECRYPTION_COOKIE_NAME;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
@@ -25,9 +26,9 @@ import org.apache.http.message.BasicNameValuePair;
 @Slf4j
 public class DdapLoginUtil {
 
-    public static Optional<Cookie> loginToDdap(String url, String username, String password) throws IOException {
+    public static CookieStore loginToDdap(String url, String username, String password) throws IOException {
+        final CookieStore cookieStore = new BasicCookieStore();
         if (username != null || password != null) {
-            final CookieStore cookieStore = new BasicCookieStore();
             final HttpClient httpclient = setupHttpClient(cookieStore);
 
             HttpPost request = new HttpPost(String.format("%s/login", url));
@@ -48,10 +49,9 @@ public class DdapLoginUtil {
             if (!sessionCookie.isPresent()) {
                 throw new SessionCookieNotPresentException();
             }
-            return sessionCookie;
-        } else {
-            return Optional.empty();
+
         }
+        return cookieStore;
     }
 
     private static CloseableHttpClient setupHttpClient(CookieStore cookieStore) {

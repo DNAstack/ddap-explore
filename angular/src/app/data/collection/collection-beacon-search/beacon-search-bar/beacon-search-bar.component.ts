@@ -17,7 +17,7 @@ export class BeaconSearchBarComponent implements OnInit {
   limitSearch = false;
 
   assemblies = Object.values(Assembly);
-  placeholder = '1 : 156105028 T > C';
+  placeholder = 'Type query in form "1 : 156105028 T > C"';
   form: FormGroup;
 
   constructor(
@@ -44,10 +44,6 @@ export class BeaconSearchBarComponent implements OnInit {
   }
 
   submitQuery() {
-    if (this.form.invalid) {
-      return;
-    }
-
     const { collection, damId } = this.activatedRoute.snapshot.params;
     const realmId = this.activatedRoute.root.firstChild.snapshot.params.realmId;
 

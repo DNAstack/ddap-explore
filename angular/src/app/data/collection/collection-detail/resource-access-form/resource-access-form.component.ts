@@ -28,7 +28,7 @@ export class ResourceAccessFormComponent implements OnInit {
   form: FormGroup;
   authUrl: string;
 
-  readonly downloadCliUrl = `${environment.ddapApiUrlOld}/cli/download`;
+  readonly downloadCliUrl = `${environment.ddapAlphaApiUrl}/cli/download`;
   readonly minimumTokensTtl: string = '30s';
 
   constructor(

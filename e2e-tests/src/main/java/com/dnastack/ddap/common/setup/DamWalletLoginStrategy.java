@@ -124,9 +124,11 @@ public class DamWalletLoginStrategy implements LoginStrategy {
 
         {
             String authorizeUriWithLoginHint = authorizeUri.toASCIIString();
+            boolean isBetaApi = authorizeUriWithLoginHint.contains("/v1beta/");
             authorizeUriWithLoginHint = new StringBuilder(authorizeUriWithLoginHint)
                 .insert(
-                    authorizeUriWithLoginHint.indexOf("?") + 1, format("loginHint=wallet:%s&", loginInfo.getEmail()))
+                    authorizeUriWithLoginHint.indexOf("?") + 1,
+                    format("%s=wallet:%s&", isBetaApi ? "login_hint" : "loginHint", loginInfo.getEmail()))
                 .toString();
 
             HttpGet request = new HttpGet(URI.create(authorizeUriWithLoginHint));

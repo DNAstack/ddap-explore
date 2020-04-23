@@ -1,4 +1,5 @@
 @import '~ddap-common-lib/styles/modules/colors';
+
 .main-container {
   position: absolute;
   left: 0;
@@ -6,6 +7,7 @@
   top: 0;
   bottom: 0;
 }
+
 .search-container {
   height: 100%;
 }
@@ -13,7 +15,7 @@
 /*TODO Refactor styles */
 .search-toolbar {
   height: 64px;
-  position:absolute;
+  position: absolute;
   top: 0;
 }
 
@@ -35,4 +37,36 @@ td, th {
 
 .run-workflow {
   margin-left: auto;
+}
+
+.table-list-container {
+  position: absolute;
+  width: 100%;
+  top: 64px;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.table-property-list {
+  margin: 0 0 1rem 0;
+}
+
+ul.table-property-list {
+  padding: 0 0 0 2rem;
+
+  a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+}
+
+ul.table-property-list:empty:after {
+  content: 'Unable to retrieve the list of properties';
+  color: $color-grey-light;
+}
+
+div.table-property-list.init {
+  display: flex;
+  color: $color-grey-light;
 }

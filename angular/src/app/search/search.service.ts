@@ -4,7 +4,10 @@ import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { Table } from '../shared/table.model';
+import { JsonSchema } from '../shared/search/json-schema.model';
+import { TableInfo } from '../shared/search/table-info.model';
+import { TableList } from '../shared/search/table-list.model';
+import { TableModel } from '../shared/search/table.model';
 
 import { SearchResourceModel } from './search-resources/search-resource.model';
 
@@ -32,7 +35,7 @@ export class SearchService {
       `${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/resource/${resourceName}`);
   }
 
-  getTables(resource: string, accessToken, connectorDetails: object = {}): Observable<any> {
+  getTables(resource: string, accessToken, connectorDetails: object = {}): Observable<TableList> {
     if (!accessToken) {
       console.warn('No access token');
       return;
@@ -52,8 +55,8 @@ export class SearchService {
     return this.http.get<any>(resource + '/tables');
   }
 
-  search(resource: string, query, accessToken, connectorDetails: object = {}): Observable<Table> {
-    return this.http.post<Table>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/query`, query,
+  search(resource: string, query, accessToken, connectorDetails: object = {}): Observable<TableModel> {
+    return this.http.post<TableModel>(`${environment.ddapApiUrl}/realm/${realmIdPlaceholder}/search/query`, query,
       {
         params: {
           resource: encodeURIComponent(resource),
@@ -67,7 +70,8 @@ export class SearchService {
       );
   }
 
-  observableSearch(resource: string, query, accessToken?: string, connectorDetails: ConnectorDetails = {}): Observable<Table> {
+  observableSearch(resource: string, query, accessToken?: string, connectorDetails: ConnectorDetails = {},
+                   onError?: any): Observable<TableModel> {
     const params = this.buildSearchParameters(
       {
         resource: encodeURIComponent(resource),
@@ -76,18 +80,16 @@ export class SearchService {
       connectorDetails
     );
 
-    return new Observable<Table>(subscriber => {
-      const observable = this.http.post<Table>(
+    return new Observable<TableModel>(subscriber => {
+      this.http.post<TableModel>(
         this.buildSearchUrl(accessToken ? null : resource),
         query,
         {params: params}
       ).pipe(
-        this.errorHandler.notifyOnError()
-      );
-
-      observable.subscribe(table => {
+        onError ? onError : this.errorHandler.notifyOnError()
+      ).subscribe((table: TableModel) => {
         if (table.data.length === 0 && table.pagination.next_page_url) {
-          this.followUp(table.pagination.next_page_url, accessToken, connectorDetails, subscriber);
+          this.followUp(table.pagination.next_page_url, accessToken, connectorDetails, subscriber, onError);
         } else {
           subscriber.next(table);
           subscriber.complete();
@@ -96,7 +98,8 @@ export class SearchService {
     });
   }
 
-  followUp(url: string, accessToken: string, connectorDetails: ConnectorDetails = {}, subscriber: Subscriber<Table>, delay: number = 1) {
+  followUp(url: string, accessToken: string, connectorDetails: ConnectorDetails = {}, subscriber: Subscriber<TableModel>,
+           onError?: any, delay: number = 1) {
     if (delay > 32) {
       this.errorHandler.openSnackBar('The server took too long to respond. No more follow-up requests.');
       subscriber.next({data: []});
@@ -105,14 +108,12 @@ export class SearchService {
     }
 
     // FIXME We need to figure out how to make a follow-up request on a protected search service.
-    const observable = this.http.get<Table>(
+    this.http.get<TableModel>(
       url,
       {params: this.buildSearchParameters({}, accessToken, connectorDetails)}
     ).pipe(
-      this.errorHandler.notifyOnError()
-    );
-
-    observable.subscribe(table => {
+      onError ? onError : this.errorHandler.notifyOnError()
+    ).subscribe((table: TableModel) => {
       if (table.data.length === 0 && table.pagination.next_page_url) {
         setTimeout(
           () => this.followUp(
@@ -131,10 +132,6 @@ export class SearchService {
     });
   }
 
-  makeDirectSearch(resource: string, query): Observable<Table> {
-    return this.observableSearch(resource, query);
-  }
-
   updateTableData(tableData) {
     this.tableData.next(tableData);
   }
@@ -145,6 +142,29 @@ export class SearchService {
 
   authorizeResource(redirectUri: string, resourceName: string) {
     return;
+  }
+
+  resolveJsonSchemaReference(tableInfo: TableInfo): Observable<TableInfo> {
+    const schema = tableInfo.data_model;
+
+    if (!schema.properties && schema.$ref) {
+      return this.http.get<TableInfo>(schema.$ref);
+    }
+
+    return new Observable<TableInfo>(subscriber => {
+      subscriber.next(tableInfo);
+      subscriber.complete();
+    });
+  }
+
+  isTableInfoPropertyListFinal(tableInfo: TableInfo): boolean {
+    const schema = tableInfo.data_model;
+
+    if (!schema.properties && schema.$ref) {
+      return false;
+    }
+
+    return true;
   }
 
   /**

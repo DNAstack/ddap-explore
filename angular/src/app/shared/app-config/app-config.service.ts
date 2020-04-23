@@ -212,10 +212,10 @@ export class AppConfigService {
         expFlag: 'demo',
       })
       .registerModule({
-        key: 'proteins',
-        name: 'Proteins',
-        iconName: '360',
-        routerLink: 'discovery/proteins',
+        key: 'molecules',
+        name: 'Molecules',
+        iconName: 'scatter_plot',
+        routerLink: 'discovery/molecules',
         parentKey: 'discovery',
         isApp: false,
         isExperimental: true,

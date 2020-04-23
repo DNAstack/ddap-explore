@@ -1,6 +1,6 @@
 
 <div class="full-hw" style="display:flex; flex-direction:column;">
-    <ddaplib-header icon="navigation" label="Proteins">
+    <ddaplib-header icon="navigation" label="Molecules">
         <span class="fill-space"></span>
         <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = !view.showLeftSidebar" matTooltip="{{view.showLeftSidebar ? 'Hide' : 'Show'}} Structures">
             <mat-icon>gesture</mat-icon>
@@ -10,15 +10,15 @@
         </button>
     </ddaplib-header>
     <!--<mat-progress-bar mode="indeterminate"></mat-progress-bar>-->
-    <ddaplib-cover-message style="flex-grow: 1" *ngIf="proteins.length == 0" message="No Proteins"
+    <ddaplib-cover-message style="flex-grow: 1" *ngIf="molecules.length == 0" message="No Molecules"
         icon="not_interested"></ddaplib-cover-message>
-    <div style="display:flex; flex: 1" *ngIf="proteins.length > 0">
+    <div style="display:flex; flex: 1" *ngIf="molecules.length > 0">
         <mat-drawer-container class="full-hw" [autosize]="true">
             <mat-drawer mode="side" [(opened)]="view.showLeftSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
                 <mat-toolbar class="tertiary-toolbar">
                     <mat-toolbar-row>
-                        <mat-icon class="m-r-sm">gesture</mat-icon>
-                        <div>Structures</div>
+                        
+                        <div>Proteins</div>
                         <span class="fill-space"></span>
                         <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false" matTooltip="Close Structures">
                             <mat-icon>close</mat-icon>
@@ -26,31 +26,11 @@
                     </mat-toolbar-row>
                 </mat-toolbar>
                 <div style="flex: 1; overflow-y: auto;">
-                    <mat-accordion>
-                        <mat-expansion-panel *ngFor="let protein of proteins; index as j;" tabindex="-1">
-                          <mat-expansion-panel-header>
-                            <mat-panel-title>
-                              {{protein.name}}
-                            </mat-panel-title>
-                          </mat-expansion-panel-header>
-                          <div class="m-b">
-                            <div class="h4 m-b-sm">Main Protein</div>
-                            <a tabindex="-1" (click)="selectProtein(protein)">
-                              {{protein.name}}
-                            </a>
-                          </div>
-                          <div *ngIf="protein.parts">
-                            <div class="h4 m-b-sm">Sub-proteins</div>
-                            <a tabindex="-1" *ngFor="let sub of protein.parts;" (click)="selectProtein(sub)">
-                                <div>{{sub.name}}</div>
-                            </a>
-                            </div>
-                        </mat-expansion-panel>
-                    </mat-accordion>
+                    <button *ngFor="let molecule of molecules; index as j;" mat-menu-item (click)="selectMolecules(molecule)"><mat-icon class="m-r-sm">gesture</mat-icon>{{molecule.name}}</button>
                 </div>
             </mat-drawer>
             <mat-drawer-content class="p-a">
-                Selected protein {{ selectedProtein | json }}
+                Selected molecule {{ selectedMolecule | json }}
             </mat-drawer-content>
         </mat-drawer-container>
     </div>

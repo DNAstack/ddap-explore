@@ -25,6 +25,7 @@ import { molecules } from './molecules';
     molecules: any[];
 
     selectedMolecule: any;
+    selectedSubMolecule: any;
 
     view: {
         showLeftSidebar: boolean
@@ -46,7 +47,16 @@ import { molecules } from './molecules';
     ngOnInit(): void {
     }
 
-    selectMolecules(molecule) {
+    selectMolecule(molecule) {
         this.selectedMolecule = molecule;
+        this.selectedSubMolecule = null;
+    }
+
+    getMoleculeToRender() {
+        if (this.selectedSubMolecule != null) {
+            return this.selectedSubMolecule;
+        } else {
+            return this.selectedMolecule;
+        }
     }
 }

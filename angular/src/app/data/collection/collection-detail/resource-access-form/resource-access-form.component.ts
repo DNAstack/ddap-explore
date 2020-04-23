@@ -72,6 +72,10 @@ export class ResourceAccessFormComponent implements OnInit {
     this.setUpFormValueChanges();
   }
 
+  isViewableUri(uri: string) {
+    return uri.startsWith('http://') || uri.startsWith('https://');
+  }
+
   resetFormStateToDefaults(): void {
     this.resourceAccessFormStateService.removeFormState(this.resource.id);
     this.form.reset(defaultState);

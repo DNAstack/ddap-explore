@@ -11,7 +11,15 @@
         <div *ngFor="let resourceInterface of resource.interfaces"
              class="flex">
           <span class="resource-interface-type">{{ resourceInterface.type }}:</span>
-          <span class="resource-interface-uri">{{ resourceInterface.uri }}</span>
+          <a *ngIf="isViewableUri(resourceInterface.uri) else nonViewableLink"
+             [href]="resourceInterface.uri"
+             target='_blank'
+             rel='noopener noreferrer'
+             class="resource-interface-uri">{{ resourceInterface.uri }}
+          </a>
+          <ng-template #nonViewableLink>
+            <span class="resource-interface-uri">{{ resourceInterface.uri }}</span>
+          </ng-template>
         </div>
       </div>
     </ng-container>

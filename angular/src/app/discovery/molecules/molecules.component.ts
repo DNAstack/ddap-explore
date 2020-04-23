@@ -6,14 +6,14 @@ import { AppConfigService } from 'src/app/shared/app-config/app-config.service';
 
 import { DiscoveryConfigService } from '../discovery-config.service';
 
-import { proteins } from './proteins';
+import { molecules } from './molecules';
 
 @Component({
     selector: 'ddap-proteins',
-    templateUrl: './proteins.component.html',
-    styleUrls: ['./proteins.component.scss'],
+    templateUrl: './molecules.component.html',
+    styleUrls: ['./molecules.component.scss'],
   })
-  export class ProteinsComponent implements OnInit {
+  export class MoleculesComponent implements OnInit {
 
     appConfig: AppConfigModel;
 
@@ -22,9 +22,9 @@ import { proteins } from './proteins';
     columnDefs: any[];
     rowData: any[];
 
-    proteins: any[];
+    molecules: any[];
 
-    selectedProtein: any;
+    selectedMolecule: any;
 
     view: {
         showLeftSidebar: boolean
@@ -36,7 +36,7 @@ import { proteins } from './proteins';
                 private viewController: ViewControllerService
                 ) {
 
-                    this.proteins = proteins;
+                    this.molecules = molecules;
 
                     this.view = {
                         showLeftSidebar: true,
@@ -46,7 +46,7 @@ import { proteins } from './proteins';
     ngOnInit(): void {
     }
 
-    selectProtein(protein) {
-        this.selectedProtein = protein;
+    selectMolecules(molecule) {
+        this.selectedMolecule = molecule;
     }
 }

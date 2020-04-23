@@ -1,4 +1,4 @@
-export const proteins = [
+export const molecules = [
 
     { name : 'ORF1ab polyprotein', id: 'YP_009724389.1',
         parts: [

@@ -2,11 +2,11 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { DiscoveryBeaconComponent } from './discovery-beacon/discovery-beacon.component';
-import { ProteinsComponent } from './proteins/proteins.component';
+import { MoleculesComponent } from './molecules/molecules.component';
 
 export const routes: Routes = [
   { path: 'beacon', component: DiscoveryBeaconComponent},
-  { path: 'proteins', component: ProteinsComponent},
+  { path: 'molecules', component: MoleculesComponent},
   { path: '', redirectTo: 'beacon'},
 ];
 

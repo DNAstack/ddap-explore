@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ViewControllerService } from 'ddap-common-lib';
 import * as ngl from 'ngl';
@@ -14,7 +14,7 @@ import { molecules } from './molecules';
     templateUrl: './molecules.component.html',
     styleUrls: ['./molecules.component.scss'],
   })
-  export class MoleculesComponent implements OnInit {
+  export class MoleculesComponent implements OnInit, AfterViewInit {
     appConfig: AppConfigModel;
 
     grid: any;
@@ -45,6 +45,9 @@ import { molecules } from './molecules';
                         showLeftSidebar: true,
                     };
     }
+    ngAfterViewInit(): void {
+        this.stage = new ngl.Stage('ngl-viewer', { backgroundColor: 'transparent'});
+    }
 
     @HostListener('window:resize') onResize(event) {
       if (this.stage) {
@@ -53,15 +56,13 @@ import { molecules } from './molecules';
     }
 
     ngOnInit(): void {
+
     }
 
   selectMolecule(molecule) {
     this.selectedMolecule = molecule;
     this.selectedSubMolecule = null;
-
-    this.stage = new ngl.Stage('ngl-viewer', { backgroundColor: 'black'});
     this.stage.loadFile('rcsb://1crn.mmtf', {defaultRepresentation: true});
-
     }
 
     getMoleculeToRender() {

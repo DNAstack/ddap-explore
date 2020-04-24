@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ViewControllerService } from 'ddap-common-lib';
 import * as ngl from 'ngl';
@@ -15,7 +15,6 @@ import { molecules } from './molecules';
     styleUrls: ['./molecules.component.scss'],
   })
   export class MoleculesComponent implements OnInit {
-
     appConfig: AppConfigModel;
 
     grid: any;
@@ -32,6 +31,8 @@ import { molecules } from './molecules';
         showLeftSidebar: boolean
     };
 
+    stage: ngl.stage;
+
     constructor(private router: Router,
                 private appConfigService: AppConfigService,
                 private configService: DiscoveryConfigService,
@@ -45,25 +46,22 @@ import { molecules } from './molecules';
                     };
     }
 
+    @HostListener('window:resize') onResize(event) {
+      if (this.stage) {
+        this.stage.handleResize();
+      }
+    }
+
     ngOnInit(): void {
     }
 
   selectMolecule(molecule) {
-        this.selectedMolecule = molecule;
-        this.selectedSubMolecule = null;
-    /**
-     * Stage class, central for creating molecular scenes with NGL.
-     *
-     * @example
-     * var stage = new Stage( "elementId", { backgroundColor: "white" } );
-     */
-    const stage = new ngl.Stage('ngl-viewer', { backgroundColor: 'black'});
-    stage.loadFile('rcsb://1crn.mmtf', {defaultRepresentation: true});
-    function handleResize () {
-      stage.handleResize();
-    }
-    window.addEventListener('orientationchange', handleResize, false);
-    window.addEventListener('resize', handleResize, false);
+    this.selectedMolecule = molecule;
+    this.selectedSubMolecule = null;
+
+    this.stage = new ngl.Stage('ngl-viewer', { backgroundColor: 'black'});
+    this.stage.loadFile('rcsb://1crn.mmtf', {defaultRepresentation: true});
+
     }
 
     getMoleculeToRender() {

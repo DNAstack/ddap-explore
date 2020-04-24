@@ -51,14 +51,14 @@ public class UserCredentialService {
             .getCredentialForResource(getUserIdentifier(session), resourceId.encodeId()));
     }
 
-    public List<UserCredential> getSessionBoundCredentials(WebSession session, List<String> authorizationIds) {
+    public List<UserCredential> getSessionBoundCredentials(WebSession session, List<String> interfaceIds) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao
-            .getCredentialsForResources(getUserIdentifier(session), authorizationIds));
+            .getCredentialsForResources(getUserIdentifier(session), interfaceIds));
     }
 
-    public List<UserCredential> getAndDecryptSessionBoundCredentials(ServerHttpRequest request, WebSession session, List<String> authorizationIds) {
+    public List<UserCredential> getAndDecryptSessionBoundCredentials(ServerHttpRequest request, WebSession session, List<String> interfaceIds) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao
-            .getCredentialsForResources(getUserIdentifier(session), authorizationIds))
+            .getCredentialsForResources(getUserIdentifier(session), interfaceIds))
             .stream().map(userCredential -> decryptSessionBoundCredentials(request, userCredential))
             .collect(Collectors.toList());
     }
@@ -84,7 +84,7 @@ public class UserCredentialService {
 
     public void storeSessionBoundCredentialsForResource(WebSession session, List<UserCredential> userCredentials) {
         String principal = getUserIdentifier(session);
-        List<String> ids = userCredentials.stream().map(UserCredential::getAuthorizationId)
+        List<String> ids = userCredentials.stream().map(UserCredential::getInterfaceId)
             .collect(Collectors.toList());
         userCredentials.forEach(userCredential -> {
             userCredential.setPrincipalId(getUserIdentifier(session));
@@ -101,7 +101,7 @@ public class UserCredentialService {
 
             List<UserCredential> credentials = dao.getCredentialsForResources(principal, ids);
             if (credentials != null && !credentials.isEmpty()) {
-                List<String> idsToDelete = credentials.stream().map(UserCredential::getAuthorizationId)
+                List<String> idsToDelete = credentials.stream().map(UserCredential::getInterfaceId)
                     .collect(Collectors.toList());
                 dao.deleteCredentials(principal, idsToDelete);
             }

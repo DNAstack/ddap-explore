@@ -37,10 +37,10 @@ databaseChangeLog:
                   type: bytea
                   remarks: |-
                     A byte array of the serialized attribues.
-              - addPrimaryKey:
-                  constraintName: pk_principal_id
-                  tableName: sessions
-                  columnNames: ["principal_id"]
+        - addPrimaryKey:
+            constraintName: pk_principal_id
+            tableName: sessions
+            columnNames: principal_id
         - createIndex:
             tableName: sessions
             columns:
@@ -86,7 +86,22 @@ databaseChangeLog:
                   name: encrypted_credentials
                   type: varchar
                   remarks: an encrypted credential map
-              - addPrimaryKey:
-                  constraintName: pk_principal_id_authorization_id_credentials
-                  tableName: sessions
-                  columnNames: ["principal_id","authorization_id"]
+        - addPrimaryKey:
+            constraintName: pk_principal_id_authorization_id_credentials
+            tableName: user_credentials
+            columnNames: principal_id,authorization_id
+  - changeSet:
+      id: 3
+      author: Patrick Magee
+      changes:
+        - dropPrimaryKey:
+            tableName: user_credentials
+            constraintName: pk_principal_id_authorization_id_credentials
+        - renameColumn:
+            tableName: user_credentials
+            newColumnName: interface_id
+            oldColumnName: authorization_id
+        - addPrimaryKey:
+            tableName: user_credentials
+            columnNames: principal_id, interface_id
+            constraintName: pk_principal_id_interface_id_user_credentials

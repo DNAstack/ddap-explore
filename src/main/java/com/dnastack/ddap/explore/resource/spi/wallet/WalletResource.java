@@ -43,8 +43,8 @@ public class WalletResource {
         Id id = new Id(collectionId);
         id.setResourceId(name);
 
-        Id authorizationId = new Id(id);
-        authorizationId.setInterfaceType(interfaceType);
+        Id interfaceId = new Id(id);
+        interfaceId.setInterfaceType(interfaceType);
 
         return Resource.newBuilder()
             .id(id.encodeId())
@@ -52,7 +52,7 @@ public class WalletResource {
             .name(name)
             .imageUrl(imageUrl)
             .description(description)
-            .interfaces(List.of(new AccessInterface(interfaceType, interfaceUri, authorizationId.encodeId())))
+            .interfaces(List.of(new AccessInterface(interfaceType, interfaceUri, interfaceId.encodeId(),true)))
             .metadata(metadata != null ? new HashMap<>(metadata) : null)
             .build();
     }

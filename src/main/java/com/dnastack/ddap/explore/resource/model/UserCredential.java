@@ -11,7 +11,7 @@ public class UserCredential {
     @JsonIgnore
     private String principalId;
     @JsonIgnore
-    private String authorizationId;
+    private String interfaceId;
     private ZonedDateTime creationTime;
     private ZonedDateTime expirationTime;
 

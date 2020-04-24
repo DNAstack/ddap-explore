@@ -15,8 +15,8 @@ export class AppExploreService {
   constructor(private http: HttpClient) {
   }
 
-  getTokens(resourceAuthorizationIds: string[], params?: TokensRequestModel): Observable<TokensResponseModel> {
-    const resources = resourceAuthorizationIds.map((resource) => {
+  getTokens(resourceInterfaceIds: string[], params?: TokensRequestModel): Observable<TokensResponseModel> {
+    const resources = resourceInterfaceIds.map((resource) => {
       return `resource=${resource}`;
     });
 

@@ -49,7 +49,7 @@ import { molecules } from './molecules';
                     this.view = {
                         showLeftSidebar: true,
                         viewer : {
-                            background: 'black',
+                            background: '#1f1f1f',
                             fov: 80,
                             cameraType: 'persepective',
                         },

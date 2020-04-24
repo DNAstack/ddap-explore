@@ -51,12 +51,13 @@
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
-                            </div>  
+                            </div>
                         </div>
                     </mat-drawer>
                     <mat-drawer-content class="full-hw p-a">
                         <ddaplib-cover-message style="flex-grow: 1" *ngIf="!getMoleculeToRender()" message="No Molecule Selected" icon="not_interested"></ddaplib-cover-message>
-                        <div class="full-hw p-a" style="background-color: black; color:white" *ngIf="getMoleculeToRender()">
+                          <div id="ngl-viewer" style="height: 100%; width: 100%;"></div>
+                        <div class="full-hw p-a" *ngIf="getMoleculeToRender()">
                             Viewing {{getMoleculeToRender().name}} with ID {{getMoleculeToRender().id}}
                         </div>
                     </mat-drawer-content>

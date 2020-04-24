@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, HostListener, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ViewControllerService } from 'ddap-common-lib';
 import * as ngl from 'ngl';
@@ -60,7 +60,7 @@ import { molecules } from './molecules';
     ngAfterViewInit(): void {
         this.stage = new ngl.Stage('ngl-viewer' );
         this.applyParameters();
-
+        this.resizeStage();
     }
 
     applyParameters() {
@@ -70,15 +70,17 @@ import { molecules } from './molecules';
                 cameraFov: this.view.viewer.fov,
             }
         );
-        // console.log(this.view.viewer);
     }
 
     @HostListener('window:resize') onResize(event) {
-      if (this.stage) {
-        // console.log("Window resized");
-        this.stage.handleResize();
-        this.stage.setSize('100%', '100%');
-      }
+        this.resizeStage();
+    }
+
+    resizeStage() {
+        if (this.stage) {
+            this.stage.handleResize();
+            this.stage.setSize('100%', '100%');
+          }
     }
 
     ngOnInit(): void {

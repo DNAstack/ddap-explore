@@ -28,7 +28,12 @@ import { molecules } from './molecules';
     selectedSubMolecule: any;
 
     view: {
-        showLeftSidebar: boolean
+        showLeftSidebar: boolean,
+        viewer: {
+            background: string,
+            fov: number,
+            cameraType: string
+        }
     };
 
     stage: ngl.stage;
@@ -43,10 +48,26 @@ import { molecules } from './molecules';
 
                     this.view = {
                         showLeftSidebar: true,
+                        viewer : {
+                            background: 'black',
+                            fov: 80,
+                            cameraType: 'persepective',
+                        },
                     };
     }
     ngAfterViewInit(): void {
-        this.stage = new ngl.Stage('ngl-viewer', { backgroundColor: 'transparent'});
+        this.stage = new ngl.Stage('ngl-viewer' );
+        this.applyParameters();
+    }
+
+    applyParameters() {
+        this.stage.setParameters(
+            {
+                backgroundColor: this.view.viewer.background,
+                cameraFov: this.view.viewer.fov,
+            }
+        );
+        // console.log(this.view.viewer);
     }
 
     @HostListener('window:resize') onResize(event) {
@@ -59,10 +80,15 @@ import { molecules } from './molecules';
 
     }
 
-  selectMolecule(molecule) {
-    this.selectedMolecule = molecule;
-    this.selectedSubMolecule = null;
-    this.stage.loadFile('rcsb://1crn.mmtf', {defaultRepresentation: true});
+    selectMolecule(molecule) {
+        this.selectedMolecule = molecule;
+        this.selectedSubMolecule = null;
+        this.selectionChanged();
+    }
+
+    selectSubMolecule(subMolecule) {
+        this.selectedSubMolecule = subMolecule;
+        this.selectionChanged();
     }
 
     getMoleculeToRender() {
@@ -71,5 +97,24 @@ import { molecules } from './molecules';
         } else {
             return this.selectedMolecule;
         }
+    }
+
+    autoView() {
+        this.stage.autoView();
+    }
+
+    selectionChanged() {
+        const molecule = this.getMoleculeToRender();
+        // console.log("Rendering " + molecule);
+        if (molecule.pdbid) {
+            this.stage.loadFile( 'rcsb://' + molecule.pdbid ).then( function( o ) {
+                o.addRepresentation( 'ribbon' , {colorScheme: 'bfactor'} );
+                o.autoView();
+            } );
+        } else {
+            // TODO: fail gracefully
+        }
+
+
     }
 }

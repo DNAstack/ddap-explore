@@ -5,6 +5,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { AgGridModule } from 'ag-grid-angular';
 import { BingMapAPILoader, BingMapAPILoaderConfig, DocumentRef, MapAPILoader, MapModule, WindowRef } from 'angular-maps';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 import { SharedModule } from '../shared/shared.module';
 
@@ -31,6 +32,7 @@ import { KeyValuePairComponent } from './ui-components/key-value-pair/key-value-
       MatDialogModule,
       MatSliderModule,
       MatButtonToggleModule,
+      ColorPickerModule,
       AgGridModule.withComponents([]),
       MapModule.forRoot(),
       AgmCoreModule.forRoot({

@@ -56,7 +56,7 @@
                                 <div class="h3 m-b-sm">Parameters</div>
                                 <mat-form-field appearance="outline" floatLabel="always">
                                     <mat-label>Background</mat-label>
-                                    <input matInput [(ngModel)]="view.viewer.background" (blur)="applyParameters()">
+                                    <input matInput autocomplete="off" [(colorPicker)]="view.viewer.background" [style.background]="view.viewer.background" cpPosition="bottom" (colorPickerChange)="applyParameters()"/>
                                 </mat-form-field>
                                 <button tabindex="-1" mat-stroked-button (click)="autoView()">
                                     <mat-icon>all_out</mat-icon> Fit

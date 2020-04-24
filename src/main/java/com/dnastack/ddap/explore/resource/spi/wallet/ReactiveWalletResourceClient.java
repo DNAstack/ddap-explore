@@ -259,7 +259,7 @@ public class ReactiveWalletResourceClient implements ResourceClient {
             }
             userCredential.setExpirationTime(ZonedDateTime.now().plus(ttl));
             userCredential.setCredentials(credentials);
-            userCredential.setAuthorizationId(id.encodeId());
+            userCredential.setInterfaceId(id.encodeId());
             return userCredential;
         }).collect(Collectors.toList());
     }

@@ -21,26 +21,26 @@ public interface UserCredentialDao {
 
     @Transaction
     @SqlUpdate("INSERT INTO " +
-        "user_credentials(principal_id,authorization_id,creation_time,expiration_time,encrypted_credentials) " +
-        "values(:principalId,:authorizationId,:creationTime,:expirationTime,:encryptedCredentials)"
+        "user_credentials(principal_id,interface_id,creation_time,expiration_time,encrypted_credentials) " +
+        "values(:principalId,:interfaceId,:creationTime,:expirationTime,:encryptedCredentials)"
     )
     void createUserCredential(@BindBean UserCredential credential);
 
     @Transaction
     @SqlBatch("INSERT INTO " +
-        "user_credentials(principal_id,authorization_id,creation_time,expiration_time,encrypted_credentials) " +
-        "values(:principalId,:authorizationId,:creationTime,:expirationTime,:encryptedCredentials)"
+        "user_credentials(principal_id,interface_id,creation_time,expiration_time,encrypted_credentials) " +
+        "values(:principalId,:interfaceId,:creationTime,:expirationTime,:encryptedCredentials)"
     )
     void createUserCredentials(@BindBean Collection<UserCredential> credential);
 
     @SqlQuery("SELECT * FROM user_credentials WHERE principal_id = :principalId")
     List<UserCredential> getUserCredentials(@Bind("principalId") String principalId);
 
-    @SqlQuery("SELECT * FROM user_credentials WHERE principal_id = :principalId AND authorization_id in (<authorizationIds>)")
-    List<UserCredential> getCredentialsForResources(@Bind("principalId") String principalId, @BindList("authorizationIds") List<String> resources);
+    @SqlQuery("SELECT * FROM user_credentials WHERE principal_id = :principalId AND interface_id in (<interfaceIds>)")
+    List<UserCredential> getCredentialsForResources(@Bind("principalId") String principalId, @BindList("interfaceIds") List<String> interfaceIds);
 
-    @SqlQuery("SELECT * FROM user_credentials WHERE principal_id = :principalId AND authorization_id = :authorizationId")
-    Optional<UserCredential> getCredentialForResource(@Bind("principalId") String principalId, @Bind("authorizationId") String resources);
+    @SqlQuery("SELECT * FROM user_credentials WHERE principal_id = :principalId AND interface_id = :interfaceId")
+    Optional<UserCredential> getCredentialForResource(@Bind("principalId") String principalId, @Bind("interfaceId") String interfaceId);
 
     @Transaction
     @SqlUpdate("DELETE\n"
@@ -60,12 +60,12 @@ public interface UserCredentialDao {
     void delete();
 
     @Transaction
-    @SqlUpdate("DELETE FROM user_credentials WHERE principal_id = :principalId AND authorization_id = :authorizationId")
-    void deleteCredential(@Bind("principalId") String principalId, @Bind("authorizationId") String authorizationId);
+    @SqlUpdate("DELETE FROM user_credentials WHERE principal_id = :principalId AND interface_id = :interfaceId")
+    void deleteCredential(@Bind("principalId") String principalId, @Bind("interfaceId") String interfaceId);
 
     @Transaction
-    @SqlBatch("DELETE FROM user_credentials WHERE principal_id = :principalId AND authorization_id = :authorizationId")
-    void deleteCredentials(@Bind("principalId") String principalId, @Bind("authorizationId") Collection<String> authorizationId);
+    @SqlBatch("DELETE FROM user_credentials WHERE principal_id = :principalId AND interface_id = :interfaceId")
+    void deleteCredentials(@Bind("principalId") String principalId, @Bind("interfaceId") Collection<String> interfaceIds);
 
     @Transaction
     @SqlUpdate("DELETE FROM user_credentials WHERE principal_id = :principalId")

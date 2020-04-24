@@ -32,15 +32,17 @@ public class OpenResource {
         collectionId.setRealm(realm);
         collectionId.setSpiKey(spiKey);
         collectionId.setCollectionId(collectionName);
-        Id id = new Id(collectionId);
-        id.setResourceId(name);
+        Id resourceId = new Id(collectionId);
+        resourceId.setResourceId(name);
+        Id interfaceId = new Id(resourceId);
+        interfaceId.setInterfaceType(interfaceType);
         return Resource.newBuilder()
-            .id(id.encodeId())
+            .id(resourceId.encodeId())
             .collectionId(collectionId.encodeId())
             .name(name)
             .imageUrl(imageUrl)
             .description(description)
-            .interfaces(List.of(new AccessInterface(interfaceType, interfaceUri, null)))
+            .interfaces(List.of(new AccessInterface(interfaceType, interfaceUri, interfaceId.encodeId(),false)))
             .metadata(metadata != null ? new HashMap<>(metadata) : null)
             .build();
     }

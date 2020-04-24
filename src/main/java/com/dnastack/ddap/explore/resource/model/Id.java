@@ -79,10 +79,43 @@ public class Id implements Serializable {
         }
     }
 
-    public static Id decodeId(String idString) {
+
+    public static Id decodeCollectionId(String idString) {
+        Id collectionId = decodeId(idString);
+
+        if (collectionId.getCollectionId() == null) {
+            throw new ResourceIdEncodingException("Could not decode CollectionId, missing required encoded attribute for collection: c");
+        }
+        return collectionId;
+    }
+
+    public static Id decodeResourceId(String idString) {
+        Id resourceId = decodeCollectionId(idString);
+        if (resourceId.getResourceId() == null) {
+            throw new ResourceIdEncodingException("Could not decode ResourceId, missing required encoded attribute for resource: n");
+        }
+        return resourceId;
+    }
+
+    public static Id decodeInterfaceId(String idString) {
+        Id interfaceId = decodeResourceId(idString);
+        if (interfaceId.getResourceId() == null) {
+            throw new ResourceIdEncodingException("Could not decode InterfaceId, missing required encoded attribute for interface: i");
+        }
+        return interfaceId;
+    }
+
+    private static Id decodeId(String idString) {
         String decodedIdString = new String(Base64.getUrlDecoder().decode(idString), StandardCharsets.UTF_8);
         try {
-            return mapper.readValue(decodedIdString, Id.class);
+            Id id = mapper.readValue(decodedIdString, Id.class);
+            if (id.getSpiKey() == null) {
+                throw new ResourceIdEncodingException("Could not decode CollectionId, missing required encoded attribute for spiKey: k");
+            }
+            if (id.getRealm() == null) {
+                throw new ResourceIdEncodingException("Could not decode CollectionId, missing required encoded attribute for realm: r");
+            }
+            return id;
         } catch (IOException e) {
             throw new ResourceIdEncodingException(
                 "Could not decode resource id: " + idString + " - " + e.getMessage(), e);

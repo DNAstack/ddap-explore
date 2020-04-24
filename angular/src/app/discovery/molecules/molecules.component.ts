@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ViewControllerService } from 'ddap-common-lib';
+import * as ngl from 'ngl';
 import { AppConfigModel } from 'src/app/shared/app-config/app-config.model';
 import { AppConfigService } from 'src/app/shared/app-config/app-config.service';
 
@@ -47,9 +48,22 @@ import { molecules } from './molecules';
     ngOnInit(): void {
     }
 
-    selectMolecule(molecule) {
+  selectMolecule(molecule) {
         this.selectedMolecule = molecule;
         this.selectedSubMolecule = null;
+    /**
+     * Stage class, central for creating molecular scenes with NGL.
+     *
+     * @example
+     * var stage = new Stage( "elementId", { backgroundColor: "white" } );
+     */
+    const stage = new ngl.Stage('ngl-viewer', { backgroundColor: 'black'});
+    stage.loadFile('rcsb://1crn.mmtf', {defaultRepresentation: true});
+    function handleResize () {
+      stage.handleResize();
+    }
+    window.addEventListener('orientationchange', handleResize, false);
+    window.addEventListener('resize', handleResize, false);
     }
 
     getMoleculeToRender() {

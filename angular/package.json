@@ -54,6 +54,7 @@
     "lodash.uniq": "^4.5.0",
     "monaco-editor": "~0.18.1",
     "ng2-ace-editor": "^0.3.9",
+    "ngl": "^0.10.4",
     "ngx-chips": "^2.1.0",
     "ngx-clipboard": "^12.3.1",
     "ngx-highlightjs": "^3.0.3",

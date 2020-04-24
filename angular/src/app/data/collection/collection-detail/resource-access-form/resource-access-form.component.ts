@@ -48,8 +48,8 @@ export class ResourceAccessFormComponent implements OnInit {
       });
   }
 
-  get resourceAuthorizationId(): string {
-    return this.selectedResourceInterface.authorizationId;
+  get resourceInterfaceId(): string {
+    return this.selectedResourceInterface.id;
   }
 
   get timeToLiveDuration(): string {
@@ -83,7 +83,7 @@ export class ResourceAccessFormComponent implements OnInit {
 
   private getTokensForSelectedResourceInterface() {
     this.appExploreService.getTokens(
-      [this.resourceAuthorizationId],
+      [this.resourceInterfaceId],
       { minimum_ttl: this.minimumTokensTtl }
       )
       .subscribe((tokensResponse: TokensResponseModel) => {
@@ -99,7 +99,7 @@ export class ResourceAccessFormComponent implements OnInit {
         tap(() => this.authUrl = this.buildUrlForResourceAuthorization()),
         flatMap(() => {
           return this.appExploreService.getTokens(
-            [this.resourceAuthorizationId],
+            [this.resourceInterfaceId],
             { minimum_ttl: this.minimumTokensTtl }
           );
         })
@@ -113,8 +113,8 @@ export class ResourceAccessFormComponent implements OnInit {
     if (tokensResponse.requiresAdditionalAuth) {
       this.authUrl = this.buildUrlForResourceAuthorization(tokensResponse.authorizationUrlBase);
     } else {
-      const resourceAuthorizationId = `${this.selectedResourceInterface.authorizationId}`;
-      this.resourceAccess = tokensResponse.access[resourceAuthorizationId];
+      const resourceInterfaceId = `${this.selectedResourceInterface.id}`;
+      this.resourceAccess = tokensResponse.access[resourceInterfaceId];
     }
   }
 
@@ -122,7 +122,7 @@ export class ResourceAccessFormComponent implements OnInit {
     if (!authorizationUrlBase) {
       const realm = this.route.root.firstChild.snapshot.params.realmId;
       authorizationUrlBase = `${environment.ddapApiUrl}/${realm}/resources/authorize`
-        + `?resource=${this.resourceAuthorizationId}`;
+        + `?resource=${this.resourceInterfaceId}`;
     }
     return `${authorizationUrlBase}`
       + `&redirect_uri=${encodeURIComponent(this.router.url)}`

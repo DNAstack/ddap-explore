@@ -5,7 +5,7 @@
         <button class="m-r-sm" tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = !view.showLeftSidebar; resizeStage()" matTooltip="{{view.showLeftSidebar ? 'Hide' : 'Show'}} Proteins" color="{{view.showLeftSidebar ? 'accent' : ''}}">
             <mat-icon>gesture</mat-icon>
         </button>
-        <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = !view.showRightSidebar; resizeStage()" matTooltip="{{view.showRightSidebar ? 'Hide' : 'Show'}} Configuration" color="{{view.showRightSidebar ? 'accent' : ''}}">
+        <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = !view.showRightSidebar; resizeStage()" matTooltip="{{view.showRightSidebar ? 'Hide' : 'Show'}} Settings" color="{{view.showRightSidebar ? 'accent' : ''}}">
             <mat-icon>tune</mat-icon>
         </button>
     </ddaplib-header>
@@ -30,12 +30,12 @@
             </mat-drawer>
             <mat-drawer-content style="display:flex; flex: 1">
                 <mat-drawer-container style="flex:1" [autosize]="true" hasBackdrop="false">
-                    <mat-drawer mode="over" position="end" [(opened)]="view.showRightSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
+                    <mat-drawer mode="side" position="end" [(opened)]="view.showRightSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
                         <mat-toolbar class="tertiary-toolbar">
                             <mat-toolbar-row>
-                                <div>Configuration</div>
+                                <div>Settings</div>
                                 <span class="fill-space"></span>
-                                <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = false; resizeStage()" matTooltip="Close Configuration">
+                                <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = false; resizeStage()" matTooltip="Close Settings">
                                     <mat-icon>close</mat-icon>
                                 </button>
                             </mat-toolbar-row>

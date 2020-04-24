@@ -27,6 +27,9 @@ import { molecules } from './molecules';
 
     selectedMolecule: any;
     selectedSubMolecule: any;
+    selectedRepresentation: any;
+
+    nglRepresentations: any[];
 
     view: {
         showLeftSidebar: boolean,
@@ -48,6 +51,13 @@ import { molecules } from './molecules';
 
                     this.molecules = molecules;
 
+                    this.nglRepresentations = [
+                        { id: 'ball+stick', name: 'Ball and Strick', params: { multipleBond: true }},
+                        { id: 'ribbon', name: 'Ribbon', params: { colorScheme: 'bfactor' }},
+                    ];
+
+                    this.selectedRepresentation = this.nglRepresentations[1];
+
                     this.view = {
                         showLeftSidebar: true,
                         viewer : {
@@ -56,11 +66,12 @@ import { molecules } from './molecules';
                             cameraType: 'persepective',
                         },
                     };
+
+
     }
     ngAfterViewInit(): void {
         this.stage = new ngl.Stage('ngl-viewer' );
         this.applyParameters();
-        this.resizeStage();
     }
 
     applyParameters() {
@@ -112,14 +123,19 @@ import { molecules } from './molecules';
 
     selectionChanged() {
         const molecule = this.getMoleculeToRender();
-        // console.log("Rendering " + molecule);
+        this.resizeStage();
+        // console.log(molecule);
+
+        const that = this;
+
         if (molecule.pdbid) {
             this.stage.loadFile( 'rcsb://' + molecule.pdbid ).then( function( o ) {
-                o.addRepresentation( 'ribbon' , {colorScheme: 'bfactor'} );
-                o.autoView();
+                o.addRepresentation( that.selectedRepresentation.id , that.selectedRepresentation.params );
             } );
+            this.autoView();
         } else {
-            // TODO: fail gracefully
+            // TODO: fail more gracefully
+            this.selectMolecule(null);
         }
 
 

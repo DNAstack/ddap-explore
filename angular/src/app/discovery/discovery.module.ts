@@ -1,6 +1,8 @@
 import { AgmCoreModule, MapsAPILoader } from '@agm/core';
 import { NgModule } from '@angular/core';
 import { MatDialogModule, MatDialogRef, MatToolbarModule } from '@angular/material';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatSliderModule } from '@angular/material/slider';
 import { AgGridModule } from 'ag-grid-angular';
 import { BingMapAPILoader, BingMapAPILoaderConfig, DocumentRef, MapAPILoader, MapModule, WindowRef } from 'angular-maps';
 
@@ -27,6 +29,8 @@ import { KeyValuePairComponent } from './ui-components/key-value-pair/key-value-
       DiscoveryRoutingModule,
       MatToolbarModule,
       MatDialogModule,
+      MatSliderModule,
+      MatButtonToggleModule,
       AgGridModule.withComponents([]),
       MapModule.forRoot(),
       AgmCoreModule.forRoot({

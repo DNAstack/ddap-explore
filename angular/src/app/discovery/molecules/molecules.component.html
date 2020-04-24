@@ -19,7 +19,7 @@
                     <mat-toolbar-row>
                         <div>Proteins</div>
                         <span class="fill-space"></span>
-                        <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false" matTooltip="Close Structures">
+                        <button active tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false" matTooltip="Close Structures">
                             <mat-icon>close</mat-icon>
                         </button>
                     </mat-toolbar-row>
@@ -45,12 +45,27 @@
                                 <div class="h3 m-b-sm">Parts</div>
                                 <mat-form-field appearance="outline" floatLabel="always">
                                     <mat-label>Sub-Molecule</mat-label>
-                                    <mat-select [(ngModel)]="selectedSubMolecule">
+                                    <mat-select [(ngModel)]="selectedSubMolecule" (selectionChange)="selectSubMolecule(selectedSubMolecule)">
                                         <mat-option *ngFor="let molecule of selectedMolecule.parts" [value]="molecule">
                                             {{molecule.name}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
+                            </div>
+                            <div style="display: flex; flex-direction: column;">
+                                <div class="h3 m-b-sm">Parameters</div>
+                                <mat-form-field appearance="outline" floatLabel="always">
+                                    <mat-label>Background</mat-label>
+                                    <input matInput [(ngModel)]="view.viewer.background" (blur)="applyParameters()">
+                                </mat-form-field>
+                                <button tabindex="-1" mat-stroked-button (click)="autoView()">
+                                    <mat-icon>all_out</mat-icon> Fit
+                                </button>
+                                <!--mat-slider [(ngModel)]="view.viewer.fov" (change)="applyParameters()" min="15" max="120" step="1" value="120"></mat-slider>
+                                <mat-button-toggle-group [(ngModel)]="view.viewer.cameraType" (change)="applyParameters()">
+                                    <mat-button-toggle value="persepective">Persepective</mat-button-toggle>
+                                    <mat-button-toggle value="orthographic">Orthographic</mat-button-toggle>
+                                  </mat-button-toggle-group>-->
                             </div>
                         </div>
                     </mat-drawer>

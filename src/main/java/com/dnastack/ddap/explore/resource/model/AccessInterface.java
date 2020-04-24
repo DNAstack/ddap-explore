@@ -12,5 +12,6 @@ public class AccessInterface {
 
     private String type;
     private URI uri;
-    private String authorizationId;
+    private String id;
+    private boolean authRequired;
 }

@@ -85,13 +85,15 @@ public class ReactiveDamResourceClient implements ResourceClient {
                     String resourceId = flatViewToDamId(realm, flatView, DamResourceType.RESOURCE).encodeId();
                     Resource resource = resources
                         .computeIfAbsent(resourceId, (key) -> flatViewToResource(collectionId, resourceId, flatView));
-                    String authorizationId = flatViewToDamId(realm, flatView, DamResourceType.INTERFACE).encodeId();
+                    String interfaceId = flatViewToDamId(realm, flatView, DamResourceType.INTERFACE).encodeId();
                     AccessInterface accessInterface = new AccessInterface();
-                    accessInterface.setAuthorizationId(authorizationId);
+                    accessInterface.setId(interfaceId);
                     accessInterface.setType(flatView.getInterfaceName());
                     accessInterface
                         .setUri(flatView.getInterfaceUri() != null ? URI.create(flatView.getInterfaceUri()) : null);
+                    accessInterface.setAuthRequired(true);
                     resource.getInterfaces().add(accessInterface);
+
 
                 }
                 return new ArrayList<>(resources.values());
@@ -118,12 +120,13 @@ public class ReactiveDamResourceClient implements ResourceClient {
                     resource = flatViewToResource(collectionId, resourceId.encodeId(), entry.getValue());
                 }
 
-                String authorizationId = flatViewToDamId(realm, view, DamResourceType.INTERFACE).encodeId();
+                String interfaceId = flatViewToDamId(realm, view, DamResourceType.INTERFACE).encodeId();
                 AccessInterface accessInterface = new AccessInterface();
-                accessInterface.setAuthorizationId(authorizationId);
+                accessInterface.setId(interfaceId);
                 accessInterface.setType(view.getInterfaceName());
                 accessInterface
                     .setUri(view.getInterfaceUri() != null ? URI.create(view.getInterfaceUri()) : null);
+                accessInterface.setAuthRequired(true);
                 resource.getInterfaces().add(accessInterface);
             }
             return resource;
@@ -205,10 +208,10 @@ public class ReactiveDamResourceClient implements ResourceClient {
             .entrySet().stream().map(entry -> {
                 String key = entry.getKey();
                 ResourceDescriptor value = entry.getValue();
-                DamId damAuthorizationId = getDamIdForResourceUri(URI.create(key), damIds);
+                DamId interfaceId = getDamIdForResourceUri(URI.create(key), damIds);
                 ResourceAccess resourceAccess = resourceResults.getAccessMap().get(value.getAccess());
                 UserCredential userCredential = new UserCredential();
-                userCredential.setAuthorizationId(damAuthorizationId.encodeId());
+                userCredential.setInterfaceId(interfaceId.encodeId());
                 userCredential.setExpirationTime(ZonedDateTime.now().plus(currentState.getTtl()));
                 userCredential.setCredentials(resourceAccess.getCredentialsMap());
                 return userCredential;

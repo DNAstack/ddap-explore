@@ -58,7 +58,7 @@ public class ResourceController {
     public Mono<PaginatedResponse<Resource>> listResources(@PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) List<String> collections, @RequestParam(value = "interface_type", required = false) List<String> interfaceTypesToFilter, @RequestParam(value = "interface_uri", required = false) List<String> interfaceUrisToFilter, @RequestParam(value = "page_token", required = false) String pageToken) {
         List<Id> collectionIdsToFilter = new ArrayList<>();
         if (collections != null) {
-            collectionIdsToFilter.addAll(collections.stream().map(Id::decodeId).collect(Collectors.toList()));
+            collectionIdsToFilter.addAll(collections.stream().map(Id::decodeCollectionId).collect(Collectors.toList()));
         }
         return resourceClientService
             .listResources(realm, collectionIdsToFilter, interfaceTypesToFilter, interfaceUrisToFilter)
@@ -68,7 +68,7 @@ public class ResourceController {
 
     @GetMapping(value = "/{realm}/resources/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Resource> getResource(@PathVariable("realm") String realm, @PathVariable("id") String resourceId) {
-        Id id = Id.decodeId(resourceId);
+        Id id = Id.decodeResourceId(resourceId);
         return resourceClientService.getClient(id.getSpiKey()).getResource(realm, id);
     }
 
@@ -80,7 +80,7 @@ public class ResourceController {
 
     @GetMapping(value = "/{realm}/collections/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Collection> getCollection(@PathVariable("realm") String realm, @PathVariable("id") String collectionId) {
-        Id id = Id.decodeId(collectionId);
+        Id id = Id.decodeCollectionId(collectionId);
         return resourceClientService.getClient(id.getSpiKey()).getCollection(realm, id);
     }
 
@@ -90,16 +90,16 @@ public class ResourceController {
         @RequestParam(required = false, name = "login_hint") String loginHint,
         @RequestParam(required = false, name = "redirect_uri") URI redirectUri,
         @RequestParam(required = false) String scope,
-        @RequestParam("resource") List<String> authorizationIds,
+        @RequestParam("resource") List<String> interfaceIds,
         @RequestParam(defaultValue = "1h") String ttl) {
 
         //Guarantee there was not an issue sent from the front end
         final URI nonNullRedirectUri = redirectUri != null ? redirectUri : UriUtil.selfLinkToUi(request, realm, "");
         final URI postLoginEndpoint = getRedirectUri(request);
         Map<String, List<Id>> spiResourcesToAuthorize = new HashMap<>();
-        authorizationIds.stream()
+        interfaceIds.stream()
             .filter(id -> !Objects.equals("undefined", id))
-            .map(Id::decodeId)
+            .map(Id::decodeInterfaceId)
             .filter(id -> resourceClientService.getClient(id.getSpiKey()).resourceRequiresAutorization(id))
             .collect(Collectors.toList())
             .forEach(id -> spiResourcesToAuthorize.computeIfAbsent(id.getSpiKey(), (key) -> new ArrayList<>()).add(id));

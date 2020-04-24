@@ -19,13 +19,13 @@
                     <mat-toolbar-row>
                         <div>Proteins</div>
                         <span class="fill-space"></span>
-                        <button active tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false" matTooltip="Close Structures">
+                        <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false" matTooltip="Close Structures">
                             <mat-icon>close</mat-icon>
                         </button>
                     </mat-toolbar-row>
                 </mat-toolbar>
                 <div style="flex: 1; overflow-y: auto;">
-                    <button *ngFor="let molecule of molecules; index as j;" mat-menu-item (click)="selectMolecule(molecule)"><mat-icon style="margin:0" class="m-r-sm">gesture</mat-icon> {{molecule.name}}</button>
+                    <button class="mat-menu-item {{molecule == selectedMolecule ? 'active' : ''}}" *ngFor="let molecule of molecules; index as j;" mat-menu-item (click)="selectMolecule(molecule)">{{molecule.name}}</button>
                 </div>
             </mat-drawer>
             <mat-drawer-content style="display:flex; flex: 1">
@@ -56,7 +56,7 @@
                                 <div class="h3 m-b-sm">Parameters</div>
                                 <mat-form-field appearance="outline" floatLabel="always">
                                     <mat-label>Background</mat-label>
-                                    <input matInput autocomplete="off" [(colorPicker)]="view.viewer.background" [style.background]="view.viewer.background" cpPosition="bottom" (colorPickerChange)="applyParameters()"/>
+                                    <input matInput autocomplete="off" [(colorPicker)]="view.viewer.background" cpAlphaChannel="disabled" [style.background]="view.viewer.background" cpPosition="bottom" (colorPickerChange)="applyParameters()"/>
                                 </mat-form-field>
                                 <button tabindex="-1" mat-stroked-button (click)="autoView()">
                                     <mat-icon>all_out</mat-icon> Fit
@@ -70,7 +70,7 @@
                         </div>
                     </mat-drawer>
                     <mat-drawer-content class="full-hw">
-                        <div id="ngl-viewer" class="full-hw"></div>
+                        <div #nglViewer id="ngl-viewer" class="full-hw"></div>
                     </mat-drawer-content>
                 </mat-drawer-container>
             </mat-drawer-content>

@@ -15,6 +15,7 @@ import { molecules } from './molecules';
     styleUrls: ['./molecules.component.scss'],
   })
   export class MoleculesComponent implements OnInit, AfterViewInit {
+
     appConfig: AppConfigModel;
 
     grid: any;
@@ -38,6 +39,7 @@ import { molecules } from './molecules';
 
     stage: ngl.stage;
 
+
     constructor(private router: Router,
                 private appConfigService: AppConfigService,
                 private configService: DiscoveryConfigService,
@@ -58,6 +60,7 @@ import { molecules } from './molecules';
     ngAfterViewInit(): void {
         this.stage = new ngl.Stage('ngl-viewer' );
         this.applyParameters();
+
     }
 
     applyParameters() {
@@ -72,7 +75,9 @@ import { molecules } from './molecules';
 
     @HostListener('window:resize') onResize(event) {
       if (this.stage) {
+        // console.log("Window resized");
         this.stage.handleResize();
+        this.stage.setSize('100%', '100%');
       }
     }
 

@@ -13,7 +13,8 @@ export interface ResourceModel {
 export interface InterfaceModel {
   type: string;
   uri: string;
-  authorizationId?: string; // If not present -> public
+  id: string;
+  authRequired: boolean; // if false, this is a public resources
 }
 
 export interface ResourcesResponseModel {

@@ -48,7 +48,7 @@ export class CollectionDetailComponent implements OnInit {
 
   isPublicResource(resource: ResourceModel): boolean {
     return resource.interfaces.some((resourceInterface: InterfaceModel) => {
-      return !resourceInterface.authorizationId;
+      return !resourceInterface.authRequired;
     });
   }
 

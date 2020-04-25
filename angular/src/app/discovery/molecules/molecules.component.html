@@ -1,6 +1,7 @@
 
 <div class="full-hw" style="display:flex; flex-direction:column;">
     <ddaplib-header icon="navigation" label="Molecules">
+        <span>{{selectedMolecule ? selectedMolecule.name : ''}} {{selectedSubMolecule ? '» ' + selectedSubMolecule.name : ''}}</span>
         <span class="fill-space"></span>
         <button class="m-r-sm" tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = !view.showLeftSidebar" matTooltip="{{view.showLeftSidebar ? 'Hide' : 'Show'}} Proteins" color="{{view.showLeftSidebar ? 'accent' : ''}}">
             <mat-icon>gesture</mat-icon>
@@ -41,23 +42,36 @@
                             </mat-toolbar-row>
                         </mat-toolbar>
                         <div class="p-a">
-                            <div *ngIf="selectedMolecule && selectedMolecule.parts">
-                                <div class="h3 m-b-sm">Parts</div>
+                            <div style="display: flex; flex-direction: column;">
+                                <div class="h3 m-b-sm">Molecule</div>
                                 <mat-form-field appearance="outline" floatLabel="always">
-                                    <mat-label>Sub-Molecule</mat-label>
-                                    <mat-select [(ngModel)]="selectedSubMolecule" (selectionChange)="selectSubMolecule(selectedSubMolecule)">
-                                        <mat-option *ngFor="let molecule of selectedMolecule.parts" [value]="molecule">
-                                            {{molecule.name}}
-                                        </mat-option>
+                                    <mat-label>Part</mat-label>
+                                    <mat-select [disabled]="!selectedMolecule" [(ngModel)]="selectedSubMolecule" (selectionChange)="selectSubMolecule(selectedSubMolecule)">
+                                        <!--<mat-option *ngIf="selectedMolecule" [value]="selectedMolecule">
+                                            {{selectedMolecule.name}}
+                                        </mat-option>-->
+                                        <span *ngIf="selectedMolecule && selectedMolecule.parts">
+                                            <mat-option *ngFor="let molecule of selectedMolecule.parts" [value]="molecule">
+                                                {{molecule.name}}
+                                            </mat-option>
+                                        </span>
                                     </mat-select>
                                 </mat-form-field>
-                            </div>
-                            <div style="display: flex; flex-direction: column;">
-                                <div class="h3 m-b-sm">Parameters</div>
+                                <div class="h3 m-b-sm">Representation</div>
+                                <mat-form-field appearance="outline" floatLabel="always">
+                                    <mat-label>Representation</mat-label>
+                                    <mat-select [(ngModel)]="selectedRepresentation" (selectionChange)="onRepresentationSelectionChanged($event)">
+                                      <mat-option *ngFor="let representation of nglRepresentations | keyvalue" [value]="representation.key">
+                                        {{prettyRepresentation(nglRepresentations[representation.key].name)}}
+                                      </mat-option>
+                                    </mat-select>
+                                  </mat-form-field>
+                                <div class="h3 m-b-sm">Environment</div>
                                 <mat-form-field appearance="outline" floatLabel="always">
                                     <mat-label>Background</mat-label>
                                     <input tabindex="-1"  matInput autocomplete="off" [(colorPicker)]="view.viewer.background" cpAlphaChannel="disabled" [style.background]="view.viewer.background" cpPosition="bottom" (colorPickerChange)="applyParameters()"/>
                                 </mat-form-field>
+                                <div class="h3 m-b-sm">Camera</div>
                                 <button tabindex="-1" mat-stroked-button (click)="autoView()">
                                     <mat-icon>all_out</mat-icon> Fit
                                 </button>

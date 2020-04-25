@@ -2,10 +2,10 @@
 <div class="full-hw" style="display:flex; flex-direction:column;">
     <ddaplib-header icon="navigation" label="Molecules">
         <span class="fill-space"></span>
-        <button class="m-r-sm" tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = !view.showLeftSidebar; resizeStage()" matTooltip="{{view.showLeftSidebar ? 'Hide' : 'Show'}} Proteins" color="{{view.showLeftSidebar ? 'accent' : ''}}">
+        <button class="m-r-sm" tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = !view.showLeftSidebar" matTooltip="{{view.showLeftSidebar ? 'Hide' : 'Show'}} Proteins" color="{{view.showLeftSidebar ? 'accent' : ''}}">
             <mat-icon>gesture</mat-icon>
         </button>
-        <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = !view.showRightSidebar; resizeStage()" matTooltip="{{view.showRightSidebar ? 'Hide' : 'Show'}} Settings" color="{{view.showRightSidebar ? 'accent' : ''}}">
+        <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = !view.showRightSidebar" matTooltip="{{view.showRightSidebar ? 'Hide' : 'Show'}} Settings" color="{{view.showRightSidebar ? 'accent' : ''}}">
             <mat-icon>tune</mat-icon>
         </button>
     </ddaplib-header>
@@ -13,13 +13,13 @@
     <ddaplib-cover-message style="flex-grow: 1" *ngIf="molecules.length == 0" message="No Molecules"
         icon="not_interested"></ddaplib-cover-message>
     <div style="display:flex; flex: 1" *ngIf="molecules.length > 0">
-        <mat-drawer-container style="flex:1" [autosize]="true">
-            <mat-drawer mode="side" [(opened)]="view.showLeftSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
+        <mat-drawer-container style="flex:1" [autosize]="true" hasBackdrop="false">
+            <mat-drawer (openedChange)="resizeStage()" mode="side" [(opened)]="view.showLeftSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
                 <mat-toolbar class="tertiary-toolbar">
                     <mat-toolbar-row>
                         <div>Proteins</div>
                         <span class="fill-space"></span>
-                        <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false; resizeStage()" matTooltip="Close Structures">
+                        <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false;" matTooltip="Close Structures">
                             <mat-icon>close</mat-icon>
                         </button>
                     </mat-toolbar-row>
@@ -30,12 +30,12 @@
             </mat-drawer>
             <mat-drawer-content style="display:flex; flex: 1">
                 <mat-drawer-container style="flex:1" [autosize]="true" hasBackdrop="false">
-                    <mat-drawer mode="side" position="end" [(opened)]="view.showRightSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
+                    <mat-drawer (openedChange)="resizeStage()" mode="side" position="end" [(opened)]="view.showRightSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
                         <mat-toolbar class="tertiary-toolbar">
                             <mat-toolbar-row>
                                 <div>Settings</div>
                                 <span class="fill-space"></span>
-                                <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = false; resizeStage()" matTooltip="Close Settings">
+                                <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = false;" matTooltip="Close Settings">
                                     <mat-icon>close</mat-icon>
                                 </button>
                             </mat-toolbar-row>
@@ -69,8 +69,8 @@
                             </div>
                         </div>
                     </mat-drawer>
-                    <mat-drawer-content class="full-hw">
-                        <ddaplib-cover-message style="flex-grow: 1" *ngIf="!this.getMoleculeToRender()" message="No Molecule Selected" icon="not_interested"></ddaplib-cover-message>
+                    <mat-drawer-content class="full-hw" [style.background-color]="view.viewer.background">
+                        <ddaplib-cover-message style="flex-grow: 1;" *ngIf="!this.getMoleculeToRender()" message="No Molecule Selected" icon="not_interested"></ddaplib-cover-message>
                         <div #nglViewer [hidden]="!this.getMoleculeToRender()" id="ngl-viewer" class="full-hw"></div>
                     </mat-drawer-content>
                 </mat-drawer-container>

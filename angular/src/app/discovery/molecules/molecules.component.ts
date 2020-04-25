@@ -32,6 +32,7 @@ import { molecules } from './molecules';
     nglRepresentations: any[];
 
     view: {
+        drawerRolling: boolean,
         showLeftSidebar: boolean,
         viewer: {
             background: string,
@@ -59,6 +60,7 @@ import { molecules } from './molecules';
                     this.selectedRepresentation = this.nglRepresentations[1];
 
                     this.view = {
+                        drawerRolling: false,
                         showLeftSidebar: true,
                         viewer : {
                             background: '#1f1f1f',

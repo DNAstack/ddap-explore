@@ -1,4 +1,7 @@
+import { ArrayDataSource } from '@angular/cdk/collections';
+import { FlatTreeControl } from '@angular/cdk/tree';
 import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material';
 import { Router } from '@angular/router';
 import { ViewControllerService } from 'ddap-common-lib';
 import * as ngl from 'ngl';
@@ -43,12 +46,21 @@ import { molecules } from './molecules';
 
     stage: ngl.stage;
 
+    treeControl = new FlatTreeControl<ExampleFlatNode>(
+        node => node.level, node => node.expandable);
+
+    treeFlattener = new MatTreeFlattener(
+        this._transformer, node => node.level, node => node.expandable, node => node.children);
+
+    dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
     constructor(private router: Router,
                 private appConfigService: AppConfigService,
                 private configService: DiscoveryConfigService,
                 private viewController: ViewControllerService
                 ) {
+
+                    this.dataSource.data = TREE_DATA;
 
                     this.molecules = molecules;
 
@@ -74,6 +86,8 @@ import { molecules } from './molecules';
 
 
     }
+
+    hasChild = (_: number, node: ExampleFlatNode) => node.expandable;
     ngAfterViewInit(): void {
         this.stage = new ngl.Stage('ngl-viewer' );
         this.applyParameters();
@@ -153,4 +167,52 @@ import { molecules } from './molecules';
 
 
     }
+
+    private _transformer = (node: FoodNode, level: number) => {
+        return {
+          expandable: !!node.children && node.children.length > 0,
+          name: node.name,
+          level: level,
+        };
+      }
 }
+
+/** Flat node with expandable and level information */
+interface ExampleFlatNode {
+    expandable: boolean;
+    name: string;
+    level: number;
+  }
+
+interface FoodNode {
+    name: string;
+    children?: FoodNode[];
+  }
+
+  const TREE_DATA: FoodNode[] = [
+    {
+      name: 'Fruit',
+      children: [
+        {name: 'Apple'},
+        {name: 'Banana'},
+        {name: 'Fruit loops'},
+      ],
+    }, {
+      name: 'Vegetables',
+      children: [
+        {
+          name: 'Green',
+          children: [
+            {name: 'Broccoli'},
+            {name: 'Brussels sprouts'},
+          ],
+        }, {
+          name: 'Orange',
+          children: [
+            {name: 'Pumpkins'},
+            {name: 'Carrots'},
+          ],
+        },
+      ],
+    },
+  ];

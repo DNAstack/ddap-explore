@@ -52,12 +52,15 @@ import { molecules } from './molecules';
 
                     this.molecules = molecules;
 
+                    /*
                     this.nglRepresentations = [
-                        { id: 'ball+stick', name: 'Ball and Strick', params: { multipleBond: true }},
                         { id: 'ribbon', name: 'Ribbon', params: { colorScheme: 'bfactor' }},
-                    ];
+                        { id: 'ball+stick', name: 'Ball and Stick', params: { multipleBond: true }},
+                        { id: 'cartoon', name: 'Cartoon', params: {}},
+                    ];*/
 
-                    this.selectedRepresentation = this.nglRepresentations[1];
+                    this.nglRepresentations = ngl.RepresentationRegistry._dict;
+                    this.selectedRepresentation = 'ribbon';
 
                     this.view = {
                         drawerRolling: false,
@@ -74,6 +77,10 @@ import { molecules } from './molecules';
     ngAfterViewInit(): void {
         this.stage = new ngl.Stage('ngl-viewer' );
         this.applyParameters();
+    }
+
+    prettyRepresentation(representationName: string) {
+        return representationName.replace('Representation', '');
     }
 
     applyParameters() {
@@ -100,6 +107,10 @@ import { molecules } from './molecules';
 
     }
 
+    onRepresentationSelectionChanged(event) {
+        this.selectionChanged();
+    }
+
     selectMolecule(molecule) {
         this.selectedMolecule = molecule;
         this.selectedSubMolecule = null;
@@ -124,17 +135,17 @@ import { molecules } from './molecules';
     }
 
     selectionChanged() {
+
         const molecule = this.getMoleculeToRender();
         this.resizeStage();
-        // console.log(molecule);
-
-        const that = this;
 
         if (molecule.pdbid) {
+            const that = this;
+            this.stage.removeAllComponents();
             this.stage.loadFile( 'rcsb://' + molecule.pdbid ).then( function( o ) {
-                o.addRepresentation( that.selectedRepresentation.id , that.selectedRepresentation.params );
+                o.addRepresentation( that.selectedRepresentation , {} );
+                o.autoView();
             } );
-            this.autoView();
         } else {
             // TODO: fail more gracefully
             this.selectMolecule(null);

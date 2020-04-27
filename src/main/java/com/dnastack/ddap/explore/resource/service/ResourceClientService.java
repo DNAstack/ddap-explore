@@ -2,6 +2,7 @@ package com.dnastack.ddap.explore.resource.service;
 
 import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
 import com.dnastack.ddap.explore.resource.model.Resource;
 import com.dnastack.ddap.explore.resource.spi.ResourceClient;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class ResourceClientService {
                 "Could not locate Reactive ResourceClient for spi key: " + spiKey));
     }
 
-    public Mono<List<Resource>> listResources(String realm, List<Id> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
+    public Mono<List<Resource>> listResources(String realm, List<CollectionId> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
         return Flux.concat(resourceClients.stream().map(client -> client
             .listResources(realm, collectionsToFilter, interfaceTypesToFilter, interfaceUrisToFilter))
             .collect(Collectors.toList()))

@@ -7,6 +7,9 @@ import com.dnastack.ddap.common.util.http.XForwardUtil;
 import com.dnastack.ddap.explore.resource.exception.ResourceAuthorizationException;
 import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
+import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
+import com.dnastack.ddap.explore.resource.model.Id.ResourceId;
 import com.dnastack.ddap.explore.resource.model.OAuthState;
 import com.dnastack.ddap.explore.resource.model.PaginatedResponse;
 import com.dnastack.ddap.explore.resource.model.Resource;
@@ -56,7 +59,7 @@ public class ResourceController {
 
     @GetMapping(value = "/{realm}/resources", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<PaginatedResponse<Resource>> listResources(@PathVariable("realm") String realm, @RequestParam(value = "collection", required = false) List<String> collections, @RequestParam(value = "interface_type", required = false) List<String> interfaceTypesToFilter, @RequestParam(value = "interface_uri", required = false) List<String> interfaceUrisToFilter, @RequestParam(value = "page_token", required = false) String pageToken) {
-        List<Id> collectionIdsToFilter = new ArrayList<>();
+        List<CollectionId> collectionIdsToFilter = new ArrayList<>();
         if (collections != null) {
             collectionIdsToFilter.addAll(collections.stream().map(Id::decodeCollectionId).collect(Collectors.toList()));
         }
@@ -68,7 +71,7 @@ public class ResourceController {
 
     @GetMapping(value = "/{realm}/resources/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Resource> getResource(@PathVariable("realm") String realm, @PathVariable("id") String resourceId) {
-        Id id = Id.decodeResourceId(resourceId);
+        ResourceId id = Id.decodeResourceId(resourceId);
         return resourceClientService.getClient(id.getSpiKey()).getResource(realm, id);
     }
 
@@ -80,7 +83,7 @@ public class ResourceController {
 
     @GetMapping(value = "/{realm}/collections/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Collection> getCollection(@PathVariable("realm") String realm, @PathVariable("id") String collectionId) {
-        Id id = Id.decodeCollectionId(collectionId);
+        CollectionId id = Id.decodeCollectionId(collectionId);
         return resourceClientService.getClient(id.getSpiKey()).getCollection(realm, id);
     }
 
@@ -96,7 +99,7 @@ public class ResourceController {
         //Guarantee there was not an issue sent from the front end
         final URI nonNullRedirectUri = redirectUri != null ? redirectUri : UriUtil.selfLinkToUi(request, realm, "");
         final URI postLoginEndpoint = getRedirectUri(request);
-        Map<String, List<Id>> spiResourcesToAuthorize = new HashMap<>();
+        Map<String, List<InterfaceId>> spiResourcesToAuthorize = new HashMap<>();
         interfaceIds.stream()
             .filter(id -> !Objects.equals("undefined", id))
             .map(Id::decodeInterfaceId)

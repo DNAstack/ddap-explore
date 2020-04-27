@@ -18,7 +18,7 @@ public class ResourceAuthorizationException extends RuntimeException {
         response = new ResourceAuthorizationExceptionResponse(status.value(), reason, resources);
     }
 
-    public ResourceAuthorizationException(String reason,HttpStatus status,  List<Id> resources) {
+    public <T extends Id> ResourceAuthorizationException(String reason,HttpStatus status,  List<T> resources) {
         super();
         this.status = status;
         response = new ResourceAuthorizationExceptionResponse(status.value(), reason, resources.stream().map(Id::encodeId).collect(Collectors.toList()));

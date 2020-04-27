@@ -3,6 +3,7 @@ package com.dnastack.ddap.explore.explore.controller;
 import com.dnastack.ddap.common.util.http.XForwardUtil;
 import com.dnastack.ddap.explore.explore.model.ExploreTokenResponse;
 import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
 import com.dnastack.ddap.explore.resource.service.ResourceClientService;
 import com.dnastack.ddap.explore.resource.service.UserCredentialService;
@@ -63,7 +64,7 @@ public class ExploreAppController {
             });
 
             List<String> reauthenticate = potentiallyReauthenticate.stream().filter(id -> {
-                Id interfaceId = Id.decodeInterfaceId(id);
+                InterfaceId interfaceId = Id.decodeInterfaceId(id);
                 return resourceClientService.getClient(interfaceId.getSpiKey())
                     .resourceRequiresAutorization(interfaceId);
             }).collect(Collectors.toList());

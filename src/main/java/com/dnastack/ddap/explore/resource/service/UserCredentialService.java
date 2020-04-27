@@ -4,6 +4,7 @@ import com.dnastack.ddap.explore.common.session.PersistantSession;
 import com.dnastack.ddap.explore.common.session.SessionEncryptionUtils;
 import com.dnastack.ddap.explore.resource.data.UserCredentialDao;
 import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +47,7 @@ public class UserCredentialService {
         return userIdentifier;
     }
 
-    public Optional<UserCredential> getSessionBoundCredentialsForResource(WebSession session, Id resourceId) {
+    public Optional<UserCredential> getSessionBoundCredentialsForResourceInterface(WebSession session, InterfaceId resourceId) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao
             .getCredentialForResource(getUserIdentifier(session), resourceId.encodeId()));
     }

@@ -7,7 +7,9 @@ import com.dnastack.ddap.common.client.WebClientFactory;
 import com.dnastack.ddap.common.security.InvalidTokenException;
 import com.dnastack.ddap.explore.resource.exception.ResourceAuthorizationException;
 import com.dnastack.ddap.explore.resource.model.Collection;
-import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
+import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
+import com.dnastack.ddap.explore.resource.model.Id.ResourceId;
 import com.dnastack.ddap.explore.resource.model.OAuthState;
 import com.dnastack.ddap.explore.resource.model.Resource;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
@@ -53,16 +55,14 @@ public class ReactiveWalletResourceClient implements ResourceClient {
     }
 
     @Override
-    public Mono<List<Resource>> listResources(String realm, List<Id> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
+    public Mono<List<Resource>> listResources(String realm, List<CollectionId> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
         return Mono.fromCallable(() ->
             config.getResources().stream().filter(walletResource -> {
                 boolean keep = true;
                 if (collectionsToFilter != null && !collectionsToFilter.isEmpty()) {
+                    CollectionId collectionId = walletResource.getInterfaceId(realm, getSpiKey()).toCollectionId();
                     keep = collectionsToFilter.stream()
-                        .anyMatch(id -> id.getRealm().equals(realm) && id.getCollectionId()
-                            .equals(walletResource.getCollectionName())
-                            && id.getSpiKey()
-                            .equals(getSpiKey()));
+                        .anyMatch(collectionId::equals);
                 }
 
                 if (interfaceTypesToFilter != null) {
@@ -79,17 +79,10 @@ public class ReactiveWalletResourceClient implements ResourceClient {
     }
 
     @Override
-    public Mono<Resource> getResource(String realm, Id id) {
-        return Mono.fromCallable(() -> {
-            if (!realm.equals(id.getRealm())) {
-                throw new IllegalArgumentException("Resource does not exist in this realm");
-            }
-
-            return idToResource(realm, id)
-                .map(walletResource -> walletResource.toResource(realm, getSpiKey()))
-                .orElseThrow(() -> new NotFoundException("Could not locate resource with id: " + id.encodeId()));
-
-        });
+    public Mono<Resource> getResource(String realm, ResourceId id) {
+        return Mono.fromCallable(() -> idToResource(realm, id)
+            .map(walletResource -> walletResource.toResource(realm, getSpiKey()))
+            .orElseThrow(() -> new NotFoundException("Could not locate resource with id: " + id.encodeId())));
     }
 
     @Override
@@ -99,9 +92,9 @@ public class ReactiveWalletResourceClient implements ResourceClient {
     }
 
     @Override
-    public Mono<Collection> getCollection(String realm, Id collectionId) {
+    public Mono<Collection> getCollection(String realm, CollectionId collectionId) {
         return Mono.fromCallable(() -> config.getCollections().stream()
-            .filter(collection -> collection.getName().equals(collectionId.getCollectionId()))
+            .filter(collection -> collection.getName().equals(collectionId.getName()))
             .map(collection -> copyCollectionFromConfig(realm, collection))
             .findFirst()
             .orElseThrow(() -> new NotFoundException(
@@ -109,9 +102,9 @@ public class ReactiveWalletResourceClient implements ResourceClient {
     }
 
     @Override
-    public OAuthState prepareOauthState(String realm, List<Id> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl) {
+    public OAuthState prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl) {
 
-        Map<String, Map<String, List<Id>>> groupedResources = groupResourceByAudienceAndScope(realm, resources);
+        Map<String, Map<String, List<InterfaceId>>> groupedResources = groupResourceByAudienceAndScope(realm, resources);
 
         if (groupedResources.isEmpty()) {
             throw new ResourceAuthorizationException("Could not locate resources to authorize", HttpStatus.BAD_REQUEST, resources);
@@ -120,7 +113,7 @@ public class ReactiveWalletResourceClient implements ResourceClient {
         OAuthState lastAuth = null;
         for (var resourcesForAudience : groupedResources.entrySet()) {
             String aud = resourcesForAudience.getKey();
-            Map<String, List<Id>> scopedResources = resourcesForAudience.getValue();
+            Map<String, List<InterfaceId>> scopedResources = resourcesForAudience.getValue();
 
             if (scopedResources.isEmpty()) {
                 throw new ResourceAuthorizationException("Could not locate resources to authorize", HttpStatus.BAD_REQUEST, resources);
@@ -128,7 +121,7 @@ public class ReactiveWalletResourceClient implements ResourceClient {
 
             for (var resourcesForScope : scopedResources.entrySet()) {
                 String configuredScope = resourcesForScope.getKey();
-                List<Id> resourceList = resourcesForScope.getValue();
+                List<InterfaceId> resourceList = resourcesForScope.getValue();
 
                 ZonedDateTime validUntil = ZonedDateTime.now().plusMinutes(10);
                 String state = UUID.randomUUID().toString();
@@ -147,7 +140,8 @@ public class ReactiveWalletResourceClient implements ResourceClient {
     public Mono<List<UserCredential>> handleResponseAndGetCredentials(ServerHttpRequest exchange, URI redirectUri, OAuthState currentState, String code) {
         return Mono.defer(() -> {
 
-            String scope = idToResource(currentState.getRealm(), currentState.getResourceList().get(0)).get()
+            String scope = idToResource(currentState.getRealm(), currentState.getResourceList().get(0).toResourceId())
+                .get()
                 .getScope();
 
             return WebClientFactory.getWebClient()
@@ -165,24 +159,24 @@ public class ReactiveWalletResourceClient implements ResourceClient {
         });
     }
 
-    private Map<String, Map<String, List<Id>>> groupResourceByAudienceAndScope(String realm, List<Id> resourceIds) {
-        Map<String, Map<String, List<Id>>> groupedResources = new HashMap<>();
-        for (Id id : resourceIds) {
-            WalletResource resource = idToResource(realm, id)
+    private Map<String, Map<String, List<InterfaceId>>> groupResourceByAudienceAndScope(String realm, List<InterfaceId> resourceIds) {
+        Map<String, Map<String, List<InterfaceId>>> groupedResources = new HashMap<>();
+        for (InterfaceId id : resourceIds) {
+            WalletResource resource = idToResource(realm, id.toResourceId())
                 .orElseThrow(() -> new NotFoundException("Could not locate resource with id:  " + id.encodeId()));
-            Map<String, List<Id>> idsForAudience = groupedResources
+            Map<String, List<InterfaceId>> idsForAudience = groupedResources
                 .computeIfAbsent(resource.getAudience(), (aud) -> new HashMap<>());
-            List<Id> idsForScopes = idsForAudience
+            List<InterfaceId> idsForScopes = idsForAudience
                 .computeIfAbsent(resource.getScope(), (scope) -> new ArrayList<>());
             idsForScopes.add(id);
         }
         return groupedResources;
     }
 
-    private Optional<WalletResource> idToResource(String realm, Id id) {
+    private Optional<WalletResource> idToResource(String realm, ResourceId id) {
         return config.getResources().stream()
-            .filter(walletResource -> id.getRealm().equals(realm) && id.getSpiKey().equals(spiKey) && walletResource
-                .idEquals(id)).findFirst();
+            .filter(walletResource -> walletResource.getInterfaceId(realm, getSpiKey()).toResourceId().equals(id))
+            .findFirst();
     }
 
     private URI getAuthorizationUrl(String audience, String scope, String state, URI redirectUri, String loginHint, String ttl) {
@@ -266,10 +260,10 @@ public class ReactiveWalletResourceClient implements ResourceClient {
 
 
     private Collection copyCollectionFromConfig(String realm, Collection collection) {
-        Id collectionId = new Id();
-        collectionId.setRealm(realm);
+        CollectionId collectionId = new CollectionId();
         collectionId.setSpiKey(getSpiKey());
-        collectionId.setCollectionId(collection.getName());
+        collectionId.setRealm(realm);
+        collectionId.setName(realm);
 
         return Collection.newBuilder()
             .id(collectionId.encodeId())

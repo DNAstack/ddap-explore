@@ -12,9 +12,11 @@ import com.dnastack.ddap.explore.resource.model.UserCredential;
 import com.dnastack.ddap.explore.resource.service.ResourceClientService;
 import com.dnastack.ddap.explore.resource.service.UserCredentialService;
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -27,6 +29,7 @@ import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1beta/{realm}/apps/discovery")
 public class DiscoveryController {
@@ -54,9 +57,9 @@ public class DiscoveryController {
     }
 
     @GetMapping("/beacon/query")
-    public Mono<DiscoveryBeaconQueryResult> querySingleBeacon(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam String resource, DiscoveryBeaconRequestModel beaconRequest) {
+    public Mono<DiscoveryBeaconQueryResult> querySingleBeacon(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam(value = "resource") String interfaceId, DiscoveryBeaconRequestModel beaconRequest) {
         return Mono.defer(() -> {
-            InterfaceId beaconId = Id.decodeInterfaceId(resource);
+            InterfaceId beaconId = Id.decodeInterfaceId(interfaceId);
             validateBeaconRequest(beaconRequest);
             return getAccessInterfaceForBeacon(realm, beaconId).flatMap(accessInterface -> {
                 BeaconAccess beaconAccess = new BeaconAccess();
@@ -69,7 +72,7 @@ public class DiscoveryController {
                             .getExternalPath(httpRequest, String
                                 .format("/api/v1beta/%s/resources/authorize", realm)));
                         URI authorizationUrl = UriComponentsBuilder.fromUri(authorizeUriBase)
-                            .queryParam("resource", resource)
+                            .queryParam("resource", interfaceId)
                             .build().toUri();
                         DiscoveryBeaconQueryResult queryResult = new DiscoveryBeaconQueryResult();
                         queryResult.setRequiresAdditionalAuth(true);
@@ -83,6 +86,11 @@ public class DiscoveryController {
                     .queryBeacon(beaconRequest, beaconAccess.getAccessInterface()
                         .getUri(), extractAuthToken(beaconAccess
                         .getUserCredential()));
+            }).doOnNext(result -> {
+                if (result.getError() != null && List.of(401, 403).contains(result.getError().getErrorCode())) {
+                    log.debug("User request was not authorized, cleaning up stale credentials");
+                    userCredentialService.deleteSessionBoundCredential(session, interfaceId);
+                }
             });
         });
 

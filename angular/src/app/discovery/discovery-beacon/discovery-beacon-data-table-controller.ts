@@ -13,15 +13,25 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
   queryForm = new FormGroup({
     start: new FormControl('',
       {
-        validators: [Validators.required, Validators.pattern(/^\d+$/)],
+        validators: [
+          Validators.required,
+          Validators.pattern(/^\d+$/),
+          Validators.max(Number.MAX_SAFE_INTEGER),
+        ],
       }),
     referenceBases: new FormControl('',
       {
-        validators: [Validators.required, Validators.pattern(/^[ACGT]+$/i)],
+        validators: [
+          Validators.required,
+          Validators.pattern(/^[ACGT]+$/i),
+        ],
       }),
     alternateBases: new FormControl('',
       {
-        validators: [Validators.required, Validators.pattern(/^[ACGT]+$/i)],
+        validators: [
+          Validators.required,
+          Validators.pattern(/^[ACGT]+$/i),
+        ],
       }),
   });
   private _onSelectionChanged: CallableFunction;

@@ -115,6 +115,10 @@ public class UserCredentialService {
         });
     }
 
+    public int deleteSessionBoundCredential(WebSession session, String id) {
+        return jdbi.withExtension(UserCredentialDao.class, dao -> dao.deleteCredential(getUserIdentifier(session), id));
+    }
+
     private Map<String, String> parseCredentialString(String credentialString) {
         try {
             TypeReference<Map<String, String>> typeReference = new TypeReference<>() {
@@ -139,7 +143,7 @@ public class UserCredentialService {
     }
 
     @Scheduled(fixedDelay = 300000)
-    public void deleteSessionBoundCredentialss() {
+    public void deleteSessionBoundCredentials() {
         jdbi.useExtension(UserCredentialDao.class, dao -> {
             log.info("Cleaning up expired or orphaned session resource tokens");
             int tokensDeleted = dao.deleteExpiredCredentials();

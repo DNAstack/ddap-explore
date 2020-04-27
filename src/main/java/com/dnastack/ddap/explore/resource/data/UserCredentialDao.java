@@ -57,18 +57,18 @@ public interface UserCredentialDao {
 
     @Transaction
     @SqlUpdate("DELETE FROM user_credentials WHERE expiration_time < NOW()")
-    void delete();
+    int delete();
 
     @Transaction
     @SqlUpdate("DELETE FROM user_credentials WHERE principal_id = :principalId AND interface_id = :interfaceId")
-    void deleteCredential(@Bind("principalId") String principalId, @Bind("interfaceId") String interfaceId);
+    int deleteCredential(@Bind("principalId") String principalId, @Bind("interfaceId") String interfaceId);
 
     @Transaction
     @SqlBatch("DELETE FROM user_credentials WHERE principal_id = :principalId AND interface_id = :interfaceId")
-    void deleteCredentials(@Bind("principalId") String principalId, @Bind("interfaceId") Collection<String> interfaceIds);
+    int deleteCredentials(@Bind("principalId") String principalId, @Bind("interfaceId") Collection<String> interfaceIds);
 
     @Transaction
     @SqlUpdate("DELETE FROM user_credentials WHERE principal_id = :principalId")
-    void deleteUserCredentials(@Bind("principalId") String principalId);
+    int deleteUserCredentials(@Bind("principalId") String principalId);
 
 }

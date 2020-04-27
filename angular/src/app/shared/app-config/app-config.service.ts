@@ -226,9 +226,8 @@ export class AppConfigService {
         requiredFeatureFlags: ['featureSearchEnabled'],
         routerLink: 'search',
         isApp: true,
-        isExperimental: true,
+        isExperimental: false,
         isSidebarEnabled: false,
-        expFlag: 'demo',
       })
       .registerModule({
         key: 'search-resources',
@@ -237,8 +236,7 @@ export class AppConfigService {
         routerLink: 'search/resources',
         parentKey: 'search',
         isApp: false,
-        isExperimental: true,
-        expFlag: 'demo',
+        isExperimental: false,
       });
   }
 }

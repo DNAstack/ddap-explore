@@ -3,7 +3,6 @@ package com.dnastack.ddap.explore.resource.service;
 import com.dnastack.ddap.explore.common.session.PersistantSession;
 import com.dnastack.ddap.explore.common.session.SessionEncryptionUtils;
 import com.dnastack.ddap.explore.resource.data.UserCredentialDao;
-import com.dnastack.ddap.explore.resource.model.Id;
 import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -45,6 +44,12 @@ public class UserCredentialService {
             throw new IllegalArgumentException("User does not exist within a session");
         }
         return userIdentifier;
+    }
+
+
+    public Optional<UserCredential> getAndDecryptSessionBoundCredentialsForResourceInterface(ServerHttpRequest request, WebSession session, InterfaceId resourceId) {
+        return getSessionBoundCredentialsForResourceInterface(session, resourceId)
+            .map(userCredential -> decryptSessionBoundCredentials(request, userCredential));
     }
 
     public Optional<UserCredential> getSessionBoundCredentialsForResourceInterface(WebSession session, InterfaceId resourceId) {

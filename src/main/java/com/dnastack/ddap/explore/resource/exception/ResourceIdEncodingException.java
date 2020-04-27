@@ -1,6 +1,6 @@
 package com.dnastack.ddap.explore.resource.exception;
 
-public class ResourceIdEncodingException extends RuntimeException {
+public class ResourceIdEncodingException extends IllegalArgumentException {
 
     public ResourceIdEncodingException() {
         super();

@@ -66,7 +66,7 @@ public class ReactiveWalletResourceClient implements ResourceClient {
                 }
 
                 if (interfaceTypesToFilter != null) {
-                    keep &= interfaceTypesToFilter.contains(walletResource.getInterfaceType());
+                    keep &= shouldKeepInterfaceType(walletResource.getInterfaceType(),interfaceTypesToFilter);
                 }
 
                 if (interfaceUrisToFilter != null) {

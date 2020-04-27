@@ -52,7 +52,7 @@ public class ReactiveOpenResourceClient implements ResourceClient {
                 }
 
                 if (interfaceTypesToFilter != null) {
-                    keep &= interfaceTypesToFilter.contains(openResource.getInterfaceType());
+                    keep &= shouldKeepInterfaceType(openResource.getInterfaceType(),interfaceTypesToFilter);
                 }
 
                 if (interfaceUrisToFilter != null) {

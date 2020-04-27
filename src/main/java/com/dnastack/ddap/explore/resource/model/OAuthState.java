@@ -1,5 +1,6 @@
 package com.dnastack.ddap.explore.resource.model;
 
+import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
 import java.io.Serializable;
 import java.net.URI;
 import java.time.Duration;
@@ -18,14 +19,14 @@ public class OAuthState implements Serializable {
     private final String realm;
     private final URI authUrl;
     private URI destinationAfterLogin;
-    private final List<Id> resourceList;
+    private final List<InterfaceId> resourceList;
     private OAuthState nextState;
 
-    public OAuthState(String stateString, ZonedDateTime validUntil, String ttl, String realm, URI authUrl, URI destinationAfterLogin, List<Id> resourceList) {
+    public OAuthState(String stateString, ZonedDateTime validUntil, String ttl, String realm, URI authUrl, URI destinationAfterLogin, List<InterfaceId> resourceList) {
         this(stateString, validUntil, parseDuration(ttl), realm, authUrl, destinationAfterLogin, resourceList);
     }
 
-    public OAuthState(String stateString, ZonedDateTime validUntil, Duration ttl, String realm, URI authUrl, URI destinationAfterLogin, List<Id> resourceList) {
+    public OAuthState(String stateString, ZonedDateTime validUntil, Duration ttl, String realm, URI authUrl, URI destinationAfterLogin, List<InterfaceId> resourceList) {
         this.stateString = stateString;
         this.validUntil = validUntil;
         this.ttl = ttl;

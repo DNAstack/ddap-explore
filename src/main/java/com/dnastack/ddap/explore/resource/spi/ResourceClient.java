@@ -2,6 +2,9 @@ package com.dnastack.ddap.explore.resource.spi;
 
 import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
+import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
+import com.dnastack.ddap.explore.resource.model.Id.ResourceId;
 import com.dnastack.ddap.explore.resource.model.OAuthState;
 import com.dnastack.ddap.explore.resource.model.Resource;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
@@ -55,7 +58,7 @@ public interface ResourceClient {
      * @param interfaceUrisToFilter a list of complete or partial uris to filter by
      * @return List of filtered resources
      */
-    Mono<List<Resource>> listResources(String realm, List<Id> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter);
+    Mono<List<Resource>> listResources(String realm, List<CollectionId> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter);
 
     /**
      * Get a Single resource from the Configuered Resource server or raise an exception if it is not present
@@ -64,7 +67,7 @@ public interface ResourceClient {
      * @param resourceId The id of the Resource to look up
      * @return the identified resource
      */
-    Mono<Resource> getResource(String realm, Id resourceId);
+    Mono<Resource> getResource(String realm, ResourceId resourceId);
 
     /**
      * List all of the collections from the underlying resource server, or an empty list if there are non configured
@@ -81,14 +84,14 @@ public interface ResourceClient {
      * @param collection The id of the Resource to look up
      * @return the identified resource
      */
-    Mono<Collection> getCollection(String realm, Id collection);
+    Mono<Collection> getCollection(String realm, CollectionId collection);
 
     /**
      * Determine whether a resource requires authorization or not. Some implementations may choose to publicly expose
      * their underlying resources and therefore will not require an authorizaiton flow. In these cases, this method
      * should return false
      */
-    default boolean resourceRequiresAutorization(Id resourceId) {
+    default boolean resourceRequiresAutorization(InterfaceId resourceId) {
         return true;
     }
 
@@ -105,7 +108,7 @@ public interface ResourceClient {
      * should be assumed to live for this TTL
      * @return the OAuthState ready for authorization flows
      */
-    OAuthState prepareOauthState(String realm, List<Id> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl);
+    OAuthState prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl);
 
     /**
      * Handle the result of an authorization code flow and retreive a list of {@link UserCredential} which can be used

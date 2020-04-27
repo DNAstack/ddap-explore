@@ -2,7 +2,9 @@ package com.dnastack.ddap.explore.resource.spi.open;
 
 import com.dnastack.ddap.explore.resource.exception.ResourceAuthorizationException;
 import com.dnastack.ddap.explore.resource.model.Collection;
-import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
+import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
+import com.dnastack.ddap.explore.resource.model.Id.ResourceId;
 import com.dnastack.ddap.explore.resource.model.OAuthState;
 import com.dnastack.ddap.explore.resource.model.Resource;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
@@ -34,21 +36,19 @@ public class ReactiveOpenResourceClient implements ResourceClient {
     }
 
     @Override
-    public boolean resourceRequiresAutorization(Id resourceId) {
+    public boolean resourceRequiresAutorization(InterfaceId resourceId) {
         return false;
     }
 
     @Override
-    public Mono<List<Resource>> listResources(String realm, List<Id> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
+    public Mono<List<Resource>> listResources(String realm, List<CollectionId> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
         return Mono.fromCallable(() ->
             config.getResources().stream().filter(openResource -> {
                 boolean keep = true;
                 if (collectionsToFilter != null && !collectionsToFilter.isEmpty()) {
+                    CollectionId thisCollection = openResource.getInterfaceId(realm,getSpiKey()).toCollectionId();
                     keep = collectionsToFilter.stream()
-                        .anyMatch(id -> id.getRealm().equals(realm) && id.getCollectionId()
-                            .equals(openResource.getCollectionName())
-                            && id.getSpiKey()
-                            .equals(getSpiKey()));
+                        .anyMatch(thisCollection::equals);
                 }
 
                 if (interfaceTypesToFilter != null) {
@@ -65,7 +65,7 @@ public class ReactiveOpenResourceClient implements ResourceClient {
     }
 
     @Override
-    public Mono<Resource> getResource(String realm, Id id) {
+    public Mono<Resource> getResource(String realm, ResourceId id) {
         return Mono.fromCallable(() -> {
             if (!realm.equals(id.getRealm())) {
                 throw new IllegalArgumentException("Resource does not exist in this realm");
@@ -85,16 +85,17 @@ public class ReactiveOpenResourceClient implements ResourceClient {
     }
 
     @Override
-    public Mono<Collection> getCollection(String realm, Id collectionId) {
+    public Mono<Collection> getCollection(String realm, CollectionId collectionId) {
         return Mono.fromCallable(() -> config.getCollections().stream()
-            .filter(collection -> collection.getName().equals(collectionId.getCollectionId()))
+            .filter(collection -> collection.getName().equals(collectionId.getName()))
             .map(collection -> copyCollectionFromConfig(realm, collection))
             .findFirst()
             .orElseThrow(() -> new NotFoundException(
                 "Could not locate collection with id: " + collectionId.encodeId())));
     }
+
     @Override
-    public OAuthState prepareOauthState(String realm, List<Id> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl) {
+    public OAuthState prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl) {
         throw new ResourceAuthorizationException(
             "Resource Authorizatization is not enabled for this client:"
                 + getSpiKey(), HttpStatus.BAD_REQUEST, resources);
@@ -107,16 +108,17 @@ public class ReactiveOpenResourceClient implements ResourceClient {
                 + getSpiKey(), HttpStatus.BAD_REQUEST, currentState.getResourceList()));
     }
 
-    private Optional<OpenResource> idToResource(String realm, Id id) {
+    private Optional<OpenResource> idToResource(String realm, ResourceId id) {
         return config.getResources().stream()
-            .filter(resource -> id.getRealm().equals(realm) && id.getSpiKey().equals(getSpiKey()) && resource
-                .idEquals(id)).findFirst();
+            .filter(resource -> resource.getInterfaceId(realm, getSpiKey()).toResourceId().equals(id))
+            .findFirst();
     }
+
     private Collection copyCollectionFromConfig(String realm, Collection collection) {
-        Id collectionId = new Id();
+        CollectionId collectionId = new CollectionId();
         collectionId.setRealm(realm);
         collectionId.setSpiKey(getSpiKey());
-        collectionId.setCollectionId(collection.getName());
+        collectionId.setName(collection.getName());
 
         return Collection.newBuilder()
             .id(collectionId.encodeId())

@@ -6,15 +6,18 @@ import com.dnastack.ddap.common.client.ReactiveDamClient;
 import com.dnastack.ddap.common.config.DamProperties;
 import com.dnastack.ddap.explore.dam.client.HttpReactiveDamOAuthClient;
 import com.dnastack.ddap.explore.dam.client.ReactiveDamOAuthClient;
+import com.dnastack.ddap.explore.resource.exception.IllegalIdentifierException;
 import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
+import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
+import com.dnastack.ddap.explore.resource.model.Id.ResourceId;
 import com.dnastack.ddap.explore.resource.model.OAuthState;
 import com.dnastack.ddap.explore.resource.model.Resource;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
 import com.dnastack.ddap.explore.resource.spi.ResourceClient;
 import com.dnastack.ddap.ic.oauth.model.TokenResponse;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import dam.v1.DamService;
 import dam.v1.DamService.GetFlatViewsResponse.FlatView;
 import dam.v1.DamService.ResourceResults;
@@ -29,12 +32,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -59,14 +59,14 @@ public class ReactiveDamResourceClient implements ResourceClient {
 
 
     @Override
-    public Mono<List<Resource>> listResources(String realm, List<Id> collectionIdsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
+    public Mono<List<Resource>> listResources(String realm, List<CollectionId> collectionIdsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
         return damClient.getFlattenedViews(realm).map(views -> views.values().stream().filter(view -> {
             boolean keep = true;
             if (!collectionIdsToFilter.isEmpty()) {
+                CollectionId thisCollection = flatViewToInterfaceId(realm, view).toCollectionId();
+                thisCollection.setAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY, null);
                 keep = collectionIdsToFilter.stream()
-                    .anyMatch(id -> id.getRealm().equals(realm) && id.getCollectionId().equals(view.getResourceName())
-                        && id.getSpiKey()
-                        .equals(getSpiKey()));
+                    .anyMatch(thisCollection::equals);
             }
             if (interfaceTypesToFilter != null && !interfaceTypesToFilter.isEmpty()) {
                 keep &= interfaceTypesToFilter.stream()
@@ -81,13 +81,17 @@ public class ReactiveDamResourceClient implements ResourceClient {
             .map(flatViews -> {
                 LinkedHashMap<String, Resource> resources = new LinkedHashMap<>();
                 for (FlatView flatView : flatViews) {
-                    String collectionId = flatViewToDamId(realm, flatView, DamResourceType.COLLECTION).encodeId();
-                    String resourceId = flatViewToDamId(realm, flatView, DamResourceType.RESOURCE).encodeId();
+                    InterfaceId interfaceId = flatViewToInterfaceId(realm, flatView);
+                    ResourceId resourceId = interfaceId.toResourceId();
+                    CollectionId collectionId = interfaceId.toCollectionId();
+                    collectionId.setAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY, null);
+
                     Resource resource = resources
-                        .computeIfAbsent(resourceId, (key) -> flatViewToResource(collectionId, resourceId, flatView));
-                    String interfaceId = flatViewToDamId(realm, flatView, DamResourceType.INTERFACE).encodeId();
+                        .computeIfAbsent(resourceId
+                            .encodeId(), (key) -> flatViewToResource(collectionId, resourceId, flatView));
+
                     AccessInterface accessInterface = new AccessInterface();
-                    accessInterface.setId(interfaceId);
+                    accessInterface.setId(interfaceId.encodeId());
                     accessInterface.setType(flatView.getInterfaceName());
                     accessInterface
                         .setUri(flatView.getInterfaceUri() != null ? URI.create(flatView.getInterfaceUri()) : null);
@@ -101,11 +105,11 @@ public class ReactiveDamResourceClient implements ResourceClient {
     }
 
     @Override
-    public Mono<Resource> getResource(String realm, Id resourceId) {
-        DamId damId = new DamId(resourceId, DamResourceType.RESOURCE);
+    public Mono<Resource> getResource(String realm, ResourceId resourceId) {
+        validateDamResourceId(resourceId);
         return damClient.getFlattenedViews(realm).map(flatViews -> {
             List<Entry<String, FlatView>> matchingEntries = flatViews.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(damId.toFlatViewPrefix()))
+                .filter(entry -> entry.getKey().startsWith(getFlatViewPrefix(resourceId)))
                 .collect(Collectors.toList());
 
             if (matchingEntries.isEmpty()) {
@@ -115,14 +119,16 @@ public class ReactiveDamResourceClient implements ResourceClient {
             Resource resource = null;
             for (Entry<String, FlatView> entry : matchingEntries) {
                 FlatView view = entry.getValue();
+                InterfaceId interfaceId = flatViewToInterfaceId(realm, view);
+
                 if (resource == null) {
-                    String collectionId = flatViewToDamId(realm, view, DamResourceType.COLLECTION).encodeId();
-                    resource = flatViewToResource(collectionId, resourceId.encodeId(), entry.getValue());
+                    CollectionId collectionId = interfaceId.toCollectionId();
+                    collectionId.setAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY, null);
+                    resource = flatViewToResource(collectionId, resourceId, entry.getValue());
                 }
 
-                String interfaceId = flatViewToDamId(realm, view, DamResourceType.INTERFACE).encodeId();
                 AccessInterface accessInterface = new AccessInterface();
-                accessInterface.setId(interfaceId);
+                accessInterface.setId(interfaceId.encodeId());
                 accessInterface.setType(view.getInterfaceName());
                 accessInterface
                     .setUri(view.getInterfaceUri() != null ? URI.create(view.getInterfaceUri()) : null);
@@ -139,11 +145,10 @@ public class ReactiveDamResourceClient implements ResourceClient {
             .map(resources -> {
                 List<Collection> collections = new ArrayList<>();
                 resources.forEach((k, resource) -> {
-                    DamId id = new DamId();
+                    CollectionId id = new CollectionId();
                     id.setSpiKey(getSpiKey());
-                    id.setCollectionId(k);
+                    id.setName(k);
                     id.setRealm(realm);
-                    id.validate(DamResourceType.COLLECTION);
                     Collection collection = resourceToCollection(id, resource);
                     collections.add(collection);
                 });
@@ -152,17 +157,16 @@ public class ReactiveDamResourceClient implements ResourceClient {
     }
 
     @Override
-    public Mono<Collection> getCollection(String realm, Id collection) {
-        DamId id = new DamId(collection, DamResourceType.COLLECTION);
-        return damClient.getResource(realm, id.getCollectionId())
-            .map(resource -> resourceToCollection(id, resource));
+    public Mono<Collection> getCollection(String realm, CollectionId collection) {
+        return damClient.getResource(realm, collection.getName())
+            .map(resource -> resourceToCollection(collection, resource));
 
     }
 
     @Override
-    public OAuthState prepareOauthState(String realm, List<Id> resources, URI postLoginUri, String scopes, String loginHint, String ttl) {
-        List<URI> uris = resources.stream().map(resourceId -> new DamId(resourceId, DamResourceType.INTERFACE))
-            .map(this::idToInterfaceUri).collect(Collectors.toList());
+    public OAuthState prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginUri, String scopes, String loginHint, String ttl) {
+        List<URI> uris = resources.stream().peek(this::validateDamResourceId).map(this::idToInterfaceUri)
+            .collect(Collectors.toList());
         String stateString = UUID.randomUUID().toString();
         ZonedDateTime validUntil = ZonedDateTime.now().plusMinutes(10);
         URI authorizatioUrl = damOAuthClient
@@ -171,10 +175,11 @@ public class ReactiveDamResourceClient implements ResourceClient {
     }
 
 
-    private URI idToInterfaceUri(DamId id) {
+    private URI idToInterfaceUri(InterfaceId id) {
         return damProperties.getBaseUrl().resolve(URI.create(String
-            .format(INTERFACE_PATH_TEMPLATE, id.getRealm(), id.getCollectionId(), id.getViewName(), id.getRoleName(), id
-                .getInterfaceType())));
+            .format(INTERFACE_PATH_TEMPLATE, id.getRealm(), id.getCollectionName(), id.getResourceName(), id
+                .getAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY), id
+                .getType())));
     }
 
     @Override
@@ -202,13 +207,11 @@ public class ReactiveDamResourceClient implements ResourceClient {
     }
 
     private List<UserCredential> convertResourceResultToUserCredential(ResourceResults resourceResults, OAuthState currentState) {
-        List<DamId> damIds = currentState.getResourceList().stream().map(id -> new DamId(id, DamResourceType.INTERFACE))
-            .collect(Collectors.toList());
         return resourceResults.getResourcesMap()
             .entrySet().stream().map(entry -> {
                 String key = entry.getKey();
                 ResourceDescriptor value = entry.getValue();
-                DamId interfaceId = getDamIdForResourceUri(URI.create(key), damIds);
+                InterfaceId interfaceId = getInterfaceIdForDamResouce(URI.create(key), currentState.getResourceList());
                 ResourceAccess resourceAccess = resourceResults.getAccessMap().get(value.getAccess());
                 UserCredential userCredential = new UserCredential();
                 userCredential.setInterfaceId(interfaceId.encodeId());
@@ -218,19 +221,20 @@ public class ReactiveDamResourceClient implements ResourceClient {
             }).collect(Collectors.toList());
     }
 
-    private DamId getDamIdForResourceUri(URI baseUri, List<DamId> ids) {
+    private InterfaceId getInterfaceIdForDamResouce(URI baseUri, List<InterfaceId> ids) {
         final String template = "/dam/%s/resources/%s/views/%s/roles/%s/interfaces/%s";
         return ids.stream().filter(id -> {
             URI toResolve = URI
                 .create(String
-                    .format(template, id.getRealm(), id.getCollectionId(), id.getViewName(), id.getRoleName(), id
-                        .getInterfaceType()));
+                    .format(template, id.getRealm(), id.getCollectionName(), id.getResourceName(), id
+                        .getAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY), id
+                        .getType()));
             return baseUri.equals(baseUri.resolve(toResolve));
         })
             .findFirst().orElseThrow(() -> new IllegalArgumentException("Could not find dam id"));
     }
 
-    private Resource flatViewToResource(String collectionId, String id, FlatView view) {
+    private Resource flatViewToResource(CollectionId collectionId, ResourceId id, FlatView view) {
         String description = view.getViewUiOrDefault("description", "") + " - " + view
             .getRoleUiOrDefault("description", "");
         String name =
@@ -246,7 +250,7 @@ public class ReactiveDamResourceClient implements ResourceClient {
         metadata.put("platformService", view.getPlatformService());
         metadata.put("contentType", view.getContentType());
         metadata.putAll(view.getLabelsMap());
-        return Resource.newBuilder().id(id).collectionId(collectionId).description(description)
+        return Resource.newBuilder().id(id.encodeId()).collectionId(collectionId.encodeId()).description(description)
             .name(name).imageUrl(
                 imageUrlString != null && !imageUrlString.isEmpty() ? URI.create(imageUrlString)
                     : null)
@@ -254,7 +258,7 @@ public class ReactiveDamResourceClient implements ResourceClient {
             .metadata(metadata).build();
     }
 
-    private Collection resourceToCollection(Id id, DamService.Resource resource) {
+    private Collection resourceToCollection(CollectionId id, DamService.Resource resource) {
         Collection collection = new Collection();
         collection.setId(id.encodeId());
         collection.setName(resource.getUiOrDefault("label", ""));
@@ -272,86 +276,31 @@ public class ReactiveDamResourceClient implements ResourceClient {
         return collection;
     }
 
-    private DamId flatViewToDamId(String realm, FlatView flatView, DamResourceType resourceType) {
-        DamId id = new DamId();
+    private InterfaceId flatViewToInterfaceId(String realm, FlatView flatView) {
+        InterfaceId id = new InterfaceId();
         id.setSpiKey(getSpiKey());
         id.setRealm(realm);
-        id.setCollectionId(flatView.getResourceName());
-        if (resourceType.equals(DamResourceType.RESOURCE)) {
-            id.setViewName(flatView.getViewName());
-            id.setRoleName(flatView.getRoleName());
-            id.validate(DamResourceType.RESOURCE);
-        } else if (resourceType.equals(DamResourceType.INTERFACE)) {
-            id.setViewName(flatView.getViewName());
-            id.setRoleName(flatView.getRoleName());
-            id.setInterfaceType(flatView.getInterfaceName());
-            id.validate(DamResourceType.INTERFACE);
-        }
+        id.setCollectionName(flatView.getResourceName());
+        id.setResourceName(flatView.getViewName());
+        id.setAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY, flatView.getRoleName());
+        id.setType(flatView.getInterfaceName());
+
         return id;
     }
 
-
-    public enum DamResourceType {
-        COLLECTION, RESOURCE, INTERFACE
+    private String getFlatViewPrefix(ResourceId resourceId) {
+        return String.format("/%s/%s/%s", resourceId.getCollectionName(), resourceId.getName(), resourceId
+            .getAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY));
     }
 
-
-    @Data
-    @EqualsAndHashCode(callSuper = true)
-    public static class DamId extends Id {
-
-        private static final long serialVersionUID = 5610629031925135439L;
-
-
-        public DamId() {
-            super();
+    private void validateDamResourceId(Id id) {
+        if (id.toResourceId().getAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY) == null) {
+            throw new IllegalIdentifierException("Missing required identifier attribute: role");
         }
+    }
 
-        public DamId(Id id, DamResourceType resource) {
-            super(id);
-            validate(resource);
-        }
+    public static class DamAdditionalPropertiesKeys {
 
-        private void validate(DamResourceType resource) {
-            switch (resource) {
-                case COLLECTION:
-                    Objects
-                        .requireNonNull(getCollectionId(), "Invalid DamId, missing required attribute: collectionId");
-                    break;
-                case RESOURCE:
-                    validate(DamResourceType.COLLECTION);
-                    Objects.requireNonNull(getViewName(), "Invalid DamID, missing required attribute: view");
-                    Objects.requireNonNull(getRoleName(), "Invalid DamId, missing required attribute: roleName");
-                    break;
-                case INTERFACE:
-                    validate(DamResourceType.RESOURCE);
-                    Objects
-                        .requireNonNull(getInterfaceType(), "Invalid DamId, missing required attribute: interfaceType");
-            }
-        }
-
-        @JsonIgnore
-        public String getViewName() {
-            return getResourceId();
-        }
-
-        @JsonIgnore
-        public String getRoleName() {
-            return getAdditionalProperties().get("ro");
-        }
-
-        @JsonIgnore
-        public void setViewName(String view) {
-            setResourceId(view);
-        }
-
-        @JsonIgnore
-        public void setRoleName(String role) {
-            setAdditionalProperties("ro", role);
-        }
-
-        public String toFlatViewPrefix() {
-            return String.format("/%s/%s/%s", getCollectionId(), getViewName(), getRoleName());
-        }
+        static final String ROLE_KEY = "ro";
     }
 }

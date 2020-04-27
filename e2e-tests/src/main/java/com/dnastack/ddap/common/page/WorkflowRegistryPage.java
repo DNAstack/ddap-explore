@@ -40,8 +40,16 @@ public class WorkflowRegistryPage extends AnyDdapPage {
                 descriptorType
         ));
         WebElement tab = driver.findElement(selector);
-        new WebDriverWait(driver, 30).until(ExpectedConditions.elementToBeClickable(tab));
+        tab = new WebDriverWait(driver, 30).until(ExpectedConditions.elementToBeClickable(tab));
+        //Hack because for whatever reason, the wait is not actually waiting untilt the item is clickable
+        try {
+            Thread.sleep(3000);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         tab.click();
+
     }
 
     public void shouldSeeCodeEditorFor(String versionName, String descriptorType) {

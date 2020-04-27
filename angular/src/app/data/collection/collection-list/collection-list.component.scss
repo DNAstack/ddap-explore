@@ -1,5 +1,8 @@
 @import '~ddap-common-lib/styles/modules/colors';
 
+// FIXME If we need to make one more copy of this, we should consider componentizing this component.
+//       - data/collection/collection-list
+//       - search/search-resources
 .ddap-card {
   vertical-align: top;
   min-width: 20rem;

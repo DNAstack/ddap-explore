@@ -6,6 +6,11 @@
 
 <ddaplib-main>
   <ng-container *ngIf="collections$ | async as collectionsResponse">
+    <!--
+      FIXME If we need to make one more copy of this, we should consider componentizing this component.
+            - data/collection/collection-list
+            - search/search-resources
+    -->
     <mat-card *ngFor="let collection of collectionsResponse.data"
               [routerLink]="[collection.id]"
               class="ddap-card">

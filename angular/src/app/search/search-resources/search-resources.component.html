@@ -1,5 +1,10 @@
 <ddaplib-header icon="search" label="Search Resources"></ddaplib-header>
 <ddaplib-main>
+  <!--
+    FIXME If we need to make one more copy of this, we should consider componentizing this component.
+          - data/collection/collection-list
+          - search/search-resources
+  -->
   <mat-card class="ddap-card"
             *ngFor="let resource of resources">
     <mat-card-header>
@@ -13,8 +18,10 @@
       <a [href]="resource.accessUrl"
          data-se="explore-resource">
         <button mat-button
-              color="primary"
-              class="uppercase">Explore</button>
+                color="primary"
+                class="uppercase">
+          Explore
+        </button>
       </a>
     </mat-card-actions>
   </mat-card>

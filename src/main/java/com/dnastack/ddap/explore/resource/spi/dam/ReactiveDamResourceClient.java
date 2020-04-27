@@ -68,9 +68,8 @@ public class ReactiveDamResourceClient implements ResourceClient {
                 keep = collectionIdsToFilter.stream()
                     .anyMatch(thisCollection::equals);
             }
-            if (interfaceTypesToFilter != null && !interfaceTypesToFilter.isEmpty()) {
-                keep &= interfaceTypesToFilter.stream()
-                    .anyMatch(type -> type.equals(view.getInterfaceName()));
+            if (interfaceTypesToFilter != null) {
+                keep &= shouldKeepInterfaceType(view.getInterfaceName(),interfaceTypesToFilter);
             }
 
             if (interfaceUrisToFilter != null && !interfaceUrisToFilter.isEmpty()) {

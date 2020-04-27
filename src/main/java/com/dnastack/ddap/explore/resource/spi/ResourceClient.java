@@ -1,7 +1,6 @@
 package com.dnastack.ddap.explore.resource.spi;
 
 import com.dnastack.ddap.explore.resource.model.Collection;
-import com.dnastack.ddap.explore.resource.model.Id;
 import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
 import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
 import com.dnastack.ddap.explore.resource.model.Id.ResourceId;
@@ -16,9 +15,9 @@ import reactor.core.publisher.Mono;
 
 /**
  * Interface defining a client which can be used for interacting with resources served by an underlying resource server.
- * This interface provides an abstraction layer ontop of existing clients
- * to present a unified mechanism for  interacting with {@code Resources}, {@code Collections}, as well as providing an
- * approach to generate and store interface specific credentials.
+ * This interface provides an abstraction layer ontop of existing clients to present a unified mechanism for
+ * interacting with {@code Resources}, {@code Collections}, as well as providing an approach to generate and store
+ * interface specific credentials.
  *
  * ResourceClients should be configured using a concrete instance of {@link ResourceClientFactory} in order to properly
  * handle autowiring of required beans, as well as enforement of required configuration properties
@@ -117,13 +116,32 @@ public interface ResourceClient {
      */
     Mono<List<UserCredential>> handleResponseAndGetCredentials(ServerHttpRequest exchange, URI redirectUri, OAuthState currentState, String code);
 
+    /**
+     * Given an {@code interfaceUri} determine wehther any of the {@code testUris} are exact matches or whether the
+     * interface uri is a partial subset. A partial subset is considered a string that is less in length then the test
+     * URI but one that must end with a slash ("/")
+     */
     default boolean shouldKeepInterfaceUri(String interfaceUri, List<String> testUris) {
         return testUris.stream().anyMatch(testUri -> {
-            String testInerfaceUri = interfaceUri;
-            if (!testInerfaceUri.endsWith("/") && testUri.length() > testInerfaceUri.length()) {
-                testInerfaceUri = testInerfaceUri + "/";
+            String interfaceUriToKeep = interfaceUri;
+            if (!interfaceUriToKeep.endsWith("/") && testUri.length() > interfaceUriToKeep.length()) {
+                interfaceUriToKeep = interfaceUriToKeep + "/";
             }
-            return testUri.startsWith(testInerfaceUri);
+            return testUri.startsWith(interfaceUriToKeep);
+        });
+    }
+
+    /**
+     * Given an {@code interfaceType} determine wehther any of the {@code testTypes} are exact matches or subsets of the
+     * {@code interfaceType}. A partial subset is considered a string that is less in length then the testType but one
+     * that must end with a slash (":")
+     */
+    default boolean shouldKeepInterfaceType(String interfaceType, List<String> testTypes) {
+        return testTypes.stream().anyMatch(testType -> {
+            if (!testType.endsWith(":") && interfaceType.length() > testType.length()) {
+                testType = testType + ":";
+            }
+            return interfaceType.startsWith(testType);
         });
     }
 

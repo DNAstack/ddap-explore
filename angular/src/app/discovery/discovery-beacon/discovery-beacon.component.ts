@@ -101,17 +101,20 @@ export class DiscoveryBeaconComponent implements OnInit {
         this.view.errorSearching = true;
         this.queryForm.enable();
 
+        // Handle an error
         if (error) {
           const actualError = error.error.error;
           let message = 'Experienced a technical error. Please try again in a few moment.';
 
+          // If receive HTTP 400, assume it is a validation error.
           if (error.status === 400) {
             const invalidFieldValuePairs = actualError.validationErrors.map(
               validationError => `"${validationError.field}" (${validationError.rejectedValue})`
             );
 
-            message = `The field${actualError.validationErrors.length === 1 ? '' : 's'}`
-              + ` ${invalidFieldValuePairs.join(', ')}. Please check your query and try again.`;
+            message = `The field${actualError.validationErrors.length < 2 ? '' : 's'}`
+              + ` ${invalidFieldValuePairs.join(', ')} ${actualError.validationErrors.length < 2 ? 'is' : 'are'} invalid.`
+              + ' Please check your query and try again.';
           }
 
           this.snackBar.open('⚠️ ' + message, null, {duration: 10000});
@@ -234,6 +237,8 @@ export class DiscoveryBeaconComponent implements OnInit {
 
     if (errors['required']) {
       return defaultMessage;
+    } else if (fieldName === 'start' && errors['max']) {
+      return `Exceeds the limit (${errors['max'].max})`;
     } else if (errors['pattern']) {
       return fieldName === 'start' ? 'Only accept numbers' : 'Must be a sequence of bases (e.g., TCAG)';
     }

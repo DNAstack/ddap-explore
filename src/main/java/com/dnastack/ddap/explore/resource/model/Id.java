@@ -257,10 +257,10 @@ public abstract class Id implements Serializable {
     }
 
     private static <T extends Id> T decodeId(String idString, Class<T> clazz) {
-        String decodedIdString = new String(Base64.getUrlDecoder().decode(idString), StandardCharsets.UTF_8);
         try {
+            String decodedIdString = new String(Base64.getUrlDecoder().decode(idString), StandardCharsets.UTF_8);
             return mapper.readValue(decodedIdString, clazz);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResourceIdEncodingException(
                 "Could not decode resource id: " + idString + " - " + e.getMessage(), e);
         }

@@ -17,8 +17,10 @@ public class WorkflowRegistryPage extends AnyDdapPage {
     }
 
     public void filterList(String query) {
-        driver.findElement(By.cssSelector(".filter-input input")).sendKeys(query);
-
+        final WebElement filterTextBox =
+                new WebDriverWait(driver, 5)
+                        .until(ExpectedConditions.elementToBeClickable(By.cssSelector(".filter-input input")));
+        filterTextBox.sendKeys(query);
     }
 
     public void selectWorkflowByName(String name) {

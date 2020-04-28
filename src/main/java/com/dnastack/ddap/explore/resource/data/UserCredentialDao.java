@@ -1,9 +1,6 @@
 package com.dnastack.ddap.explore.resource.data;
 
 import com.dnastack.ddap.explore.resource.model.UserCredential;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMappers;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -13,6 +10,10 @@ import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.jdbi.v3.sqlobject.transaction.Transaction;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 @RegisterBeanMappers(
     value = @RegisterBeanMapper(UserCredential.class)
@@ -65,7 +66,7 @@ public interface UserCredentialDao {
 
     @Transaction
     @SqlBatch("DELETE FROM user_credentials WHERE principal_id = :principalId AND interface_id = :interfaceId")
-    int deleteCredentials(@Bind("principalId") String principalId, @Bind("interfaceId") Collection<String> interfaceIds);
+    int[] deleteCredentials(@Bind("principalId") String principalId, @Bind("interfaceId") Collection<String> interfaceIds);
 
     @Transaction
     @SqlUpdate("DELETE FROM user_credentials WHERE principal_id = :principalId")

@@ -25,6 +25,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 @Slf4j
@@ -60,7 +61,7 @@ public class DamConfigStrategy implements ConfigStrategy {
          to be a particular value (configured in master) for passport tokens to have a validatable audience
          */
         final CookieStore cookieStore = StrategyFactory.getLoginStrategy()
-            .performPersonaLogin(TestingPersona.ADMINISTRATOR.getId(), "master");
+            .performPersonaLogin(TestingPersona.ADMINISTRATOR.getId(), AbstractBaseE2eTest.REALM);
 
         damRealmJson = appendRealmClientsToExistingClientsInConfig(cookieStore, damRealmJson, AbstractBaseE2eTest.REALM);
 
@@ -83,20 +84,24 @@ public class DamConfigStrategy implements ConfigStrategy {
 
 
     private JSONObject getExistingClients(CookieStore cookieStore, String realm) throws IOException {
-        HttpClient httpclient = HttpClientBuilder.create()
-            .setDefaultCookieStore(cookieStore)
-            .build();
+            HttpClient httpclient = HttpClientBuilder.create()
+                                                     .setDefaultCookieStore(cookieStore)
+                                                     .build();
 
-        HttpGet request = new HttpGet(format("%s/dam/v1alpha/%s/config", damConfig.getDamBaseUrl(), realm));
-        HttpResponse response = httpclient.execute(request);
-        String responseBody = EntityUtils.toString(response.getEntity());
+            HttpGet request = new HttpGet(format("%s/dam/v1alpha/%s/config", damConfig.getDamBaseUrl(), realm));
+            HttpResponse response = httpclient.execute(request);
+            String responseBody = EntityUtils.toString(response.getEntity());
 
-        JSONObject damConfig = new JSONObject(responseBody);
-        JSONObject clients = damConfig.getJSONObject("clients");
+        try {
+            JSONObject damConfig = new JSONObject(responseBody);
+            JSONObject clients = damConfig.getJSONObject("clients");
 
-        log.debug("Parsed clients from master realm: {}", clients);
+            log.debug("Parsed clients from {} realm: {}", realm, clients);
 
-        return clients;
+            return clients;
+        } catch (JSONException je) {
+            throw new RuntimeException(String.format("Failed to lookup previous clients. Response payload:\n%s\n", responseBody), je);
+        }
     }
 
     private String appendRealmClientsToExistingClientsInConfig(CookieStore cookieStore, String damConfig, String realm) throws IOException {

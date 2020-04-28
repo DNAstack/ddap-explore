@@ -163,14 +163,14 @@ public class ReactiveDamResourceClient implements ResourceClient {
     }
 
     @Override
-    public OAuthState prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginUri, String scopes, String loginHint, String ttl) {
+    public List<OAuthState> prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginUri, String scopes, String loginHint, String ttl) {
         List<URI> uris = resources.stream().peek(this::validateDamResourceId).map(this::idToInterfaceUri)
             .collect(Collectors.toList());
         String stateString = UUID.randomUUID().toString();
         ZonedDateTime validUntil = ZonedDateTime.now().plusMinutes(10);
         URI authorizatioUrl = damOAuthClient
             .getAuthorizeUrl(realm, stateString, scopes, postLoginUri, uris, loginHint, ttl);
-        return new OAuthState(stateString, validUntil, ttl, realm, authorizatioUrl, null, resources);
+        return List.of(new OAuthState(stateString, validUntil, ttl, realm, authorizatioUrl, null, resources));
     }
 
 

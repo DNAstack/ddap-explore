@@ -95,7 +95,7 @@ public class ReactiveOpenResourceClient implements ResourceClient {
     }
 
     @Override
-    public OAuthState prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl) {
+    public List<OAuthState> prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl) {
         throw new ResourceAuthorizationException(
             "Resource Authorizatization is not enabled for this client:"
                 + getSpiKey(), HttpStatus.BAD_REQUEST, resources);

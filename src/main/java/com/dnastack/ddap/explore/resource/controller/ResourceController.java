@@ -159,23 +159,44 @@ public class ResourceController {
             .collect(Collectors.toList())
             .forEach(id -> spiResourcesToAuthorize.computeIfAbsent(id.getSpiKey(), (key) -> new ArrayList<>()).add(id));
 
-        OAuthState lastState = null;
+        List<OAuthState> allStates = new ArrayList<>();
         for (var entry : spiResourcesToAuthorize.entrySet()) {
-            OAuthState state = resourceClientService.getClient(entry.getKey())
+            List<OAuthState> states = resourceClientService.getClient(entry.getKey())
                 .prepareOauthState(realm, entry.getValue(), postLoginEndpoint, scope, loginHint, ttl);
-            state.setNextState(lastState);
-            state.setDestinationAfterLogin(nonNullRedirectUri);
-            lastState = state;
+            allStates.addAll(states);
         }
 
-        if (lastState == null) {
+        final OAuthState startingState = chainStates(nonNullRedirectUri, allStates);
+
+        if (startingState == null) {
             return ResponseEntity.status(TEMPORARY_REDIRECT).location(nonNullRedirectUri).build();
         } else {
             Map<String, Object> sessionAttributes = session.getAttributes();
-            sessionAttributes.put(RESOURCE_LOGIN_STATE_KEY, lastState);
-            return ResponseEntity.status(TEMPORARY_REDIRECT).location(lastState.getAuthUrl()).build();
+            sessionAttributes.put(RESOURCE_LOGIN_STATE_KEY, startingState);
+            return ResponseEntity.status(TEMPORARY_REDIRECT).location(startingState.getAuthUrl()).build();
         }
 
+    }
+
+    /**
+     * Recursively chain states together, setting next state for each item in the list
+     * @param redirectUri Final Redirect URI
+     * @param states The array of states
+     * @return final chained state
+     */
+    private OAuthState chainStates(URI redirectUri, List<OAuthState> states) {
+        if (states == null || states.size() == 0) {
+            return null;
+        } else if (states.size() == 1) {
+            OAuthState finalState = states.get(0);
+            finalState.setDestinationAfterLogin(redirectUri);
+            return finalState;
+        } else {
+            OAuthState headState = states.get(0);
+            headState.setDestinationAfterLogin(redirectUri);
+            headState.setNextState(chainStates(redirectUri, states.subList(1, states.size() - 1)));
+            return headState;
+        }
     }
 
 
@@ -219,7 +240,7 @@ public class ResourceController {
             } else {
                 if (code == null) {
                     return Mono
-                        .error(() -> new IllegalArgumentException("Could not complete authorization callback, missing required propert: code, in repsosne"));
+                        .error(() -> new IllegalArgumentException("Could not complete authorization callback, missing required property: code, in response"));
                 }
                 return resourceClient.handleResponseAndGetCredentials(request, redirectUri, storedState, code)
                     .doOnNext(userCredentials -> {

@@ -102,7 +102,7 @@ public class ReactiveWalletResourceClient implements ResourceClient {
     }
 
     @Override
-    public OAuthState prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl) {
+    public List<OAuthState> prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl) {
 
         Map<String, Map<String, List<InterfaceId>>> groupedResources = groupResourceByAudienceAndScope(realm, resources);
 
@@ -110,7 +110,7 @@ public class ReactiveWalletResourceClient implements ResourceClient {
             throw new ResourceAuthorizationException("Could not locate resources to authorize", HttpStatus.BAD_REQUEST, resources);
         }
 
-        OAuthState lastAuth = null;
+        List<OAuthState> states = new ArrayList<>();
         for (var resourcesForAudience : groupedResources.entrySet()) {
             String aud = resourcesForAudience.getKey();
             Map<String, List<InterfaceId>> scopedResources = resourcesForAudience.getValue();
@@ -127,13 +127,11 @@ public class ReactiveWalletResourceClient implements ResourceClient {
                 String state = UUID.randomUUID().toString();
                 String scope = combineScopes(configuredScope, combineScopes(OIDC_SCOPES, scopes));
                 URI authorizationUrl = getAuthorizationUrl(aud, scope, state, postLoginRedirect, loginHint, ttl);
-                OAuthState oAuthState = new OAuthState(state, validUntil, ttl, realm, authorizationUrl, postLoginRedirect, resourceList);
-                oAuthState.setNextState(lastAuth);
-                lastAuth = oAuthState;
+                states.add(new OAuthState(state, validUntil, ttl, realm, authorizationUrl, postLoginRedirect, resourceList));
             }
         }
 
-        return lastAuth;
+        return states;
     }
 
     @Override

@@ -107,7 +107,7 @@ public interface ResourceClient {
      * should be assumed to live for this TTL
      * @return the OAuthState ready for authorization flows
      */
-    OAuthState prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl);
+    List<OAuthState> prepareOauthState(String realm, List<InterfaceId> resources, URI postLoginRedirect, String scopes, String loginHint, String ttl);
 
     /**
      * Handle the result of an authorization code flow and retreive a list of {@link UserCredential} which can be used

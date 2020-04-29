@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { AppConfigService } from '../../shared/app-config/app-config.service';
+import { DotLoadingIndicatorComponent } from '../../shared/dot-loading-indicator/dot-loading-indicator.component';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
 import { TableInfo } from '../../shared/search/table-info.model';
@@ -45,6 +46,7 @@ export class SearchTablesComponent implements OnInit {
   view: SearchView;
 
   currentQuery = '';
+  activeQuery = '';
 
   options: {
     wrapBehavioursEnabled: true
@@ -121,7 +123,7 @@ export class SearchTablesComponent implements OnInit {
     // NOTE If we want to have the query also display in the query editor, we can set the preview query to the current query.
     // this.currentQuery = previewQuery;
 
-    this.doSearch(previewQuery, false);
+    this.doSearch(previewQuery);
   }
 
   onTableInfoExpanded(table: UITableInfo) {
@@ -175,9 +177,12 @@ export class SearchTablesComponent implements OnInit {
     });
   }
 
-  doSearch(query: string, addToQueryHistory: boolean) {
+  doSearch(query: string) {
     query = query.replace(/;\s*$/, '');
 
+    this.activeQuery = query;
+
+    this.result = null;
     this.view.isSearching = true;
     this.view.errorQueryingTables = false;
 
@@ -186,16 +191,18 @@ export class SearchTablesComponent implements OnInit {
       {query: query},
       this.accessToken,
       this.connectorDetails,
-      catchError(error => {
+      (error) => {
         this.queryError = JSON.parse(error.error.message);
         this.view.isSearching = false;
         throw error;
-      })
+      }
     ).subscribe(result => {
       this.queryError = null;
       this.completedQuery = query;
+
       this.result = result;
-      this.searchService.updateTableData(result);
+      // this.searchService.updateTableData(result);
+
       this.view.isSearching = false;
 
       this.queryHistory.unshift(query);
@@ -317,7 +324,7 @@ export class SearchTablesComponent implements OnInit {
       this.currentQuery = config.search.defaultQuery;
 
       if (this.currentQuery && this.currentQuery.length > 0) {
-        this.doSearch(this.currentQuery, false);
+        this.doSearch(this.currentQuery);
       }
     });
   }

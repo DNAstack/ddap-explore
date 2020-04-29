@@ -13,6 +13,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DdapLayoutModule } from 'ddap-common-lib';
 import { AceEditorModule } from 'ng2-ace-editor';
 
+import { SharedModule } from '../shared/shared.module';
+
 import { SearchEditorComponent } from './search-editor/search-editor.component';
 import { SearchResourcesComponent } from './search-resources/search-resources.component';
 import { SearchRoutingModule } from './search-routing.module';
@@ -44,6 +46,7 @@ import { SearchTablesComponent } from './search-tables/search-tables.component';
     MatMenuModule,
     MatProgressBarModule,
     MatCardModule,
+    SharedModule,
   ],
 })
 export class SearchModule {}

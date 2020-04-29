@@ -31,6 +31,7 @@ import { ClipboardModule } from 'ngx-clipboard';
 
 import { AccessDeniedScreenComponent } from './access-denied-screen/access-denied-screen.component';
 import { DataTableComponent } from './data-table/data-table.component';
+import { DotLoadingIndicatorComponent } from './dot-loading-indicator/dot-loading-indicator.component';
 import { LayoutComponent } from './layout/layout.component';
 import { MarkdownPipe } from './markdown.pipe';
 import { MetadataFilterPipe } from './metadata-list/metadata-filter.pipe';
@@ -46,6 +47,7 @@ import { PaginatorComponent } from './paginator/paginator.component';
     MarkdownPipe,
     AccessDeniedScreenComponent,
     DataTableComponent,
+    DotLoadingIndicatorComponent,
   ],
   imports: [
     CommonModule,
@@ -126,6 +128,7 @@ import { PaginatorComponent } from './paginator/paginator.component';
     MenuModule,
     AccessDeniedScreenComponent,
     DataTableComponent,
+    DotLoadingIndicatorComponent,
   ],
   providers: [
     ViewControllerService,

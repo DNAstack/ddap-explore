@@ -93,7 +93,7 @@
                                   class="b-b"
                                   [searchText]="currentQuery"
                                   [editorOptions]="options"
-                                  (doSearch)="doSearch($event, true)">
+                                  (doSearch)="doSearch($event)">
               </ddap-search-editor>
 
               <div class="query-error"
@@ -133,7 +133,7 @@
                       </i>
                     </button>
                     <mat-menu #menu="matMenu" class="menu-width-lg">
-                      <button *ngFor="let q of queryHistory" (click)="doSearch(q, false)"
+                      <button *ngFor="let q of queryHistory" (click)="doSearch(q)"
                               mat-menu-item>{{q}}</button>
                     </mat-menu>
                     <button tabindex="-1" mat-icon-button (click)="viewResultsJSON()"
@@ -145,8 +145,8 @@
                 </mat-toolbar-row>
               </mat-toolbar>
 
-              <div *ngIf="result != null && view.isSearching" class="sync-in-progress">
-                Updating...
+              <div *ngIf="view.isSearching" class="sync-in-progress">
+                <ddap-dot-loading-indicator></ddap-dot-loading-indicator>
               </div>
 
               <!-- Result Container -->
@@ -154,7 +154,7 @@
                 <ng-container *ngIf="queryHistory.length > 0">
                   <!-- Completed Query -->
                   <div class="completed-query">
-                    <pre><code>{{completedQuery}}</code></pre>
+                    <pre><code>{{view.isSearching ? activeQuery : completedQuery}}</code></pre>
                     <button *ngIf="result && fixedFlags.workflowIntegrationEnabled"
                             mat-stroked-button
                             color="accent"
@@ -168,22 +168,19 @@
                   </div>
 
                   <!-- Result Table -->
-                  <table *ngIf="result"
-                         data-se="result-wrapper">
-                    <tr>
-                      <th *ngFor="let property of properties;">{{property}}</th>
-                    </tr>
-                    <tr *ngFor="let row of result['data']">
-                      <td [ngClass]="{'no-wrap': !view.wrapSearchResults}"
-                          *ngFor="let value of row | objectToArray : properties"
-                          [innerHTML]="value | linkify">
-                      </td>
-                    </tr>
-                  </table>
-
-                  <div *ngIf="!result"
-                       data-se="result-wrapper">
-                    No results
+                  <div class="results"
+                       *ngIf="result && result.data.length > 0">
+                    <table data-se="data-table">
+                      <tr>
+                        <th *ngFor="let property of properties;">{{property}}</th>
+                      </tr>
+                      <tr *ngFor="let row of result['data']">
+                        <td [ngClass]="{'no-wrap': !view.wrapSearchResults}"
+                            *ngFor="let value of row | objectToArray : properties"
+                            [innerHTML]="value | linkify">
+                        </td>
+                      </tr>
+                    </table>
                   </div>
                 </ng-container>
               </div>

@@ -1,0 +1,135 @@
+@import '~ddap-common-lib/styles/modules/colors';
+
+$default-opacity: 0.125;
+$bouncing-height: 24px;
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 120px;
+  height: 24px;
+
+  .dot {
+    opacity: $default-opacity;
+    width: 24px;
+    height: 24px;
+    border-radius: 24px;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+  }
+
+  .dot.a {
+    background-color: $primary-color;
+    animation-name: loading-indicator-spinner-a;
+  }
+
+  .dot.b {
+    background-color: $primary-color;
+    animation-name: loading-indicator-spinner-b;
+  }
+
+  .dot.c {
+    background-color: $primary-color;
+    animation-name: loading-indicator-spinner-c;
+  }
+
+  .dot.d {
+    background-color: $primary-color;
+    animation-name: loading-indicator-spinner-d;
+  }
+
+  &.slow {
+    .dot {
+      animation-duration: 2s;
+    }
+  }
+}
+
+@keyframes loading-indicator-spinner-a {
+  from {
+    opacity: $default-opacity;
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: $default-opacity;
+  }
+
+  75% {
+    opacity: $default-opacity;
+  }
+
+  to {
+    opacity: $default-opacity;
+  }
+}
+
+@keyframes loading-indicator-spinner-b {
+  from {
+    opacity: $default-opacity;
+  }
+
+  25% {
+    opacity: $default-opacity;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  75% {
+    opacity: $default-opacity;
+  }
+
+  to {
+    opacity: $default-opacity;
+  }
+}
+
+@keyframes loading-indicator-spinner-c {
+  from {
+    opacity: $default-opacity;
+  }
+
+  25% {
+    opacity: $default-opacity;
+  }
+
+  50% {
+    opacity: $default-opacity;
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: $default-opacity;
+  }
+}
+
+@keyframes loading-indicator-spinner-d {
+  from {
+    opacity: $default-opacity;
+  }
+
+  25% {
+    opacity: $default-opacity;
+  }
+
+  50% {
+    opacity: $default-opacity;
+  }
+
+  75% {
+    opacity: $default-opacity;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

@@ -66,11 +66,11 @@ export class SearchEditorComponent implements OnInit, AfterViewInit {
   }
 
   doSearchFromEditor() {
-    this.doSearch.emit(this.getQueryFromEditor());
+    const query = this.getQueryFromEditor();
+    this.doSearch.emit(query);
   }
 
   getQueryFromEditor() {
-
     let query = this.editor.getEditor().getValue();
 
     query = query.trim();

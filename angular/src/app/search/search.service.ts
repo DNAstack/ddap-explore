@@ -1,7 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
+import { SimpleSnackBar } from '@angular/material/snack-bar/typings/simple-snack-bar';
 import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { JsonSchema } from '../shared/search/json-schema.model';
@@ -18,7 +21,11 @@ export class SearchService {
 
   tableData: BehaviorSubject<object>;
 
+  // For notification
+  snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+
   constructor(private http: HttpClient,
+              private snackBar: MatSnackBar,
               private errorHandler: ErrorHandlerService) {
     this.tableData = new BehaviorSubject<object>({});
   }
@@ -80,16 +87,23 @@ export class SearchService {
       connectorDetails
     );
 
+    const errorHandler = onError
+      ? catchError(error => {
+        onError(error);
+        throw error;
+      })
+      : this.errorHandler.notifyOnError();
+
     return new Observable<TableModel>(subscriber => {
       this.http.post<TableModel>(
         this.buildSearchUrl(accessToken ? null : resource),
         query,
         {params: params}
       ).pipe(
-        onError ? onError : this.errorHandler.notifyOnError()
+        errorHandler
       ).subscribe((table: TableModel) => {
         if (table.data.length === 0 && table.pagination.next_page_url) {
-          this.followUp(table.pagination.next_page_url, accessToken, connectorDetails, subscriber, onError);
+          this.followUp(table.pagination.next_page_url, accessToken, connectorDetails, subscriber, errorHandler);
         } else {
           subscriber.next(table);
           subscriber.complete();
@@ -101,7 +115,7 @@ export class SearchService {
   followUp(url: string, accessToken: string, connectorDetails: ConnectorDetails = {}, subscriber: Subscriber<TableModel>,
            onError?: any, delay: number = 1) {
     if (delay > 32) {
-      this.errorHandler.openSnackBar('The server took too long to respond. No more follow-up requests.');
+      this.notifyUser('The server took too long to respond. No more follow-up requests.');
       subscriber.next({data: []});
       subscriber.complete();
       return;
@@ -116,14 +130,17 @@ export class SearchService {
     ).subscribe((table: TableModel) => {
       if (table.data.length === 0 && table.pagination.next_page_url) {
         setTimeout(
-          () => this.followUp(
-            table.pagination.next_page_url,
-            accessToken,
-            connectorDetails,
-            subscriber,
-            Math.pow(delay, 2)  // next delay
-          ),
-          delay
+          () => {
+            this.followUp(
+              table.pagination.next_page_url,
+              accessToken,
+              connectorDetails,
+              subscriber,
+              onError,
+              delay * 2  // next delay
+            );
+          },
+          delay * 1000 // convert to millisecond
         );
       } else {
         subscriber.next(table);
@@ -195,6 +212,22 @@ export class SearchService {
     }
 
     return params;
+  }
+
+  private notifyUser(message: string, delayInSecond: number = 3) {
+    const config = {
+      panelClass: 'ddap-error',
+    };
+
+    if (delayInSecond !== null) {
+      config['duration'] = delayInSecond * 1000;
+    }
+
+    if (this.snackBarRef) {
+      this.snackBarRef.dismiss();
+    }
+
+    this.snackBarRef = this.snackBar.open(message, null, config);
   }
 }
 

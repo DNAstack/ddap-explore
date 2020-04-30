@@ -1,20 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AgGridModule } from 'ag-grid-angular';
-import { ViewControllerService } from 'ddap-common-lib';
-
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
-import { BeaconService } from '../beacon-service/beacon.service';
-import { DiscoveryConfigService } from '../discovery-config.service';
 
 @Component({
   selector: 'ddap-discovery-search',
   templateUrl: './discovery-search.component.html',
   styleUrls: ['./discovery-search.component.scss'],
 })
-export class DiscoverySearchComponent implements OnInit {
-  appConfig: AppConfigModel;
+export class DiscoverySearchComponent {
 
   view: {
     isRefreshingBeacons: boolean,
@@ -29,53 +20,35 @@ export class DiscoverySearchComponent implements OnInit {
   private gridApi;
   private gridColumnApi;
 
-  constructor(private router: Router,
-              private appConfigService: AppConfigService,
-              private configService: DiscoveryConfigService,
-              private beaconNetworkService: BeaconService,
-              private viewController: ViewControllerService
-              ) {
+  constructor() {
+    this.view = {
+      isRefreshingBeacons: false,
+      errorLoadingBeacons: false,
+      wrapTableContent: false,
+    };
 
-                this.view = {
-                  isRefreshingBeacons : false,
-                  errorLoadingBeacons : false,
-                  wrapTableContent : false,
-                };
+    this.grid = {
+      animateRows: true,
+      multiSortKey: 'ctrl',
+      defaultColumnDefinition: {
+        sortable: true,
+        resizable: true,
+        filter: true,
+      },
+      floatingFilter: true,
+      paginationAutoPageSize: true,
+      makeFullWidth: true,
+      pagination: false,
+      domLayout: 'normal',
+      suppressCellSelection: true,
+    };
 
-                this.grid = {
-                  animateRows: true,
-                  multiSortKey: 'ctrl',
-                  defaultColumnDefinition: {
-                    sortable: true,
-                    resizable: true,
-                    filter: true,
-                  },
-                  floatingFilter: true,
-                  paginationAutoPageSize: true,
-                  makeFullWidth: true,
-                  pagination: false,
-                  domLayout: 'normal',
-                  suppressCellSelection: true,
-                };
+    this.columnDefs = [
+      { field: 'name' },
+      { field: 'organization' },
+    ];
 
-                this.columnDefs = [
-                  {field: 'name'},
-                  {field: 'organization'},
-                ];
-
-                this.rowData = [];
-  }
-
-  ngOnInit(): void {
-    // Ensure that the user can only access this component when it is enabled.
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      this.appConfig = data;
-      if (this.appConfig.featureBeaconsEnabled) {
-        this.initialize();
-      } else {
-        this.router.navigate(['/']);
-      }
-    });
+    this.rowData = [];
   }
 
   onRowClicked(event) {
@@ -87,14 +60,12 @@ export class DiscoverySearchComponent implements OnInit {
     this.gridColumnApi = params.columnApi;
     if (this.grid.makeFullWidth) {
       params.api.sizeColumnsToFit();
-      window.addEventListener('resize', function() {
-        setTimeout(function() {
+      window.addEventListener('resize', function () {
+        setTimeout(function () {
           params.api.sizeColumnsToFit();
         });
       });
     }
   }
 
-  private initialize() {
-  }
 }

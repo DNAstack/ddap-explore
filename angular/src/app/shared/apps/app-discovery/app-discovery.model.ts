@@ -1,4 +1,4 @@
-import { KeyValuePair } from '../key-value-pair.model';
+import { KeyValuePair } from '../../key-value-pair.model';
 
 export interface BeaconInfoResponseModel {
   id: string;
@@ -51,6 +51,7 @@ export interface BeaconQueryAlleleResponseModel {
   frequency: number;
   note: string;
   externalUrl: string;
+  info?: KeyValuePair<string>;
 }
 
 export interface BeaconQueryErrorModel {

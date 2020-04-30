@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 
-import { AppConfigModel } from '../../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../../shared/app-config/app-config.service';
 import { CollectionsResponseModel } from '../../../shared/collection.model';
 import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.service';
 import { DataService } from '../../data.service';
@@ -21,23 +18,12 @@ export class CollectionListComponent implements OnInit {
 
   constructor(
     public randomImageRetriever: ImagePlaceholderRetriever,
-    private dataService: DataService,
-    private router: Router,
-    private appConfigService: AppConfigService
+    private dataService: DataService
   ) {
   }
 
   ngOnInit() {
-    // Ensure that the user can only access this component when it is enabled.
-    // FIXME: causing multiple subscriptions
-    this.appConfigService.get()
-      .subscribe((data: AppConfigModel) => {
-        if (data.featureExploreDataEnabled) {
-          this.collections$ = this.dataService.getCollections();
-        } else {
-          this.router.navigate(['/']);
-        }
-      });
+    this.collections$ = this.dataService.getCollections();
   }
 
   // TODO: Move to common lib

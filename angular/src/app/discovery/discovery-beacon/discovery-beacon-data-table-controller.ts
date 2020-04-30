@@ -2,9 +2,13 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ILatLong } from 'angular-maps';
 import { catchError } from 'rxjs/operators';
 
+import {
+  BeaconQueryAlleleResponseModel,
+  BeaconQueryRequestModel,
+  BeaconQueryResponseModel,
+} from '../../shared/apps/app-discovery/app-discovery.model';
+import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discovery.service';
 import { ColumnDefinition, DataTableController } from '../../shared/data-table/data-table-controller';
-import { BeaconResponse } from '../beacon-service/beacon.model';
-import { BeaconService } from '../beacon-service/beacon.service';
 
 export class DiscoveryBeaconDataTableController extends DataTableController {
 
@@ -40,9 +44,9 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
   private _afterSuccessfulSearch: CallableFunction;
   private _afterFailedSearch: CallableFunction;
 
-  private beaconService: BeaconService;
+  private appDiscoveryService: AppDiscoveryService;
 
-  constructor(beaconService: BeaconService,
+  constructor(appDiscoveryService: AppDiscoveryService,
               onSelectionChanged: CallableFunction,
               canSearch: CallableFunction,
               beforeSearch: CallableFunction,
@@ -50,7 +54,7 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
               afterFailedSearch: CallableFunction) {
     super();
 
-    this.beaconService = beaconService;
+    this.appDiscoveryService = appDiscoveryService;
 
     this._onSelectionChanged = onSelectionChanged;
     this._canSearch = canSearch;
@@ -77,16 +81,18 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
     this.find(query);
   }
 
-  find(query: QuerySnapshot) {
+  find(query: BeaconQueryRequestModel) {
     this._beforeSearch();
 
-    this.beaconService.runObservableBeaconSearch(
-      'hCoV-19',
-      '1',
-      query.start,
-      query.referenceBases,
-      query.alternateBases
-    ).pipe(
+    const { start, referenceBases, alternateBases } = query;
+    // tslint:disable-next-line
+    this.appDiscoveryService.queryBeacon('eyJrIjoib3Blbi0xIiwiciI6ImRuYXN0YWNrIiwiYyI6IkNvdmlkIFJlc291cmNlcyIsIm4iOiJDb3ZpZCBCZWFjb24iLCJpIjoiaHR0cDpiZWFjb24ifQ', {
+      assemblyId: 'hCoV-19',
+      referenceName: '1',
+      start,
+      referenceBases,
+      alternateBases,
+    }).pipe(
       catchError((e) => {
         this._afterFailedSearch(e);
         throw e;
@@ -95,7 +101,7 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
       data => {
         this.queryForm.enable();
 
-        const responses: BeaconResponse[] = data['datasetAlleleResponses'];
+        const responses: BeaconQueryAlleleResponseModel[] = data.datasetAlleleResponses;
 
         if (responses.length === 0) {
           // No results
@@ -106,7 +112,7 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
 
         const info = responses[0].info;
 
-        if (info.length === 0) {
+        if (Object.values(info).length === 0) {
           // No results
           this.setResultList([]);
           this.setColumnDefinitionList([]);
@@ -131,10 +137,10 @@ export class DiscoveryBeaconDataTableController extends DataTableController {
     );
   }
 
-  getQuerySnapshot(): QuerySnapshot {
+  getQuerySnapshot(): BeaconQueryRequestModel {
     const snapshot = this.queryForm.value;
     return {
-      start: parseInt(snapshot['start'], 10),
+      start: snapshot['start'],
       referenceBases: snapshot['referenceBases'].toUpperCase(),
       alternateBases: snapshot['alternateBases'].toUpperCase(),
     };

@@ -3,7 +3,7 @@ import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import _startcase from 'lodash.startcase';
 
-import { AccessModel } from '../../../../shared/apps/app-explore.model';
+import { AccessModel } from '../../../../shared/apps/app-explore/app-explore.model';
 
 import { ResourceAccessCredentialsEntryModel } from './resource-access-credentials-entry.model';
 

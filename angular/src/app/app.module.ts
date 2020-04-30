@@ -6,8 +6,8 @@ import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { CheckinComponent } from './checkin/checkin.component';
 import { LobbyComponent } from './lobby/lobby.component';
+import { CheckinComponent } from './shared/checkin/checkin.component';
 import { SharedModule } from './shared/shared.module';
 
 @NgModule({

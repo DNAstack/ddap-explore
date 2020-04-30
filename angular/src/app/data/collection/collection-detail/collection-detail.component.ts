@@ -3,8 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { share } from 'rxjs/operators';
 
-import { AppConfigModel } from '../../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../../shared/app-config/app-config.service';
 import { CollectionModel } from '../../../shared/collection.model';
 import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.service';
 import { InterfaceModel, ResourceModel, ResourcesResponseModel } from '../../../shared/resource.model';
@@ -26,24 +24,15 @@ export class CollectionDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private appConfigService: AppConfigService,
     private dataService: DataService
   ) {
   }
 
   ngOnInit() {
-    // Ensure that the user can only access this component when it is enabled.
-    // FIXME: causing multiple subscriptions
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      if (data.featureExploreDataEnabled) {
-        const collectionId = this.route.snapshot.params.collectionId;
-        this.collection$ = this.dataService.getCollection(collectionId)
-          .pipe(share());
-        this.collectionResources$ = this.dataService.getResources({ collection: collectionId });
-      } else {
-        this.router.navigate(['/']);
-      }
-    });
+    const collectionId = this.route.snapshot.params.collectionId;
+    this.collection$ = this.dataService.getCollection(collectionId)
+      .pipe(share());
+    this.collectionResources$ = this.dataService.getResources({ collection: collectionId });
   }
 
   isPublicResource(resource: ResourceModel): boolean {

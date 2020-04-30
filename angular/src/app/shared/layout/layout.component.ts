@@ -9,9 +9,11 @@ import { Observable } from 'rxjs';
 import { IdentityService } from '../../identity/identity.service';
 import { AccessControlService, UserAccessGrantStatus } from '../access-control.service';
 import { AppConfigModel } from '../app-config/app-config.model';
-import { AppConfigService } from '../app-config/app-config.service';
+import { AppConfigStore } from '../app-config/app-config.store';
 import { DamInfoStore } from '../dam/dam-info.store';
 import { DamsInfo } from '../dam/dams-info';
+
+import { LayoutViewControllerService } from './view-controller/layout-view-controller.service';
 
 @Component({
   templateUrl: './layout.component.html',
@@ -29,10 +31,11 @@ export class LayoutComponent implements OnInit {
 
   constructor(public loader: LoadingBarService,
               public router: Router,
+              private layoutViewControllerService: LayoutViewControllerService,
               private titleService: Title,
               private http: HttpClient,
               private activatedRoute: ActivatedRoute,
-              public appConfigService: AppConfigService,
+              public appConfigStore: AppConfigStore,
               public accessControlService: AccessControlService,
               private identityService: IdentityService,
               public viewController: ViewControllerService,
@@ -40,13 +43,13 @@ export class LayoutComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.appConfig = this.appConfigService.getDefault();
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      this.appConfig = data;
-      this.titleService.setTitle(this.appConfig.title);
-
-      this.initialize();
-    });
+    this.layoutViewControllerService.initView();
+    this.appConfigStore.state$
+      .subscribe((appConfig: AppConfigModel) => {
+        this.appConfig = appConfig;
+        this.titleService.setTitle(appConfig.title);
+        this.initialize();
+      });
   }
 
   initialize() {

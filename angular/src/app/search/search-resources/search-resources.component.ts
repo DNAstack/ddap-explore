@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map, shareReplay } from 'rxjs/operators';
 
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { DamInfoService } from '../../shared/dam/dam-info.service';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
 import { ResourceService } from '../../shared/resource/resource.service';
@@ -18,11 +16,10 @@ import { SearchResourceModel } from './search-resource.model';
   providers: [ImagePlaceholderRetriever],
 })
 export class SearchResourcesComponent implements OnInit {
-  appConfig: AppConfigModel;
+
   resources: SearchResourceModel[];
 
   constructor(private searchService: SearchService,
-              private appConfigService: AppConfigService,
               private randomImageRetriever: ImagePlaceholderRetriever,
               private router: Router,
               private resourceService: ResourceService,
@@ -31,15 +28,7 @@ export class SearchResourcesComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      this.appConfig = data;
-
-      if (this.appConfig.featureSearchEnabled) {
-        this.initialize();
-      } else {
-        this.router.navigate(['/']);
-      }
-    });
+    this.initialize();
   }
 
   initialize() {

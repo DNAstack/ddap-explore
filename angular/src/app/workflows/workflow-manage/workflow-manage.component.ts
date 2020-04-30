@@ -11,7 +11,7 @@ import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 import { SearchService } from '../../search/search.service';
 import { AccessControlService } from '../../shared/access-control.service';
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
+import { AppConfigStore } from '../../shared/app-config/app-config.store';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
 import { ResourceService } from '../../shared/resource/resource.service';
@@ -75,7 +75,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
   executionStep: WorkflowExecutionStepComponent;
 
   constructor(private route: ActivatedRoute,
-              private appConfigService: AppConfigService,
+              private appConfigStore: AppConfigStore,
               private accessControl: AccessControlService,
               private router: Router,
               private validationService: FormValidationService,
@@ -103,16 +103,11 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     this.preInitialize();
 
     // Ensure that the user can only access this component when it is enabled.
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      if (data.featureWorkflowsEnabled) {
-        // Register TRS endpoints.
-        this.trsService.endpoint(data.trsBaseUrl);
-
-        // Start the component initialization.
-        this.initialize();
-      } else {
-        this.router.navigate(['/']);
-      }
+    this.appConfigStore.state$.subscribe((data: AppConfigModel) => {
+      // Register TRS endpoints.
+      this.trsService.endpoint(data.trsBaseUrl);
+      // Start the component initialization.
+      this.initialize();
     });
   }
 

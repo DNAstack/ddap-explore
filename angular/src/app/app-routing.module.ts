@@ -1,9 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { CheckinComponent } from './checkin/checkin.component';
+import { DataAppGuard } from './data/data-app.guard';
+import { DiscoveryAppGuard } from './discovery/discovery-app.guard';
 import { LobbyComponent } from './lobby/lobby.component';
+import { SearchAppGuard } from './search/search-app.guard';
+import { CheckinComponent } from './shared/checkin/checkin.component';
 import { LayoutComponent } from './shared/layout/layout.component';
+import { WorkflowAppGuard } from './workflows/workflow-app.guard';
 
 const routes: Routes = [
   {
@@ -24,26 +28,25 @@ const routes: Routes = [
     children: [
       {
         path: 'data',
+        canActivate: [DataAppGuard],
         loadChildren: () => import('./data/data.module')
           .then(mod => mod.DataModule),
       },
       {
         path: 'analyze',
+        canActivate: [WorkflowAppGuard],
         loadChildren: () => import('./workflows/workflows.module')
           .then(mod => mod.WorkflowsModule),
       },
       {
-        path: 'search',
-        loadChildren: () => import('./search/search.module')
-          .then(mod => mod.SearchModule),
-      },
-      {
         path: 'discovery',
+        canActivate: [DiscoveryAppGuard],
         loadChildren: () => import('./discovery/discovery.module')
           .then(mod => mod.DiscoveryModule),
       },
       {
         path: 'search',
+        canActivate: [SearchAppGuard],
         loadChildren: () => import('./search/search.module')
           .then(mod => mod.SearchModule),
       },

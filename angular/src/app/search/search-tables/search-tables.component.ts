@@ -6,23 +6,21 @@ import 'brace';
 import 'brace/mode/sql';
 import 'brace/theme/eclipse';
 import { Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 
-import { AppConfigService } from '../../shared/app-config/app-config.service';
-import { DotLoadingIndicatorComponent } from '../../shared/dot-loading-indicator/dot-loading-indicator.component';
+import { AppConfigStore } from '../../shared/app-config/app-config.store';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
 import { TableInfo } from '../../shared/search/table-info.model';
-import Table = WebAssembly.Table;
 import { TableModel } from '../../shared/search/table.model';
 import { SearchEditorComponent } from '../search-editor/search-editor.component';
-import IResourceResults = dam.v1.IResourceResults;
-import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 import { SearchResourceModel } from '../search-resources/search-resource.model';
 import { SearchService } from '../search.service';
 
 import { JsonViewerService } from './json-viewer/json-viewer.component';
-import { BeaconRegistry, SearchView } from './search-tables.model';
+import { SearchView } from './search-tables.model';
+import Table = WebAssembly.Table;
+import IResourceResults = dam.v1.IResourceResults;
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 
 
 @Component({
@@ -31,7 +29,7 @@ import { BeaconRegistry, SearchView } from './search-tables.model';
   styleUrls: ['./search-tables.component.scss'],
 })
 export class SearchTablesComponent implements OnInit {
-  @ViewChild(SearchEditorComponent, {static: false})
+  @ViewChild(SearchEditorComponent, { static: false })
   searchEditor: SearchEditorComponent;
 
   tableInfoList: TableInfo[] = [];
@@ -71,13 +69,15 @@ export class SearchTablesComponent implements OnInit {
 
   private snackBarRef: any;
 
-  constructor(private appConfigService: AppConfigService,
-              private searchService: SearchService,
-              private route: ActivatedRoute,
-              private jsonViewerService: JsonViewerService,
-              private router: Router,
-              private snackBar: MatSnackBar,
-              private resourceService: ResourceService) {
+  constructor(
+    private appConfigStore: AppConfigStore,
+    private searchService: SearchService,
+    private route: ActivatedRoute,
+    private jsonViewerService: JsonViewerService,
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private resourceService: ResourceService
+  ) {
     this.view = {
       errorLoadingTables: true,
       errorQueryingTables: true,
@@ -188,7 +188,7 @@ export class SearchTablesComponent implements OnInit {
 
     this.searchService.observableSearch(
       this.isUsingPublicView() ? this.currentView.interfaceUri : this.currentView.resourcePath,
-      {query: query},
+      { query: query },
       this.accessToken,
       this.connectorDetails,
       (error) => {
@@ -273,15 +273,19 @@ export class SearchTablesComponent implements OnInit {
     if (this.isUsingPublicView()) {
       observableTables = this.searchService.getPublicTables(this.currentView.interfaceUri);
     } else {
-      observableTables = this.searchService.getTables(this.currentView.resourcePath, this.accessToken, this.connectorDetails);
+      observableTables = this.searchService.getTables(
+        this.currentView.resourcePath,
+        this.accessToken,
+        this.connectorDetails
+      );
     }
 
     observableTables.subscribe(
-      ({tables}) => {
+      ({ tables }) => {
         this.tableInfoList = tables;
         this.buildUiTableInfoList();
       },
-      ({error}) => {
+      ({ error }) => {
         if (error && error.message) {
           const errorDetails = JSON.parse(error.message);
           if (errorDetails.hasOwnProperty('authorization-request')) {
@@ -312,7 +316,7 @@ export class SearchTablesComponent implements OnInit {
       this.snackBarRef.dismiss();
     }
 
-    this.snackBarRef = this.snackBar.open(message, action.label, {panelClass: 'ddap-error'});
+    this.snackBarRef = this.snackBar.open(message, action.label, { panelClass: 'ddap-error' });
     this.snackBarRef.onAction().subscribe();
   }
 
@@ -320,7 +324,7 @@ export class SearchTablesComponent implements OnInit {
     this.tableApiRequests = 0;
     this.getTables();
 
-    this.appConfigService.get().subscribe(config => {
+    this.appConfigStore.state$.subscribe(config => {
       this.currentQuery = config.search.defaultQuery;
 
       if (this.currentQuery && this.currentQuery.length > 0) {

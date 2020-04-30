@@ -29,7 +29,6 @@ import { molecules } from './molecules';
     molecules: any[];
 
     selectedMolecule: any;
-    selectedSubMolecule: any;
     selectedRepresentation: any;
 
     nglRepresentations: any[];
@@ -46,11 +45,11 @@ import { molecules } from './molecules';
 
     stage: ngl.stage;
 
-    treeControl = new FlatTreeControl<ExampleFlatNode>(
+    treeControl = new FlatTreeControl<MoleculeNode>(
         node => node.level, node => node.expandable);
 
     treeFlattener = new MatTreeFlattener(
-        this._transformer, node => node.level, node => node.expandable, node => node.children);
+        this._transformer, node => node.level, node => node.expandable, node => node.parts);
 
     dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
@@ -60,7 +59,7 @@ import { molecules } from './molecules';
                 private viewController: ViewControllerService
                 ) {
 
-                    this.dataSource.data = TREE_DATA;
+                    this.dataSource.data = <Molecule[]> molecules;
 
                     this.molecules = molecules;
 
@@ -87,7 +86,8 @@ import { molecules } from './molecules';
 
     }
 
-    hasChild = (_: number, node: ExampleFlatNode) => node.expandable;
+    hasChild = (_: number, node: MoleculeNode) => node.expandable;
+
     ngAfterViewInit(): void {
         this.stage = new ngl.Stage('ngl-viewer' );
         this.applyParameters();
@@ -127,21 +127,7 @@ import { molecules } from './molecules';
 
     selectMolecule(molecule) {
         this.selectedMolecule = molecule;
-        this.selectedSubMolecule = null;
         this.selectionChanged();
-    }
-
-    selectSubMolecule(subMolecule) {
-        this.selectedSubMolecule = subMolecule;
-        this.selectionChanged();
-    }
-
-    getMoleculeToRender() {
-        if (this.selectedSubMolecule != null) {
-            return this.selectedSubMolecule;
-        } else {
-            return this.selectedMolecule;
-        }
     }
 
     autoView() {
@@ -150,13 +136,12 @@ import { molecules } from './molecules';
 
     selectionChanged() {
 
-        const molecule = this.getMoleculeToRender();
         this.resizeStage();
 
-        if (molecule.pdbid) {
+        if (this.selectedMolecule.pdbid) {
             const that = this;
             this.stage.removeAllComponents();
-            this.stage.loadFile( 'rcsb://' + molecule.pdbid ).then( function( o ) {
+            this.stage.loadFile( 'rcsb://' + this.selectedMolecule.pdbid ).then( function( o ) {
                 o.addRepresentation( that.selectedRepresentation , {} );
                 o.autoView();
             } );
@@ -168,51 +153,26 @@ import { molecules } from './molecules';
 
     }
 
-    private _transformer = (node: FoodNode, level: number) => {
+    private _transformer = (molecule: Molecule, level: number) => {
         return {
-          expandable: !!node.children && node.children.length > 0,
-          name: node.name,
+          expandable: !!molecule.parts && molecule.parts.length > 0,
+          name: molecule.name,
+          molecule: molecule,
           level: level,
         };
       }
 }
 
-/** Flat node with expandable and level information */
-interface ExampleFlatNode {
+interface MoleculeNode {
     expandable: boolean;
     name: string;
+    molecule: Molecule;
     level: number;
   }
 
-interface FoodNode {
+interface Molecule {
     name: string;
-    children?: FoodNode[];
-  }
-
-  const TREE_DATA: FoodNode[] = [
-    {
-      name: 'Fruit',
-      children: [
-        {name: 'Apple'},
-        {name: 'Banana'},
-        {name: 'Fruit loops'},
-      ],
-    }, {
-      name: 'Vegetables',
-      children: [
-        {
-          name: 'Green',
-          children: [
-            {name: 'Broccoli'},
-            {name: 'Brussels sprouts'},
-          ],
-        }, {
-          name: 'Orange',
-          children: [
-            {name: 'Pumpkins'},
-            {name: 'Carrots'},
-          ],
-        },
-      ],
-    },
-  ];
+    id: string;
+    pdbid: string;
+    parts: Molecule[];
+}

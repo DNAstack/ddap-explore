@@ -10,12 +10,10 @@ import { DiscoveryBeaconComponent } from './discovery-beacon/discovery-beacon.co
 import { GeocodeService } from './discovery-beacon/geocode/geocode.service';
 import { DiscoveryBeaconHelpDialogComponent } from './discovery-beacon/help/discovery-beacon.help.dialog';
 import { DiscoveryRoutingModule } from './discovery-routing.module';
-import { DiscoverySearchComponent } from './discovery-search/discovery-search.component';
 import { KeyValuePairComponent } from './ui-components/key-value-pair/key-value-pair.component';
 
 @NgModule({
   declarations: [
-    DiscoverySearchComponent,
     DiscoveryBeaconComponent,
     KeyValuePairComponent,
     DiscoveryBeaconHelpDialogComponent,

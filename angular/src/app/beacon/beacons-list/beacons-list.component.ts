@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AgGridModule } from 'ag-grid-angular';
 import { ViewControllerService } from 'ddap-common-lib';
 
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { BeaconConfigService } from '../beacon-config.service';
 import { BeaconNetworkService } from '../beacon-service/beacon-network.service';
 import { Beacon, BeaconRegistry } from '../beacon-service/beacon.model';
@@ -14,8 +11,8 @@ import { Beacon, BeaconRegistry } from '../beacon-service/beacon.model';
   templateUrl: './beacons-list.component.html',
   styleUrls: ['./beacons-list.component.scss'],
 })
-export class BeaconListComponent implements OnInit {
-  appConfig: AppConfigModel;
+export class BeaconListComponent {
+
   registries: BeaconRegistry[];
   registry: BeaconRegistry;
   beacons: Beacon[];
@@ -34,7 +31,6 @@ export class BeaconListComponent implements OnInit {
   private gridColumnApi;
 
   constructor(private router: Router,
-              private appConfigService: AppConfigService,
               private beaconConfigService: BeaconConfigService,
               private beaconNetworkService: BeaconNetworkService,
               private viewController: ViewControllerService
@@ -68,18 +64,6 @@ export class BeaconListComponent implements OnInit {
                 ];
 
                 this.rowData = [];
-  }
-
-  ngOnInit(): void {
-    // Ensure that the user can only access this component when it is enabled.
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      this.appConfig = data;
-      if (this.appConfig.featureBeaconsEnabled) {
-        this.initialize();
-      } else {
-        this.router.navigate(['/']);
-      }
-    });
   }
 
   onRowClicked(event) {

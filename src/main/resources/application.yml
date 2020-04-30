@@ -100,13 +100,13 @@ resources:
               description: Read From public covid Beacon
               collectionName: Covid Resources
               interfaceType: http:beacon
-              interfaceUri: https://beacon.covid-19.dnastack.com
+              interfaceUri: https://beacon.covid-19.dnastack.com/beacon/public
             1:
               name: Covid Virus Beacon
               description: Read From public covid Beacon
               collectionName: Covid Resources
               interfaceType: http:beacon:virus
-              interfaceUri: https://beacon.covid-19.dnastack.com
+              interfaceUri: https://beacon.covid-19.dnastack.com/beacon/public
 
           collections:
             0:

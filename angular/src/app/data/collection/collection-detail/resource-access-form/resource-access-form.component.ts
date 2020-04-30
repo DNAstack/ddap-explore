@@ -4,8 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { filter, flatMap, tap } from 'rxjs/operators';
 
 import { environment } from '../../../../../environments/environment';
-import { AccessModel, TokensResponseModel } from '../../../../shared/apps/app-explore.model';
-import { AppExploreService } from '../../../../shared/apps/app-explore.service';
+import { AccessModel, TokensResponseModel } from '../../../../shared/apps/app-explore/app-explore.model';
+import { AppExploreService } from '../../../../shared/apps/app-explore/app-explore.service';
 import { InterfaceModel, ResourceModel } from '../../../../shared/resource.model';
 
 import { ResourceAccessFormBuilder } from './resource-access-form-builder.service';

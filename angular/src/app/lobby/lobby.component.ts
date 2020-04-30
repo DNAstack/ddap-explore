@@ -20,6 +20,7 @@ export class LobbyComponent implements OnInit {
   authorizationRequestedOnDemand = false;
   eventType: string;
   realmId: string;
+  appTitle: string;
 
   constructor(
     private titleService: Title,
@@ -35,7 +36,8 @@ export class LobbyComponent implements OnInit {
     this.eventType = this.activatedRoute.snapshot.queryParamMap.get('after');
     this.appConfigStore.state$
       .subscribe(config => {
-        this.titleService.setTitle(config.title);
+        this.appTitle = config.ui.title;
+        this.titleService.setTitle(config.ui.title);
         this.initialize();
       });
   }

@@ -8,7 +8,7 @@ import { catchError, map } from 'rxjs/operators';
 import { SimplifiedWesResourceViews } from '../workflows/workflow.model';
 import { WorkflowService } from '../workflows/workflows.service';
 
-import { AppConfigModel } from './app-config/app-config.model';
+import { AppConfigModel, FrontendFeature } from './app-config/app-config.model';
 import { AppConfigStore } from './app-config/app-config.store';
 import { ResourceAuthStateService } from './resource-auth-state.service';
 import { ResourceService } from './resource/resource.service';
@@ -58,7 +58,7 @@ export class AccessControlService {
     return new Promise<UserAccessGrantStatus>((resolve => {
       this.latestDamIdList = damIdList;
 
-      this.appConfigStore.state$.subscribe((data: AppConfigModel) => {
+      this.appConfigStore.state$.subscribe((appConfig: AppConfigModel) => {
         if (this.userAccessGrantState !== UserAccessGrantStatus.UNCHECKED) {
           this.watchForFinalState(resolve);
           return;
@@ -66,7 +66,7 @@ export class AccessControlService {
 
         this.userAccessGrantState = UserAccessGrantStatus.CHECKING;
 
-        if (data.authorizationOnInitRequired) {
+        if (appConfig.enabledFeatures.includes(FrontendFeature.authOnInitRequired)) {
           this.enforceAuthorization(damIdList, resolve, initiateAuthorizationFlowIfRequired);
         } else {
           this.userAccessGrantState = UserAccessGrantStatus.ON_DEMAND;

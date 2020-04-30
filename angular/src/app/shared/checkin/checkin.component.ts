@@ -21,10 +21,10 @@ export class CheckinComponent implements OnInit {
     this.appConfigStore.state$
       .subscribe((appConfig: AppConfigModel) => {
         if (appConfig.inStandaloneMode) {
-          this.router.navigate([`/_/${appConfig.defaultModule}`]);
+          this.router.navigate([`/_/${appConfig.defaultRoute}`]);
         } else {
           const realm = _get(this.activatedRoute, 'root.firstChild.snapshot.params.realmId', defaultRealm);
-          this.router.navigate([`/${realm}/${appConfig.defaultModule}`]);
+          this.router.navigate([`/${realm}/${appConfig.defaultRoute}`]);
         }
       });
   }

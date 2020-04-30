@@ -325,7 +325,7 @@ export class SearchTablesComponent implements OnInit {
     this.getTables();
 
     this.appConfigStore.state$.subscribe(config => {
-      this.currentQuery = config.search.defaultQuery;
+      this.currentQuery = config.apps.search.defaultQuery;
 
       if (this.currentQuery && this.currentQuery.length > 0) {
         this.doSearch(this.currentQuery);

@@ -103,9 +103,9 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     this.preInitialize();
 
     // Ensure that the user can only access this component when it is enabled.
-    this.appConfigStore.state$.subscribe((data: AppConfigModel) => {
+    this.appConfigStore.state$.subscribe((appConfig: AppConfigModel) => {
       // Register TRS endpoints.
-      this.trsService.endpoint(data.trsBaseUrl);
+      this.trsService.endpoint(appConfig.apps.workflows.trsBaseUrl);
       // Start the component initialization.
       this.initialize();
     });

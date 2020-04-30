@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 
 import { IdentityService } from '../../identity/identity.service';
 import { AccessControlService, UserAccessGrantStatus } from '../access-control.service';
-import { AppConfigModel } from '../app-config/app-config.model';
+import { AppConfigModel, FrontendFeature } from '../app-config/app-config.model';
 import { AppConfigStore } from '../app-config/app-config.store';
 import { DamInfoStore } from '../dam/dam-info.store';
 import { DamsInfo } from '../dam/dams-info';
@@ -23,6 +23,7 @@ export class LayoutComponent implements OnInit {
 
   realm: string;
   appConfig: AppConfigModel = null;
+  FrontendFeature = FrontendFeature;
 
   userIsAuthorized: boolean = null;  // "null" means undecided or on-demand.
 
@@ -47,7 +48,7 @@ export class LayoutComponent implements OnInit {
     this.appConfigStore.state$
       .subscribe((appConfig: AppConfigModel) => {
         this.appConfig = appConfig;
-        this.titleService.setTitle(appConfig.title);
+        this.titleService.setTitle(appConfig.ui.title);
         this.initialize();
       });
   }
@@ -136,8 +137,8 @@ export class LayoutComponent implements OnInit {
   }
 
   private updateTheme() {
-    if (this.appConfig.theme) {
-      window.document.querySelector('ddap-root').classList.add(this.appConfig.theme);
+    if (this.appConfig.ui.theme) {
+      window.document.querySelector('ddap-root').classList.add(this.appConfig.ui.theme);
     }
   }
 }

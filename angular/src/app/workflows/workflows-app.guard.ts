@@ -3,13 +3,13 @@ import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, UrlTree } fro
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppConfigModel } from '../shared/app-config/app-config.model';
+import { AppConfigModel, FrontendApp } from '../shared/app-config/app-config.model';
 import { AppConfigStore } from '../shared/app-config/app-config.store';
 
 @Injectable({
   providedIn: 'root',
 })
-export class WorkflowAppGuard implements CanActivate {
+export class WorkflowsAppGuard implements CanActivate {
 
   constructor(private appConfigStore: AppConfigStore) {
   }
@@ -20,8 +20,8 @@ export class WorkflowAppGuard implements CanActivate {
   ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     return this.appConfigStore.state$
       .pipe(
-        map((appConfig: AppConfigModel) => {
-          return appConfig.featureWorkflowsEnabled;
+        map(({ enabledApps }: AppConfigModel) => {
+          return enabledApps.includes(FrontendApp.workflows);
         })
       );
   }

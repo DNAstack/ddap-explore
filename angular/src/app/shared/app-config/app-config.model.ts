@@ -1,28 +1,43 @@
 export interface AppConfigModel {
-  title: string;
-  logoUrl: string;
+  ui: {
+    title: string;
+    logoUrl: string;
+    theme: string;
+  };
+  enabledApps: FrontendApp[];
+  enabledFeatures: FrontendFeature[];
+  defaultRoute: string;
   googleAnalyticsId: string;
-  theme: string;
-  defaultModule: string;
   tosUrl: string;
   inStandaloneMode: boolean;
-  authorizationOnInitRequired: boolean;
-  sidebarEnabled: boolean;
-  featureRealmInputEnabled: boolean;
-  featureAdministrationEnabled: boolean;
-  featureTermsEnabled: boolean;
-  featureExploreDataEnabled: boolean;
-  featureDiscoveryEnabled: boolean;
-  featureWorkflowsEnabled: boolean;
-  featureSearchEnabled: boolean;
+  listPageSize: number;
+  apps: {
+    search: FrontendAppSearchConfig;
+    workflows: FrontendAppWorkflowsConfig;
+  };
+}
+
+export interface FrontendAppSearchConfig {
+  defaultQuery: string;
+}
+
+export interface FrontendAppWorkflowsConfig {
   trsBaseUrl: string;
   trsAcceptedToolClasses: string[];
   trsAcceptedVersionDescriptorTypes: string[];
-  listPageSize: number;
-  covidBeaconUrl: string;
-  search: SearchConfig;
 }
 
-interface SearchConfig {
-  defaultQuery: string;
+export enum FrontendApp {
+  data = 'DATA',
+  discovery = 'DISCOVERY',
+  search = 'SEARCH',
+  workflows = 'WORKFLOWS',
+}
+
+export enum FrontendFeature {
+  administration = 'ADMINISTRATION',
+  authOnInitRequired = 'AUTH_ON_INIT_REQUIRED',
+  realmInput = 'REALM_INPUT',
+  sidebar= 'SIDEBAR',
+  terms = 'TERMS',
 }

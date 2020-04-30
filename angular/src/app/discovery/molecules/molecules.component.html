@@ -26,12 +26,12 @@
                     </mat-toolbar-row>
                 </mat-toolbar>
                 <div style="flex: 1; overflow-y: auto;">
-                    <mat-tree *ngIf="false" [dataSource]="dataSource" [treeControl]="treeControl">
+                    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
                         <!-- This is the tree node template for leaf nodes -->
                         <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
                           <!-- use a disabled button to provide padding for tree leaf -->
                           <button mat-icon-button disabled></button>
-                          {{node.name}}
+                          <button class="mat-menu-item {{node.molecule == selectedMolecule ? 'active' : ''}}" mat-menu-item (click)="selectMolecule(node.molecule)">{{node.name}}</button>
                         </mat-tree-node>
                         <!-- This is the tree node template for expandable nodes -->
                         <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding>
@@ -41,10 +41,9 @@
                               {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                             </mat-icon>
                           </button>
-                          {{node.name}}
+                          <button class="mat-menu-item {{node.molecule == selectedMolecule ? 'active' : ''}}" mat-menu-item (click)="selectMolecule(node.molecule)">{{node.name}}</button>
                         </mat-tree-node>
                       </mat-tree>
-                    <button class="mat-menu-item {{molecule == selectedMolecule ? 'active' : ''}}" *ngFor="let molecule of molecules; index as j;" mat-menu-item (click)="selectMolecule(molecule)">{{molecule.name}}</button>
                 </div>
             </mat-drawer>
             <mat-drawer-content style="display:flex; flex: 1">
@@ -61,20 +60,6 @@
                         </mat-toolbar>
                         <div class="p-a">
                             <div style="display: flex; flex-direction: column;">
-                                <div class="h3 m-b-sm">Molecule</div>
-                                <mat-form-field appearance="outline" floatLabel="always">
-                                    <mat-label>Part</mat-label>
-                                    <mat-select [disabled]="!selectedMolecule" [(ngModel)]="selectedSubMolecule" (selectionChange)="selectSubMolecule(selectedSubMolecule)">
-                                        <!--<mat-option *ngIf="selectedMolecule" [value]="selectedMolecule">
-                                            {{selectedMolecule.name}}
-                                        </mat-option>-->
-                                        <span *ngIf="selectedMolecule && selectedMolecule.parts">
-                                            <mat-option *ngFor="let molecule of selectedMolecule.parts" [value]="molecule">
-                                                {{molecule.name}}
-                                            </mat-option>
-                                        </span>
-                                    </mat-select>
-                                </mat-form-field>
                                 <div class="h3 m-b-sm">Representation</div>
                                 <mat-form-field appearance="outline" floatLabel="always">
                                     <mat-label>Representation</mat-label>
@@ -102,8 +87,8 @@
                         </div>
                     </mat-drawer>
                     <mat-drawer-content class="full-hw" [style.background-color]="view.viewer.background">
-                        <ddaplib-cover-message style="flex-grow: 1;" *ngIf="!this.getMoleculeToRender()" message="No Molecule Selected" icon="not_interested"></ddaplib-cover-message>
-                        <div #nglViewer [hidden]="!this.getMoleculeToRender()" id="ngl-viewer" class="full-hw"></div>
+                        <ddaplib-cover-message style="flex-grow: 1;" *ngIf="!this.selectedMolecule" message="No Molecule Selected" icon="not_interested"></ddaplib-cover-message>
+                        <div #nglViewer [hidden]="!this.selectedMolecule" id="ngl-viewer" class="full-hw"></div>
                     </mat-drawer-content>
                 </mat-drawer-container>
             </mat-drawer-content>

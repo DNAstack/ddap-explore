@@ -45,11 +45,9 @@ import { molecules } from './molecules';
 
     stage: ngl.stage;
 
-    treeControl = new FlatTreeControl<MoleculeNode>(
-        node => node.level, node => node.expandable);
+    treeControl: any;
 
-    treeFlattener = new MatTreeFlattener(
-        this._transformer, node => node.level, node => node.expandable, node => node.parts);
+    treeFlattener: any;
 
     dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
@@ -58,6 +56,11 @@ import { molecules } from './molecules';
                 private configService: DiscoveryConfigService,
                 private viewController: ViewControllerService
                 ) {
+
+                    this.treeControl = new FlatTreeControl<MoleculeNode>(
+                        node => node.level, node => node.expandable);
+                    this.treeFlattener = new MatTreeFlattener(
+                        this._transformer, node => node.level, node => node.expandable, node => node.parts);
 
                     this.dataSource.data = <Molecule[]> molecules;
 

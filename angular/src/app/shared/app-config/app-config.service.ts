@@ -182,10 +182,10 @@ export class AppConfigService {
         isSidebarEnabled: true,
       })
       .registerModule({
-        key: 'sequences',
-        name: 'Sequences',
+        key: 'genomes',
+        name: 'Genomes',
         iconName: 'sync_alt',
-        routerLink: 'discovery/sequences',
+        routerLink: 'discovery/genomes',
         parentKey: 'discovery',
         isApp: false,
         isExperimental: true,

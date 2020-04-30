@@ -153,6 +153,7 @@ import { molecules } from './molecules';
 
     }
 
+
     private _transformer = (molecule: Molecule, level: number) => {
         return {
           expandable: !!molecule.parts && molecule.parts.length > 0,
@@ -161,6 +162,7 @@ import { molecules } from './molecules';
           level: level,
         };
       }
+
 }
 
 interface MoleculeNode {

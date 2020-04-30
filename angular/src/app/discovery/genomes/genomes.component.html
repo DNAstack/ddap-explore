@@ -1,0 +1,54 @@
+
+<div class="full-hw" style="display:flex; flex-direction:column;">
+    <ddaplib-header icon="navigation" label="Genomes">
+        <span class="fill-space"></span>
+        <button class="m-r-sm" tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = !view.showLeftSidebar" matTooltip="{{view.showLeftSidebar ? 'Hide' : 'Show'}} Filters" color="{{view.showLeftSidebar ? 'accent' : ''}}">
+            <mat-icon>filter_list</mat-icon>
+        </button>
+        <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = !view.showRightSidebar" matTooltip="{{view.showRightSidebar ? 'Hide' : 'Show'}} Settings" color="{{view.showRightSidebar ? 'accent' : ''}}">
+            <mat-icon>tune</mat-icon>
+        </button>
+    </ddaplib-header>
+    <!--<mat-progress-bar mode="indeterminate"></mat-progress-bar>-->
+    <ddaplib-cover-message style="flex-grow: 1" message="No Genomes"
+        icon="not_interested"></ddaplib-cover-message>
+    <div style="display:flex; flex: 1">
+        <mat-drawer-container style="flex:1" [autosize]="true" hasBackdrop="false">
+            <mat-drawer mode="side" [(opened)]="view.showLeftSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
+                <mat-toolbar class="tertiary-toolbar">
+                    <mat-toolbar-row>
+                        <div>Filters</div>
+                        <span class="fill-space"></span>
+                        <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false;" matTooltip="Close Structures">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </mat-toolbar-row>
+                </mat-toolbar>
+                <div style="flex: 1; overflow-y: auto;">
+                    Filters
+                </div>
+            </mat-drawer>
+            <mat-drawer-content style="display:flex; flex: 1">
+                <mat-drawer-container style="flex:1" [autosize]="true" hasBackdrop="false">
+                    <mat-drawer mode="side" position="end" [(opened)]="view.showRightSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
+                        <mat-toolbar class="tertiary-toolbar">
+                            <mat-toolbar-row>
+                                <div>Settings</div>
+                                <span class="fill-space"></span>
+                                <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = false;" matTooltip="Close Settings">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </mat-toolbar-row>
+                        </mat-toolbar>
+                        <div class="p-a">
+                            Settings
+                        </div>
+                    </mat-drawer>
+                    <mat-drawer-content class="full-hw">
+                        Content
+                    </mat-drawer-content>
+                </mat-drawer-container>
+            </mat-drawer-content>
+        </mat-drawer-container>
+    </div>
+</div>

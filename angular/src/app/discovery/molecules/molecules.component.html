@@ -28,7 +28,7 @@
                 <div style="flex: 1; overflow-y: auto;">
                     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
                         <!-- This is the tree node template for leaf nodes -->
-                        <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+                        <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding matTreeNodePaddingIndent="20px">
                           <!-- use a disabled button to provide padding for tree leaf -->
                           <button mat-icon-button disabled></button>
                           <button [disabled]="!node.molecule.pdbid" class="mat-menu-item {{node.molecule == selectedMolecule ? 'active' : ''}}" mat-menu-item (click)="selectMolecule(node.molecule)">{{node.name}}</button>

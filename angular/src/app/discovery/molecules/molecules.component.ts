@@ -45,9 +45,17 @@ import { molecules } from './molecules';
 
     stage: ngl.stage;
 
-    treeControl: any;
-
-    treeFlattener: any;
+    treeControl = new FlatTreeControl<MoleculeNode>(
+        node => node.level, node => node.expandable);
+        treeFlattener = new MatTreeFlattener(
+        (molecule: Molecule, level: number) => {
+            return {
+              expandable: !!molecule.parts && molecule.parts.length > 0,
+              name: molecule.name,
+              molecule: molecule,
+              level: level,
+            };
+          }, node => node.level, node => node.expandable, node => node.parts);
 
     dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
@@ -56,22 +64,9 @@ import { molecules } from './molecules';
                 private configService: DiscoveryConfigService,
                 private viewController: ViewControllerService
                 ) {
-
-                    this.treeControl = new FlatTreeControl<MoleculeNode>(
-                        node => node.level, node => node.expandable);
-                    this.treeFlattener = new MatTreeFlattener(
-                        this._transformer, node => node.level, node => node.expandable, node => node.parts);
-
                     this.dataSource.data = <Molecule[]> molecules;
 
                     this.molecules = molecules;
-
-                    /*
-                    this.nglRepresentations = [
-                        { id: 'ribbon', name: 'Ribbon', params: { colorScheme: 'bfactor' }},
-                        { id: 'ball+stick', name: 'Ball and Stick', params: { multipleBond: true }},
-                        { id: 'cartoon', name: 'Cartoon', params: {}},
-                    ];*/
 
                     this.nglRepresentations = ngl.RepresentationRegistry._dict;
                     this.selectedRepresentation = 'ribbon';
@@ -94,6 +89,8 @@ import { molecules } from './molecules';
     ngAfterViewInit(): void {
         this.stage = new ngl.Stage('ngl-viewer' );
         this.applyParameters();
+
+
     }
 
     prettyRepresentation(representationName: string) {
@@ -157,14 +154,6 @@ import { molecules } from './molecules';
     }
 
 
-    private _transformer = (molecule: Molecule, level: number) => {
-        return {
-          expandable: !!molecule.parts && molecule.parts.length > 0,
-          name: molecule.name,
-          molecule: molecule,
-          level: level,
-        };
-      }
 
 
 

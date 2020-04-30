@@ -31,7 +31,7 @@
                         <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
                           <!-- use a disabled button to provide padding for tree leaf -->
                           <button mat-icon-button disabled></button>
-                          <button class="mat-menu-item {{node.molecule == selectedMolecule ? 'active' : ''}}" mat-menu-item (click)="selectMolecule(node.molecule)">{{node.name}}</button>
+                          <button [disabled]="!node.molecule.pdbid" class="mat-menu-item {{node.molecule == selectedMolecule ? 'active' : ''}}" mat-menu-item (click)="selectMolecule(node.molecule)">{{node.name}}</button>
                         </mat-tree-node>
                         <!-- This is the tree node template for expandable nodes -->
                         <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding>
@@ -41,7 +41,7 @@
                               {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                             </mat-icon>
                           </button>
-                          <button class="mat-menu-item {{node.molecule == selectedMolecule ? 'active' : ''}}" mat-menu-item (click)="selectMolecule(node.molecule)">{{node.name}}</button>
+                          <button [disabled]="!node.molecule.pdbid" class="mat-menu-item {{node.molecule == selectedMolecule ? 'active' : ''}}" mat-menu-item (click)="selectMolecule(node.molecule)">{{node.name}}</button>
                         </mat-tree-node>
                       </mat-tree>
                 </div>

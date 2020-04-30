@@ -7,15 +7,15 @@
 <!--    gtag('config', 'UA-52918106-11');-->
 <!--</script>-->
 <div class="site-container {{viewController.view.leftSidebarOpened ? '' : 'zen-mode'}}">
-  <ddaplib-main-header [siteName]="appConfig.title"
-    [logoUrl]="appConfig.logoUrl"
-    [isSandbox]="appConfig.featureRealmInputEnabled"
+  <ddaplib-main-header [siteName]="appConfig.ui.title"
+    [logoUrl]="appConfig.ui.logoUrl"
+    [isSandbox]="appConfig.enabledFeatures.includes(FrontendFeature.realmInput)"
     [realmActions]="['edit']"
     (realmChangeAcknowledge)="onAcknowledge($event)">
     <ddaplib-menu-apps [accessibleApps]="viewController.getAccessibleApps()"
       [realmId]="viewController.getRealmId()"
       *ngIf="viewController.getAccessibleApps().length > 1">
-      <ng-container *ngIf="appConfig.featureAdministrationEnabled">
+      <ng-container *ngIf="appConfig.enabledFeatures.includes(FrontendFeature.administration)">
         <mat-divider></mat-divider>
         <div class="app-menu-section-title">Administration</div>
         <ng-container *ngIf="identityConcentratorInfo$ | async as identityConcentratorInfo">
@@ -45,7 +45,7 @@
         </ng-container>
       </ng-container>
     </ddaplib-menu-apps>
-    <ddaplib-menu-profile *ngIf="appConfig.authorizationOnInitRequired && accessControlService.isUserAuthorized()">
+    <ddaplib-menu-profile *ngIf="appConfig.enabledFeatures.includes(FrontendFeature.authOnInitRequired) && accessControlService.isUserAuthorized()">
       <button mat-menu-item
         (click)="onSignOut()">
         <mat-icon>exit_to_app</mat-icon>
@@ -61,7 +61,7 @@
     data-se="main-progress-bar">
   </mat-progress-bar>
 
-  <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
+  <ddaplib-sandbox-banner *ngIf="appConfig.enabledFeatures.includes(FrontendFeature.realmInput)"></ddaplib-sandbox-banner>
 
   <mat-sidenav-container>
     <!-- Left Side Navigation -->
@@ -75,7 +75,7 @@
     <mat-sidenav-content>
       <ng-container *ngIf="viewController.getCurrentApp(); else inaccessibleApp">
         <!-- Middle Content -->
-        <ddaplib-sandbox-banner *ngIf="appConfig.featureRealmInputEnabled"></ddaplib-sandbox-banner>
+        <ddaplib-sandbox-banner *ngIf="appConfig.enabledFeatures.includes(FrontendFeature.realmInput)"></ddaplib-sandbox-banner>
         <router-outlet></router-outlet>
       </ng-container>
       <ng-template #inaccessibleApp>
@@ -86,7 +86,7 @@
     </mat-sidenav-content>
   </mat-sidenav-container>
 
-  <ddaplib-footer *ngIf="appConfig.featureTermsEnabled">
+  <ddaplib-footer *ngIf="appConfig.enabledFeatures.includes(FrontendFeature.terms)">
     <span class="fill-space"></span>
     <a class="m-r-sm" href="https://dnastack.com"
           target="_blank">

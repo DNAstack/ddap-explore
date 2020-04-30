@@ -6,32 +6,33 @@ server:
   # If both are specified (not recommended) SERVER_PORT will take precedence.
   port: ${PORT:8085}
 
-ui:
-  title: "DDAP"
-  logo-url: null
-  google-analytics-id: null
-  theme: null
-  default-module: 'data/collections'
-  tos-url: 'https://beacon-network.org/#/terms'  # Alternatively, tos-url: 'https://dnastack.com/#/legal/terms'
+frontend-config:
+  ui:
+    title: "DDAP"
+    logo-url: null
+    theme: null
+  default-route: 'data/collections'
+  # To see all options go to com.dnastack.ddap.explore.config.model.FrontendApp
+  enabled-apps:
+    - DATA
+    - SEARCH
+    - WORKFLOWS
+  # To see all options go to com.dnastack.ddap.explore.config.model.FrontendFeature
+  enabled-features:
+    - ADMINISTRATION
+    - REALM_INPUT
   in-standalone-mode: ${ddap.dam-facade}
-  authorization-on-init-required: false
-  feature-realm-input-enabled: true
-  feature-administration-enabled: true
-  feature-terms-enabled: false
-  feature-explore-data-enabled: true
-  feature-discovery-enabled: false
-  feature-beacons-enabled: false
-  feature-workflows-enabled: true
-  feature-search-enabled: true
-  trs-base-url: "https://dockstore.org/api/api/ga4gh/v2"
-  trs-accepted-tool-classes: ['Workflow']
-  trs-accepted-version-descriptor-types: ['WDL']
+  google-analytics-id: null
+  tos-url: 'https://beacon-network.org/#/terms'  # Alternatively, tos-url: 'https://dnastack.com/#/legal/terms'
   list-page-size: 20
-  covid-beacon-url: null
-
-  search:
-    # The default query, IF DEFINED, will make the UI to run the first query automatically on initialization.
-    default-query: null
+  apps:
+    search:
+      # The default query, IF DEFINED, will make the UI to run the first query automatically on initialization.
+      default-query: null
+    workflows:
+      trs-base-url: "https://dockstore.org/api/api/ga4gh/v2"
+      trs-accepted-tool-classes: ['Workflow']
+      trs-accepted-version-descriptor-types: ['WDL']
 
 dams:
   1:

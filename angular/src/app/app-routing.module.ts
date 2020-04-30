@@ -8,7 +8,7 @@ import { LobbyComponent } from './lobby/lobby.component';
 import { SearchAppGuard } from './search/search-app.guard';
 import { CheckinComponent } from './shared/checkin/checkin.component';
 import { LayoutComponent } from './shared/layout/layout.component';
-import { WorkflowAppGuard } from './workflows/workflow-app.guard';
+import { WorkflowsAppGuard } from './workflows/workflows-app.guard';
 
 const routes: Routes = [
   {
@@ -35,7 +35,7 @@ const routes: Routes = [
       },
       {
         path: 'analyze',
-        canActivate: [WorkflowAppGuard],
+        canActivate: [WorkflowsAppGuard],
         loadChildren: () => import('./workflows/workflows.module')
           .then(mod => mod.WorkflowsModule),
       },

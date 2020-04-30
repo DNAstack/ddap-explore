@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, UrlTree } fro
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppConfigModel } from '../shared/app-config/app-config.model';
+import { AppConfigModel, FrontendApp } from '../shared/app-config/app-config.model';
 import { AppConfigStore } from '../shared/app-config/app-config.store';
 
 @Injectable({
@@ -20,8 +20,8 @@ export class BeaconAppGuard implements CanActivate {
   ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     return this.appConfigStore.state$
       .pipe(
-        map((appConfig: AppConfigModel) => {
-          return appConfig.featureBeaconsEnabled;
+        map(({ enabledApps }: AppConfigModel) => {
+          return enabledApps.includes(FrontendApp.beacon);
         })
       );
   }

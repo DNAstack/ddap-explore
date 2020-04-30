@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ViewControllerService } from 'ddap-common-lib';
 
+import { FrontendApp } from '../../app-config/app-config.model';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -15,7 +17,7 @@ export class LayoutViewRegistrationService {
         key: 'data',
         name: 'Data',
         iconName: 'search',
-        requiredFeatureFlags: ['featureExploreDataEnabled'],
+        requiredFeatureFlags: [FrontendApp.data],
         routerLink: 'data',
         isApp: true,
         isSidebarEnabled: true,
@@ -54,7 +56,7 @@ export class LayoutViewRegistrationService {
         key: 'beacon',
         name: 'Beacon',
         iconName: 'wifi_tethering',
-        requiredFeatureFlags: ['featureBeaconsEnabled'],
+        requiredFeatureFlags: [FrontendApp.beacon],
         routerLink: 'beacon',
         isApp: true,
         isSidebarEnabled: true,
@@ -81,7 +83,7 @@ export class LayoutViewRegistrationService {
         key: 'discovery',
         name: 'Discovery',
         iconName: 'trending_up',
-        requiredFeatureFlags: ['featureDiscoveryEnabled'],
+        requiredFeatureFlags: [FrontendApp.discovery],
         routerLink: 'discovery',
         isApp: true,
         isSidebarEnabled: false,
@@ -91,7 +93,7 @@ export class LayoutViewRegistrationService {
       .registerModule({
         key: 'analytics',
         name: 'Analytics',
-        requiredFeatureFlags: ['featureWorkflowsEnabled'],
+        requiredFeatureFlags: [FrontendApp.workflows],
         iconName: 'memory',
         routerLink: 'analyze',  // FIXME Change to "analytics"
         isApp: true,
@@ -128,7 +130,7 @@ export class LayoutViewRegistrationService {
         key: 'search',
         name: 'Search',
         iconName: 'search',
-        requiredFeatureFlags: ['featureSearchEnabled'],
+        requiredFeatureFlags: [FrontendApp.search],
         routerLink: 'search',
         isApp: true,
         isExperimental: false,

@@ -1,7 +1,7 @@
 <div class="site-container lobby">
   <mat-card>
     <mat-card-header>
-      <mat-card-title>{{ (appConfigService.get() | async).title }}</mat-card-title>
+      <mat-card-title>{{ appTitle }}</mat-card-title>
     </mat-card-header>
 
     <ng-container *ngIf="!initialized; else dialogForAuthorizedUser">

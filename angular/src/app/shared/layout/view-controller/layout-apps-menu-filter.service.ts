@@ -14,7 +14,8 @@ export class LayoutAppsMenuFilterService implements ViewFilterInterface {
   isVisible(moduleMetadata: ModuleMetadata): boolean {
     const eligibleScore = moduleMetadata.requiredFeatureFlags.reduce(
       (previousValue, requiredFeatureFlag) => {
-        return previousValue + (this.config[requiredFeatureFlag] ? 1 : 0);
+        const enabledApps: string[] = Object.values(this.config.enabledApps);
+        return previousValue + (enabledApps.includes(requiredFeatureFlag) ? 1 : 0);
       }, 0
     );
 

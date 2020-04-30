@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
+import { AppConfigModel, FrontendAppWorkflowsConfig } from '../../shared/app-config/app-config.model';
 import { AppConfigStore } from '../../shared/app-config/app-config.store';
 import { TrsService } from '../trs-v2/trs.service';
 
@@ -13,7 +13,8 @@ import { Config } from './trs-browser/trs-browser.component';
   styleUrls: ['registered-workflow-list.component.scss'],
 })
 export class RegisteredWorkflowListComponent implements OnInit {
-  appConfig: AppConfigModel;
+
+  workflowsConfig: FrontendAppWorkflowsConfig;
   publicBrowserConfig: Config;
 
   constructor(private route: ActivatedRoute,
@@ -24,18 +25,18 @@ export class RegisteredWorkflowListComponent implements OnInit {
 
   ngOnInit(): void {
     // Ensure that the user can only access this component when it is enabled.
-    this.appConfigStore.state$.subscribe((data: AppConfigModel) => {
-      this.appConfig = data;
+    this.appConfigStore.state$.subscribe((appConfig: AppConfigModel) => {
+      this.workflowsConfig = appConfig.apps.workflows;
 
-      if (!this.appConfig.trsBaseUrl) {
+      if (!this.workflowsConfig.trsBaseUrl) {
         return;
       }
 
       this.publicBrowserConfig = {
-        client: this.trs.endpoint(this.appConfig.trsBaseUrl),
-        acceptedToolClasses: this.appConfig.trsAcceptedToolClasses,
-        acceptedVersionDescriptorTypes: this.appConfig.trsAcceptedVersionDescriptorTypes,
-        pageSize: this.appConfig.listPageSize,
+        client: this.trs.endpoint(this.workflowsConfig.trsBaseUrl),
+        acceptedToolClasses: this.workflowsConfig.trsAcceptedToolClasses,
+        acceptedVersionDescriptorTypes: this.workflowsConfig.trsAcceptedVersionDescriptorTypes,
+        pageSize: appConfig.listPageSize,
         editable: false,
       };
     });

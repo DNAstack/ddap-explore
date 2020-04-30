@@ -1,4 +1,4 @@
-import { KeyValuePair } from '../key-value-pair.model';
+import { KeyValuePair } from '../../key-value-pair.model';
 
 export interface TokensResponseModel {
   requiresAdditionalAuth: boolean;

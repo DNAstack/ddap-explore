@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AgGridModule } from 'ag-grid-angular';
 
 import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { BeaconConfigService } from '../beacon-config.service';
 import { BeaconNetworkService } from '../beacon-service/beacon-network.service';
 import { Beacon, BeaconQuery, BeaconRegistry, BeaconResponse } from '../beacon-service/beacon.model';
@@ -14,8 +11,8 @@ import { Beacon, BeaconQuery, BeaconRegistry, BeaconResponse } from '../beacon-s
   templateUrl: './beacon-search.component.html',
   styleUrls: ['./beacon-search.component.scss'],
 })
-export class BeaconSearchComponent implements OnInit {
-  appConfig: AppConfigModel;
+export class BeaconSearchComponent {
+
   registries: BeaconRegistry[];
   registry: BeaconRegistry;
   beacons: Beacon[];
@@ -50,7 +47,6 @@ export class BeaconSearchComponent implements OnInit {
   private queryParameters: any;
 
   constructor(private router: Router,
-              private appConfigService: AppConfigService,
               private beaconConfigService: BeaconConfigService,
               private beaconNetworkService: BeaconNetworkService,
               private route: ActivatedRoute
@@ -90,18 +86,6 @@ export class BeaconSearchComponent implements OnInit {
                 ];
 
                 this.rowData = [];
-  }
-
-  ngOnInit(): void {
-    // Ensure that the user can only access this component when it is enabled.
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      this.appConfig = data;
-      if (this.appConfig.featureBeaconsEnabled) {
-        this.initialize();
-      } else {
-        this.router.navigate(['/']);
-      }
-    });
   }
 
   refreshBeacons() {

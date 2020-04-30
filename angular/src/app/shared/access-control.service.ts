@@ -1,17 +1,17 @@
-import {HttpErrorResponse} from '@angular/common/http';
-import {Inject, Injectable} from '@angular/core';
-import {Router} from '@angular/router';
-import {LOCAL_STORAGE, StorageService} from 'ngx-webstorage-service';
-import {throwError} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
+import { throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
-import {SimplifiedWesResourceViews} from '../workflows/workflow.model';
-import {WorkflowService} from '../workflows/workflows.service';
+import { SimplifiedWesResourceViews } from '../workflows/workflow.model';
+import { WorkflowService } from '../workflows/workflows.service';
 
-import {AppConfigModel} from './app-config/app-config.model';
-import {AppConfigService} from './app-config/app-config.service';
-import {ResourceAuthStateService} from './resource-auth-state.service';
-import {ResourceService} from './resource/resource.service';
+import { AppConfigModel } from './app-config/app-config.model';
+import { AppConfigStore } from './app-config/app-config.store';
+import { ResourceAuthStateService } from './resource-auth-state.service';
+import { ResourceService } from './resource/resource.service';
 
 export enum UserAccessGrantStatus {
   UNCHECKED, // The user authorization is unknown.
@@ -39,7 +39,7 @@ export class AccessControlService {
   constructor(
     @Inject(LOCAL_STORAGE) private storage: StorageService,
     private router: Router,
-    private appConfigService: AppConfigService,
+    private appConfigStore: AppConfigStore,
     private resourceService: ResourceService,
     private resourceAuthStateService: ResourceAuthStateService,
     private workflowService: WorkflowService
@@ -58,7 +58,7 @@ export class AccessControlService {
     return new Promise<UserAccessGrantStatus>((resolve => {
       this.latestDamIdList = damIdList;
 
-      this.appConfigService.get().subscribe((data: AppConfigModel) => {
+      this.appConfigStore.state$.subscribe((data: AppConfigModel) => {
         if (this.userAccessGrantState !== UserAccessGrantStatus.UNCHECKED) {
           this.watchForFinalState(resolve);
           return;

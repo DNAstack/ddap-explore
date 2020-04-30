@@ -6,7 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
 import { AccessControlService, UserAccessGrantStatus } from '../shared/access-control.service';
-import { AppConfigService } from '../shared/app-config/app-config.service';
+import { AppConfigStore } from '../shared/app-config/app-config.store';
 import { DamInfoStore } from '../shared/dam/dam-info.store';
 
 @Component({
@@ -25,7 +25,7 @@ export class LobbyComponent implements OnInit {
     private titleService: Title,
     private activatedRoute: ActivatedRoute,
     private damInfoStore: DamInfoStore,
-    public appConfigService: AppConfigService,
+    public appConfigStore: AppConfigStore,
     public accessControlService: AccessControlService
   ) {
   }
@@ -33,8 +33,7 @@ export class LobbyComponent implements OnInit {
   ngOnInit(): void {
     this.realmId = this.activatedRoute.snapshot.params.realmId;
     this.eventType = this.activatedRoute.snapshot.queryParamMap.get('after');
-    this.appConfigService
-      .get()
+    this.appConfigStore.state$
       .subscribe(config => {
         this.titleService.setTitle(config.title);
         this.initialize();

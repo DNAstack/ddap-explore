@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { realmIdPlaceholder } from 'ddap-common-lib';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 import { TokensRequestModel, TokensResponseModel } from './app-explore.model';
 

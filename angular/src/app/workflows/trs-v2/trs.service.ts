@@ -2,8 +2,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { AppConfigService } from '../../shared/app-config/app-config.service';
-
 import { Tool } from './tool.model';
 
 /**

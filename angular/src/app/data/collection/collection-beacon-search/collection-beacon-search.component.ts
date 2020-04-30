@@ -1,18 +1,16 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, flatMap, mergeAll, pluck } from 'rxjs/operators';
 
-import { AppConfigModel } from '../../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../../shared/app-config/app-config.service';
 import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.service';
 import { dam } from '../../../shared/proto/dam-service';
 import { ResourceService } from '../../../shared/resource/resource.service';
 import { DataService } from '../../data.service';
 
-import IResourceResults = dam.v1.IResourceResults;
 import { BeaconSearchRequestModel, BeaconSearchResponseModel } from './beacon-search.model';
 import { BeaconSearchService } from './beacon-search.service';
+import IResourceResults = dam.v1.IResourceResults;
 
 @Component({
   selector: 'ddap-collection-beacon-search',
@@ -33,31 +31,25 @@ export class CollectionBeaconSearchComponent implements OnInit {
 
   private searchParams: BeaconSearchRequestModel;
 
-  constructor(private route: ActivatedRoute,
-              private appConfigService: AppConfigService,
-              private router: Router,
-              private activatedRoute: ActivatedRoute,
-              private dataService: DataService,
-              private beaconService: BeaconSearchService,
-              private resourceService: ResourceService) {
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private dataService: DataService,
+    private beaconService: BeaconSearchService,
+    private resourceService: ResourceService
+  ) {
   }
 
   ngOnInit() {
-    // Ensure that the user can only access this component when it is enabled.
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      if (data.featureExploreDataEnabled) {
-        this.initialize();
-      } else {
-        this.router.navigate(['/']);
-      }
-    });
+    this.initialize();
   }
 
   limitSearchChange($event) {
     const limitSearch = $event.checked;
     const searchParams: BeaconSearchRequestModel = {
       ...this.searchParams,
-       // Don't put a boolean into this map, so that we are always pulling out the limitSearch as a string
+      // Don't put a boolean into this map, so that we are always pulling out the limitSearch as a string
       limitSearch: `${limitSearch}`,
     };
     this.router.navigate(['.'], {
@@ -97,19 +89,24 @@ export class CollectionBeaconSearchComponent implements OnInit {
                   queryParams.damId = damId;
                   queryParams.resource = resourceId;
 
-                  const accessToken = this.resourceService.lookupResourceToken(resourceTokens, resourcePath).credentials['access_token'];
+                  const accessToken = this.resourceService.lookupResourceToken(
+                    resourceTokens,
+                    resourcePath
+                  ).credentials['access_token'];
                   return this.beaconService.query(queryParams, accessToken);
                 });
             }),
             mergeAll()
-          ).subscribe((beaconResponse: BeaconSearchResponseModel[]) => {
+          ).subscribe(
+            (beaconResponse: BeaconSearchResponseModel[]) => {
               beaconResponse.forEach((response) => this.results.push(response));
-          },
-          (error) => {
-            this.requireAuth = true;
-            this.results = allBeaconsResponse;
-            this.resourceAuthUrl = this.getUrlForObtainingAccessToken(this.getResourcePathsFrom(allBeaconsResponse));
-          });
+            },
+            (error) => {
+              this.requireAuth = true;
+              this.results = allBeaconsResponse;
+              this.resourceAuthUrl = this.getUrlForObtainingAccessToken(this.getResourcePathsFrom(allBeaconsResponse));
+            }
+          );
       });
   }
 

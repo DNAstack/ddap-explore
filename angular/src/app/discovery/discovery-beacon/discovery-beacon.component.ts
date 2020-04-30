@@ -6,10 +6,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ILatLong, IMapOptions } from 'angular-maps';
 import { ViewControllerService } from 'ddap-common-lib';
 
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
+import { BeaconQueryRequestModel } from '../../shared/apps/app-discovery/app-discovery.model';
+import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discovery.service';
 import { DataTableComponent } from '../../shared/data-table/data-table.component';
-import { BeaconService } from '../beacon-service/beacon.service';
 
 import { DiscoveryBeaconDataTableController } from './discovery-beacon-data-table-controller';
 import { GeocodeService } from './geocode/geocode.service';
@@ -24,7 +23,6 @@ export class DiscoveryBeaconComponent implements OnInit {
   @ViewChild(DataTableComponent, {static: false})
   dataTable: DataTableComponent;
 
-  appConfig: AppConfigModel;
   dataTableController: DiscoveryBeaconDataTableController;
 
   searchBoxActive = false;
@@ -67,17 +65,16 @@ export class DiscoveryBeaconComponent implements OnInit {
   };
 
   constructor(private router: Router,
-              private appConfigService: AppConfigService,
-              private beaconService: BeaconService,
               public viewController: ViewControllerService,
               private route: ActivatedRoute,
               private snackBar: MatSnackBar,
               private geocodeService: GeocodeService,
               private changeDetector: ChangeDetectorRef,
-              public helpDialog: MatDialog
+              public helpDialog: MatDialog,
+    private appDiscoveryService: AppDiscoveryService
   ) {
     this.dataTableController = new DiscoveryBeaconDataTableController(
-      this.beaconService,
+      this.appDiscoveryService,
       (selectedRow) => this.onRowSelectionChanged(selectedRow),
       () => this.canSearch(),
       () => {
@@ -141,16 +138,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Ensure that the user can only access this component when it is enabled.
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      this.appConfig = data;
-
-      if (this.appConfig.featureDiscoveryEnabled) {
-        this.initialize();
-      } else {
-        this.router.navigate(['/']);
-      }
-    });
+    this.initialize();
   }
 
   openHelpDialog() {
@@ -165,7 +153,7 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   canSearch() {
-    return this.beaconService.isReady() && !this.dataTableController.inflight && this.queryForm.valid;
+    return !this.dataTableController.inflight && this.queryForm.valid;
   }
 
   setSearchBoxActive(active: boolean) {
@@ -215,10 +203,10 @@ export class DiscoveryBeaconComponent implements OnInit {
     }
   }
 
-  getQuerySnapshot(): QuerySnapshot {
+  getQuerySnapshot(): BeaconQueryRequestModel {
     const snapshot = this.queryForm.value;
     return {
-      start: parseInt(snapshot['start'], 10),
+      start: snapshot['start'],
       referenceBases: snapshot['referenceBases'].toUpperCase(),
       alternateBases: snapshot['alternateBases'].toUpperCase(),
     };
@@ -247,21 +235,17 @@ export class DiscoveryBeaconComponent implements OnInit {
   }
 
   private initialize() {
-    if (this.appConfig.covidBeaconUrl) {
-      this.beaconService.setApiUrl(this.appConfig.covidBeaconUrl);
-    }
-
     this.route.queryParams
       .subscribe(params => {
-        const position = Number(params['position']);
+        const position = params['position'];
         const reference = params['referenceBases'];
         const alternate = params['alternateBases'];
 
-        let q: QuerySnapshot;
+        let q: BeaconQueryRequestModel;
 
         if (position === 0 || !reference || !alternate) {
           q = {
-            start: 3840,
+            start: '3840',
             referenceBases: 'A',
             alternateBases: 'G',
           };

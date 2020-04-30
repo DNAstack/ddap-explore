@@ -4,8 +4,6 @@ import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { flatDeep } from 'ddap-common-lib';
 import { map } from 'rxjs/operators';
 
-import { AppConfigModel } from '../../shared/app-config/app-config.model';
-import { AppConfigService } from '../../shared/app-config/app-config.service';
 import { JsonEditorDefaults } from '../../shared/jsonEditorDefaults';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceAuthStateService } from '../../shared/resource-auth-state.service';
@@ -34,7 +32,6 @@ export class WorkflowDetailComponent implements OnInit {
   editor: JsonEditorComponent;
 
   constructor(private route: ActivatedRoute,
-              private appConfigService: AppConfigService,
               private router: Router,
               private workflowService: WorkflowService,
               private activatedRoute: ActivatedRoute,
@@ -45,14 +42,7 @@ export class WorkflowDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Ensure that the user can only access this component when it is enabled.
-    this.appConfigService.get().subscribe((data: AppConfigModel) => {
-      if (data.featureWorkflowsEnabled) {
-        this.initialize();
-      } else {
-        this.router.navigate(['/']);
-      }
-    });
+    this.initialize();
   }
 
   private initialize() {

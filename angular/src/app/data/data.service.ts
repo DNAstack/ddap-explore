@@ -4,7 +4,6 @@ import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { AppConfigService } from '../shared/app-config/app-config.service';
 import { CollectionModel, CollectionsRequestModel, CollectionsResponseModel } from '../shared/collection.model';
 import { ResourceModel, ResourcesRequestModel, ResourcesResponseModel } from '../shared/resource.model';
 
@@ -15,7 +14,6 @@ export class DataService {
 
   constructor(
     private http: HttpClient,
-    private appConfigService: AppConfigService,
     private errorHandler: ErrorHandlerService
   ) {
   }

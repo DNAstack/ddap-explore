@@ -46,13 +46,12 @@ public class UserCredentialService {
         return userIdentifier;
     }
 
-
-    public Optional<UserCredential> getAndDecryptSessionBoundCredentialsForResourceInterface(ServerHttpRequest request, WebSession session, InterfaceId resourceId) {
-        return getSessionBoundCredentialsForResourceInterface(session, resourceId)
-            .map(userCredential -> decryptSessionBoundCredentials(request, userCredential));
+    public Optional<UserCredential> getAndDecryptCredentialsForResourceInterface(ServerHttpRequest request, WebSession session, InterfaceId resourceId) {
+        return getCredentialsForResourceInterface(session, resourceId)
+            .map(userCredential -> decryptCredentials(request, userCredential));
     }
 
-    public Optional<UserCredential> getSessionBoundCredentialsForResourceInterface(WebSession session, InterfaceId resourceId) {
+    public Optional<UserCredential> getCredentialsForResourceInterface(WebSession session, InterfaceId resourceId) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao
             .getCredentialForResource(getUserIdentifier(session), resourceId.encodeId()));
     }
@@ -62,15 +61,15 @@ public class UserCredentialService {
             .getCredentialsForResources(getUserIdentifier(session), interfaceIds));
     }
 
-    public List<UserCredential> getAndDecryptSessionBoundCredentials(ServerHttpRequest request, WebSession session, List<String> interfaceIds) {
+    public List<UserCredential> getAndDecryptCredentials(ServerHttpRequest request, WebSession session, List<String> interfaceIds) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao
             .getCredentialsForResources(getUserIdentifier(session), interfaceIds))
-            .stream().map(userCredential -> decryptSessionBoundCredentials(request, userCredential))
+            .stream().map(userCredential -> decryptCredentials(request, userCredential))
             .collect(Collectors.toList());
     }
 
 
-    private UserCredential decryptSessionBoundCredentials(ServerHttpRequest request, UserCredential userCredential) {
+    private UserCredential decryptCredentials(ServerHttpRequest request, UserCredential userCredential) {
         String privateKey = requirePrivateKeyInCookie(request);
         String decryptedCredentials = SessionEncryptionUtils
             .decryptData(privateKey, userCredential.getEncryptedCredentials());
@@ -88,7 +87,7 @@ public class UserCredentialService {
         return privateKey.getValue();
     }
 
-    public void storeSessionBoundCredentialsForResource(WebSession session, List<UserCredential> userCredentials) {
+    public void storeCredentialsForResource(WebSession session, List<UserCredential> userCredentials) {
         String principal = getUserIdentifier(session);
         List<String> ids = userCredentials.stream().map(UserCredential::getInterfaceId)
             .collect(Collectors.toList());
@@ -115,7 +114,7 @@ public class UserCredentialService {
         });
     }
 
-    public int deleteSessionBoundCredential(WebSession session, String id) {
+    public int deleteCredential(WebSession session, String id) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao.deleteCredential(getUserIdentifier(session), id));
     }
 
@@ -143,7 +142,7 @@ public class UserCredentialService {
     }
 
     @Scheduled(fixedDelay = 300000)
-    public void deleteSessionBoundCredentials() {
+    public void deleteExpiredCredentials() {
         jdbi.useExtension(UserCredentialDao.class, dao -> {
             log.info("Cleaning up expired or orphaned session resource tokens");
             int tokensDeleted = dao.deleteExpiredCredentials();

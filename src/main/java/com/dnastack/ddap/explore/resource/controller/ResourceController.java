@@ -245,7 +245,7 @@ public class ResourceController {
                 return resourceClient.handleResponseAndGetCredentials(request, redirectUri, storedState, code)
                     .doOnNext(userCredentials -> {
                         if (userCredentials != null && !userCredentials.isEmpty()) {
-                            userCredentialService.storeSessionBoundCredentialsForResource(session, userCredentials);
+                            userCredentialService.storeCredentialsForResource(session, userCredentials);
                         }
                     }).then(Mono.defer(() -> {
                         Optional<OAuthState> nextStateOpt = storedState.getNextState();

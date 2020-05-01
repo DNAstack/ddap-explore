@@ -51,7 +51,7 @@ public class ExploreAppController {
             final Duration enforceTtl = parseDuration(minimumTtl);
             final ExploreTokenResponse tokenResponse = new ExploreTokenResponse();
             List<UserCredential> existingCredentials = userCredentialService
-                .getAndDecryptSessionBoundCredentials(httpRequest, session, interfaceIds);
+                .getAndDecryptCredentials(httpRequest, session, interfaceIds);
             List<String> potentiallyReauthenticate = new ArrayList<>();
             interfaceIds.forEach(id -> {
                 Optional<UserCredential> existingOpt = existingCredentials.stream()

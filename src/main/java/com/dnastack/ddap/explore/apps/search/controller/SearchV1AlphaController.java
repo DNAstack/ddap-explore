@@ -19,12 +19,12 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1alpha/realm/{realm}/search")
-public class SearchController {
+public class SearchV1AlphaController {
     private SearchClient searchClient;
     private SearchResourceService searchResourceService;
 
     @Autowired
-    public SearchController(SearchClient searchClient,
+    public SearchV1AlphaController(SearchClient searchClient,
                             SearchResourceService searchResourceService) {
         this.searchClient = searchClient;
         this.searchResourceService = searchResourceService;

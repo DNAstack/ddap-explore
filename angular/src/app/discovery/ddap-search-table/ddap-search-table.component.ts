@@ -22,6 +22,7 @@ import { DiscoveryConfigService } from '../discovery-config.service';
 
     @Input() service: string;
     @Input() table: string;
+    @Input() fieldMap?: any;
 
     appConfig: AppConfigModel;
 
@@ -118,10 +119,25 @@ import { DiscoveryConfigService } from '../discovery-config.service';
           this.queryError = null;
           this.results = result;
 
+          // console.log(result.data_model.properties);
+
+          const that = this;
+
           // Set column definitions
           const columnDefs = [];
           Object.keys(result.data_model.properties).map(function(key) {
-            columnDefs.push({'field': key});
+
+            const field = {'field': key};
+            if (result.data_model.properties[key]['type'] === 'int') {
+              field['type'] = 'numericColumn';
+              field['filter'] = 'agNumberColumnFilter';
+            }
+
+            if (that.fieldMap && that.fieldMap[key]) {
+              field['headerName'] = that.fieldMap[key];
+            }
+
+            columnDefs.push(field);
             return columnDefs;
           });
           this.columnDefs = columnDefs;
@@ -160,6 +176,8 @@ import { DiscoveryConfigService } from '../discovery-config.service';
 
     onGridReady(params) {
       this.gridApi = params.api;
+
+
 
       this.gridColumnApi = params.columnApi;
 

@@ -2,15 +2,9 @@
 <div class="full-hw" style="display:flex; flex-direction:column;">
     <ddaplib-header icon="navigation" label="Genomes">
         <span class="fill-space"></span>
-        <button class="m-r-sm" tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = !view.showLeftSidebar" matTooltip="{{view.showLeftSidebar ? 'Hide' : 'Show'}} Filters" color="{{view.showLeftSidebar ? 'accent' : ''}}">
-            <mat-icon>filter_list</mat-icon>
-        </button>
-        <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = !view.showRightSidebar" matTooltip="{{view.showRightSidebar ? 'Hide' : 'Show'}} Settings" color="{{view.showRightSidebar ? 'accent' : ''}}">
-            <mat-icon>tune</mat-icon>
-        </button>
     </ddaplib-header>
     <!--<mat-progress-bar mode="indeterminate"></mat-progress-bar>-->
     <div style="display:flex; flex-direction:column; flex: 1">
-        <ddap-search-table style="display:flex; flex-direction:column; flex:1" [service]="service" [table]="table"></ddap-search-table>
+        <ddap-search-table style="display:flex; flex-direction:column; flex:1" [service]="service" [table]="table" [fieldMap]="fieldMap"></ddap-search-table>
     </div>
 </div>

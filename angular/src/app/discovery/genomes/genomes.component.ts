@@ -23,7 +23,22 @@ import { DiscoveryConfigService } from '../discovery-config.service';
 
     service = 'search';
     table = 'search_cloud.coronavirus.sequences';
-
+    fieldMap = {
+        'virus_strain_name' : 'Strain',
+        'accession_id' : 'Accession',
+        'data_source' : 'Source',
+        'related_id' : 'Related',
+        'nuc_completeness' : 'Completeness',
+        'sequence_length' : 'Length',
+        'sequence_quality' : 'Quality',
+        'quality_assessment' : 'Quality Assessment',
+        'host' : 'Host',
+        'sample_collection_date' : 'Sample Collection Date',
+        'location' : 'Location',
+        'originating_lab' : 'Originating Laboratory',
+        'submission_date' : 'Submission Date',
+        'submitting_lab' : 'Submitting Laboratory',
+    };
 
     constructor(private router: Router,
                 private appConfigService: AppConfigService,
@@ -37,6 +52,8 @@ import { DiscoveryConfigService } from '../discovery-config.service';
                         showLeftSidebar: true,
                         showRightSidebar: false,
                     };
+
+
     }
 
     ngAfterViewInit(): void {

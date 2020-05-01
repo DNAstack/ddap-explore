@@ -1,4 +1,4 @@
-package com.dnastack.ddap.explore.apps.search.client;
+package com.dnastack.ddap.explore.apps.search.exception;
 
 import lombok.Getter;
 

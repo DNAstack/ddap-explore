@@ -18,6 +18,14 @@ public class UserCredential {
     @JsonIgnore
     private String encryptedCredentials;
 
+    @JsonIgnore
+    public String getAccessToken(){
+        if (credentials != null){
+            return credentials.get("access_token");
+        }
+        return null;
+    }
+
     private Map<String, String> credentials;
 
 }

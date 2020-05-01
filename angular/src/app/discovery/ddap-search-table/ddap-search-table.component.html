@@ -1,0 +1,59 @@
+<div style="display:flex; flex:1">
+    <mat-drawer-container style="flex:1" [autosize]="true" hasBackdrop="false">
+        <mat-drawer mode="side" [(opened)]="view.showLeftSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
+            <mat-toolbar class="tertiary-toolbar">
+                <mat-toolbar-row>
+                    <div>Filters</div>
+                    <span class="fill-space"></span>
+                    <button tabindex="-1" mat-icon-button (click)="view.showLeftSidebar = false;" matTooltip="Close Structures">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </mat-toolbar-row>
+            </mat-toolbar>
+            <div style="flex: 1; overflow-y: auto;">
+                Filters
+            </div>
+        </mat-drawer>
+        <mat-drawer-content style="display:flex; flex: 1">
+            <mat-drawer-container style="flex:1" [autosize]="true" hasBackdrop="false">
+                <mat-drawer mode="side" position="end" [(opened)]="view.showRightSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
+                    <mat-toolbar class="tertiary-toolbar">
+                        <mat-toolbar-row>
+                            <div>Settings</div>
+                            <span class="fill-space"></span>
+                            <button tabindex="-1" mat-icon-button (click)="view.showRightSidebar = false;" matTooltip="Close Settings">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-toolbar-row>
+                    </mat-toolbar>
+                    <div class="p-a">
+                        Settings
+                    </div>
+                </mat-drawer>
+                <mat-drawer-content class="full-hw">
+                    <ag-grid-angular
+                    style="width: 100%; height: 100%;"
+                    #agGrid
+                    [hidden]="view.isSearching"
+                    class="ag-theme-material"
+                    [defaultColDef]="grid.defaultColumnDefinition"
+                    [multiSortKey]="grid.multiSortKey"
+                    [animateRows]="grid.animateRows"
+                    [pagination]="grid.pagination"
+                    [floatingFilter]="grid.floatingFilter"
+                    [suppressCellSelection]="grid.suppressCellSelection"
+                    [paginationAutoPageSize]="grid.paginationAutoPageSize"
+                    [(rowData)]="rowData"
+                    [columnDefs]="columnDefs"
+                    [domLayout]="grid.domLayout"
+                    (filterModified)="onFilterChanged($event)"
+                    (filterChanged)="onFilterChanged($event)"
+                    (rowClicked)='onRowClicked($event)'
+                    (gridReady)="onGridReady($event)"
+                    >
+                  </ag-grid-angular>
+                </mat-drawer-content>
+            </mat-drawer-container>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>

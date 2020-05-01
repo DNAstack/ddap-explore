@@ -1,17 +1,14 @@
-import { ArrayDataSource } from '@angular/cdk/collections';
-import { FlatTreeControl } from '@angular/cdk/tree';
 import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ViewControllerService } from 'ddap-common-lib';
-import * as ngl from 'ngl';
+import { SearchService } from 'src/app/search/search.service';
 import { AppConfigModel } from 'src/app/shared/app-config/app-config.model';
 import { AppConfigService } from 'src/app/shared/app-config/app-config.service';
 
 import { DiscoveryConfigService } from '../discovery-config.service';
 
 @Component({
-    selector: 'ddap-proteins',
+    selector: 'ddap-genomes',
     templateUrl: './genomes.component.html',
     styleUrls: [],
   })
@@ -19,18 +16,19 @@ import { DiscoveryConfigService } from '../discovery-config.service';
 
     appConfig: AppConfigModel;
 
-    grid: any;
-
-    columnDefs: any[];
-    rowData: any[];
-
     view: {
         showLeftSidebar: boolean,
-        showRightSidebar: boolean
+        showRightSidebar: boolean,
     };
+
+    service = 'search';
+    table = 'search_cloud.coronavirus.sequences';
+
 
     constructor(private router: Router,
                 private appConfigService: AppConfigService,
+                private route: ActivatedRoute,
+                private searchService: SearchService,
                 private configService: DiscoveryConfigService,
                 private viewController: ViewControllerService
                 ) {
@@ -41,14 +39,15 @@ import { DiscoveryConfigService } from '../discovery-config.service';
                     };
     }
 
-
     ngAfterViewInit(): void {
     }
 
-
     ngOnInit(): void {
-
     }
-
 }
+
+interface ParsedBackendError {
+    errorName: string;
+    message: string;
+  }
 

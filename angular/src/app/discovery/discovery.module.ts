@@ -10,6 +10,7 @@ import { ColorPickerModule } from 'ngx-color-picker';
 
 import { SharedModule } from '../shared/shared.module';
 
+import { SearchTableComponent } from './ddap-search-table/ddap-search-table.component';
 import { DiscoveryBeaconComponent } from './discovery-beacon/discovery-beacon.component';
 import { GeocodeService } from './discovery-beacon/geocode/geocode.service';
 import { DiscoveryBeaconHelpDialogComponent } from './discovery-beacon/help/discovery-beacon.help.dialog';
@@ -22,6 +23,7 @@ import { KeyValuePairComponent } from './ui-components/key-value-pair/key-value-
 @NgModule({
   declarations: [
     GenomesComponent,
+    SearchTableComponent,
     DiscoverySearchComponent,
     DiscoveryBeaconComponent,
     MoleculesComponent,

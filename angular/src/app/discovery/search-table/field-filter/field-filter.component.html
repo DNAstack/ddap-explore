@@ -1,0 +1,15 @@
+<div style="display:flex; align-items: center; justify-content: center;">
+    <mat-form-field appearance="outline" floatLabel="always" *ngIf="operators && operator">
+        <mat-label>{{field.headerName}}</mat-label>
+        <div style="display: flex; flex-direction: row; align-items: center; ">
+            <a [matMenuTriggerFor]="appMenu" class="m-r" style="width:64px">
+                {{operator.name}}
+            </a>
+            <mat-menu #appMenu="matMenu">
+                <button mat-menu-item class="mat-menu-item {{operator === op ? 'active' : ''}}" *ngFor="let op of operators" (click)="selectOperator(op)">{{op.name}}</button>
+            </mat-menu>
+            <input matInput value="">
+        </div>
+    </mat-form-field>
+</div>
+

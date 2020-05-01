@@ -13,9 +13,11 @@ import { TableModel } from 'src/app/shared/search/table.model';
 
 import { DiscoveryConfigService } from '../discovery-config.service';
 
+import { Arity } from './field-filter/field-filter.component';
+
 @Component({
     selector: 'ddap-search-table',
-    templateUrl: './ddap-search-table.component.html',
+    templateUrl: './search-table.component.html',
     styleUrls: [],
   })
   export class SearchTableComponent implements OnInit, AfterViewInit {
@@ -23,6 +25,8 @@ import { DiscoveryConfigService } from '../discovery-config.service';
     @Input() service: string;
     @Input() table: string;
     @Input() fieldMap?: any;
+    @Input() showLeftSidebar?: boolean;
+    @Input() showRightSidebar?: boolean;
 
     appConfig: AppConfigModel;
 
@@ -33,8 +37,6 @@ import { DiscoveryConfigService } from '../discovery-config.service';
     grid: any;
 
     view: {
-        showLeftSidebar: boolean,
-        showRightSidebar: boolean,
         isSearching: boolean,
         errorQueryingTable: boolean
     };
@@ -57,22 +59,19 @@ import { DiscoveryConfigService } from '../discovery-config.service';
                 ) {
 
                     this.view = {
-                        showLeftSidebar: false,
-                        showRightSidebar: false,
                         isSearching: false,
                         errorQueryingTable: false,
                     };
 
                     this.grid = {
                         animateRows: true,
-                        rowModelType: 'serverSide',
                         multiSortKey: 'ctrl',
                         defaultColumnDefinition: {
                           sortable: true,
                           resizable: true,
                           filter: true,
                         },
-                        floatingFilter: true,
+                        floatingFilter: false,
                         paginationAutoPageSize: true,
                         makeFullWidth: true,
                         pagination: true,
@@ -91,13 +90,39 @@ import { DiscoveryConfigService } from '../discovery-config.service';
         });
     }
 
-    executeSearch() {
-        const query = 'SELECT * FROM ' + this.table + ' WHERE ' + this.filtersToWhereClause() + ' LIMIT 50';
-        this.executeSearchWithQuery(query);
+    compileStats() {
+
     }
 
-    filtersToWhereClause() {
+    operatorsForColumn(colDef) {
+      if (!colDef.type || colDef.type === 'textColumn') {
+        return [
+          { name: 'contains', arity: Arity.unary },
+          { name: 'starts with', arity: Arity.unary },
+          { name: 'ends with', arity: Arity.unary },
+          { name: 'is', arity: Arity.unary },
+          { name: 'is not', arity: Arity.unary },
+        ];
+      } else if (colDef.type === 'numericColumn') {
+        return [
+          { name: 'equals', arity: Arity.unary },
+          { name: 'greater than', arity: Arity.unary },
+          { name: 'less than', arity: Arity.unary },
+          { name: 'between', arity: Arity.binary },
+        ];
+      }
+    }
+
+    getQuery() {
+      return 'SELECT * FROM ' + this.table + ' WHERE ' + this.getWhereClause() + ' LIMIT 50';
+    }
+
+    getWhereClause() {
       return '1 = 1';
+    }
+
+    executeSearch() {
+        this.executeSearchWithQuery(this.getQuery());
     }
 
     executeSearchWithQuery(query: string) {
@@ -131,6 +156,10 @@ import { DiscoveryConfigService } from '../discovery-config.service';
             if (result.data_model.properties[key]['type'] === 'int') {
               field['type'] = 'numericColumn';
               field['filter'] = 'agNumberColumnFilter';
+            }
+
+            if (result.data_model.properties[key]['type'] === 'string') {
+              field['type'] = 'textColumn';
             }
 
             if (that.fieldMap && that.fieldMap[key]) {

@@ -26,18 +26,17 @@ public class ResourceClientService {
     }
 
     public Mono<List<Resource>> listResources(String realm, List<CollectionId> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
-        return Flux.concat(resourceClients.stream().map(client -> client
-            .listResources(realm, collectionsToFilter, interfaceTypesToFilter, interfaceUrisToFilter))
-            .collect(Collectors.toList()))
-            .reduce(new ArrayList<Resource>(), (resources, spiResources) -> {
+        return Flux.fromIterable(resourceClients)
+            .flatMap(client -> client.listResources(realm, collectionsToFilter, interfaceTypesToFilter, interfaceUrisToFilter))
+            .reduce((resources, spiResources) -> {
                 resources.addAll(spiResources);
                 return resources;
             });
     }
 
     public Mono<List<Collection>> listCollections(String realm) {
-        return Flux
-            .concat(resourceClients.stream().map(client -> client.listCollections(realm)).collect(Collectors.toList()))
+        return Flux.fromIterable(resourceClients)
+            .flatMap(client -> client.listCollections(realm))
             .reduce((intermediate, spiCollections) -> {
                 intermediate.addAll(spiCollections);
                 return intermediate;

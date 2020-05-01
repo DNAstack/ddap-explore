@@ -66,7 +66,7 @@ public class DiscoveryController {
                 beaconAccess.setAccessInterface(accessInterface);
                 if (accessInterface.isAuthRequired()) {
                     Optional<UserCredential> credential = userCredentialService
-                        .getAndDecryptSessionBoundCredentialsForResourceInterface(httpRequest, session, beaconId);
+                        .getAndDecryptCredentialsForResourceInterface(httpRequest, session, beaconId);
                     if (!credential.isPresent()) {
                         URI authorizeUriBase = URI.create(XForwardUtil
                             .getExternalPath(httpRequest, String
@@ -89,7 +89,7 @@ public class DiscoveryController {
             }).doOnNext(result -> {
                 if (result.getError() != null && List.of(401, 403).contains(result.getError().getErrorCode())) {
                     log.debug("User request was not authorized, cleaning up stale credentials");
-                    userCredentialService.deleteSessionBoundCredential(session, interfaceId);
+                    userCredentialService.deleteCredential(session, interfaceId);
                 }
             });
         });

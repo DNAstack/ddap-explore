@@ -1,6 +1,7 @@
 package com.dnastack.ddap.explore.apps.search.client;
 
 import com.dnastack.ddap.common.client.WebClientFactory;
+import com.dnastack.ddap.explore.apps.search.exception.SearchResourceException;
 import com.dnastack.ddap.explore.apps.search.model.SearchTablesResponseModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;

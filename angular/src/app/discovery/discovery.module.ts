@@ -20,9 +20,11 @@ import { MoleculesComponent } from './molecules/molecules.component';
 import { FieldFilterComponent } from './search-table/field-filter/field-filter.component';
 import { SearchTableComponent } from './search-table/search-table.component';
 import { KeyValuePairComponent } from './ui-components/key-value-pair/key-value-pair.component';
+import { VariantsComponent } from './variants/variantscomponent';
 
 @NgModule({
   declarations: [
+    VariantsComponent,
     GenomesComponent,
     FieldFilterComponent,
     SearchTableComponent,

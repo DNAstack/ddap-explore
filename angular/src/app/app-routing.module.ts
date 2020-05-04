@@ -43,7 +43,7 @@ const routes: Routes = [
           .then(mod => mod.BeaconModule),
       },
       {
-        path: 'discovery',
+        path: 'cloud',
         loadChildren: () => import('./discovery/discovery.module')
           .then(mod => mod.DiscoveryModule),
       },

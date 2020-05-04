@@ -34,12 +34,18 @@ import { Arity } from './field-filter/field-filter.component';
     rowData: any[];
     filters: any;
 
+    conditionMap = {};
+
     grid: any;
 
     view: {
         isSearching: boolean,
-        errorQueryingTable: boolean
+        errorQueryingTable: boolean,
+        fieldConditionsChanged: boolean,
+        resultSize: number
     };
+
+    resultSizes = [10, 50, 100];
 
     searchServiceView: any;
 
@@ -61,7 +67,10 @@ import { Arity } from './field-filter/field-filter.component';
                     this.view = {
                         isSearching: false,
                         errorQueryingTable: false,
+                        fieldConditionsChanged: false,
+                        resultSize: 50,
                     };
+
 
                     this.grid = {
                         animateRows: true,
@@ -72,9 +81,9 @@ import { Arity } from './field-filter/field-filter.component';
                           filter: true,
                         },
                         floatingFilter: false,
-                        paginationAutoPageSize: true,
+                        paginationAutoPageSize: false,
                         makeFullWidth: true,
-                        pagination: true,
+                        pagination: false,
                         domLayout: 'normal',
                         suppressCellSelection: true,
                       };
@@ -90,19 +99,43 @@ import { Arity } from './field-filter/field-filter.component';
         });
     }
 
-    compileStats() {
+    conditionChangedForField(condition, colDef) {
 
+      this.view.fieldConditionsChanged = true;
+
+      // remove the condition if all values are the empty string
+      let removeCondition = true;
+      for (let i = 0; i < condition.values.length; i++) {
+        if (condition.values[i] !== '') {
+          removeCondition = false;
+          break;
+        }
+      }
+      if (removeCondition) {
+        delete this.conditionMap[colDef.field];
+        return;
+      }
+
+      this.conditionMap[colDef.field] = condition;
+    }
+
+    resultSizeChanged() {
+      this.view.fieldConditionsChanged = true;
     }
 
     operatorsForColumn(colDef) {
-      if (!colDef.type || colDef.type === 'textColumn') {
+      // text
+      if (!colDef.type) {
         return [
           { name: 'contains', arity: Arity.unary },
+          { name: 'doesn\'t contain', arity: Arity.unary },
           { name: 'starts with', arity: Arity.unary },
           { name: 'ends with', arity: Arity.unary },
           { name: 'is', arity: Arity.unary },
           { name: 'is not', arity: Arity.unary },
         ];
+
+        // number
       } else if (colDef.type === 'numericColumn') {
         return [
           { name: 'equals', arity: Arity.unary },
@@ -114,10 +147,50 @@ import { Arity } from './field-filter/field-filter.component';
     }
 
     getQuery() {
-      return 'SELECT * FROM ' + this.table + ' WHERE ' + this.getWhereClause() + ' LIMIT 50';
+      const query = 'SELECT * FROM ' + this.table + ' WHERE ' + this.getWhereClause() + ' LIMIT ' + this.view.resultSize;
+      // console.log(query);
+      return query;
     }
 
     getWhereClause() {
+      let clause = '1 = 1';
+      const that = this;
+      Object.keys(this.conditionMap).forEach(function(key) {
+        clause = clause + ' AND ' + that.clauseForCondition(key, that.conditionMap[key]);
+      });
+      return clause;
+    }
+
+    clauseForCondition(field: string, condition: any) {
+      const op = condition.operator;
+      const values = condition.values;
+
+      // text operations
+      if (op.name === 'contains') {
+        return '(' + field + ' LIKE \' %' + values[0] + '%\'' + ')';
+      } else if (op.name === 'doesn\'t contain') {
+        return '(' + field + ' NOT LIKE \' %' + values[0] + '%\'' + ')';
+      } else if (op.name === 'starts with') {
+        return '(' + field + ' LIKE \'' + values[0] + '%\'' + ')';
+      } else if (op.name === 'ends with') {
+        return '(' + field + ' LIKE \' %' + values[0] + '\'' + ')';
+      } else if (op.name === 'is') {
+        return '(' + field + ' = \'' + values[0] + '\'' + ')';
+      } else if (op.name === 'is not') {
+        return '(' + field + ' <> \'' + values[0] + '\'' + ')';
+      }
+
+      // numeric operations
+      if (op.name === 'equals') {
+        return '(' + field + ' = ' + Number(values[0]) + ')';
+      } else if (op.name === 'greater than') {
+        return '(' + field + ' > ' + Number(values[0]) + ')';
+      } else if (op.name === 'less than') {
+        return '(' + field + ' < ' + Number(values[0]) + ')';
+      } else if (op.name === 'between') {
+        return '(' + field + ' BETWEEN ' + Number(values[0]) + ' AND ' + Number(values[1]) + ')';
+      }
+
       return '1 = 1';
     }
 
@@ -129,6 +202,8 @@ import { Arity } from './field-filter/field-filter.component';
         this.results = null;
         this.view.isSearching = true;
         this.view.errorQueryingTable = false;
+
+        // console.log(query);
 
         this.searchService.observableSearch(
             this.searchServiceView.interfaceUri,
@@ -143,33 +218,38 @@ import { Arity } from './field-filter/field-filter.component';
         ).subscribe(result => {
           this.queryError = null;
           this.results = result;
-
-          // console.log(result.data_model.properties);
-
+          this.view.fieldConditionsChanged = false;
           const that = this;
 
+          // console.log(result);
+
           // Set column definitions
-          const columnDefs = [];
-          Object.keys(result.data_model.properties).map(function(key) {
+          if (!that.columnDefs) {
 
-            const field = {'field': key};
-            if (result.data_model.properties[key]['type'] === 'int') {
-              field['type'] = 'numericColumn';
-              field['filter'] = 'agNumberColumnFilter';
-            }
+            const columnDefs = [];
 
-            if (result.data_model.properties[key]['type'] === 'string') {
-              field['type'] = 'textColumn';
-            }
+            Object.keys(result.data_model.properties).map(function(key) {
 
-            if (that.fieldMap && that.fieldMap[key]) {
-              field['headerName'] = that.fieldMap[key];
-            }
+              const field = {'field': key};
+              if (result.data_model.properties[key]['type'] === 'int') {
+                field['type'] = 'numericColumn';
+                field['filter'] = 'agNumberColumnFilter';
+              }
 
-            columnDefs.push(field);
-            return columnDefs;
-          });
-          this.columnDefs = columnDefs;
+              /*if (result.data_model.properties[key]['type'] === 'string') {
+                field['type'] = 'textColumn';
+              }*/
+
+              if (that.fieldMap && that.fieldMap[key]) {
+                field['headerName'] = that.fieldMap[key];
+              }
+
+              columnDefs.push(field);
+              return columnDefs;
+            });
+
+            this.columnDefs = columnDefs;
+          }
 
           // Set row data
           this.rowData = result.data;
@@ -177,6 +257,9 @@ import { Arity } from './field-filter/field-filter.component';
           this.gridApi.setRowData(this.rowData);
 
           this.view.isSearching = false;
+        },
+        error => {
+          // console.log(error);
         });
       }
 

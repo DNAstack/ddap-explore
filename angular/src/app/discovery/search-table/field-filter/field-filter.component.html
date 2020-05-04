@@ -1,14 +1,19 @@
-<div style="display:flex; align-items: center; justify-content: center;">
+<div style="display:flex;">
     <mat-form-field appearance="outline" floatLabel="always" *ngIf="operators && operator">
-        <mat-label>{{field.headerName}}</mat-label>
+        <mat-label>{{field.headerName ? field.headerName : field.field}}</mat-label>
         <div style="display: flex; flex-direction: row; align-items: center; ">
-            <a [matMenuTriggerFor]="appMenu" class="m-r" style="width:64px">
-                {{operator.name}}
-            </a>
-            <mat-menu #appMenu="matMenu">
-                <button mat-menu-item class="mat-menu-item {{operator === op ? 'active' : ''}}" *ngFor="let op of operators" (click)="selectOperator(op)">{{op.name}}</button>
+            <input matInput #in (input)="onChange($event.target.value)" (keyup.enter)="$event.target.blur(); onEnter()">
+        </div>
+        <div style="display: flex;" matSuffix>
+            <button mat-icon-button *ngIf="value != ''" tabindex="-1" style="margin-top:-20px" (click)="in.value = ''; onChange(in.value)">
+                <mat-icon>close</mat-icon>
+            </button>
+            <button mat-icon-button tabindex="-1" style="margin-top:-20px" [matMenuTriggerFor]="opMenu">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #opMenu="matMenu">
+                <button *ngFor="let opName of operatorNames" mat-menu-item class="mat-menu-item {{operator.name === opName ? 'active' : ''}}" (click)="selectOperator(getOperatorByName(opName))">{{opName}}</button>
             </mat-menu>
-            <input matInput value="">
         </div>
     </mat-form-field>
 </div>

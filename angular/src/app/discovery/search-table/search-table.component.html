@@ -1,23 +1,43 @@
 <div style="display:flex; flex:1">
     <mat-drawer-container style="flex:1" [autosize]="true" hasBackdrop="false">
-        <mat-drawer mode="side" [(opened)]="showLeftSidebar" style="min-width:300px; max-width:300px; display:flex; flex-direction: column; overflow:hidden;">
-            <mat-toolbar class="tertiary-toolbar">
-                <mat-toolbar-row>
-                    <div>Filters</div>
-                    <span class="fill-space"></span>
-                    <!--button tabindex="-1" mat-icon-button (click)="showLeftSidebar = false;" matTooltip="Close Structures">
-                        <mat-icon>close</mat-icon>
-                    </button>-->
-                </mat-toolbar-row>
-            </mat-toolbar>
-            <div style="flex: 1; overflow-y: auto;" class="p-a">
-                <div *ngFor="let colDef of columnDefs">
-                    <ddap-field-filter [field]="colDef" [operators]="operatorsForColumn(colDef)" condition=""></ddap-field-filter>
+        <mat-drawer mode="side" [(opened)]="showLeftSidebar" style="min-width:300px; max-width:300px;">
+            <div class="full-hw" style="display:flex; flex-direction: column; overflow:hidden;">
+                <mat-toolbar class="tertiary-toolbar">
+                    <mat-toolbar-row>
+                        <div>Filters</div>
+                        <span class="fill-space"></span>
+                        <button tabindex="-1" mat-icon-button (click)="showLeftSidebar = false;" matTooltip="Close Filters">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </mat-toolbar-row>
+                </mat-toolbar>
+                <div style="flex-grow: 1; overflow-y: auto;" class="p-a">
+                    <div *ngIf="columnDefs">
+                        <div *ngFor="let colDef of columnDefs">
+                            <ddap-field-filter [field]="colDef" [operators]="operatorsForColumn(colDef)" condition="" (enter)="executeSearch()" (conditionChanged)="conditionChangedForField($event,colDef)"></ddap-field-filter>
+                        </div>
+                        <mat-divider></mat-divider>
+                        <mat-form-field class="m-t" appearance="outline" floatLabel="always" >
+                            <mat-label>Results</mat-label>
+                            <mat-select (selectionChange)="resultSizeChanged()" [(ngModel)]="view.resultSize">
+                                <mat-option *ngFor="let resultSize of resultSizes" [value]="resultSize">{{resultSize}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
                 </div>
+                <mat-toolbar class="tertiary-toolbar b-t">
+                    <mat-toolbar-row>
+                        <span class="fill-space"></span>
+                        
+                        <button [disabled]="!view.fieldConditionsChanged || view.isSearching" (click)="executeSearch()" tabindex="-1" mat-flat-button color="accent">
+                            Search
+                        </button>
+                    </mat-toolbar-row>
+                </mat-toolbar>
             </div>
         </mat-drawer>
         <mat-drawer-content style="display:flex; flex: 1">
-            <mat-drawer-container style="flex:1" [autosize]="true" hasBackdrop="false">
+            <mat-drawer-container style="flex:1;" [autosize]="true" hasBackdrop="false">
                 <mat-drawer mode="side" position="end" [(opened)]="showRightSidebar" style="min-width:400px; max-width:400px; display:flex; flex-direction: column; overflow:hidden;">
                     <mat-toolbar class="tertiary-toolbar">
                         <mat-toolbar-row>
@@ -32,28 +52,30 @@
                         Settings
                     </div>
                 </mat-drawer>
-                <mat-drawer-content class="full-hw p-a">
-                    <ag-grid-angular
-                    style="width: 100%; height: 100%;"
-                    #agGrid
-                    [hidden]="view.isSearching"
-                    class="ag-theme-material b-a"
-                    [defaultColDef]="grid.defaultColumnDefinition"
-                    [multiSortKey]="grid.multiSortKey"
-                    [animateRows]="grid.animateRows"
-                    [pagination]="grid.pagination"
-                    [floatingFilter]="grid.floatingFilter"
-                    [suppressCellSelection]="grid.suppressCellSelection"
-                    [paginationAutoPageSize]="grid.paginationAutoPageSize"
-                    [(rowData)]="rowData"
-                    [columnDefs]="columnDefs"
-                    [domLayout]="grid.domLayout"
-                    (filterModified)="onFilterChanged($event)"
-                    (filterChanged)="onFilterChanged($event)"
-                    (rowClicked)='onRowClicked($event)'
-                    (gridReady)="onGridReady($event)"
-                    >
-                  </ag-grid-angular>
+                <mat-drawer-content class="full-hw" style="display: flex;">
+                    <div class="p-a" style="flex:1">
+                        <ag-grid-angular
+                        style="width: 100%; height: 100%;"
+                        #agGrid
+                        [hidden]="view.isSearching"
+                        class="ag-theme-material b-a"
+                        [defaultColDef]="grid.defaultColumnDefinition"
+                        [multiSortKey]="grid.multiSortKey"
+                        [animateRows]="grid.animateRows"
+                        [pagination]="grid.pagination"
+                        [floatingFilter]="grid.floatingFilter"
+                        [suppressCellSelection]="grid.suppressCellSelection"
+                        [paginationAutoPageSize]="grid.paginationAutoPageSize"
+                        [(rowData)]="rowData"
+                        [columnDefs]="columnDefs"
+                        [domLayout]="grid.domLayout"
+                        (filterModified)="onFilterChanged($event)"
+                        (filterChanged)="onFilterChanged($event)"
+                        (rowClicked)='onRowClicked($event)'
+                        (gridReady)="onGridReady($event)"
+                        >
+                      </ag-grid-angular>
+                    </div>
                 </mat-drawer-content>
             </mat-drawer-container>
         </mat-drawer-content>

@@ -100,8 +100,7 @@ public class SearchV1BetaController {
                             .just(handleException(httpRequest, throwable, realm, this::constructListResultRequiringAuthorization)))
                         .map(listTables -> {
                             listTables.setResource(resource);
-                            return mapLazilyResolvedReferenceUrls(httpRequest, realm, accessInterface
-                                .getId(), listTables);
+                            return listTables;
                         });
                 }).reduce(new AggregateListTable(), (identity, current) -> {
                     List<ListTables> tableResources = identity.getTableResources();
@@ -137,11 +136,17 @@ public class SearchV1BetaController {
             return getAccessInterfaceFor(realm, interfaceId)
                 .flatMap(accessInterface -> {
                     final URI absoluteDataModelUri = accessInterface.getUri().resolve(dataModelUri);
+                    if (absoluteDataModelUri.getHost().equals(accessInterface.getUri().getHost())) {
+                        return Mono.just(accessInterface);
+                    } else {
+                        return getFirstAccessInterfaceForURI(realm, absoluteDataModelUri)
+                            .switchIfEmpty(Mono.just(new AccessInterface(null, absoluteDataModelUri, null, false)));
+                    }
+                }).flatMap(accessInterface -> {
+                    final URI absoluteDataModelUri = accessInterface.getUri().resolve(dataModelUri);
                     String accessToken = null;
-                    if (accessInterface.getUri().getHost().equals(absoluteDataModelUri.getHost()) && accessInterface
-                        .isAuthRequired()) {
+                    if (accessInterface.isAuthRequired()) {
                         accessToken = getAccessTokenForInterface(httpRequest, session, realm, accessInterface);
-
                         if (accessToken == null) {
                             Map<String, Object> response = new HashMap<>();
                             UriComponentsBuilder componentsBuilder = getAuthorizationUriBuilder(httpRequest, realm);
@@ -151,11 +156,13 @@ public class SearchV1BetaController {
                             return Mono.just(response);
                         }
                     }
+
                     ParameterizedTypeReference<Map<String, Object>> typeReference = new ParameterizedTypeReference<>() {
                     };
                     return retrieveSearchResource(httpRequest, session, accessInterface, absoluteDataModelUri, typeReference, accessToken, null)
                         .onErrorResume(throwable -> Mono
                             .just(handleException(httpRequest, throwable, realm, this::contstructDataModelResultRequiredAuth)));
+
                 });
         });
     }
@@ -191,7 +198,7 @@ public class SearchV1BetaController {
                 }
                 URI absolutePageToRetrieve = UriComponentsBuilder.fromUri(accessInterface.getUri())
                     .pathSegment("search").build().toUri().resolve(pageToRetrieve);
-                ParameterizedTypeReference<TableData> typeReference = new ParameterizedTypeReference<TableData>() {
+                ParameterizedTypeReference<TableData> typeReference = new ParameterizedTypeReference<>() {
                 };
 
                 return retrieveSearchResource(httpRequest, session, accessInterface, absolutePageToRetrieve, typeReference, accessToken, null)
@@ -229,42 +236,26 @@ public class SearchV1BetaController {
 
     }
 
-    private ListTables mapLazilyResolvedReferenceUrls(ServerHttpRequest httpRequest, String realm, String interfaceId, ListTables listData) {
-        if (listData.getTableInfos() != null) {
-            listData.getTableInfos().stream().forEach(tableInfo -> {
-                if (tableInfo.getDataModel() != null) {
-                    URI base = URI.create(XForwardUtil.getExternalPath(httpRequest,httpRequest.getPath().toString()));
-                    Map<String, Object> currentDataModel = tableInfo.getDataModel();
-                    if (currentDataModel.containsKey("$ref")) {
-                        UriComponentsBuilder componentsBuilder = getUriBuilder(httpRequest, realm, "/apps/search/tables/data-models");
-                        componentsBuilder.queryParam("resource", interfaceId);
-                        componentsBuilder.queryParam("data_model_uri", currentDataModel.get("$ref"));
-                        currentDataModel.put("$ref", base.relativize(componentsBuilder.build().toUri()));
-                    }
-                }
-            });
-        }
-        return listData;
-    }
-
     private TableData setupPagination(ServerHttpRequest httpRequest, String realm, TableData tableData, InterfaceId searchInterface) {
         if (tableData.getPagination() != null) {
             Pagination pagination = tableData.getPagination();
-            URI base = URI.create(XForwardUtil.getExternalPath(httpRequest,httpRequest.getPath().toString()));
             if (pagination.getNextPageUrl() != null) {
 
-                pagination.setNextPageUrl(base.relativize(getUriBuilder(httpRequest, realm, "/apps/search/query/results")
-                    .queryParam("resource", searchInterface.encodeId())
-                    .queryParam("next_page_token", Base64.getEncoder()
-                        .encodeToString(pagination.getNextPageUrl().toString().getBytes(StandardCharsets.UTF_8)))
-                    .build().toUri()));
+                pagination
+                    .setNextPageUrl(getUriBuilder(httpRequest, realm, "/apps/search/query/results")
+                        .queryParam("resource", searchInterface.encodeId())
+                        .queryParam("next_page_token", Base64.getEncoder()
+                            .encodeToString(pagination.getNextPageUrl().toString().getBytes(StandardCharsets.UTF_8)))
+                        .build().toUri());
             }
             if (pagination.getPreviousPageUrl() != null) {
-                pagination.setPreviousPageUrl(base.relativize(getUriBuilder(httpRequest, realm, "/apps/search/query/results")
-                    .queryParam("resource", searchInterface.encodeId())
-                    .queryParam("previous_page_token", Base64.getEncoder()
-                        .encodeToString(pagination.getPreviousPageUrl().toString().getBytes(StandardCharsets.UTF_8)))
-                    .build().toUri()));
+                pagination
+                    .setPreviousPageUrl(getUriBuilder(httpRequest, realm, "/apps/search/query/results")
+                        .queryParam("resource", searchInterface.encodeId())
+                        .queryParam("previous_page_token", Base64.getEncoder()
+                            .encodeToString(pagination.getPreviousPageUrl().toString()
+                                .getBytes(StandardCharsets.UTF_8)))
+                        .build().toUri());
             }
         }
         return tableData;
@@ -314,6 +305,12 @@ public class SearchV1BetaController {
                         "Could not find Interface for resource with id: " + interfaceId.encodeId()));
                 return accessInterface;
             });
+    }
+
+    private Mono<AccessInterface> getFirstAccessInterfaceForURI(String realm, URI uri) {
+        return resourceClientService.listResources(realm, null, null, List.of(uri.toString()))
+            .flatMap(resources -> Mono.justOrEmpty(resources.stream().findFirst()))
+            .flatMap(resource -> Mono.justOrEmpty(resource.getInterfaces().stream().findFirst()));
     }
 
     private Map<String, Object> contstructDataModelResultRequiredAuth(ServerHttpRequest httpRequest, String realm, List<String> interfaceIds) {

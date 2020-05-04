@@ -1,6 +1,6 @@
 import { AgmCoreModule } from '@agm/core';
 import { NgModule } from '@angular/core';
-import { MatDialogModule, MatDialogRef, MatToolbarModule } from '@angular/material';
+import { MatDialogModule, MatToolbarModule } from '@angular/material';
 import { AgGridModule } from 'ag-grid-angular';
 import {
   BingMapAPILoader,
@@ -21,7 +21,6 @@ import {
 import {
   GeoLocationComponent
 } from './beacon/beacon-search-result-table/beacon-search-result-detail.component/geo-location/geo-location.component';
-import { GeocodeService } from './beacon/beacon-search-result-table/beacon-search-result-detail.component/geo-location/geocode.service';
 import {
   TableCellDataComponent
 } from './beacon/beacon-search-result-table/beacon-search-result-detail.component/table-cell-data/table-cell-data.component';
@@ -55,13 +54,8 @@ import { DiscoveryRoutingModule } from './discovery-routing.module';
     }),
   ],
   providers: [
-    GeocodeService,
     {
       provide: MapAPILoader, deps: [], useFactory: MapServiceProviderFactory,
-    },
-    {
-      provide: MatDialogRef,
-      useValue: {},
     },
   ],
   entryComponents: [

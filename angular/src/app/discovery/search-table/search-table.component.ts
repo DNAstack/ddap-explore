@@ -167,13 +167,13 @@ import { Arity } from './field-filter/field-filter.component';
 
       // text operations
       if (op.name === 'contains') {
-        return '(' + field + ' LIKE \' %' + values[0] + '%\'' + ')';
+        return '(' + field + ' LIKE \'%' + values[0] + '%\'' + ')';
       } else if (op.name === 'doesn\'t contain') {
-        return '(' + field + ' NOT LIKE \' %' + values[0] + '%\'' + ')';
+        return '(' + field + ' NOT LIKE \'%' + values[0] + '%\'' + ')';
       } else if (op.name === 'starts with') {
         return '(' + field + ' LIKE \'' + values[0] + '%\'' + ')';
       } else if (op.name === 'ends with') {
-        return '(' + field + ' LIKE \' %' + values[0] + '\'' + ')';
+        return '(' + field + ' LIKE \'%' + values[0] + '\'' + ')';
       } else if (op.name === 'is') {
         return '(' + field + ' = \'' + values[0] + '\'' + ')';
       } else if (op.name === 'is not') {

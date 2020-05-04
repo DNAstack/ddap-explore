@@ -11,7 +11,7 @@ export const routes: Routes = [
   { path: 'virus/variants', component: VariantsComponent},
   { path: 'virus/beacon', component: DiscoveryBeaconComponent},
   { path: 'virus/molecules', component: MoleculesComponent},
-  { path: '', redirectTo: 'virus/beacon'},
+  { path: '', redirectTo: 'virus/genomes'},
 ];
 
 @NgModule({

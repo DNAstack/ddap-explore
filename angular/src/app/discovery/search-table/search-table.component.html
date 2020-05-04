@@ -25,10 +25,9 @@
                         </mat-form-field>
                     </div>
                 </div>
-                <mat-toolbar class="tertiary-toolbar b-t">
+                <mat-toolbar class="tertiary-toolbar b-t" style="border-bottom: none;">
                     <mat-toolbar-row>
                         <span class="fill-space"></span>
-                        
                         <button [disabled]="!view.fieldConditionsChanged || view.isSearching" (click)="executeSearch()" tabindex="-1" mat-flat-button color="accent">
                             Search
                         </button>

@@ -3,7 +3,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'ddap-help-dialog',
-  templateUrl: './help-dialog.html',
+  templateUrl: './help-dialog.component.html',
 })
 export class HelpDialogComponent {
 

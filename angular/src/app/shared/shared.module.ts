@@ -82,7 +82,6 @@ import { PaginatorComponent } from './paginator/paginator.component';
 
     DdapLayoutModule,
     DdapFormModule,
-
     MenuModule,
 
     AgGridModule.withComponents([]),

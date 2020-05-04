@@ -1,4 +1,11 @@
+import { BeaconQueryAlleleRequestModel } from '../../beacon/beacon-search.model';
 import { KeyValuePair } from '../../key-value-pair.model';
+import { ResourceModel } from '../resource.model';
+
+export interface BeaconInfoResourcePair {
+  resource: ResourceModel;
+  beaconInfo: BeaconInfoResponseModel;
+}
 
 export interface BeaconInfoResponseModel {
   id: string;
@@ -6,6 +13,8 @@ export interface BeaconInfoResponseModel {
   apiVersion: string;
   description: string;
   organization: BeaconOrganizationModel;
+  datasets: BeaconDatasetModel[];
+  sampleAlleleRequests?: BeaconQueryAlleleRequestModel[];
   info?: KeyValuePair<string>;
 }
 
@@ -16,53 +25,12 @@ export interface BeaconOrganizationModel {
   info?: KeyValuePair<string>;
 }
 
+export interface BeaconDatasetModel {
+  id: string;
+  name: string;
+  assemblyId: string;
+}
+
 export interface BeaconInfoRequestModel extends KeyValuePair<string> {
 
-}
-
-export interface BeaconQueryResponseModel {
-  beaconId: string;
-  apiVersion: string;
-  exists: boolean;
-  alleleRequest: BeaconQueryAlleleRequestModel;
-  datasetAlleleResponses: BeaconQueryAlleleResponseModel[];
-  requiresAdditionalAuth: boolean;
-  authorizationUrlBase?: string;
-  queryError?: BeaconQueryErrorModel;
-}
-
-export interface BeaconQueryAlleleRequestModel {
-  referenceName: string;
-  referenceBases: string;
-  alternateBases: string;
-  variantType: string;
-  assemblyId: string;
-  start: number;
-  end: number;
-  datasetIds: string[];
-}
-
-export interface BeaconQueryAlleleResponseModel {
-  datasetId: string;
-  exists: boolean;
-  variantCount: number;
-  callCount: number;
-  sampleCount: number;
-  frequency: number;
-  note: string;
-  externalUrl: string;
-  info?: KeyValuePair<string>;
-}
-
-export interface BeaconQueryErrorModel {
-  status: number;
-  message: string;
-}
-
-export interface BeaconQueryRequestModel extends KeyValuePair<string> {
-  assemblyId?: string;
-  referenceName?: string;
-  start?: string;
-  referenceBases?: string;
-  alternateBases?: string;
 }

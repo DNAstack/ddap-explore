@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { CollectionsResponseModel } from '../../../shared/collection.model';
+import { CollectionsResponseModel } from '../../../shared/apps/collection.model';
+import { ResourceService } from '../../../shared/apps/resource.service';
 import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.service';
-import { DataService } from '../../data.service';
 
 
 @Component({
@@ -18,12 +18,12 @@ export class CollectionListComponent implements OnInit {
 
   constructor(
     public randomImageRetriever: ImagePlaceholderRetriever,
-    private dataService: DataService
+    private resourceService: ResourceService
   ) {
   }
 
   ngOnInit() {
-    this.collections$ = this.dataService.getCollections();
+    this.collections$ = this.resourceService.getCollections();
   }
 
   // TODO: Move to common lib

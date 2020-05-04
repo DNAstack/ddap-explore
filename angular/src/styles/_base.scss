@@ -3,9 +3,8 @@
 // Plus imports for other components in your app.
 // Ag Grid
 // TODO: move to a separate file
-@import "~ag-grid-community/dist/styles/ag-grid.css";
-@import "~ag-grid-community/dist/styles/ag-theme-balham.css";
-@import "~ag-grid-community/dist/styles/ag-theme-material.css";
+@import "~ag-grid-community/dist/styles/ag-grid.min.css";
+@import "~ag-grid-community/dist/styles/ag-theme-material.min.css";
 
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.

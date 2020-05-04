@@ -1,0 +1,40 @@
+@import '~ddap-common-lib/styles/modules/colors';
+
+.single-beacon-info,
+.single-beacon-dataset-info {
+  font-size: 1.4rem;
+  margin-top: 0.5rem;
+}
+
+.single-beacon-info,
+.single-beacon-dataset-info {
+  span:first-child {
+    color: $color-grey;
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+  }
+}
+
+.mat-form-field {
+  margin-top: 0.5rem;
+}
+
+::ng-deep .mat-form-field-wrapper {
+  padding: 0;
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-infix {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+@media only screen and (min-width: 480px) {
+  .single-beacon-info,
+  .multiple-beacon-info {
+    margin-right: 1.5rem;
+  }
+
+  .mat-form-field:not(:last-of-type) {
+    margin-right: 1rem;
+  }
+}

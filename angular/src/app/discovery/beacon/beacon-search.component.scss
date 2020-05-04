@@ -1,0 +1,65 @@
+@import '~ddap-common-lib/styles/modules/colors';
+
+::ng-deep .site-container ddaplib-main {
+  padding: 1rem;
+
+  main {
+    height: 100%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.search-bar {
+  padding-bottom: 1rem;
+}
+
+.search-results {
+  height: 100%;
+}
+
+.search-content-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.search-progress-backdrop {
+  position: absolute;
+  z-index: 1000;
+  background: $color-faded-grey;
+  opacity: 0.8;
+  width: 101%;
+  height: 100%;
+  margin-left: -1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media only screen and (max-width: 479px) {
+  ::ng-deep .site-container ddaplib-header + ddaplib-main,
+  ::ng-deep .site-container ddaplib-searchable-header + ddaplib-main {
+    top: 10rem;
+  }
+
+  ::ng-deep mat-toolbar {
+    &.mat-toolbar-multiple-rows {
+      height: 10rem;
+    }
+
+    .mat-toolbar-row {
+      height: 10rem;
+    }
+  }
+
+  ::ng-deep ddap-beacon-info-bar {
+    form {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      align-content: center;
+    };
+  }
+}

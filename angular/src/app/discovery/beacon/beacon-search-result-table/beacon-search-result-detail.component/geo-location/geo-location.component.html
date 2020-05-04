@@ -1,0 +1,9 @@
+<x-map [Options]="defaultMapOptions">
+  <x-map-marker *ngIf="latitude && longitude"
+                [Latitude]="latitude"
+                [Longitude]="longitude"
+                [matTooltip]="title">
+    <x-info-box [Title]="title">
+    </x-info-box>
+  </x-map-marker>
+</x-map>

@@ -6,7 +6,7 @@ import { filter, flatMap, tap } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import { AccessModel, TokensResponseModel } from '../../../../shared/apps/app-explore/app-explore.model';
 import { AppExploreService } from '../../../../shared/apps/app-explore/app-explore.service';
-import { InterfaceModel, ResourceModel } from '../../../../shared/resource.model';
+import { InterfaceModel, ResourceModel } from '../../../../shared/apps/resource.model';
 
 import { ResourceAccessFormBuilder } from './resource-access-form-builder.service';
 import { ResourceAccessFormStateService } from './resource-access-form-state.service';

@@ -1,0 +1,80 @@
+<div class="details-panel">
+  <ddap-table-cell-data title="Source"
+                        value="{{ selectedRowData.source }}">
+  </ddap-table-cell-data>
+  <br/>
+
+  <div *ngIf="buildNextStrainUrl(selectedRowData.source) as nextStrainUrl"
+       class="flex">
+    <img src="https://github.com/nextstrain.png?size=20">
+    <a [href]="nextStrainUrl"
+       target="_blank">
+      Nextstrain
+    </a>
+  </div>
+  <br/>
+
+  <ddap-table-cell-data title="Accession ID"
+                        value="{{ selectedRowData.Accession_ID }}">
+  </ddap-table-cell-data>
+  <br/>
+
+  <ddap-table-cell-data title="Data Source"
+                        value="{{ selectedRowData.Data_Source }}">
+  </ddap-table-cell-data>
+  <br/>
+
+  <div *ngIf="selectedRowData.Data_Source === 'GISAID'"
+       class="font-sm">
+    This service shares derivative data from the Global Initiative on Sharing All Influenza Data
+    (<a href="https://www.gisaid.org/" target="_blank">GISAID</a>).
+  </div>
+  <div *ngIf="selectedRowData.Data_Source === 'Genome Warehouse'"
+       class="font-sm">
+    This service shares derivative data from the
+    (<a href="http://bigd.big.ac.cn/gwh/" target="_blank">National Genomics Data Center</a>).
+  </div>
+  <br/>
+
+  <ddap-table-cell-data title="Nuc Completeness"
+                        value="{{ selectedRowData.Nuc_Completeness }}">
+  </ddap-table-cell-data>
+  <br/>
+
+  <ddap-table-cell-data title="Host"
+                        value="{{ selectedRowData.Host }}">
+  </ddap-table-cell-data>
+  <br/>
+
+  <ddap-table-cell-data title="Sample Collection Date"
+                        value="{{ selectedRowData.Sample_Collection_Date }}">
+  </ddap-table-cell-data>
+  <br/>
+
+  <ddap-table-cell-data title="Location"
+                        value="{{ selectedRowData.Location }}">
+  </ddap-table-cell-data>
+  <br/>
+
+  <ng-container *ngIf="selectedRowData.Location && mapCoordinates">
+    <ddap-geo-location [title]="selectedRowData.source"
+                       [latitude]="mapCoordinates.latitude"
+                       [longitude]="mapCoordinates.longitude">
+    </ddap-geo-location>
+    <br/>
+  </ng-container>
+
+  <ddap-table-cell-data title="Originating Lab"
+                        value="{{ selectedRowData.Originating_Lab }}">
+  </ddap-table-cell-data>
+  <br/>
+
+  <ddap-table-cell-data title="Submission Date"
+                        value="{{ selectedRowData.Submission_Date }}">
+  </ddap-table-cell-data>
+  <br/>
+
+  <ddap-table-cell-data title="Submitting Lab"
+                        value="{{ selectedRowData.Submitting_Lab }}">
+  </ddap-table-cell-data>
+</div>

@@ -4,8 +4,8 @@ import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
 import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { BeaconSearchQueryParser } from '../../../shared/beacon/beacon-search-query.parser';
 
-import { BeaconSearchQueryParser } from './beacon-search-query.parser';
 import { BeaconSearchRequestModel, BeaconSearchResponseModel } from './beacon-search.model';
 
 @Injectable({

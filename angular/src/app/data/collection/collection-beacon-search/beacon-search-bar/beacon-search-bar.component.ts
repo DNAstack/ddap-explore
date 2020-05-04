@@ -2,7 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { Assembly, BeaconSearchRequestModel } from '../beacon-search.model';
+import { Assembly } from '../../../../shared/beacon/beacon-search.model';
+import { BeaconSearchRequestModel } from '../beacon-search.model';
 
 import { BeaconSearchFormBuilder } from './beacon-search-form-builder.service';
 

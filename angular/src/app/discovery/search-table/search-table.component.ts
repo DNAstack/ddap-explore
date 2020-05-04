@@ -1,6 +1,6 @@
 import { ArrayDataSource } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
-import { AfterViewInit, Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ViewControllerService } from 'ddap-common-lib';
@@ -27,6 +27,9 @@ import { Arity } from './field-filter/field-filter.component';
     @Input() fieldMap?: any;
     @Input() showLeftSidebar?: boolean;
     @Input() showRightSidebar?: boolean;
+
+    @Input() conditions: any;
+    @Output() conditionsChange: EventEmitter<Object>;
 
     appConfig: AppConfigModel;
 
@@ -63,6 +66,8 @@ import { Arity } from './field-filter/field-filter.component';
                 private configService: DiscoveryConfigService,
                 private viewController: ViewControllerService
                 ) {
+
+                  this.conditionsChange = new EventEmitter<Object>();
 
                     this.view = {
                         isSearching: false,
@@ -113,10 +118,12 @@ import { Arity } from './field-filter/field-filter.component';
       }
       if (removeCondition) {
         delete this.conditionMap[colDef.field];
+        this.conditionsChange.emit(this.conditionMap);
         return;
       }
 
       this.conditionMap[colDef.field] = condition;
+      this.conditionsChange.emit(this.conditionMap);
     }
 
     resultSizeChanged() {

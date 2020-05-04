@@ -16,6 +16,8 @@ import { DiscoveryConfigService } from '../discovery-config.service';
 
     appConfig: AppConfigModel;
 
+    conditions: {};
+
     view: {
         showLeftSidebar: boolean,
         showRightSidebar: boolean,
@@ -53,6 +55,11 @@ import { DiscoveryConfigService } from '../discovery-config.service';
                     };
 
 
+    }
+
+    onConditionsChange(map) {
+        // console.log("Received");
+        // console.log(map);
     }
 
     ngAfterViewInit(): void {

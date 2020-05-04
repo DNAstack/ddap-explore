@@ -2,6 +2,7 @@
 <div class="full-hw" style="display:flex; flex-direction:column;">
     <ddaplib-header icon="navigation" label="Variants">
         <span class="fill-space"></span>
+        {{conditions | json}}
         <button tabindex="-1" mat-icon-button 
             (click)="view.showLeftSidebar = !view.showLeftSidebar;" 
             color="{{view.showLeftSidebar ? 'accent' : '' }}"
@@ -15,6 +16,9 @@
         [service]="service" 
         [table]="table" 
         [fieldMap]="fieldMap" 
-        [showLeftSidebar]="view.showLeftSidebar"></ddap-search-table>
+        [showLeftSidebar]="view.showLeftSidebar"
+        [conditions]="conditions"
+        (conditionsChange)="onConditionsChange($event)"        
+        ></ddap-search-table>
     </div>
 </div>

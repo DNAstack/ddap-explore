@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import { Assembly } from '../beacon-search.model';
-
-import { BeaconSearchVariantValidator } from './beacon-search-variant.validator';
+import { BeaconSearchVariantValidator } from '../../../../shared/beacon/beacon-search-variant.validator';
+import { Assembly } from '../../../../shared/beacon/beacon-search.model';
 
 @Injectable({
   providedIn: 'root',

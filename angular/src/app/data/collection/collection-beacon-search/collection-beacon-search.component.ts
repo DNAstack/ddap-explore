@@ -3,14 +3,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, flatMap, mergeAll, pluck } from 'rxjs/operators';
 
+import IResourceResults = dam.v1.IResourceResults;
+import { ResourceService } from '../../../shared/apps/resource.service';
 import { ImagePlaceholderRetriever } from '../../../shared/image-placeholder.service';
 import { dam } from '../../../shared/proto/dam-service';
-import { ResourceService } from '../../../shared/resource/resource.service';
-import { DataService } from '../../data.service';
+import { ResourceService as ResourceServiceDeprecated } from '../../../shared/resource/resource.service';
 
 import { BeaconSearchRequestModel, BeaconSearchResponseModel } from './beacon-search.model';
 import { BeaconSearchService } from './beacon-search.service';
-import IResourceResults = dam.v1.IResourceResults;
 
 @Component({
   selector: 'ddap-collection-beacon-search',
@@ -35,9 +35,9 @@ export class CollectionBeaconSearchComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private dataService: DataService,
+    private resourceService: ResourceService,
     private beaconService: BeaconSearchService,
-    private resourceService: ResourceService
+    private resourceServiceDeprecated: ResourceServiceDeprecated
   ) {
   }
 
@@ -76,7 +76,7 @@ export class CollectionBeaconSearchComponent implements OnInit {
               damIdResourcePathPairs = beaconResponse.map((result) => {
                 return `${result.beaconInfo.damId};${result.beaconInfo.resourcePath}`;
               });
-              return this.resourceService.getAccessTokensForAuthorizedResources(damIdResourcePathPairs);
+              return this.resourceServiceDeprecated.getAccessTokensForAuthorizedResources(damIdResourcePathPairs);
             }),
             flatMap((resourceTokens: IResourceResults) => {
               this.requireAuth = false;
@@ -89,7 +89,7 @@ export class CollectionBeaconSearchComponent implements OnInit {
                   queryParams.damId = damId;
                   queryParams.resource = resourceId;
 
-                  const accessToken = this.resourceService.lookupResourceToken(
+                  const accessToken = this.resourceServiceDeprecated.lookupResourceToken(
                     resourceTokens,
                     resourcePath
                   ).credentials['access_token'];
@@ -113,7 +113,7 @@ export class CollectionBeaconSearchComponent implements OnInit {
   private initializeComponentFields(searchParams: BeaconSearchRequestModel) {
     const collectionId = searchParams.collection;
     if (collectionId) {
-      this.collectionName$ = this.dataService.getCollection(collectionId)
+      this.collectionName$ = this.resourceService.getCollection(collectionId)
         .pipe(pluck('name'));
     }
     this.searchParams = searchParams;
@@ -129,7 +129,7 @@ export class CollectionBeaconSearchComponent implements OnInit {
 
   private getUrlForObtainingAccessToken(damIdResourcePathPairs: string[] = []): string {
     const redirectUri = this.getRedirectUrl();
-    return this.resourceService.getUrlForObtainingAccessToken(damIdResourcePathPairs, redirectUri);
+    return this.resourceServiceDeprecated.getUrlForObtainingAccessToken(damIdResourcePathPairs, redirectUri);
   }
 
   private getRedirectUrl(): string {

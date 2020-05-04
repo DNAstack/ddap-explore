@@ -3,14 +3,15 @@ import { Injectable } from '@angular/core';
 import { ErrorHandlerService, realmIdPlaceholder } from 'ddap-common-lib';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../environments/environment';
-import { CollectionModel, CollectionsRequestModel, CollectionsResponseModel } from '../shared/collection.model';
-import { ResourceModel, ResourcesRequestModel, ResourcesResponseModel } from '../shared/resource.model';
+import { environment } from '../../../environments/environment';
+
+import { CollectionModel, CollectionsRequestModel, CollectionsResponseModel } from './collection.model';
+import { ResourceModel, ResourcesRequestModel, ResourcesResponseModel } from './resource.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class DataService {
+export class ResourceService {
 
   constructor(
     private http: HttpClient,

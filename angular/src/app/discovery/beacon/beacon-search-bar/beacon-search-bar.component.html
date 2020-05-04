@@ -1,0 +1,47 @@
+<form [formGroup]="form"
+      novalidate
+      class="flex vertical-center">
+  <mat-form-field *ngIf="!isVirusInterface"
+                  appearance="outline"
+                  class="assembly-input">
+    <mat-label>Assembly</mat-label>
+    <mat-select formControlName="assemblyId"
+                data-se="assembly-id-inp">
+      <mat-option *ngFor="let assembly of assemblies"
+                  [value]="assembly">
+        {{ assembly }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field *ngIf="!isVirusInterface"
+                  appearance="outline"
+                  class="query-input--small">
+    <mat-label>Chromosome</mat-label>
+    <input matInput
+           formControlName="referenceName"
+           data-se="reference-name-inp">
+  </mat-form-field>
+  <mat-form-field class="query-input"
+                  appearance="outline"
+                  floatLabel="always">
+    <mat-label>Position</mat-label>
+    <input matInput
+           formControlName="start"
+           data-se="start-inp">
+  </mat-form-field>
+  <mat-form-field class="query-input--small"
+                  appearance="outline">
+    <mat-label>Reference</mat-label>
+    <input matInput
+           formControlName="referenceBases"
+           data-se="reference-bases-inp">
+  </mat-form-field>
+  <mat-form-field class="query-input--small"
+                  appearance="outline">
+    <mat-label>Alternate</mat-label>
+    <input matInput
+           formControlName="alternateBases"
+           data-se="alternate-bases-inp">
+  </mat-form-field>
+</form>

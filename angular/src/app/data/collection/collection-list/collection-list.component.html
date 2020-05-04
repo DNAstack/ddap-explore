@@ -1,8 +1,6 @@
-<ddaplib-searchable-header [searchable]="true"
-                           iconName="collections_bookmark"
-                           label="Collections">
-  <ddap-beacon-search-bar></ddap-beacon-search-bar>
-</ddaplib-searchable-header>
+<ddaplib-header iconName="collections_bookmark"
+                label="Collections">
+</ddaplib-header>
 
 <ddaplib-main>
   <ng-container *ngIf="collections$ | async as collectionsResponse">

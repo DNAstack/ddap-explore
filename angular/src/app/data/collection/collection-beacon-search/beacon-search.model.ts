@@ -33,9 +33,3 @@ export interface BeaconSearchRequestModel extends KeyValuePair<string> {
   collection?: string;
   damId?: string;
 }
-
-export enum Assembly {
-  grch37 = 'GRCh37',
-  grch38 = 'GRCh38',
-  ncbi36 = 'NCBI36',
-}

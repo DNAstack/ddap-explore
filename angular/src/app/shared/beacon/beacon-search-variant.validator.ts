@@ -1,6 +1,6 @@
 import { AbstractControl } from '@angular/forms';
 
-import { BeaconSearchQueryParser } from '../beacon-search-query.parser';
+import { BeaconSearchQueryParser } from './beacon-search-query.parser';
 
 export class BeaconSearchVariantValidator {
 

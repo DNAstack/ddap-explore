@@ -1,0 +1,29 @@
+@import '~ddap-common-lib/styles/modules/colors';
+
+mat-drawer-container {
+  height: 100%;
+
+  mat-drawer {
+    min-width: 35rem;
+    max-width: 35rem;
+
+    mat-toolbar {
+      border-right: 1px solid #e0e0e0;
+      border-top: 1px solid #e0e0e0;
+    }
+  }
+
+  ::ng-deep .mat-drawer-backdrop.mat-drawer-show {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  ::ng-deep ddap-data-table.opened-drawer-margin-offset ag-grid-angular {
+    margin-right: 1rem;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  mat-drawer-container mat-drawer {
+    min-width: auto;
+  }
+}

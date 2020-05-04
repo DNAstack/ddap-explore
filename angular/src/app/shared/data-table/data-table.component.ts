@@ -1,113 +1,69 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ViewControllerService } from 'ddap-common-lib';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Column, ColumnApi, GridApi, NavigateToNextCellParams } from 'ag-grid-community';
 
-import { DataTableController } from './data-table-controller';
+import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } from './data-table.model';
 
 @Component({
   selector: 'ddap-data-table',
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
 })
-export class DataTableComponent implements OnInit {
-  grid: any;
-  selectedRow: any;
-
-  selfBoundNavigateToCell: CallableFunction;
+export class DataTableComponent {
 
   @Input()
-  controller: DataTableController;
-
+  columnDefs: ColumnDef[];
   @Input()
-  hiddenFieldIds: string[];
+  rowData: RowData[];
+  @Input()
+  defaultColumnDef: DefaultColumnDef = {
+    sortable: true,
+    filter: true,
+    resizable: true,
+  };
+  @Input()
+  defaultTableConfig: TableConfig = {
+    suppressCellSelection: true,
+    enableCellTextSelection: true,
+    multiSortKey: 'ctrl',
+  };
+  @Input()
+  rowSelection: TableRowSelection = TableRowSelection.single;
+  @Input()
+  pagination = true;
 
-  // TODO need proper type reference
-  gridApi: any;
-  gridColumnApi: any;
+  @Output()
+  readonly selectedRowsChanged: EventEmitter<any | any[]> = new EventEmitter<any | any[]>();
 
-  constructor(viewController: ViewControllerService) {
-    this.grid = {
-      animateRows: false,
-      multiSortKey: 'ctrl',
-      defaultColumnDefinition: {
-        sortable: true,
-        resizable: true,
-        filter: true,
-      },
-      makeFullWidth: false,
-      pagination: !this.isMobile(),
-      domLayout: 'normal',
-      enableStatusBar: true,
-      suppressCellSelection: true,
-      rowSelection: 'single',
-    };
+  private gridApi: GridApi;
+  private gridColumnApi: ColumnApi;
 
-    this.selfBoundNavigateToCell = this.navigateToCell.bind(this);
+  constructor() {
+    this.navigateToNextCell = this.navigateToNextCell.bind(this);
   }
 
-  ngOnInit() {
-    this.controller.initialize();
+  onGridReady(params): void {
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+
+    this.autoSizeColumns();
   }
 
-  onGridReady(event) {
-    this.gridApi = event.api;
-    this.gridColumnApi = event.columnApi;
-
-    if (this.grid.makeFullWidth) {
-      event.api.sizeColumnsToFit();
-      window.addEventListener('resize', function () {
-        setTimeout(function () {
-          event.api.sizeColumnsToFit();
-        });
-      });
+  onRowDataChanged(params): void {
+    if (!this.gridColumnApi) {
+      return;
     }
-
-    this.hideAndResizeColumns();
+    this.autoSizeColumns();
   }
 
-  onRowDataChanged(event) {
+  onSelectionChanged(params): void {
     if (!this.gridApi) {
       return;
     }
-    this.hideAndResizeColumns();
-  }
-
-  onSelectionChanged(event) {
-    this.selectedRow = this.gridApi.getSelectedRows()[0];
-    this.controller.onSelectionChanged(this.selectedRow);
-  }
-
-  hasEverLoaded() {
-    return !(this.controller.resultList === null || this.controller.resultList === undefined);
-  }
-
-  enablePagination(enabled: boolean) {
-    this.grid.pagination = enabled;
+    this.selectedRowsChanged.emit(this.gridApi.getSelectedRows());
   }
 
   // FIXME need generalization and customization
-  hideAndResizeColumns() {
-    if (!this.hasEverLoaded()) {
-      return;
-    }
-
-    const hiddenFieldIds = this.hiddenFieldIds;
-
-    const allColumnIds = [];
-    const hiddenColumnIds = [];
-
-    this.gridColumnApi.getAllColumns().forEach(function (column) {
-      allColumnIds.push(column.colId);
-      if (hiddenFieldIds.includes(column.userProvidedColDef.field)) {
-        hiddenColumnIds.push(column.colId);
-      }
-    });
-
-    this.gridColumnApi.setColumnsVisible(hiddenColumnIds, false);
-    this.gridColumnApi.autoSizeColumns(allColumnIds);
-  }
-
-  // FIXME need generalization and customization
-  navigateToCell(params) {
+  navigateToNextCell(params: NavigateToNextCellParams) {
     let previousCell = params.previousCellPosition;
     const suggestedNextCell = params.nextCellPosition;
 
@@ -143,13 +99,13 @@ export class DataTableComponent implements OnInit {
     }
   }
 
-  // FIXME move to the view controller
-  isMobile() {
-    return this.isMobileWidth(window.innerWidth);
+  private autoSizeColumns(): void {
+    if (!this.gridColumnApi) {
+      return;
+    }
+    const allColumnIds = this.gridColumnApi.getAllColumns()
+      .map((column: Column) => column.getColId());
+    this.gridColumnApi.autoSizeColumns(allColumnIds);
   }
 
-  // FIXME normalize duplicate code
-  private isMobileWidth(width: number) {
-    return width <= 760;
-  }
 }

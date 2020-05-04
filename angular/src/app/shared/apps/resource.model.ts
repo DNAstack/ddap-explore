@@ -1,4 +1,5 @@
-import { KeyValuePair } from './key-value-pair.model';
+import { BeaconInterfaceType } from '../beacon/beacon-search.model';
+import { KeyValuePair } from '../key-value-pair.model';
 
 export interface ResourceModel {
   id: string;
@@ -11,7 +12,7 @@ export interface ResourceModel {
 }
 
 export interface InterfaceModel {
-  type: string;
+  type: BeaconInterfaceType | string;
   uri: string;
   id: string;
   authRequired: boolean; // if false, this is a public resources

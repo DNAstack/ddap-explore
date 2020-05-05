@@ -1,6 +1,5 @@
 <ddaplib-header>
-  <ddap-beacon-info-bar (beaconChanged)="changeBeaconResource($event)">
-  </ddap-beacon-info-bar>
+  <h2>Beacon</h2>
   <span class="fill-space"></span>
   <div>
     <button (click)="openHelpDialog()"
@@ -12,6 +11,8 @@
 </ddaplib-header>
 
 <ddaplib-main>
+  <ddap-beacon-info-bar (beaconChanged)="changeBeaconResource($event)">
+  </ddap-beacon-info-bar>
   <div *ngIf="beaconForm?.beacon?.resource as beaconResource"
        class="search-bar">
     <ddap-beacon-search-bar (queryChanged)="changeBeaconQuery($event)"

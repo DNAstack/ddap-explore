@@ -2,6 +2,7 @@
 
 .mat-form-field {
   margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 ::ng-deep .mat-form-field-wrapper {
@@ -16,6 +17,10 @@
 @media only screen and (min-width: 480px) {
   .beacon-info {
     margin-right: 1.5rem;
+  }
+
+  .mat-form-field {
+    width: 19rem;
   }
 
   .mat-form-field:not(:last-of-type) {

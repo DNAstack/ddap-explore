@@ -5,17 +5,16 @@ import com.dnastack.ddap.explore.apps.beacon.client.BeaconErrorException;
 import com.dnastack.ddap.explore.apps.discovery.model.DiscoveryBeacon;
 import com.dnastack.ddap.explore.apps.discovery.model.DiscoveryBeaconQueryResult;
 import com.dnastack.ddap.explore.apps.discovery.model.DiscoveryBeaconRequestModel;
-import java.net.URI;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -79,17 +78,21 @@ public class ReactiveDiscoveryBeaconClient {
     }
 
     private URI getBeaconQueryUrl(URI beaconBaseUrl, DiscoveryBeaconRequestModel beaconRequest) {
-        final MultiValueMap<String, String> variables = new LinkedMultiValueMap<>();
-        variables.add("assemblyId", beaconRequest.getAssemblyId());
-        variables.add("referenceName", beaconRequest.getReferenceName());
-        variables.add("start", beaconRequest.getStart());
-        variables.add("referenceBases", beaconRequest.getReferenceBases());
-        variables.add("alternateBases", beaconRequest.getAlternateBases());
-        URI beaconUri = UriComponentsBuilder.fromUri(beaconBaseUrl).pathSegment("query")
-            .queryParams(variables)
-            .build()
+        UriComponentsBuilder beaconUriBuilder = UriComponentsBuilder.fromUri(beaconBaseUrl).pathSegment("query")
+            .queryParam("assemblyId", beaconRequest.getAssemblyId())
+            .queryParam("referenceName", beaconRequest.getReferenceName())
+            .queryParam("start", beaconRequest.getStart())
+            .queryParam("referenceBases", beaconRequest.getReferenceBases())
+            .queryParam("alternateBases", beaconRequest.getAlternateBases());
+
+        if (beaconRequest.getDatasetIds() != null && !beaconRequest.getDatasetIds().isEmpty()) {
+            beaconRequest.getDatasetIds().forEach((dataset) -> {
+                beaconUriBuilder.queryParam("datasetIds", dataset);
+            });
+        }
+
+        return beaconUriBuilder.build()
             .toUri();
-        return beaconUri;
     }
 
 }

@@ -426,7 +426,7 @@ public class SearchV1BetaController {
     private Mono<AccessInterface> getAccessInterfaceForConnector(AccessInterface searchInterface, String connectorKey) {
         InterfaceId interfaceId = Id.decodeInterfaceId(searchInterface.getId());
         String connectorUri = UriComponentsBuilder.fromUri(searchInterface.getUri())
-            .pathSegment("connector", connectorKey).pathSegment().build()
+            .pathSegment("auth-realm", connectorKey).pathSegment().build()
             .toUriString();
         return resourceClientService
             .listResources(interfaceId.getRealm(), null, List.of("search:connector"), List.of(connectorUri))

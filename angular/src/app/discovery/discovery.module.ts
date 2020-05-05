@@ -17,13 +17,14 @@ import { BeaconInfoBarComponent } from './beacon/beacon-info-bar/beacon-info-bar
 import { BeaconSearchBarComponent } from './beacon/beacon-search-bar/beacon-search-bar.component';
 import {
   BeaconSearchResultDetailComponent
-} from './beacon/beacon-search-result-table/beacon-search-result-detail.component/beacon-search-result-detail.component';
+} from './beacon/beacon-search-result-table/beacon-search-result-detail/beacon-search-result-detail.component';
 import {
   GeoLocationComponent
-} from './beacon/beacon-search-result-table/beacon-search-result-detail.component/geo-location/geo-location.component';
+} from './beacon/beacon-search-result-table/beacon-search-result-detail/geo-location/geo-location.component';
+import { GeocodeService } from './beacon/beacon-search-result-table/beacon-search-result-detail/geo-location/geocode.service';
 import {
   TableCellDataComponent
-} from './beacon/beacon-search-result-table/beacon-search-result-detail.component/table-cell-data/table-cell-data.component';
+} from './beacon/beacon-search-result-table/beacon-search-result-detail/table-cell-data/table-cell-data.component';
 import {
   BeaconSearchResultTableComponent
 } from './beacon/beacon-search-result-table/beacon-search-result-table.component';
@@ -54,6 +55,7 @@ import { DiscoveryRoutingModule } from './discovery-routing.module';
     }),
   ],
   providers: [
+    GeocodeService,
     {
       provide: MapAPILoader, deps: [], useFactory: MapServiceProviderFactory,
     },

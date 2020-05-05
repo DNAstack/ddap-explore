@@ -2,21 +2,25 @@
       [formGroup]="form"
       novalidate
       class="flex vertical-center">
-  <mat-form-field *ngIf="beacons.length > 1; else singleBeacon"
-                  class="multiple-beacon-info"
+  <mat-form-field class="beacon-info"
                   appearance="outline">
     <mat-label>Beacon</mat-label>
-    <mat-select formControlName="beacon">
+    <!-- [disabled] will trigger warning in console, but having the control set to disabled via FormControl
+         won't trigger initial value change   -->
+    <mat-select [disabled]="beacons.length < 2"
+                formControlName="beacon">
       <mat-option *ngFor="let beacon of beacons"
                   [value]="beacon">
         {{ beacon.beaconInfo.name }}
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <mat-form-field *ngIf="selectedBeaconDatasets.length > 1; else singleDataset"
-                  appearance="outline">
+  <mat-form-field appearance="outline">
     <mat-label>Dataset</mat-label>
-    <mat-select formControlName="datasets"
+    <!-- [disabled] will trigger warning in console, but having the control set to disabled via FormControl
+         won't trigger initial value change   -->
+    <mat-select [disabled]="selectedBeaconDatasets.length < 2"
+                formControlName="datasets"
                 multiple>
       <mat-option *ngFor="let dataset of selectedBeaconDatasets"
                   [value]="dataset.id">
@@ -25,19 +29,3 @@
     </mat-select>
   </mat-form-field>
 </form>
-
-<ng-template #singleBeacon>
-  <h2 *ngIf="beacons[0] as singleBeacon"
-      class="single-beacon-info">
-    <span>Beacon:</span>
-    <span>{{ singleBeacon.beaconInfo.name }}</span>
-  </h2>
-</ng-template>
-
-<ng-template #singleDataset>
-  <h3 *ngIf="selectedBeaconDatasets[0] as singleDataset"
-      class="single-beacon-dataset-info">
-    <span>Dataset:</span>
-    <span>{{ singleDataset.name }}</span>
-  </h3>
-</ng-template>

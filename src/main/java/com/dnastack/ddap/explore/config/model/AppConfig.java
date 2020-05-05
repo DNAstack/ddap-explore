@@ -28,6 +28,7 @@ public class AppConfig {
     @Data
     public static class FrontendAppsConfig {
         private FrontendAppSearchConfig search;
+        private FrontendAppWorkflowsConfig workflows;
     }
 
     @Data

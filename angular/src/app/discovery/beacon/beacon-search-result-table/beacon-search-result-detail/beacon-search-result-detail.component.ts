@@ -32,7 +32,7 @@ export class BeaconSearchResultDetailComponent implements OnChanges {
       return;
     }
     const tokens = source.split('/');
-    if (tokens.length === 1) {
+    if (tokens.length < 3) {
       return;
     }
     return `https://nextstrain.org/ncov?s=${tokens[1]}/${tokens[2]}/${tokens[3]}`;

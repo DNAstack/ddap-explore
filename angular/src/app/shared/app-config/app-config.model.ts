@@ -9,6 +9,7 @@ export interface AppConfigModel {
   defaultRoute: string;
   googleAnalyticsId: string;
   tosUrl: string;
+  ppUrl: string;
   inStandaloneMode: boolean;
   listPageSize: number;
   apps: {

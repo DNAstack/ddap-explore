@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { MatDrawer } from '@angular/material/sidenav';
 
 import { BeaconQueryAlleleResponseModel } from '../../../shared/beacon/beacon-search.model';
 import { BeaconDataTableModelParser } from '../../../shared/data-table/beacon/beacon-data-table-model.parser';
@@ -10,6 +11,9 @@ import { ColumnDef, DataTableModel, TableRowSelection } from '../../../shared/da
   styleUrls: ['./beacon-search-result-table.component.scss'],
 })
 export class BeaconSearchResultTableComponent implements OnChanges {
+
+  @ViewChild('selectedRowDetailDrawer', { static: false })
+  selectedRowDetailDrawer: MatDrawer;
 
   @Input()
   alleleResponses: BeaconQueryAlleleResponseModel[];
@@ -24,6 +28,8 @@ export class BeaconSearchResultTableComponent implements OnChanges {
     this.dataTableModels = this.alleleResponses.map((alleleResponse: BeaconQueryAlleleResponseModel) => {
       return BeaconDataTableModelParser.parse(alleleResponse.info);
     }).map((dataTableModel: DataTableModel) => this.setFieldVisibility(dataTableModel));
+
+    this.resetDrawer();
   }
 
   changeRowSelection(selectedRows: any[]) {
@@ -42,6 +48,12 @@ export class BeaconSearchResultTableComponent implements OnChanges {
       });
     }
     return dataTableModel;
+  }
+
+  private resetDrawer() {
+    if (this.selectedRowDetailDrawer && this.selectedRowDetailDrawer.opened) {
+      this.selectedRowDetailDrawer.toggle();
+    }
   }
 
 }

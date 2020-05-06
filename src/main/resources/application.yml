@@ -22,7 +22,7 @@ frontend-config:
   in-standalone-mode: ${ddap.dam-facade}
   google-analytics-id: null
   tos-url: 'https://www.dnastack.com/terms'
-  pp-url: 'https://www.dnastack.com/privacy'
+  privacy-policy-url: 'https://www.dnastack.com/privacy'
   list-page-size: 20
   apps:
     search:

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { ILatLong } from 'angular-maps';
 import _get from 'lodash.get';
 import { EMPTY, Observable } from 'rxjs';
@@ -17,13 +17,19 @@ export class BeaconSearchResultDetailComponent implements OnChanges {
 
   mapCoordinates: ILatLong;
 
-  constructor(private geocodeService: GeocodeService) {
+  constructor(
+    private changeDetectorRef: ChangeDetectorRef,
+    private geocodeService: GeocodeService
+  ) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     this.buildMapCoordinates()
       .subscribe((coordinates: ILatLong) => {
         this.mapCoordinates = coordinates;
+        // This needs to be present otherwise map is not redrawn until detail panel is clicked, since all changes
+        // happen in x-map component
+        this.changeDetectorRef.detectChanges();
       });
   }
 

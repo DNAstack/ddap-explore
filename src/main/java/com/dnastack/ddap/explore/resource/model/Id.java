@@ -18,6 +18,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 @Data
+@EqualsAndHashCode(exclude = "additionalProperties")
 public abstract class Id implements Serializable {
 
 

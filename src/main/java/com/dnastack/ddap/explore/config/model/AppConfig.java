@@ -21,7 +21,7 @@ public class AppConfig {
     private boolean inStandaloneMode;
     private String googleAnalyticsId;
     private String tosUrl;
-    private String ppUrl;
+    private String privacyPolicyUrl;
     private int listPageSize;
     @JsonInclude()
     private FrontendAppsConfig apps;

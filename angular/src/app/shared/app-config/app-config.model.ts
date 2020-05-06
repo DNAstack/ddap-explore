@@ -9,7 +9,7 @@ export interface AppConfigModel {
   defaultRoute: string;
   googleAnalyticsId: string;
   tosUrl: string;
-  ppUrl: string;
+  privacyPolicyUrl: string;
   inStandaloneMode: boolean;
   listPageSize: number;
   apps: {

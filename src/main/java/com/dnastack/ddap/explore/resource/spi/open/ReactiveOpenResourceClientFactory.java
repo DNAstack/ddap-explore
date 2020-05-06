@@ -6,6 +6,7 @@ import com.dnastack.ddap.explore.resource.spi.SpiConfigurationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class ReactiveOpenResourceClientFactory extends
         }
 
         Set<String> collectionsSeen = new HashSet<>();
-        for (Collection collection : config.getCollections()) {
+        for (Map.Entry<String, Collection> entry : config.getCollections().entrySet()) {
+            Collection collection = entry.getValue();
             if (collection.getName() == null || collection.getName().isEmpty()) {
                 throw new SpiConfigurationException(
                     "Invalid SPI Configraution, Missing or empty collection property: \"name\" for SPI - " + spiKey);
@@ -57,7 +59,8 @@ public class ReactiveOpenResourceClientFactory extends
         }
 
         Set<String> resourcesSeen = new HashSet<>();
-        for (OpenResource resource : config.getResources()) {
+        for (Map.Entry<String, OpenResource> resourceEntry : config.getResources().entrySet()) {
+            OpenResource resource = resourceEntry.getValue();
             if (resource.getName() == null || resource.getName().isEmpty()) {
                 throw new SpiConfigurationException(
                     "Invalid SPI Configraution, Missing or empty resource property: \"name\" for SPI - " + spiKey);
@@ -69,16 +72,15 @@ public class ReactiveOpenResourceClientFactory extends
                         + resource.getName() + " in SPI - " + spiKey);
             }
 
-            if (resource.getCollectionName() == null || resource.getCollectionName().isEmpty()) {
+            if (resource.getCollectionId() == null || resource.getCollectionId().isEmpty()) {
                 throw new SpiConfigurationException(
-                    "Invalid SPI Configraution, Missing or empty resource property: \"collectionName\" for resource "
+                    "Invalid SPI Configraution, Missing or empty resource property: \"collectionId\" for resource "
                         + resource.getName() + " in SPI - " + spiKey);
             }
 
-            if (config.getCollections().stream()
-                .noneMatch(col -> col.getName().equals(resource.getCollectionName()))) {
+            if (!config.getCollections().containsKey(resource.getCollectionId())) {
                 throw new SpiConfigurationException(
-                    "Invalid SPI Configraution, collectionName for resource " + resource.getName()
+                    "Invalid SPI Configraution, collectionId for resource " + resource.getName()
                         + " does not exist in collections in SPI - " + spiKey);
             }
 
@@ -94,11 +96,11 @@ public class ReactiveOpenResourceClientFactory extends
                         + resource.getName() + " in SPI - " + spiKey);
             }
 
-            String concatString = resource.getCollectionName() + resource.getName();
+            String concatString = resource.getCollectionId() + resource.getName();
             if (resourcesSeen.contains(concatString)) {
                 throw new SpiConfigurationException(
                     "Duplicate resource configuration detected for resource: " + resource.getName()
-                        + " with collection: " + resource.getCollectionName() + " in SPI -" + spiKey);
+                        + " with collection: " + resource.getCollectionId() + " in SPI -" + spiKey);
             } else {
                 resourcesSeen.add(concatString);
             }

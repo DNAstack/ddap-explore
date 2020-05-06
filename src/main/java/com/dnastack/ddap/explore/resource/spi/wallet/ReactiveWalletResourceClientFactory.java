@@ -6,6 +6,7 @@ import com.dnastack.ddap.explore.resource.spi.SpiConfigurationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,8 @@ public class ReactiveWalletResourceClientFactory extends
         }
 
         Set<String> collectionsSeen = new HashSet<>();
-        for (Collection collection : walletConfig.getCollections()) {
+        for (Map.Entry<String, Collection> collectionEntry : walletConfig.getCollections().entrySet()) {
+            Collection collection = collectionEntry.getValue();
             if (collection.getName() == null || collection.getName().isEmpty()) {
                 throw new SpiConfigurationException(
                     "Invalid SPI Configraution, Missing or empty collection property: \"name\" for SPI - " + spiKey);
@@ -73,7 +75,8 @@ public class ReactiveWalletResourceClientFactory extends
 
             if (collectionsSeen.contains(collection.getName())) {
                 throw new SpiConfigurationException(
-                    "Duplicate collection configuration detected for collection: " + collection.getName() + " in SPI -"
+                    "Duplicate collection configuration detected for collection name: " + collection.getName()
+                        + " in SPI -"
                         + spiKey);
             } else {
                 collectionsSeen.add(collection.getName());
@@ -81,7 +84,8 @@ public class ReactiveWalletResourceClientFactory extends
         }
 
         Set<String> resourcesSeen = new HashSet<>();
-        for (WalletResource resource : walletConfig.getResources()) {
+        for (Map.Entry<String, WalletResource> resourceEntry : walletConfig.getResources().entrySet()) {
+            WalletResource resource = resourceEntry.getValue();
             if (resource.getName() == null || resource.getName().isEmpty()) {
                 throw new SpiConfigurationException(
                     "Invalid SPI Configraution, Missing or empty resource property: \"name\" for SPI - " + spiKey);
@@ -93,16 +97,15 @@ public class ReactiveWalletResourceClientFactory extends
                         + resource.getName() + " in SPI - " + spiKey);
             }
 
-            if (resource.getCollectionName() == null || resource.getCollectionName().isEmpty()) {
+            if (resource.getCollectionId() == null || resource.getCollectionId().isEmpty()) {
                 throw new SpiConfigurationException(
                     "Invalid SPI Configraution, Missing or empty resource property: \"collectionName\" for resource "
                         + resource.getName() + " in SPI - " + spiKey);
             }
 
-            if (walletConfig.getCollections().stream()
-                .noneMatch(col -> col.getName().equals(resource.getCollectionName()))) {
+            if (!walletConfig.getCollections().containsKey(resource.getCollectionId())) {
                 throw new SpiConfigurationException(
-                    "Invalid SPI Configraution, collectionName for resource " + resource.getName()
+                    "Invalid SPI Configraution, collectionId for resource " + resource.getName()
                         + " does not exist in collections in SPI - " + spiKey);
             }
 
@@ -130,11 +133,11 @@ public class ReactiveWalletResourceClientFactory extends
                         + resource.getName() + " in SPI - " + spiKey);
             }
 
-            String concatString = resource.getCollectionName() + resource.getName();
+            String concatString = resource.getCollectionId() + resource.getName();
             if (resourcesSeen.contains(concatString)) {
                 throw new SpiConfigurationException(
                     "Duplicate resource configuration detected for resource: " + resource.getName()
-                        + " with collection: " + resource.getCollectionName() + " in SPI -" + spiKey);
+                        + " with collection: " + resource.getCollectionId() + " in SPI -" + spiKey);
             } else {
                 resourcesSeen.add(concatString);
             }

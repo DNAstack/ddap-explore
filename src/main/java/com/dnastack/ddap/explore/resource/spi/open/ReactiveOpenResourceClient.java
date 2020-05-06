@@ -1,6 +1,7 @@
 package com.dnastack.ddap.explore.resource.spi.open;
 
 import com.dnastack.ddap.explore.resource.exception.ResourceAuthorizationException;
+import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
 import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
@@ -43,16 +44,19 @@ public class ReactiveOpenResourceClient implements ResourceClient {
     @Override
     public Mono<List<Resource>> listResources(String realm, List<CollectionId> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
         return Mono.fromCallable(() ->
-            config.getResources().stream().filter(openResource -> {
+            config.getResources().entrySet().stream().filter(openResourceEntry -> {
                 boolean keep = true;
+                String resourceId = openResourceEntry.getKey();
+                OpenResource openResource = openResourceEntry.getValue();
                 if (collectionsToFilter != null && !collectionsToFilter.isEmpty()) {
-                    CollectionId thisCollection = openResource.getInterfaceId(realm,getSpiKey()).toCollectionId();
+                    CollectionId thisCollection = getInterfaceIdFromOpenResource(realm, getSpiKey(), openResource, resourceId)
+                        .toCollectionId();
                     keep = collectionsToFilter.stream()
                         .anyMatch(thisCollection::equals);
                 }
 
                 if (interfaceTypesToFilter != null) {
-                    keep &= shouldKeepInterfaceType(openResource.getInterfaceType(),interfaceTypesToFilter);
+                    keep &= shouldKeepInterfaceType(openResource.getInterfaceType(), interfaceTypesToFilter);
                 }
 
                 if (interfaceUrisToFilter != null) {
@@ -60,7 +64,8 @@ public class ReactiveOpenResourceClient implements ResourceClient {
                 }
 
                 return keep;
-            }).map(openResource -> openResource.toResource(realm, getSpiKey()))
+            }).map(openResource -> openResourceToResource(realm, getSpiKey(), openResource.getValue(), openResource
+                .getKey()))
                 .collect(Collectors.toList()));
     }
 
@@ -72,7 +77,7 @@ public class ReactiveOpenResourceClient implements ResourceClient {
             }
 
             return idToResource(realm, id)
-                .map(openResource -> openResource.toResource(realm, getSpiKey()))
+                .map(openResource -> openResourceToResource(realm, getSpiKey(), openResource, id.getId()))
                 .orElseThrow(() -> new NotFoundException("Could not locate resource with id: " + id.encodeId()));
 
         });
@@ -80,17 +85,16 @@ public class ReactiveOpenResourceClient implements ResourceClient {
 
     @Override
     public Mono<List<Collection>> listCollections(String realm) {
-        return Mono.fromCallable(() -> config.getCollections().stream()
-            .map(collection -> copyCollectionFromConfig(realm, collection)).collect(Collectors.toList()));
+        return Mono.fromCallable(() -> config.getCollections().entrySet().stream()
+            .map(collection -> copyCollectionFromConfig(realm, collection.getKey(), collection.getValue()))
+            .collect(Collectors.toList()));
     }
 
     @Override
     public Mono<Collection> getCollection(String realm, CollectionId collectionId) {
-        return Mono.fromCallable(() -> config.getCollections().stream()
-            .filter(collection -> collection.getName().equals(collectionId.getName()))
-            .map(collection -> copyCollectionFromConfig(realm, collection))
-            .findFirst()
-            .orElseThrow(() -> new NotFoundException(
+        return Mono.justOrEmpty(idToCollection(realm, collectionId))
+            .map(collection -> copyCollectionFromConfig(realm, collectionId.getId(), collection))
+            .switchIfEmpty(Mono.error(new NotFoundException(
                 "Could not locate collection with id: " + collectionId.encodeId())));
     }
 
@@ -109,16 +113,43 @@ public class ReactiveOpenResourceClient implements ResourceClient {
     }
 
     private Optional<OpenResource> idToResource(String realm, ResourceId id) {
-        return config.getResources().stream()
-            .filter(resource -> resource.getInterfaceId(realm, getSpiKey()).toResourceId().equals(id))
-            .findFirst();
+        return Optional.ofNullable(config.getResources().get(id.getId()));
     }
 
-    private Collection copyCollectionFromConfig(String realm, Collection collection) {
+    private Optional<Collection> idToCollection(String realm, CollectionId id) {
+        return Optional.ofNullable(config.getCollections().get(id.getId()));
+    }
+
+    public Resource openResourceToResource(String realm, String spikey, OpenResource openResource, String resourceId) {
+        InterfaceId interfaceId = getInterfaceIdFromOpenResource(realm, spikey, openResource, resourceId);
+        return Resource.newBuilder()
+            .id(interfaceId.toResourceId().encodeId())
+            .collectionId(interfaceId.toCollectionId().encodeId())
+            .name(openResource.getName())
+            .imageUrl(openResource.getImageUrl())
+            .description(openResource.getDescription())
+            .interfaces(List
+                .of(new AccessInterface(openResource.getInterfaceType(), openResource.getInterfaceUri(), interfaceId
+                    .encodeId(), false)))
+            .metadata(openResource.getMetadata() != null ? new HashMap<>(openResource.getMetadata()) : null)
+            .build();
+    }
+
+    public InterfaceId getInterfaceIdFromOpenResource(String realm, String spikey, OpenResource openResource, String resourceId) {
+        InterfaceId id = new InterfaceId();
+        id.setRealm(realm);
+        id.setSpiKey(spikey);
+        id.setResourceId(resourceId);
+        id.setCollectionId(openResource.getCollectionId());
+        id.setType(openResource.getInterfaceType());
+        return id;
+    }
+
+    private Collection copyCollectionFromConfig(String realm, String id, Collection collection) {
         CollectionId collectionId = new CollectionId();
         collectionId.setRealm(realm);
         collectionId.setSpiKey(getSpiKey());
-        collectionId.setName(collection.getName());
+        collectionId.setId(id);
 
         return Collection.newBuilder()
             .id(collectionId.encodeId())

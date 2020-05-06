@@ -65,7 +65,7 @@ resources:
             0:
               name: WES API Reader
               description: Read from local wes server
-              collectionName: Local Resources From Wallet
+              collectionId: 0
               audience: aud1
               scope: read
               interfaceType: http:wes
@@ -73,7 +73,7 @@ resources:
             1:
               name: WES API Executor
               description: Executre on the local wes server
-              collectionName: Local Resources From Wallet
+              collectionId: 0
               audience: aud1
               scope: write
               interfaceType: http:wes
@@ -81,7 +81,7 @@ resources:
             2:
               name: Search API Spender
               description: Execute queries on the search api
-              collectionName: Local Resources From Wallet
+              collectionId: 0
               audience: aud2
               scope: explode
               interfaceType: http:search
@@ -97,7 +97,7 @@ resources:
             0:
               name: Covid Virus Beacon
               description: Read From public covid Beacon
-              collectionName: Covid Resources
+              collectionId: 0
               interfaceType: http:beacon:virus
               interfaceUri: https://beacon.covid-19.dnastack.com/beacon/public
 

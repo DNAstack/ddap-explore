@@ -6,6 +6,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import com.dnastack.ddap.common.client.WebClientFactory;
 import com.dnastack.ddap.common.security.InvalidTokenException;
 import com.dnastack.ddap.explore.resource.exception.ResourceAuthorizationException;
+import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Collection;
 import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
 import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
@@ -57,16 +58,19 @@ public class ReactiveWalletResourceClient implements ResourceClient {
     @Override
     public Mono<List<Resource>> listResources(String realm, List<CollectionId> collectionsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
         return Mono.fromCallable(() ->
-            config.getResources().stream().filter(walletResource -> {
+            config.getResources().entrySet().stream().filter(walletResourceEntry -> {
                 boolean keep = true;
+                WalletResource walletResource = walletResourceEntry.getValue();
+                String id = walletResourceEntry.getKey();
                 if (collectionsToFilter != null && !collectionsToFilter.isEmpty()) {
-                    CollectionId collectionId = walletResource.getInterfaceId(realm, getSpiKey()).toCollectionId();
+                    CollectionId collectionId = getInterfaceIdFromWalletResource(realm, getSpiKey(), walletResource, id)
+                        .toCollectionId();
                     keep = collectionsToFilter.stream()
                         .anyMatch(collectionId::equals);
                 }
 
                 if (interfaceTypesToFilter != null) {
-                    keep &= shouldKeepInterfaceType(walletResource.getInterfaceType(),interfaceTypesToFilter);
+                    keep &= shouldKeepInterfaceType(walletResource.getInterfaceType(), interfaceTypesToFilter);
                 }
 
                 if (interfaceUrisToFilter != null) {
@@ -74,30 +78,30 @@ public class ReactiveWalletResourceClient implements ResourceClient {
                 }
 
                 return keep;
-            }).map(walletResource -> walletResource.toResource(realm, getSpiKey()))
+            }).map(walletResource -> walletResourceToResource(realm, getSpiKey(), walletResource
+                .getValue(), walletResource.getKey()))
                 .collect(Collectors.toList()));
     }
 
     @Override
     public Mono<Resource> getResource(String realm, ResourceId id) {
-        return Mono.fromCallable(() -> idToResource(realm, id)
-            .map(walletResource -> walletResource.toResource(realm, getSpiKey()))
-            .orElseThrow(() -> new NotFoundException("Could not locate resource with id: " + id.encodeId())));
+        return Mono.justOrEmpty(idToResource(realm, id))
+            .map(walletResource -> walletResourceToResource(realm, getSpiKey(), walletResource, id.getId()))
+            .switchIfEmpty(Mono.error(new NotFoundException("Could not locate resource with id: " + id.encodeId())));
     }
 
     @Override
     public Mono<List<Collection>> listCollections(String realm) {
-        return Mono.fromCallable(() -> config.getCollections().stream()
-            .map(collection -> copyCollectionFromConfig(realm, collection)).collect(Collectors.toList()));
+        return Mono.fromCallable(() -> config.getCollections().entrySet().stream()
+            .map(collection -> copyCollectionFromConfig(realm, collection.getKey(), collection.getValue()))
+            .collect(Collectors.toList()));
     }
 
     @Override
     public Mono<Collection> getCollection(String realm, CollectionId collectionId) {
-        return Mono.fromCallable(() -> config.getCollections().stream()
-            .filter(collection -> collection.getName().equals(collectionId.getName()))
-            .map(collection -> copyCollectionFromConfig(realm, collection))
-            .findFirst()
-            .orElseThrow(() -> new NotFoundException(
+        return Mono.justOrEmpty(idToCollection(realm, collectionId))
+            .map(collection -> copyCollectionFromConfig(realm, collectionId.getId(), collection))
+            .switchIfEmpty(Mono.error(new NotFoundException(
                 "Could not locate collection with id: " + collectionId.encodeId())));
     }
 
@@ -127,7 +131,8 @@ public class ReactiveWalletResourceClient implements ResourceClient {
                 String state = UUID.randomUUID().toString();
                 String scope = combineScopes(configuredScope, combineScopes(OIDC_SCOPES, scopes));
                 URI authorizationUrl = getAuthorizationUrl(aud, scope, state, postLoginRedirect, loginHint, ttl);
-                states.add(new OAuthState(state, validUntil, ttl, realm, authorizationUrl, postLoginRedirect, resourceList));
+                states
+                    .add(new OAuthState(state, validUntil, ttl, realm, authorizationUrl, postLoginRedirect, resourceList));
             }
         }
 
@@ -171,11 +176,6 @@ public class ReactiveWalletResourceClient implements ResourceClient {
         return groupedResources;
     }
 
-    private Optional<WalletResource> idToResource(String realm, ResourceId id) {
-        return config.getResources().stream()
-            .filter(walletResource -> walletResource.getInterfaceId(realm, getSpiKey()).toResourceId().equals(id))
-            .findFirst();
-    }
 
     private URI getAuthorizationUrl(String audience, String scope, String state, URI redirectUri, String loginHint, String ttl) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(config.getAuthorizationUrl())
@@ -257,11 +257,44 @@ public class ReactiveWalletResourceClient implements ResourceClient {
     }
 
 
-    private Collection copyCollectionFromConfig(String realm, Collection collection) {
+    private Optional<WalletResource> idToResource(String realm, ResourceId id) {
+        return Optional.ofNullable(config.getResources().get(id.getId()));
+    }
+
+    private Optional<Collection> idToCollection(String realm, CollectionId id) {
+        return Optional.ofNullable(config.getCollections().get(id.getId()));
+    }
+
+    public Resource walletResourceToResource(String realm, String spikey, WalletResource walletResource, String resourceId) {
+        InterfaceId interfaceId = getInterfaceIdFromWalletResource(realm, spikey, walletResource, resourceId);
+        return Resource.newBuilder()
+            .id(interfaceId.toResourceId().encodeId())
+            .collectionId(interfaceId.toCollectionId().encodeId())
+            .name(walletResource.getName())
+            .imageUrl(walletResource.getImageUrl())
+            .description(walletResource.getDescription())
+            .interfaces(List
+                .of(new AccessInterface(walletResource.getInterfaceType(), walletResource.getInterfaceUri(), interfaceId
+                    .encodeId(), false)))
+            .metadata(walletResource.getMetadata() != null ? new HashMap<>(walletResource.getMetadata()) : null)
+            .build();
+    }
+
+    public InterfaceId getInterfaceIdFromWalletResource(String realm, String spikey, WalletResource walletResource, String resourceId) {
+        InterfaceId id = new InterfaceId();
+        id.setRealm(realm);
+        id.setSpiKey(spikey);
+        id.setResourceId(resourceId);
+        id.setCollectionId(walletResource.getCollectionId());
+        id.setType(walletResource.getInterfaceType());
+        return id;
+    }
+
+    private Collection copyCollectionFromConfig(String realm, String id, Collection collection) {
         CollectionId collectionId = new CollectionId();
         collectionId.setSpiKey(getSpiKey());
         collectionId.setRealm(realm);
-        collectionId.setName(realm);
+        collectionId.setId(id);
 
         return Collection.newBuilder()
             .id(collectionId.encodeId())

@@ -146,7 +146,7 @@ public class ReactiveDamResourceClient implements ResourceClient {
                 resources.forEach((k, resource) -> {
                     CollectionId id = new CollectionId();
                     id.setSpiKey(getSpiKey());
-                    id.setName(k);
+                    id.setId(k);
                     id.setRealm(realm);
                     Collection collection = resourceToCollection(id, resource);
                     collections.add(collection);
@@ -157,7 +157,7 @@ public class ReactiveDamResourceClient implements ResourceClient {
 
     @Override
     public Mono<Collection> getCollection(String realm, CollectionId collection) {
-        return damClient.getResource(realm, collection.getName())
+        return damClient.getResource(realm, collection.getId())
             .map(resource -> resourceToCollection(collection, resource));
 
     }
@@ -176,7 +176,7 @@ public class ReactiveDamResourceClient implements ResourceClient {
 
     private URI idToInterfaceUri(InterfaceId id) {
         return damProperties.getBaseUrl().resolve(URI.create(String
-            .format(INTERFACE_PATH_TEMPLATE, id.getRealm(), id.getCollectionName(), id.getResourceName(), id
+            .format(INTERFACE_PATH_TEMPLATE, id.getRealm(), id.getCollectionId(), id.getResourceId(), id
                 .getAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY), id
                 .getType())));
     }
@@ -225,7 +225,7 @@ public class ReactiveDamResourceClient implements ResourceClient {
         return ids.stream().filter(id -> {
             URI toResolve = URI
                 .create(String
-                    .format(template, id.getRealm(), id.getCollectionName(), id.getResourceName(), id
+                    .format(template, id.getRealm(), id.getCollectionId(), id.getResourceId(), id
                         .getAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY), id
                         .getType()));
             return baseUri.equals(baseUri.resolve(toResolve));
@@ -279,8 +279,8 @@ public class ReactiveDamResourceClient implements ResourceClient {
         InterfaceId id = new InterfaceId();
         id.setSpiKey(getSpiKey());
         id.setRealm(realm);
-        id.setCollectionName(flatView.getResourceName());
-        id.setResourceName(flatView.getViewName());
+        id.setCollectionId(flatView.getResourceName());
+        id.setResourceId(flatView.getViewName());
         id.setAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY, flatView.getRoleName());
         id.setType(flatView.getInterfaceName());
 
@@ -288,7 +288,7 @@ public class ReactiveDamResourceClient implements ResourceClient {
     }
 
     private String getFlatViewPrefix(ResourceId resourceId) {
-        return String.format("/%s/%s/%s", resourceId.getCollectionName(), resourceId.getName(), resourceId
+        return String.format("/%s/%s/%s", resourceId.getCollectionId(), resourceId.getId(), resourceId
             .getAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY));
     }
 

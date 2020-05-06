@@ -1,6 +1,7 @@
 package com.dnastack.ddap.explore.resource.spi.open;
 
 import com.dnastack.ddap.explore.resource.model.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
 
@@ -13,20 +14,13 @@ public class OpenResourceClientConfiguration {
      * wallet resource representation. This approach is strictly to overcome springs inability to rebind configuration
      * parameters once the application has started
      */
-    private Map<String, OpenResource> resources;
+    private Map<String, OpenResource> resources = new HashMap<>();
 
     /**
      * Collection Configuration should be provided as a Map, where the key is any arbitrary value, and the value is the
      * wallet resource representation. This approach is strictly to overcome springs inability to rebind configuration
      * parameters once the application has started
      */
-    private Map<String, Collection> collections;
+    private Map<String, Collection> collections = new HashMap<>();
 
-    public java.util.Collection<OpenResource> getResources() {
-        return resources.values();
-    }
-
-    public java.util.Collection<Collection> getCollections() {
-        return collections.values();
-    }
 }

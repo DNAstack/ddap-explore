@@ -95,12 +95,6 @@ resources:
         spi-properties:
           resources:
             0:
-              name: Covid Beacon
-              description: Read From public covid Beacon
-              collectionName: Covid Resources
-              interfaceType: http:beacon
-              interfaceUri: https://beacon.covid-19.dnastack.com/beacon/public
-            1:
               name: Covid Virus Beacon
               description: Read From public covid Beacon
               collectionName: Covid Resources

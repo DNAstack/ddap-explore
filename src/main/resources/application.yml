@@ -21,7 +21,8 @@ frontend-config:
   enabled-features:
   in-standalone-mode: ${ddap.dam-facade}
   google-analytics-id: null
-  tos-url: 'https://beacon-network.org/#/terms'  # Alternatively, tos-url: 'https://dnastack.com/#/legal/terms'
+  tos-url: 'https://www.dnastack.com/terms'
+  pp-url: 'https://www.dnastack.com/privacy'
   list-page-size: 20
   apps:
     search:

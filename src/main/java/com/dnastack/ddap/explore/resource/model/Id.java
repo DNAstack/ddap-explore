@@ -14,6 +14,7 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.TreeMap;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 @Data
@@ -102,13 +103,14 @@ public abstract class Id implements Serializable {
     }
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class CollectionId extends Id {
 
         private static final long serialVersionUID = -8122211961586936183L;
         private static final String COLLECTION_ID = "c";
 
         @JsonProperty(COLLECTION_PROPERTY_KEY)
-        String name;
+        String id;
 
         public CollectionId() {
         }
@@ -117,15 +119,15 @@ public abstract class Id implements Serializable {
             super(id);
 
             if (id instanceof CollectionId) {
-                this.name = ((CollectionId) id).getName();
+                this.id = ((CollectionId) id).getId();
             }
 
             if (id instanceof ResourceId) {
-                this.name = ((ResourceId) id).getCollectionName();
+                this.id = ((ResourceId) id).getCollectionId();
             }
 
             if (id instanceof InterfaceId) {
-                this.name = ((InterfaceId) id).getCollectionName();
+                this.id = ((InterfaceId) id).getCollectionId();
             }
 
         }
@@ -133,13 +135,14 @@ public abstract class Id implements Serializable {
         @Override
         public void validate() {
             super.validate();
-            if (getName() == null) {
+            if (getId() == null) {
                 throw new IllegalIdentifierException("Missing Required attribute in identifier: collectionId");
             }
         }
     }
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class ResourceId extends Id {
 
         private static final long serialVersionUID = -8122211961586936183L;
@@ -147,10 +150,10 @@ public abstract class Id implements Serializable {
         private static final String COLLECTION_ID = "c";
 
         @JsonProperty(COLLECTION_PROPERTY_KEY)
-        String collectionName;
+        String collectionId;
 
         @JsonProperty(RESOURCE_PROPERTY_KEY)
-        String name;
+        String id;
 
         public ResourceId() {
         }
@@ -158,43 +161,44 @@ public abstract class Id implements Serializable {
         public ResourceId(Id id) {
             super(id);
             if (id instanceof CollectionId) {
-                this.name = ((CollectionId) id).getName();
+                this.id = ((CollectionId) id).getId();
             }
 
             if (id instanceof ResourceId) {
-                collectionName = ((ResourceId) id).getCollectionName();
-                this.name = ((ResourceId) id).getName();
+                collectionId = ((ResourceId) id).getCollectionId();
+                this.id = ((ResourceId) id).getId();
             }
 
             if (id instanceof InterfaceId) {
-                collectionName = ((InterfaceId) id).getCollectionName();
-                this.name = ((InterfaceId) id).getResourceName();
+                collectionId = ((InterfaceId) id).getCollectionId();
+                this.id = ((InterfaceId) id).getResourceId();
             }
         }
 
         @Override
         public void validate() {
             super.validate();
-            if (getName() == null) {
+            if (getId() == null) {
                 throw new IllegalIdentifierException("Missing Required attribute in identifier: resourceId");
             }
 
-            if (getCollectionName() == null) {
+            if (getCollectionId() == null) {
                 throw new IllegalIdentifierException("Missing Required attribute in identifier: collectionId");
             }
         }
     }
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class InterfaceId extends Id {
 
         private static final long serialVersionUID = -8122211961586936183L;
 
         @JsonProperty(COLLECTION_PROPERTY_KEY)
-        String collectionName;
+        String collectionId;
 
         @JsonProperty(RESOURCE_PROPERTY_KEY)
-        String resourceName;
+        String resourceId;
 
         @JsonProperty(INTERFACE_PROPERTY_KEY)
         String type;
@@ -205,17 +209,17 @@ public abstract class Id implements Serializable {
         public InterfaceId(Id id) {
             super(id);
             if (id instanceof CollectionId) {
-                resourceName = ((CollectionId) id).getName();
+                resourceId = ((CollectionId) id).getId();
             }
 
             if (id instanceof ResourceId) {
-                collectionName = ((ResourceId) id).getCollectionName();
-                resourceName = ((ResourceId) id).getName();
+                collectionId = ((ResourceId) id).getCollectionId();
+                resourceId = ((ResourceId) id).getId();
             }
 
             if (id instanceof InterfaceId) {
-                collectionName = ((InterfaceId) id).getCollectionName();
-                resourceName = ((InterfaceId) id).getResourceName();
+                collectionId = ((InterfaceId) id).getCollectionId();
+                resourceId = ((InterfaceId) id).getResourceId();
                 this.type = ((InterfaceId) id).getType();
             }
         }
@@ -224,11 +228,11 @@ public abstract class Id implements Serializable {
         @Override
         public void validate() {
             super.validate();
-            if (getResourceName() == null) {
+            if (getResourceId() == null) {
                 throw new IllegalIdentifierException("Missing Required attribute in identifier: resourceId");
             }
 
-            if (getCollectionName() == null) {
+            if (getCollectionId() == null) {
                 throw new IllegalIdentifierException("Missing Required attribute in identifier: collectionId");
             }
             if (getType() == null) {

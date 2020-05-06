@@ -1,11 +1,12 @@
 import { KeyValue } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import 'brace';
 import 'brace/mode/sql';
 import 'brace/theme/eclipse';
 import { Observable } from 'rxjs';
+
+import { AppConfigStore } from '../../shared/app-config/app-config.store';
 import { dam } from '../../shared/proto/dam-service';
 import { ResourceService } from '../../shared/resource/resource.service';
 import { TableInfo } from '../../shared/search/table-info.model';
@@ -16,7 +17,6 @@ import { SearchService } from '../search.service';
 
 import { JsonViewerService } from './json-viewer/json-viewer.component';
 import { SearchView } from './search-tables.model';
-import { AppConfigStore } from "../../shared/app-config/app-config.store";
 import Table = WebAssembly.Table;
 import IResourceResults = dam.v1.IResourceResults;
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
@@ -66,16 +66,13 @@ export class SearchTablesComponent implements OnInit {
   completedQuery: string;
   properties: string[];
 
-  private snackBarRef: any;
-
   constructor(
     private appConfigStore: AppConfigStore,
     private searchService: SearchService,
     private route: ActivatedRoute,
     private jsonViewerService: JsonViewerService,
     private router: Router,
-    private snackBar: MatSnackBar,
-    private resourceService: ResourceService,
+    private resourceService: ResourceService
   ) {
     this.view = {
       errorLoadingTables: true,
@@ -139,12 +136,6 @@ export class SearchTablesComponent implements OnInit {
 
   onResultTableFullscreenButtonToggle() {
     this.view.showQueryEditor = !this.view.showQueryEditor;
-
-    this.showFeedback(
-      this.view.showQueryEditor
-        ? 'Now, the query editor is visible.'
-        : 'The query editor is now hidden. Click the same button again to edit the query.',
-    );
   }
 
   isTablePropertyListFinal(table: UITableInfo): boolean {
@@ -156,7 +147,7 @@ export class SearchTablesComponent implements OnInit {
     const aPos = a[positionKey];
     const bPos = b[positionKey];
     return aPos > bPos ? -1 : (bPos > aPos ? 1 : 0);
-  };
+  }
 
   previewTableQuery(tableName: string) {
     return `SELECT * FROM ${tableName} LIMIT 50;`;
@@ -194,7 +185,7 @@ export class SearchTablesComponent implements OnInit {
         this.queryError = JSON.parse(error.error.message);
         this.view.isSearching = false;
         throw error;
-      },
+      }
     ).subscribe(result => {
       this.queryError = null;
       this.completedQuery = query;
@@ -275,7 +266,7 @@ export class SearchTablesComponent implements OnInit {
       observableTables = this.searchService.getTables(
         this.currentView.resourcePath,
         this.accessToken,
-        this.connectorDetails,
+        this.connectorDetails
       );
     }
 
@@ -292,31 +283,12 @@ export class SearchTablesComponent implements OnInit {
             this.getTables(authRequestDetails);
           }
         }
-      },
+      }
     );
   }
 
   isUsingPublicView() {
     return this.accessToken === undefined || this.accessToken === null;
-  }
-
-  private showFeedback(message, action?: FeedbackAction) {
-    if (!action) {
-      action = {
-        label: 'Dismiss',
-        callback: () => {
-          this.snackBarRef.dismiss();
-          this.snackBarRef = null;
-        },
-      };
-    }
-
-    if (this.snackBarRef) {
-      this.snackBarRef.dismiss();
-    }
-
-    this.snackBarRef = this.snackBar.open(message, action.label, { panelClass: 'ddap-error' });
-    this.snackBarRef.onAction().subscribe();
   }
 
   private initializeTableList() {
@@ -331,11 +303,6 @@ export class SearchTablesComponent implements OnInit {
       }
     });
   }
-}
-
-interface FeedbackAction {
-  label: string;
-  callback: Function;
 }
 
 interface UITableInfo {

@@ -11,7 +11,8 @@
 </ddaplib-header>
 
 <ddaplib-main>
-  <ddap-beacon-info-bar (beaconChanged)="changeBeaconResource($event)">
+  <ddap-beacon-info-bar (beaconChanged)="changeBeaconResource($event)"
+                        [hideInputs]="isStandaloneMode$ | async">
   </ddap-beacon-info-bar>
   <div *ngIf="beaconForm?.beacon?.resource as beaconResource"
        class="search-bar">

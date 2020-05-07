@@ -1,7 +1,15 @@
 @import '~ddap-common-lib/styles/modules/colors';
 
-mat-sidenav-container {
-  height: 100%;
+::ng-deep .site-container {
+  .mat-drawer-content {
+    height: auto;
+  }
+}
+
+mat-sidenav-container,
+mat-sidenav-content {
+  display: flex;
+  flex-grow: 1;
 }
 
 .link-to-external-app {

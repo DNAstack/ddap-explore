@@ -1,5 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
-import { MatDrawer } from '@angular/material/sidenav';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 import { BeaconQueryAlleleResponseModel } from '../../../shared/beacon/beacon-search.model';
 import { BeaconDataTableModelParser } from '../../../shared/data-table/beacon/beacon-data-table-model.parser';
@@ -12,28 +11,25 @@ import { ColumnDef, DataTableModel, TableRowSelection } from '../../../shared/da
 })
 export class BeaconSearchResultTableComponent implements OnChanges {
 
-  @ViewChild('selectedRowDetailDrawer', { static: false })
-  selectedRowDetailDrawer: MatDrawer;
-
   @Input()
   alleleResponses: BeaconQueryAlleleResponseModel[];
   @Input()
   hiddenFieldIds: string[];
 
+  @Output()
+  selectedRowChanged: EventEmitter<any> = new EventEmitter<any>();
+
   dataTableModels: DataTableModel[];
   tableRowSelection = TableRowSelection.single;
-  selectedRowData: any;
 
   ngOnChanges(changes: SimpleChanges): void {
     this.dataTableModels = this.alleleResponses.map((alleleResponse: BeaconQueryAlleleResponseModel) => {
       return BeaconDataTableModelParser.parse(alleleResponse.info);
     }).map((dataTableModel: DataTableModel) => this.setFieldVisibility(dataTableModel));
-
-    this.resetDrawer();
   }
 
   changeRowSelection(selectedRows: any[]) {
-    this.selectedRowData = selectedRows[0];
+    this.selectedRowChanged.emit(selectedRows[0]);
   }
 
   private setFieldVisibility(dataTableModel: DataTableModel): DataTableModel {
@@ -48,12 +44,6 @@ export class BeaconSearchResultTableComponent implements OnChanges {
       });
     }
     return dataTableModel;
-  }
-
-  private resetDrawer() {
-    if (this.selectedRowDetailDrawer && this.selectedRowDetailDrawer.opened) {
-      this.selectedRowDetailDrawer.toggle();
-    }
   }
 
 }

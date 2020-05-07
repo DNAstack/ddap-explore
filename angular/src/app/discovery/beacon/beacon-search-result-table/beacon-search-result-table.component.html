@@ -1,34 +1,7 @@
-<mat-drawer-container [autosize]="true"
-                      [hasBackdrop]="false">
-  <mat-drawer #selectedRowDetailDrawer
-              [opened]="selectedRowData"
-              [mode]="'side'"
-              position="end">
-    <ng-container *ngIf="selectedRowData">
-      <mat-toolbar class="tertiary-toolbar">
-        <mat-toolbar-row>
-          <div>Details</div>
-          <span class="fill-space"></span>
-          <button (click)="selectedRowDetailDrawer.toggle()"
-                  matTooltip="Hide Details"
-                  mat-icon-button>
-            <mat-icon>close</mat-icon>
-          </button>
-        </mat-toolbar-row>
-      </mat-toolbar>
-      <ddap-beacon-search-result-detail [selectedRowData]="selectedRowData">
-      </ddap-beacon-search-result-detail>
-    </ng-container>
-  </mat-drawer>
-
-  <mat-drawer-content>
-    <ng-container *ngFor="let dataTableModel of dataTableModels">
-      <ddap-data-table (selectedRowsChanged)="changeRowSelection($event)"
-                       [rowSelection]="tableRowSelection"
-                       [columnDefs]="dataTableModel.columnDefs"
-                       [rowData]="dataTableModel.rowData"
-                       [class.opened-drawer-margin-offset]="selectedRowDetailDrawer.opened">
-      </ddap-data-table>
-    </ng-container>
-  </mat-drawer-content>
-</mat-drawer-container>
+<ng-container *ngFor="let dataTableModel of dataTableModels">
+  <ddap-data-table (selectedRowsChanged)="changeRowSelection($event)"
+                   [rowSelection]="tableRowSelection"
+                   [columnDefs]="dataTableModel.columnDefs"
+                   [rowData]="dataTableModel.rowData">
+  </ddap-data-table>
+</ng-container>

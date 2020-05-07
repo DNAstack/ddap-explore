@@ -1,4 +1,7 @@
 export interface AppConfigModel {
+  head: {
+    title: string;
+  };
   ui: {
     title: string;
     logoUrl: string;

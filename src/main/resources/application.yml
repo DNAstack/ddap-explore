@@ -7,7 +7,13 @@ server:
   port: ${PORT:8085}
 
 frontend-config:
+  # The "head" section is for anything related to the HEAD subtree (<head>).
+  head:
+    # Document title
+    title: "DDAP"
+  # The "ui" section is for anything related to the UI in general (anything under <body>).
   ui:
+    # UI Title
     title: "DDAP"
     logo-url: null
     theme: null

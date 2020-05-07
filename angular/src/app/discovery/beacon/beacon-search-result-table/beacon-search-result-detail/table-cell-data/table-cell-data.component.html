@@ -1,7 +1,9 @@
 <div class="flex flex--column">
   <mat-form-field appearance="outline">
     <mat-label>{{ title }}</mat-label>
-    <input disabled="true" matInput [value]="value || '---'">
+    <input disabled="true"
+           matInput
+           [value]="value || '---'">
   </mat-form-field>
   <ng-content></ng-content>
 </div>

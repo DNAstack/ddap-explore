@@ -38,21 +38,6 @@
 }
 
 @media only screen and (max-width: 479px) {
-  ::ng-deep .site-container ddaplib-header + ddaplib-main,
-  ::ng-deep .site-container ddaplib-searchable-header + ddaplib-main {
-    top: 10rem;
-  }
-
-  ::ng-deep mat-toolbar {
-    &.mat-toolbar-multiple-rows {
-      height: 10rem;
-    }
-
-    .mat-toolbar-row {
-      height: 10rem;
-    }
-  }
-
   ::ng-deep ddap-beacon-info-bar {
     form {
       display: flex;

@@ -12,6 +12,7 @@
 }
 
 .search-bar {
+  flex-wrap: wrap;
   padding-bottom: 1rem;
 }
 
@@ -27,10 +28,10 @@
 
 .search-progress-backdrop {
   position: absolute;
-  top:0;
-  right:0;
-  bottom:0;
-  left:0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -58,6 +59,26 @@
       flex-direction: column;
       flex-wrap: wrap;
       align-content: center;
-    };
+    }
+  }
+
+  .search-bar {
+    flex-direction: column;
+
+    button {
+      margin-top: 1rem;
+    }
+
+    ::ng-deep ddap-beacon-search-bar {
+      width: 100%;
+    }
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .search-bar {
+    button {
+      margin-left: 1rem;
+    }
   }
 }

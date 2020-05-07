@@ -50,17 +50,13 @@ export class BeaconSearchComponent implements OnInit {
     this.helpDialog.open(HelpDialogComponent);
   }
 
-  changeBeaconResource(beaconForm: BeaconInfoFormModel) {
-    this.beaconForm = beaconForm;
-    this.submitQuery();
+  loadResultTable() {
+    if (!this.refreshBeaconResult$.getValue() && this.beaconForm && this.beaconQuery) {
+      this.submitQuery();
+    }
   }
 
-  changeBeaconQuery(beaconQuery: BeaconQueryAlleleRequestModel) {
-    this.beaconQuery = beaconQuery;
-    this.submitQuery();
-  }
-
-  private submitQuery(): void {
+  submitQuery(): void {
     this.refreshBeaconResult$.next({ ...this.beaconQuery, datasetIds: this.beaconForm.datasets });
   }
 

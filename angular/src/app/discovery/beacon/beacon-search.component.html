@@ -11,39 +11,65 @@
 </ddaplib-header>
 
 <ddaplib-main (keyup.enter)="submitQuery()">
-  <ddap-beacon-info-bar (beaconChanged)="beaconForm = $event; loadResultTable()"
-                        [hideInputs]="isStandaloneMode$ | async">
-  </ddap-beacon-info-bar>
-  <div *ngIf="beaconForm?.beacon?.resource as beaconResource"
-       class="flex vertical-center search-bar">
-    <ddap-beacon-search-bar (queryChanged)="beaconQuery = $event; loadResultTable()"
-                            [interfaceType]="beaconResource.interfaces[0].type"
-                            [beaconInfo]="beaconForm.beacon.beaconInfo">
-    </ddap-beacon-search-bar>
-    <button (click)="submitQuery()"
-            mat-raised-button
-            color="primary"
-            class="flex vertical-center">
-      <mat-icon>search</mat-icon>
-      Search
-    </button>
-  </div>
+  <mat-drawer-container [autosize]="true"
+                        [hasBackdrop]="false">
+    <mat-drawer #selectedRowDetailDrawer
+                [opened]="selectedRowData"
+                [mode]="'side'"
+                position="end">
+      <ng-container *ngIf="selectedRowData">
+        <mat-toolbar class="tertiary-toolbar">
+          <mat-toolbar-row>
+            <div>Details</div>
+            <span class="fill-space"></span>
+            <button (click)="selectedRowDetailDrawer.toggle()"
+                    matTooltip="Hide Details"
+                    mat-icon-button>
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-toolbar-row>
+        </mat-toolbar>
+        <ddap-beacon-search-result-detail [selectedRowData]="selectedRowData">
+        </ddap-beacon-search-result-detail>
+      </ng-container>
+    </mat-drawer>
 
-  <div class="search-content-container">
-    <div *ngIf="loader.progress$ | async"
-         class="search-progress-backdrop">
-      <mat-spinner [value]="loader.progress$ | async"
-                   mode="indeterminate"
-                   color="accent">
-      </mat-spinner>
-    </div>
+    <mat-drawer-content>
+      <ddap-beacon-info-bar (beaconChanged)="beaconForm = $event; loadResultTable()"
+                            [hideInputs]="isStandaloneMode$ | async">
+      </ddap-beacon-info-bar>
+      <div *ngIf="beaconForm?.beacon?.resource as beaconResource"
+           class="flex vertical-center search-bar">
+        <ddap-beacon-search-bar (queryChanged)="beaconQuery = $event; loadResultTable()"
+                                [interfaceType]="beaconResource.interfaces[0].type"
+                                [beaconInfo]="beaconForm.beacon.beaconInfo">
+        </ddap-beacon-search-bar>
+        <button (click)="submitQuery()"
+                mat-raised-button
+                color="primary"
+                class="flex vertical-center">
+          <mat-icon>search</mat-icon>
+          Search
+        </button>
+      </div>
 
-    <div *ngIf="beaconQueryResponse$ | async as queryResponse"
-         class="search-results">
-      <ddap-beacon-search-result-table [alleleResponses]="queryResponse.datasetAlleleResponses"
-                                       [hiddenFieldIds]="['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness']">
-      </ddap-beacon-search-result-table>
-    </div>
-  </div>
+      <div class="flex stretch">
+        <div *ngIf="loader.progress$ | async"
+             class="search-progress-backdrop">
+          <mat-spinner [value]="loader.progress$ | async"
+                       mode="indeterminate"
+                       color="accent">
+          </mat-spinner>
+        </div>
 
+        <div *ngIf="beaconQueryResponse$ | async as queryResponse"
+             class="flex stretch search-results">
+          <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
+                                           [alleleResponses]="queryResponse.datasetAlleleResponses"
+                                           [hiddenFieldIds]="['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness']">
+          </ddap-beacon-search-result-table>
+        </div>
+      </div>
+    </mat-drawer-content>
+  </mat-drawer-container>
 </ddaplib-main>

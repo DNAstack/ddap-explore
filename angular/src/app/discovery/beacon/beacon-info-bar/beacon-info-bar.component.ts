@@ -1,8 +1,7 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { ErrorHandlerService } from 'ddap-common-lib';
-import { EMPTY, Subscription } from 'rxjs';
-import { catchError, debounceTime, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { debounceTime, tap } from 'rxjs/operators';
 
 import { BeaconDatasetModel, BeaconInfoResourcePair } from '../../../shared/apps/app-discovery/app-discovery.model';
 import { ResourceService } from '../../../shared/apps/resource.service';
@@ -17,6 +16,9 @@ import { BeaconInfoFormModel } from './beacon-info-form.model';
   styleUrls: ['./beacon-info-bar.component.scss'],
 })
 export class BeaconInfoBarComponent implements OnInit, OnDestroy {
+
+  @Input()
+  hideInputs: boolean;
 
   @Output()
   readonly beaconChanged: EventEmitter<BeaconInfoFormModel> = new EventEmitter();

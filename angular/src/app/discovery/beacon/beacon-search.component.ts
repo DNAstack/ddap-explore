@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatDrawer } from '@angular/material/sidenav';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { ErrorHandlerService } from 'ddap-common-lib';
 import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
@@ -19,10 +20,14 @@ import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 })
 export class BeaconSearchComponent implements OnInit {
 
+  @ViewChild('selectedRowDetailDrawer', { static: false })
+  selectedRowDetailDrawer: MatDrawer;
+
   beaconForm: BeaconInfoFormModel;
   beaconQuery: BeaconQueryAlleleRequestModel;
   beaconQueryResponse$: Observable<BeaconQueryResponseModel>;
   isStandaloneMode$: Observable<boolean>;
+  selectedRowData: any;
 
   private readonly refreshBeaconResult$ = new BehaviorSubject<BeaconQueryAlleleRequestModel>(undefined);
 
@@ -58,6 +63,7 @@ export class BeaconSearchComponent implements OnInit {
 
   submitQuery(): void {
     this.refreshBeaconResult$.next({ ...this.beaconQuery, datasetIds: this.beaconForm.datasets });
+    this.resetDrawer();
   }
 
   private setUpBeaconQueryObservable() {
@@ -76,6 +82,12 @@ export class BeaconSearchComponent implements OnInit {
           );
       })
     );
+  }
+
+  private resetDrawer() {
+    if (this.selectedRowDetailDrawer && this.selectedRowDetailDrawer.opened) {
+      this.selectedRowDetailDrawer.toggle();
+    }
   }
 
 }

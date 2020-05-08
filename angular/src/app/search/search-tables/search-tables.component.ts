@@ -1,6 +1,5 @@
 import { KeyValue } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import 'brace';
 import 'brace/mode/sql';
@@ -67,15 +66,12 @@ export class SearchTablesComponent implements OnInit {
   completedQuery: string;
   properties: string[];
 
-  private snackBarRef: any;
-
   constructor(
     private appConfigStore: AppConfigStore,
     private searchService: SearchService,
     private route: ActivatedRoute,
     private jsonViewerService: JsonViewerService,
     private router: Router,
-    private snackBar: MatSnackBar,
     private resourceService: ResourceService
   ) {
     this.view = {
@@ -140,12 +136,6 @@ export class SearchTablesComponent implements OnInit {
 
   onResultTableFullscreenButtonToggle() {
     this.view.showQueryEditor = !this.view.showQueryEditor;
-
-    this.showFeedback(
-      this.view.showQueryEditor
-        ? 'Now, the query editor is visible.'
-        : 'The query editor is now hidden. Click the same button again to edit the query.'
-    );
   }
 
   isTablePropertyListFinal(table: UITableInfo): boolean {
@@ -301,25 +291,6 @@ export class SearchTablesComponent implements OnInit {
     return this.accessToken === undefined || this.accessToken === null;
   }
 
-  private showFeedback(message, action?: FeedbackAction) {
-    if (!action) {
-      action = {
-        label: 'Dismiss',
-        callback: () => {
-          this.snackBarRef.dismiss();
-          this.snackBarRef = null;
-        },
-      };
-    }
-
-    if (this.snackBarRef) {
-      this.snackBarRef.dismiss();
-    }
-
-    this.snackBarRef = this.snackBar.open(message, action.label, { panelClass: 'ddap-error' });
-    this.snackBarRef.onAction().subscribe();
-  }
-
   private initializeTableList() {
     this.tableApiRequests = 0;
     this.getTables();
@@ -332,11 +303,6 @@ export class SearchTablesComponent implements OnInit {
       }
     });
   }
-}
-
-interface FeedbackAction {
-  label: string;
-  callback: Function;
 }
 
 interface UITableInfo {

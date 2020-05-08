@@ -6,7 +6,9 @@
           - search/search-resources
   -->
   <mat-card class="ddap-card"
-            *ngFor="let resource of resources">
+            *ngFor="let resource of resources"
+            (click)="this.router.navigateByUrl(resource.accessUrl)"
+            [attr.data-se]="resource.resourceName + '-resource'">
     <mat-card-header>
       <mat-card-title>{{ resource.ui.label || 'Unknown' }}</mat-card-title>
       <mat-card-subtitle>{{ resource.ui.description || 'Unknown' }}</mat-card-subtitle>
@@ -15,14 +17,11 @@
          [src]="[resource.ui.imageUrl || randomImageRetriever.getPathToFixedRandomImage(resource.ui.label)]"
          alt="Photo">
     <mat-card-actions>
-      <a [href]="resource.accessUrl"
-         data-se="explore-resource">
-        <button mat-button
-                color="primary"
-                class="uppercase">
-          Explore
-        </button>
-      </a>
+      <button mat-button
+              color="primary"
+              class="uppercase">
+        Explore
+      </button>
     </mat-card-actions>
   </mat-card>
 </ddaplib-main>

@@ -48,7 +48,7 @@ export class LayoutComponent implements OnInit {
     this.appConfigStore.state$
       .subscribe((appConfig: AppConfigModel) => {
         this.appConfig = appConfig;
-        this.titleService.setTitle(appConfig.ui.title);
+        this.titleService.setTitle(appConfig.head.title);
         this.initialize();
       });
   }

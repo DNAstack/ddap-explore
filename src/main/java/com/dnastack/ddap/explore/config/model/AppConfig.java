@@ -12,6 +12,8 @@ import java.util.Set;
 public class AppConfig {
 
     @JsonInclude()
+    private FrontendHeadConfig head;
+    @JsonInclude()
     private FrontendUiConfig ui;
     private String defaultRoute;
     @JsonInclude()
@@ -25,6 +27,11 @@ public class AppConfig {
     private int listPageSize;
     @JsonInclude()
     private FrontendAppsConfig apps;
+
+    @Data
+    public static class FrontendHeadConfig {
+        private String title;
+    }
 
     @Data
     public static class FrontendAppsConfig {

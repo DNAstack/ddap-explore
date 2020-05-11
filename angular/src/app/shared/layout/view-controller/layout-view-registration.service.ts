@@ -91,6 +91,17 @@ export class LayoutViewRegistrationService {
 
     this.viewController
       .registerModule({
+        key: 'workspace',
+        name: 'Workspaces',
+        iconName: 'view_carousel',
+        requiredFeatureFlags: [FrontendApp.discovery],
+        routerLink: 'workspace',
+        isApp: true,
+        isSidebarEnabled: false,
+      });
+
+    this.viewController
+      .registerModule({
         key: 'analytics',
         name: 'Analytics',
         requiredFeatureFlags: [FrontendApp.workflows],

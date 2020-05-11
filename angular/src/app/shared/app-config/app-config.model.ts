@@ -37,6 +37,7 @@ export enum FrontendApp {
   discovery = 'DISCOVERY',
   search = 'SEARCH',
   workflows = 'WORKFLOWS',
+  workspace = 'WORKSPACE',
 }
 
 export enum FrontendFeature {

@@ -1,0 +1,29 @@
+<ddaplib-header iconName="view_carousel"
+                label="Workspaces">
+</ddaplib-header>
+<ddaplib-main [disableMobile]="true">
+  <!--
+    FIXME If we need to make one more copy of this, we should consider componentizing this component.
+          - data/collection/collection-list
+          - search/search-resources
+  -->
+  <mat-card class="ddap-card"
+            *ngFor="let resource of resources">
+    <mat-card-header>
+      <mat-card-title>{{ resource.ui.label || 'Unknown' }}</mat-card-title>
+      <mat-card-subtitle>{{ resource.ui.description || 'Unknown' }}</mat-card-subtitle>
+    </mat-card-header>
+    <img mat-card-image
+         [src]="[resource.ui.imageUrl || randomImageRetriever.getPathToFixedRandomImage(resource.ui.label)]"
+         alt="Photo">
+    <mat-card-actions>
+      <a [href]="resource.accessUrl"
+         data-se="explore-resource">
+        <button mat-button
+                color="primary"
+                class="uppercase">
+          Explore
+        </button>
+      </a>
+    </mat-card-actions>
+  </mat-card>

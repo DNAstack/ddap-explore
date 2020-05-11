@@ -9,6 +9,7 @@ import { SearchAppGuard } from './search/search-app.guard';
 import { CheckinComponent } from './shared/checkin/checkin.component';
 import { LayoutComponent } from './shared/layout/layout.component';
 import { WorkflowsAppGuard } from './workflows/workflows-app.guard';
+import { WorkspaceAppGuard } from './workspace/workspace-app.guard';
 
 const routes: Routes = [
   {
@@ -56,6 +57,12 @@ const routes: Routes = [
         canActivate: [SearchAppGuard],
         loadChildren: () => import('./search/search.module')
           .then(mod => mod.SearchModule),
+      },
+      {
+        path: 'workspace',
+        canActivate: [WorkspaceAppGuard],
+        loadChildren: () => import('./workspace/workspace.module')
+          .then(mod => mod.WorkspaceModule),
       },
     ],
   },

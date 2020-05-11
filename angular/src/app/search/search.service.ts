@@ -30,6 +30,10 @@ export class SearchService {
     this.tableData = new BehaviorSubject<object>({});
   }
 
+  getSPISearchResources(): Observable<object[]> {
+    return this.http.get<object[]>('http://localhost:8085/api/v1beta/app/resources?interface_type=http:beacon');
+  }
+
   getSearchResources(): Observable<SearchResourceModel[]> {
     return this.http.get<SearchResourceModel[]>(`${environment.ddapAlphaApiUrl}/realm/${realmIdPlaceholder}/search/resources`)
       .pipe(

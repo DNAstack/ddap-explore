@@ -29,6 +29,9 @@ public class ListTables {
     @JsonProperty("tables")
     private List<TableInfo> tableInfos;
 
+    @JsonProperty("errors")
+    private List<TableError> errors;
+
     @JsonProperty("pagination")
     private Pagination pagination;
 

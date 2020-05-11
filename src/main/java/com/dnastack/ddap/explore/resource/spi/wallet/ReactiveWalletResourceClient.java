@@ -275,7 +275,7 @@ public class ReactiveWalletResourceClient implements ResourceClient {
             .description(walletResource.getDescription())
             .interfaces(List
                 .of(new AccessInterface(walletResource.getInterfaceType(), walletResource.getInterfaceUri(), interfaceId
-                    .encodeId(), false)))
+                    .encodeId(), true)))
             .metadata(walletResource.getMetadata() != null ? new HashMap<>(walletResource.getMetadata()) : null)
             .build();
     }

@@ -8,7 +8,8 @@
   <mat-card class="ddap-card"
             *ngFor="let resource of resources"
             (click)="this.router.navigateByUrl(resource.accessUrl)"
-            [attr.data-se]="resource.resourceName + '-resource'">
+            [attr.data-se]="resource.resourceName + '-resource'"
+            [attr.data-href]="resource.accessUrl">
     <mat-card-header>
       <mat-card-title>{{ resource.ui.label || 'Unknown' }}</mat-card-title>
       <mat-card-subtitle>{{ resource.ui.description || 'Unknown' }}</mat-card-subtitle>

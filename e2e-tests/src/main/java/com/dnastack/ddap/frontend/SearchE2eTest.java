@@ -42,10 +42,10 @@ public class SearchE2eTest extends AbstractFrontendE2eTest {
         ddapPage.getNavBar().goToSearchResources();
         log.info("Authorizing for search resources");
 
-        WebElement accessBtn = driver.findElement(DdapBy.se("explore-resource"));
+        WebElement accessBtn = driver.findElement(DdapBy.se("search-resource"));
         new WebDriverWait(driver, 10)
-                .until(ExpectedConditions.attributeContains(DdapBy.se("explore-resource"), "href", "?resource"));
-        URI authorizeUrl = URI.create(accessBtn.getAttribute("href"));
+                .until(ExpectedConditions.attributeContains(DdapBy.se("search-resource"), "data-href", "?resource"));
+        URI authorizeUrl = URI.create(accessBtn.getAttribute("data-href"));
 
         TablesPage tablesPage = loginStrategy
                 .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, TablesPage::new);

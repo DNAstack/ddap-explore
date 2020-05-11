@@ -69,7 +69,7 @@ export class BeaconSearchComponent implements OnInit {
   }
 
   closeDetail(): void {
-    this.selectedRowDetailDrawer.toggle();
+    this.selectedRowDetailDrawer.close();
     this.deselectRowsEvents.next();
   }
 

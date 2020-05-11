@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Column, ColumnApi, GridApi, NavigateToNextCellParams } from 'ag-grid-community';
+import { Subject, Subscription } from 'rxjs';
 
 import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } from './data-table.model';
 
@@ -8,7 +9,7 @@ import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } 
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
 })
-export class DataTableComponent {
+export class DataTableComponent implements OnInit, OnDestroy {
 
   @Input()
   columnDefs: ColumnDef[];
@@ -30,15 +31,27 @@ export class DataTableComponent {
   rowSelection: TableRowSelection = TableRowSelection.single;
   @Input()
   pagination = true;
+  @Input()
+  deselectRowsEvents: Subject<void> = new Subject();
 
   @Output()
   readonly selectedRowsChanged: EventEmitter<any | any[]> = new EventEmitter<any | any[]>();
 
   private gridApi: GridApi;
   private gridColumnApi: ColumnApi;
+  private deselectRowsSubscription: Subscription;
 
   constructor() {
     this.navigateToNextCell = this.navigateToNextCell.bind(this);
+    this.deselectAllRows = this.deselectAllRows.bind(this);
+  }
+
+  ngOnInit() {
+      this.deselectRowsSubscription = this.deselectRowsEvents.subscribe(this.deselectAllRows);
+  }
+
+  ngOnDestroy() {
+      this.deselectRowsSubscription.unsubscribe();
   }
 
   onGridReady(params): void {
@@ -99,6 +112,10 @@ export class DataTableComponent {
     }
   }
 
+  deselectAllRows(): void {
+    this.gridApi.deselectAll();
+  }
+
   private autoSizeColumns(): void {
     if (!this.gridColumnApi) {
       return;
@@ -107,5 +124,4 @@ export class DataTableComponent {
       .map((column: Column) => column.getColId());
     this.gridColumnApi.autoSizeColumns(allColumnIds);
   }
-
 }

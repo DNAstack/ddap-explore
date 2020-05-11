@@ -62,7 +62,7 @@ public class ReactiveDamResourceClient implements ResourceClient {
     public Mono<List<Resource>> listResources(String realm, List<CollectionId> collectionIdsToFilter, List<String> interfaceTypesToFilter, List<String> interfaceUrisToFilter) {
         return damClient.getFlattenedViews(realm).map(views -> views.values().stream().filter(view -> {
             boolean keep = true;
-            if (!collectionIdsToFilter.isEmpty()) {
+            if (collectionIdsToFilter != null && !collectionIdsToFilter.isEmpty()) {
                 CollectionId thisCollection = flatViewToInterfaceId(realm, view).toCollectionId();
                 thisCollection.setAdditionalProperty(DamAdditionalPropertiesKeys.ROLE_KEY, null);
                 keep = collectionIdsToFilter.stream()

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.core.ParameterizedTypeReference;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.WebSession;
@@ -50,6 +52,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1beta/{realm}/apps/search")
 public class SearchV1BetaController {
@@ -96,8 +99,11 @@ public class SearchV1BetaController {
                     ParameterizedTypeReference<ListTables> typeReference = new ParameterizedTypeReference<>() {
                     };
                     return retrieveSearchResource(httpRequest, session, accessInterface, tablesUri, typeReference, accessToken, null)
-                        .onErrorResume(throwable -> Mono
-                            .just(handleException(httpRequest, throwable, realm, this::constructListResultRequiringAuthorization)))
+                        .onErrorResume(throwable -> {
+                                return Mono
+                                    .just(handleException(httpRequest, throwable, realm, this::constructListResultRequiringAuthorization));
+                            }
+                        )
                         .map(listTables -> {
                             listTables.setResource(resource);
                             return listTables;
@@ -108,7 +114,7 @@ public class SearchV1BetaController {
                         tableResources = new ArrayList<>();
                         identity.setTableResources(tableResources);
                     }
-
+                    identity.setRequiresAdditionalAuth(identity.isRequiresAdditionalAuth() || current.isRequiresAdditionalAuth());
                     tableResources.add(current);
                     return identity;
                 }).map(aggregateListTable -> {
@@ -279,6 +285,7 @@ public class SearchV1BetaController {
 
 
     private <T> T handleException(ServerHttpRequest httpRequest, Throwable throwable, String realm, AuthExceptionRecovery<T> authRecovery) {
+        log.debug("here");
         if (throwable instanceof SearchAuthorizationException) {
             SearchAuthorizationException searchAuthorizationException = (SearchAuthorizationException) throwable;
             AccessInterface accessInterface = searchAuthorizationException.getAccessInterfaceToAuthorize();
@@ -471,17 +478,17 @@ public class SearchV1BetaController {
 
 
     private ExchangeFilterFunction buildAuthExchangeFilter(String accessToken, Map<String, String> ga4ghCredentials) {
-        return ExchangeFilterFunction.ofRequestProcessor((request) -> {
-            if (accessToken != null) {
-                request.headers().setBearerAuth(accessToken);
-            }
-            if (ga4ghCredentials != null) {
-                ga4ghCredentials.forEach((connectorKey, credential) -> {
-                    request.headers().add("GA4GH-Search-Authorization", connectorKey + "=" + credential);
-                });
-            }
-            return Mono.just(request);
-        });
+        return ExchangeFilterFunction.ofRequestProcessor((request) -> Mono.just(ClientRequest.from(request)
+            .headers((headers) -> {
+                if (accessToken != null) {
+                    headers.setBearerAuth(accessToken);
+                }
+                if (ga4ghCredentials != null) {
+                    ga4ghCredentials.forEach((connectorKey, credential) -> {
+                        headers.add("GA4GH-Search-Authorization", connectorKey + "=\""  + credential + "\"");
+                    });
+                }
+            }).build()));
     }
 
     @FunctionalInterface

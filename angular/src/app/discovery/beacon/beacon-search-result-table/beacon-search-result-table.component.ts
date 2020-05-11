@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Subject } from 'rxjs';
 
 import { BeaconQueryAlleleResponseModel } from '../../../shared/beacon/beacon-search.model';
 import { BeaconDataTableModelParser } from '../../../shared/data-table/beacon/beacon-data-table-model.parser';
@@ -15,6 +16,8 @@ export class BeaconSearchResultTableComponent implements OnChanges {
   alleleResponses: BeaconQueryAlleleResponseModel[];
   @Input()
   hiddenFieldIds: string[];
+  @Input()
+  deselectRowsEvents: Subject<void>;
 
   @Output()
   selectedRowChanged: EventEmitter<any> = new EventEmitter<any>();

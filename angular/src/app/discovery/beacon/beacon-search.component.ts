@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { ErrorHandlerService } from 'ddap-common-lib';
-import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, Subject } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
 import { AppConfigStore } from '../../shared/app-config/app-config.store';
@@ -30,6 +30,8 @@ export class BeaconSearchComponent implements OnInit {
   selectedRowData: any;
 
   private readonly refreshBeaconResult$ = new BehaviorSubject<BeaconQueryAlleleRequestModel>(undefined);
+
+  private deselectRowsEvents = new Subject();
 
   constructor(
     public loader: LoadingBarService,
@@ -64,6 +66,11 @@ export class BeaconSearchComponent implements OnInit {
   submitQuery(): void {
     this.refreshBeaconResult$.next({ ...this.beaconQuery, datasetIds: this.beaconForm.datasets });
     this.resetDrawer();
+  }
+
+  closeDetail(): void {
+    this.selectedRowDetailDrawer.toggle();
+    this.deselectRowsEvents.next();
   }
 
   private setUpBeaconQueryObservable() {

@@ -4,17 +4,25 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import com.dnastack.ddap.common.client.WebClientFactory;
 import com.dnastack.ddap.common.util.http.XForwardUtil;
+import com.dnastack.ddap.explore.apps.search.exception.FilterException;
 import com.dnastack.ddap.explore.apps.search.exception.SearchAuthorizationException;
+import com.dnastack.ddap.explore.apps.search.exception.SearchException;
 import com.dnastack.ddap.explore.apps.search.exception.SearchResourceException;
 import com.dnastack.ddap.explore.apps.search.model.AggregateListTable;
 import com.dnastack.ddap.explore.apps.search.model.ListTables;
 import com.dnastack.ddap.explore.apps.search.model.Pagination;
 import com.dnastack.ddap.explore.apps.search.model.SearchAuthRequest;
 import com.dnastack.ddap.explore.apps.search.model.SearchRequest;
+import com.dnastack.ddap.explore.apps.search.model.SimpleSearchRequest;
+import com.dnastack.ddap.explore.apps.search.model.SimpleSearchRequest.OrderByFilter;
+import com.dnastack.ddap.explore.apps.search.model.SimpleSearchRequest.SearchFilter;
 import com.dnastack.ddap.explore.apps.search.model.TableData;
+import com.dnastack.ddap.explore.apps.search.model.TableInfo;
 import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
 import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
+import com.dnastack.ddap.explore.resource.model.PaginatedResponse;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
 import com.dnastack.ddap.explore.resource.service.ResourceClientService;
 import com.dnastack.ddap.explore.resource.service.UserCredentialService;
@@ -71,6 +79,149 @@ public class SearchV1BetaController {
     }
 
 
+    @PostMapping("/simple/filter")
+    public Mono<TableData> simpleSearchQuery(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam("resource") String interfaceIdString, @RequestBody SimpleSearchRequest simpleSearchRequest) {
+        return Mono.defer(() -> {
+            InterfaceId interfaceId = InterfaceId.decodeInterfaceId(interfaceIdString);
+            if (!interfaceId.getType().equals("http:search:table")) {
+                throw new IllegalArgumentException("Resource: " + interfaceIdString
+                    + ", has invalid interface type for simple search. Must equal \"http:search:table\"");
+            }
+
+            return resourceClientService.getClient(interfaceId.getSpiKey())
+                .getResource(realm, interfaceId.toResourceId())
+                .flatMap(resource -> {
+                    if (resource.getMetadata() == null || !resource.getMetadata().containsKey("tableName")) {
+                        throw new SearchException("Simple search requires a resource of type \"http:search:table\" with a \"tableName\" defined in the resource metadata");
+                    }
+                    String tableName = resource.getMetadata().get("tableName");
+                    String query = formulateSimpleSearchQuery(tableName, simpleSearchRequest);
+                    AccessInterface accessInterface = resource.getInterfaces().stream()
+                        .filter(iface -> iface.getType().equals("http:search:table")).findFirst()
+                        .orElseThrow(() -> new SearchException("Resource: " + interfaceIdString
+                            + ", has invalid interface type for simple search. Must equal \"http:search:table\""));
+                    SearchRequest searchRequest = new SearchRequest();
+                    searchRequest.setQuery(query);
+
+                    final String accessToken = getAccessTokenForInterface(httpRequest, session, realm, accessInterface);
+                    if (accessInterface.isAuthRequired() && accessToken == null) {
+                        return Mono.just(constructSearchResultRequiringAuthorization(httpRequest, realm, List
+                            .of(interfaceIdString)));
+                    }
+
+                    URI searchUri = UriComponentsBuilder.fromUri(accessInterface.getUri()).pathSegment("search")
+                        .build().toUri();
+                    ParameterizedTypeReference<TableData> typeReference = new ParameterizedTypeReference<TableData>() {
+                    };
+                    return postSearchResource(httpRequest, session, accessInterface, searchUri, typeReference, searchRequest, accessToken, null)
+                        .map(data -> setupPagination(httpRequest, realm, data, interfaceId))
+                        .onErrorResume(throwable -> Mono
+                            .just(handleException(httpRequest, throwable, realm, this::constructSearchResultRequiringAuthorization)));
+                });
+
+        });
+    }
+
+
+    private String formulateSimpleSearchQuery(String tableName, SimpleSearchRequest simpleSearchRequest) {
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("SELECT\n")
+            .append(" *\n")
+            .append("FROM ").append(tableName);
+
+        if (simpleSearchRequest.getFilters() != null && !simpleSearchRequest.getFilters().isEmpty()) {
+            builder.append("\nWHERE");
+            boolean first = true;
+            for (Map.Entry<String, SearchFilter> entry : simpleSearchRequest.getFilters().entrySet()) {
+                String key = entry.getKey();
+                SearchFilter filter = entry.getValue();
+
+                if (filter == null || filter.getOperation() == null){
+                    throw new FilterException("Illegal Search filter, an operation must be defined");
+                }
+
+                builder.append("\n  ");
+                if (!first) {
+                    builder.append("AND ");
+                } else {
+                    first = false;
+                }
+                builder.append(key).append(" ").append(filter.getFilterString());
+            }
+        }
+
+        if (simpleSearchRequest.getOrder() != null && !simpleSearchRequest.getOrder().isEmpty()) {
+            builder.append("\nORDER BY");
+            boolean first = true;
+            for (OrderByFilter orderByFilter : simpleSearchRequest.getOrder()) {
+                if (orderByFilter.getField() == null || orderByFilter.getDirection() == null){
+                    throw new FilterException("Illegal order clause, must define a field and a direction");
+                }
+                if (first) {
+                    first = false;
+                } else {
+                    builder.append(",");
+                }
+                builder.append(" ").append(orderByFilter.getField()).append(" ")
+                    .append(orderByFilter.getDirection().name());
+            }
+        }
+
+        return builder.toString();
+    }
+
+    @GetMapping("/simple/resources")
+    public Mono<PaginatedResponse<TableInfo>> getSimpleSearchResources(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam("collection") String collectionIdString) {
+        return Mono.defer(() -> {
+            CollectionId collectionId = CollectionId.decodeCollectionId(collectionIdString);
+            return resourceClientService
+                .listResources(realm, List.of(collectionId), List.of("http:search:table"), null);
+
+        }).flatMapMany(Flux::fromIterable)
+            .flatMap(resource -> getTable(httpRequest, session, realm, resource.getMetadata().get("tableName"), resource
+                .getInterfaces()
+                .get(0).getId())
+                .map(tableInfo -> {
+                    tableInfo.setResource(resource);
+                    return tableInfo;
+                }))
+            .reduce(new PaginatedResponse<>(new ArrayList<>()), (identity, tableInfo) -> {
+                identity.getData().add(tableInfo);
+                return identity;
+            });
+    }
+
+    @GetMapping("/table/{tableName}/info")
+    public Mono<TableInfo> getTable(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @PathVariable String tableName, @RequestParam("resource") String interfaceIdString) {
+        return Mono.defer(() -> {
+            InterfaceId interfaceId = InterfaceId.decodeInterfaceId(interfaceIdString);
+            if (!interfaceId.getType().startsWith("http:search")) {
+                throw new IllegalArgumentException("Resource: " + interfaceIdString
+                    + ", has invalid interface type for search. Must start with \"http:search\"");
+            }
+            return getAccessInterfaceFor(realm, interfaceId)
+                .flatMap(accessInterface -> {
+                    final String accessToken = getAccessTokenForInterface(httpRequest, session, realm, accessInterface);
+                    if (accessInterface.isAuthRequired() && accessToken == null) {
+                        return Mono.just(constructTableInfoRequiringAuthorization(httpRequest, realm, List
+                            .of(interfaceIdString)));
+                    }
+
+                    URI tableInfoUri = UriComponentsBuilder.fromUri(accessInterface.getUri()).pathSegment("table")
+                        .pathSegment(tableName).pathSegment("info").build().toUri();
+                    ParameterizedTypeReference<TableInfo> typeReference = new ParameterizedTypeReference<>() {
+                    };
+
+                    return retrieveSearchResource(httpRequest, session, accessInterface, tableInfoUri, typeReference, accessToken, null)
+                        .onErrorResume(throwable -> Mono
+                            .just(handleException(httpRequest, throwable, realm, this::constructTableInfoRequiringAuthorization)));
+
+                });
+        });
+    }
+
+
     @GetMapping("/tables")
     public Mono<AggregateListTable> getTables(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm) {
         return Mono.defer(() -> {
@@ -114,7 +265,8 @@ public class SearchV1BetaController {
                         tableResources = new ArrayList<>();
                         identity.setTableResources(tableResources);
                     }
-                    identity.setRequiresAdditionalAuth(identity.isRequiresAdditionalAuth() || current.isRequiresAdditionalAuth());
+                    identity.setRequiresAdditionalAuth(
+                        identity.isRequiresAdditionalAuth() || current.isRequiresAdditionalAuth());
                     tableResources.add(current);
                     return identity;
                 }).map(aggregateListTable -> {
@@ -305,8 +457,8 @@ public class SearchV1BetaController {
 
     private Mono<AccessInterface> getAccessInterfaceFor(String realm, InterfaceId interfaceId) {
         return resourceClientService.getClient(interfaceId.getSpiKey()).getResource(realm, interfaceId.toResourceId())
-            .map(beaconResource -> {
-                AccessInterface accessInterface = beaconResource.getInterfaces().stream()
+            .map(searchResource -> {
+                AccessInterface accessInterface = searchResource.getInterfaces().stream()
                     .filter(beaconInterface -> beaconInterface.getId().equals(interfaceId.encodeId())).findFirst()
                     .orElseThrow(() -> new NotFoundException(
                         "Could not find Interface for resource with id: " + interfaceId.encodeId()));
@@ -331,6 +483,17 @@ public class SearchV1BetaController {
         return result;
     }
 
+
+    private TableInfo constructTableInfoRequiringAuthorization(ServerHttpRequest httpRequest, String realm, List<String> interfaceIds) {
+        TableInfo tableData = new TableInfo();
+        tableData.setRequiresAdditionalAuth(true);
+        UriComponentsBuilder componentsBuilder = getAuthorizationUriBuilder(httpRequest, realm);
+        for (var id : interfaceIds) {
+            componentsBuilder.queryParam("resource", id);
+        }
+        tableData.setAuthorizationUrlBase(componentsBuilder.build().toUri());
+        return tableData;
+    }
 
     private TableData constructSearchResultRequiringAuthorization(ServerHttpRequest httpRequest, String realm, List<String> interfaceIds) {
         TableData tableData = new TableData();
@@ -485,7 +648,7 @@ public class SearchV1BetaController {
                 }
                 if (ga4ghCredentials != null) {
                     ga4ghCredentials.forEach((connectorKey, credential) -> {
-                        headers.add("GA4GH-Search-Authorization", connectorKey + "=\""  + credential + "\"");
+                        headers.add("GA4GH-Search-Authorization", connectorKey + "=\"" + credential + "\"");
                     });
                 }
             }).build()));

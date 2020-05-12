@@ -3,7 +3,7 @@ package com.dnastack.ddap.explore.apps.search.exception;
 import lombok.Getter;
 
 
-public class SearchResourceException extends RuntimeException {
+public class SearchResourceException extends SearchException {
     @Getter
     private final int status;
 

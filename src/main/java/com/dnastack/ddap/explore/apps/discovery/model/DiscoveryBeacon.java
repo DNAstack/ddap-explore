@@ -1,5 +1,6 @@
 package com.dnastack.ddap.explore.apps.discovery.model;
 
+import com.dnastack.ddap.explore.resource.model.Resource;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DiscoveryBeacon implements Cloneable {
+
+    private Resource resource;
 
     @NotBlank
     private String id;
@@ -37,6 +40,6 @@ public class DiscoveryBeacon implements Cloneable {
 
     @Override
     public DiscoveryBeacon clone() {
-        return new DiscoveryBeacon(id, name, apiVersion, description, version, welcomeUrl, alternativeUrl, createDateTime, updateDateTime, organization, datasets, sampleAlleleRequests, info);
+        return new DiscoveryBeacon(resource,id, name, apiVersion, description, version, welcomeUrl, alternativeUrl, createDateTime, updateDateTime, organization, datasets, sampleAlleleRequests, info);
     }
 }

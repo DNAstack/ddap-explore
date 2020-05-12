@@ -5,7 +5,7 @@ import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import lombok.Data;
 
 @Data
-public class SearchAuthorizationException extends RuntimeException {
+public class SearchAuthorizationException extends SearchException {
 
     SearchAuthRequest searchAuthRequest;
     AccessInterface accessInterfaceToAuthorize;

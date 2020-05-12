@@ -1,17 +1,21 @@
 package com.dnastack.ddap.explore.apps.discovery.controller;
 
 import com.dnastack.ddap.common.util.http.XForwardUtil;
+import com.dnastack.ddap.explore.apps.beacon.model.BeaconInfo;
 import com.dnastack.ddap.explore.apps.discovery.client.ReactiveDiscoveryBeaconClient;
 import com.dnastack.ddap.explore.apps.discovery.model.DiscoveryBeacon;
 import com.dnastack.ddap.explore.apps.discovery.model.DiscoveryBeaconQueryResult;
 import com.dnastack.ddap.explore.apps.discovery.model.DiscoveryBeaconRequestModel;
 import com.dnastack.ddap.explore.resource.model.AccessInterface;
 import com.dnastack.ddap.explore.resource.model.Id;
+import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
 import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
+import com.dnastack.ddap.explore.resource.model.PaginatedResponse;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
 import com.dnastack.ddap.explore.resource.service.ResourceClientService;
 import com.dnastack.ddap.explore.resource.service.UserCredentialService;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -54,6 +59,21 @@ public class DiscoveryController {
             return getAccessInterfaceForBeacon(realm, beaconId)
                 .flatMap(accessInterface -> beaconClient.getBeaconInfo(accessInterface.getUri()));
         });
+    }
+
+    @GetMapping("/beacon/resources")
+    public Mono<PaginatedResponse<DiscoveryBeacon>> getBeaconInfoAndResources(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam String collection) {
+        return Mono.defer(() ->             resourceClientService.listResources(realm,List.of(CollectionId.decodeCollectionId(collection)),List.of("http:beacon"),null))
+            .flatMapMany(Flux::fromIterable)
+            .flatMap(resource -> getBeaconInfo(httpRequest,session,realm,resource.getInterfaces().get(0).getId()).map(beaconInfo -> {
+
+                beaconInfo.setResource(resource);
+                return beaconInfo;
+            }))
+            .reduce(new PaginatedResponse<>(new ArrayList<>()),(identity,beaconInfo)->{
+                identity.getData().add(beaconInfo);
+                return identity;
+            });
     }
 
     @GetMapping("/beacon/query")

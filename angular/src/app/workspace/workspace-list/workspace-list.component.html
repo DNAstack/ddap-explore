@@ -1,5 +1,5 @@
 <ddaplib-header iconName="view_carousel"
-                label="Workspaces">
+                label="Collections">
 </ddaplib-header>
 <ddaplib-main [disableMobile]="true">
   <!--
@@ -8,22 +8,21 @@
           - search/search-resources
   -->
   <mat-card class="ddap-card"
-            *ngFor="let resource of resources">
+            *ngFor="let collection of collections"
+            [routerLink]="['..', collection.id]">
     <mat-card-header>
-      <mat-card-title>{{ resource.ui.label || 'Unknown' }}</mat-card-title>
-      <mat-card-subtitle>{{ resource.ui.description || 'Unknown' }}</mat-card-subtitle>
+      <mat-card-title>{{ collection.name || 'Unknown' }}</mat-card-title>
+      <mat-card-subtitle>{{ collection.description || 'Unknown' }}</mat-card-subtitle>
     </mat-card-header>
     <img mat-card-image
-         [src]="[resource.ui.imageUrl || randomImageRetriever.getPathToFixedRandomImage(resource.ui.label)]"
+         [src]="[randomImageRetriever.getPathToFixedRandomImage((collection.metadata || {}).imageUrl)]"
          alt="Photo">
     <mat-card-actions>
-      <a [href]="resource.accessUrl"
-         data-se="explore-resource">
-        <button mat-button
-                color="primary"
-                class="uppercase">
+      <a [routerLink]="['..', collection.id]"
+         data-se="explore-resource"
+         mat-button>
           Explore
-        </button>
       </a>
     </mat-card-actions>
   </mat-card>
+</ddaplib-main>

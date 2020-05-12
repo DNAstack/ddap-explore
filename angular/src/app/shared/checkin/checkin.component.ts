@@ -20,6 +20,10 @@ export class CheckinComponent implements OnInit {
   ngOnInit() {
     this.appConfigStore.state$
       .subscribe((appConfig: AppConfigModel) => {
+        if (!appConfig.defaultRoute) {
+          throw new Error('The app has not been configured properly.');
+        }
+
         if (appConfig.inStandaloneMode) {
           this.router.navigate([`/app/${appConfig.defaultRoute}`]);
         } else {

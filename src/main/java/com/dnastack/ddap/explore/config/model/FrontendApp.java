@@ -5,5 +5,6 @@ public enum FrontendApp {
     DATA,
     DISCOVERY,
     SEARCH,
-    WORKFLOWS;
+    WORKFLOWS,
+    WORKSPACE;
 }

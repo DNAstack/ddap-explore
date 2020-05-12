@@ -386,3 +386,26 @@ html {
 .ag-theme-material .ag-row:hover {
   cursor: pointer;
 }
+
+/*******************
+ * Component Frame *
+ *******************/
+
+$component-frame-aside-width: 240px;
+
+.component-frame {
+  display: flex;
+  height: 100%;
+
+  .component-frame-main {
+    order: 2;
+    flex: 1;
+    background-color: blue;
+  }
+
+  .component-frame-aside {
+    order: 1;
+    width: $component-frame-aside-width;
+    background-color: red;
+  }
+}

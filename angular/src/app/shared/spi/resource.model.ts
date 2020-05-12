@@ -1,12 +1,16 @@
-export class Resource {
+import { SPIMetadata } from './metadata.model';
+
+export class SPIResource {
   collectionId: string;
   description: string;
   id: string;
-  interfaces: Interface[];
+  imageUrl?: string;
+  interfaces: SPIInterface[];
   name: string;
+  metadata?: SPIMetadata;
 }
 
-class Interface {
+class SPIInterface {
   type: string;
   uri: string;
   id: string;

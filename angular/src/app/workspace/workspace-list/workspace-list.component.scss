@@ -1,0 +1,55 @@
+@import '~ddap-common-lib/styles/modules/colors';
+
+// FIXME If we need to make one more copy of this, we should consider componentizing this component.
+//       - data/collection/collection-list
+//       - search/search-resources
+.ddap-card {
+  vertical-align: top;
+  min-width: 20rem;
+  width: calc(30% + 4rem);
+  max-width: 30rem;
+  min-height: 20rem;
+  display: inline-block;
+  margin-right: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+  }
+
+  mat-card-title {
+    min-height: 3rem;
+    max-height: 3rem;
+  }
+
+  img {
+    min-width: 20rem;
+    height: 10rem;
+    object-fit: cover;
+  }
+
+  mat-icon {
+    float: right;
+    margin-right: 0.5rem;
+  }
+
+  mat-card-content {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    min-height: 3rem;
+    max-height: 3rem;
+
+    p {
+      color: $color-grey;
+    }
+  }
+}
+
+@media (max-width: 1600px) {
+  .ddap-card {
+    min-width: 20rem;
+    width: calc(50% - 4rem);
+  }
+}

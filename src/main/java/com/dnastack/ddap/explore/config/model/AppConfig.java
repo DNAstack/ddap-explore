@@ -3,6 +3,7 @@ package com.dnastack.ddap.explore.config.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 import java.util.Set;

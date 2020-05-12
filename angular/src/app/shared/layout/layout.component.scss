@@ -78,3 +78,7 @@ ddap-access-denied-screen.disabled-feature {
   justify-content: center;
   flex-direction: column;
 }
+
+::ng-deep ddap-workspace {
+  height: 100%;
+}

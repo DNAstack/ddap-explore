@@ -1,3 +1,5 @@
+import { SPIResource } from './resource.model';
+
 export class ResourceListResponseModel {
-  data: Response[];
+  data: SPIResource[];
 }

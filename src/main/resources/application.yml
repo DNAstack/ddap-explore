@@ -225,3 +225,55 @@ resources:
             0:
               name: Covid Resources
               description: A collection of Public Resources for dealing with Covid
+
+---
+
+spring:
+  profiles: covid19-dev
+
+resources:
+  spi:
+    clients:
+      covid-public:
+        factory-name: "open-resource-client-factory"
+        spi-properties:
+          resources:
+            0:
+              name: "COVID-19 Beacon"
+              description: "Public COVID-19 Beacon"
+              collectionId: "0"
+              interfaceType: "http:beacon:virus"
+              interfaceUri: "https://beacon.covid-19.dnastack.com/beacon/public"
+            1:
+              name: "Sequences"
+              imageUrl: null
+              description: "Public Search Service provided by DNAstack"
+              collectionId: "0"
+              interfaceType: "http:search:simple"
+              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.prod.dnastack.com"
+              metadata:
+                iconName: "table_chart"
+                tableName: "search_cloud.coronavirus.sequences"
+            2:
+              name: "Variants"
+              imageUrl: null
+              description: "Public Search Service provided by DNAstack"
+              collectionId: "0"
+              interfaceType: "http:search:simple"
+              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.prod.dnastack.com"
+              metadata:
+                iconName: "table_chart"
+                tableName: "search_cloud.coronavirus.variants"
+            3:
+              name: "Files"
+              description: "Public Search Service provided by DNAstack"
+              collectionId: "0"
+              interfaceType: "http:search:simple"
+              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.prod.dnastack.com"
+              metadata:
+                iconName: "table_chart"
+                tableName: "search_cloud.coronavirus.files"
+          collections:
+            0:
+              name: "COVID-19 Cloud"
+              description: "A Collection of Public Resources for Covid-19"

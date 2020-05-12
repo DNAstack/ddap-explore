@@ -3,12 +3,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { ErrorHandlerService } from 'ddap-common-lib';
-import { BehaviorSubject, EMPTY, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
 import { AppConfigStore } from '../../shared/app-config/app-config.store';
 import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discovery.service';
 import { BeaconQueryAlleleRequestModel, BeaconQueryResponseModel } from '../../shared/beacon/beacon-search.model';
+import { DataTableEventsService } from '../../shared/data-table/data-table-events.service';
 
 import { BeaconInfoFormModel } from './beacon-info-bar/beacon-info-form.model';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
@@ -17,6 +18,7 @@ import { HelpDialogComponent } from './help-dialog/help-dialog.component';
   selector: 'ddap-beacon-search',
   templateUrl: './beacon-search.component.html',
   styleUrls: ['./beacon-search.component.scss'],
+  providers: [DataTableEventsService],
 })
 export class BeaconSearchComponent implements OnInit {
 
@@ -31,13 +33,12 @@ export class BeaconSearchComponent implements OnInit {
 
   private readonly refreshBeaconResult$ = new BehaviorSubject<BeaconQueryAlleleRequestModel>(undefined);
 
-  private deselectRowsEvents = new Subject();
-
   constructor(
     public loader: LoadingBarService,
     private appConfigStore: AppConfigStore,
     private appDiscoveryService: AppDiscoveryService,
     private errorHandlerService: ErrorHandlerService,
+    private dataTableEventsService: DataTableEventsService,
     private helpDialog: MatDialog
   ) {
   }
@@ -70,7 +71,7 @@ export class BeaconSearchComponent implements OnInit {
 
   closeDetail(): void {
     this.selectedRowDetailDrawer.close();
-    this.deselectRowsEvents.next();
+    this.dataTableEventsService.deselectRows();
   }
 
   private setUpBeaconQueryObservable() {

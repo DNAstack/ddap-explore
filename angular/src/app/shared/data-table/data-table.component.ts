@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Column, ColumnApi, GridApi, NavigateToNextCellParams } from 'ag-grid-community';
-import { Subject, Subscription } from 'rxjs';
 
+import { DataTableEventsService } from './data-table-events.service';
 import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } from './data-table.model';
 
 @Component({
@@ -9,7 +9,7 @@ import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } 
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
 })
-export class DataTableComponent implements OnInit, OnDestroy {
+export class DataTableComponent implements OnDestroy {
 
   @Input()
   columnDefs: ColumnDef[];
@@ -31,27 +31,21 @@ export class DataTableComponent implements OnInit, OnDestroy {
   rowSelection: TableRowSelection = TableRowSelection.single;
   @Input()
   pagination = true;
-  @Input()
-  deselectRowsEvents: Subject<void> = new Subject();
 
   @Output()
   readonly selectedRowsChanged: EventEmitter<any | any[]> = new EventEmitter<any | any[]>();
 
   private gridApi: GridApi;
   private gridColumnApi: ColumnApi;
-  private deselectRowsSubscription: Subscription;
 
-  constructor() {
+  constructor(private dataTableEventsService: DataTableEventsService) {
     this.navigateToNextCell = this.navigateToNextCell.bind(this);
     this.deselectAllRows = this.deselectAllRows.bind(this);
-  }
-
-  ngOnInit() {
-      this.deselectRowsSubscription = this.deselectRowsEvents.subscribe(this.deselectAllRows);
+    this.dataTableEventsService.deselectRowsEvents.subscribe(this.deselectAllRows);
   }
 
   ngOnDestroy() {
-      this.deselectRowsSubscription.unsubscribe();
+    this.dataTableEventsService.deselectRowsEvents.unsubscribe();
   }
 
   onGridReady(params): void {

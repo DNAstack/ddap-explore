@@ -11,4 +11,8 @@ ag-grid-angular {
   ::ng-deep .ag-root-wrapper {
     flex-grow: 1;
   }
+
+  :host ::ng-deep &.hide-border .ag-root {
+    border: 0;
+  }
 }

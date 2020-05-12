@@ -2,6 +2,7 @@
   <ddap-data-table (selectedRowsChanged)="changeRowSelection($event)"
                    [rowSelection]="tableRowSelection"
                    [columnDefs]="dataTableModel.columnDefs"
-                   [rowData]="dataTableModel.rowData">
+                   [rowData]="dataTableModel.rowData"
+                   [hideBorder]="true">
   </ddap-data-table>
 </ng-container>

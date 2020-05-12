@@ -66,7 +66,6 @@
         <div *ngIf="beaconQueryResponse$ | async as queryResponse"
              class="flex stretch search-results">
           <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
-                                           [deselectRowsEvents]="deselectRowsEvents"
                                            [alleleResponses]="queryResponse.datasetAlleleResponses"
                                            [hiddenFieldIds]="['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness']">
           </ddap-beacon-search-result-table>

@@ -15,7 +15,7 @@ export class BeaconInfoFormBuilder {
   buildForm(beacons?: BeaconInfoResourcePair[]): FormGroup {
     return this.formBuilder.group({
       beacon: [_get(beacons, '[0]'), [Validators.required]],
-      datasets: [[_get(beacons, '[0].beaconInfo.datasets[0].id')], [Validators.required]],
+      datasets: [[_get(beacons, '[0].beaconInfo.datasets[0].id')], []],
     });
   }
 

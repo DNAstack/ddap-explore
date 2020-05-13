@@ -6,17 +6,23 @@
                   class="beacon-info"
                   appearance="outline">
     <mat-label>Beacon</mat-label>
+    <mat-icon *ngIf="selectedBeaconError"
+              color="warn">
+      error_outline
+    </mat-icon>
     <!-- [disabled] will trigger warning in console, but having the control set to disabled via FormControl
          won't trigger initial value change   -->
     <mat-select [disabled]="beacons.length < 2"
                 formControlName="beacon">
       <mat-option *ngFor="let beacon of beacons"
-                  [value]="beacon">
-        {{ beacon.beaconInfo.name }}
+                  [value]="beacon"
+                  [matTooltip]="beacon.beaconInfo?.name || beacon.resource.name">
+        {{ beacon.beaconInfo?.name || beacon.resource.name }}
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <mat-form-field appearance="outline">
+  <mat-form-field *ngIf="selectedBeaconDatasets.length > 0"
+                  appearance="outline">
     <mat-label>Dataset</mat-label>
     <!-- [disabled] will trigger warning in console, but having the control set to disabled via FormControl
          won't trigger initial value change   -->
@@ -24,9 +30,15 @@
                 formControlName="datasets"
                 multiple>
       <mat-option *ngFor="let dataset of selectedBeaconDatasets"
-                  [value]="dataset.id">
+                  [value]="dataset.id"
+                  [matTooltip]="dataset.name">
         {{ dataset.name }}
       </mat-option>
     </mat-select>
   </mat-form-field>
+
+  <span *ngIf="selectedBeaconError as error"
+        class="error-message">
+    We were unable to fetch the beacon's info. The beacon is either outdated (must be Beacon API specification of v1.1.0 or newer) or network connection error occurred. Please try again later.
+  </span>
 </form>

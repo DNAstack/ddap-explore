@@ -5,5 +5,7 @@ export interface JsonSchema {
 }
 
 interface JsonSchemaProperties {
-  [key: string]: object;
+  $ref?: string;
+  type?: string;
+  [key: string]: any;
 }

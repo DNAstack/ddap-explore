@@ -1,1 +1,50 @@
+@import '~ddap-common-lib/styles/modules/colors';
 
+.component-frame-aside .tertiary-toolbar {
+  mat-toolbar-row.back-navigator {
+    outline: none;
+    cursor: pointer;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.resource-list-container {
+  h2 {
+    cursor: default;
+    padding: 1rem 16px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: $color-grey;
+    margin: 0;
+  }
+
+  & + .resource-list-container {
+    border-top: 1px solid $color-grey-light;
+  }
+}
+
+.resource-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  & > li {
+    a {
+      display: block;
+      padding: 1rem 16px;
+      color: #000;
+    }
+  }
+}
+
+.selected-resource-name {
+  font-weight: 400;
+
+  &:before {
+    content: ' / ';
+    color: $color-grey-light;
+  }
+}

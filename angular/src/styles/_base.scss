@@ -400,12 +400,12 @@ $component-frame-aside-width: 240px;
   .component-frame-main {
     order: 2;
     flex: 1;
-    background-color: blue;
   }
 
   .component-frame-aside {
-    order: 1;
     width: $component-frame-aside-width;
-    background-color: red;
+    order: 1;
+    background-color: #fff;
+    border-right: 1px solid $color-grey-light;
   }
 }

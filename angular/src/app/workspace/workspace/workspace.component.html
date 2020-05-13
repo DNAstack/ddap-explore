@@ -1,4 +1,74 @@
 <div class="component-frame">
-  <div class="component-frame-main"></div>
-  <aside class="component-frame-aside"></aside>
+  <div class="component-frame-main">
+    <mat-toolbar class="tertiary-toolbar">
+      <ddap-dot-loading-indicator *ngIf="!collection"></ddap-dot-loading-indicator>
+      <mat-toolbar-row *ngIf="collection">
+        <div class="collection-name">
+          {{ collection.name }}
+
+          <span class="selected-resource-name"
+                *ngIf="activeBeaconResource">
+            {{ activeBeaconResource.name }}
+          </span>
+          <span class="selected-resource-name"
+                *ngIf="activeSimpleSearchResource">
+            {{ activeSimpleSearchResource.resource.name }}
+          </span>
+        </div>
+      </mat-toolbar-row>
+    </mat-toolbar>
+
+    <div *ngIf="getActiveResource()?.type === 'beacon'">
+      <ddap-dot-loading-indicator *ngIf="!activeBeaconResource"></ddap-dot-loading-indicator>
+    </div>
+    <div *ngIf="getActiveResource()?.type === 'simple-search'">
+      <ddap-dot-loading-indicator *ngIf="!activeSimpleSearchResource"></ddap-dot-loading-indicator>
+      <ddap-simple-search [resource]="activeSimpleSearchResource"
+                          *ngIf="activeSimpleSearchResource">
+      </ddap-simple-search>
+    </div>
+  </div>
+
+  <aside class="component-frame-aside">
+    <mat-toolbar class="tertiary-toolbar">
+      <ddap-dot-loading-indicator *ngIf="!collection"></ddap-dot-loading-indicator>
+      <mat-toolbar-row *ngIf="collection"
+                       class="back-navigator"
+                       matRipple
+                       [routerLink]="[getBaseUrl(), 'all']">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Collections</span>
+      </mat-toolbar-row>
+    </mat-toolbar>
+
+    <div class="resource-list-container"
+         *ngIf="beaconResources && beaconResources.length > 0">
+      <h2>Beacons</h2>
+      <ul class="resource-list">
+        <ng-container *ngFor="let beacon of beaconResources">
+          <li>
+            <a matRipple
+               [routerLink]="[getBaseUrl(), getCollectionId(), 'beacon', beacon.resource.id]">
+              {{ beacon.name }}
+            </a>
+          </li>
+        </ng-container>
+      </ul>
+    </div>
+
+    <div class="resource-list-container"
+         *ngIf="simpleSearchResources && simpleSearchResources.length > 0">
+      <h2>Simple Searches</h2>
+      <ul class="resource-list">
+        <ng-container *ngFor="let searchSimple of simpleSearchResources">
+          <li>
+            <a matRipple
+               [routerLink]="[getBaseUrl(), getCollectionId(), 'simple-search', searchSimple.resource.id]">
+              {{ searchSimple.resource.name }}
+            </a>
+          </li>
+        </ng-container>
+      </ul>
+    </div>
+  </aside>
 </div>

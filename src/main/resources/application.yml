@@ -249,30 +249,30 @@ resources:
               imageUrl: null
               description: "Public Search Service provided by DNAstack"
               collectionId: "0"
-              interfaceType: "http:search:simple"
-              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.prod.dnastack.com"
+              interfaceType: "http:search:table"
+              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.staging.dnastack.com"
               metadata:
                 iconName: "table_chart"
-                tableName: "search_cloud.coronavirus.sequences"
+                tableName: "search_cloud.coronavirus.sequences_dev"
             2:
               name: "Variants"
               imageUrl: null
               description: "Public Search Service provided by DNAstack"
               collectionId: "0"
-              interfaceType: "http:search:simple"
-              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.prod.dnastack.com"
+              interfaceType: "http:search:table"
+              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.staging.dnastack.com"
               metadata:
                 iconName: "table_chart"
-                tableName: "search_cloud.coronavirus.variants"
-            3:
-              name: "Files"
-              description: "Public Search Service provided by DNAstack"
-              collectionId: "0"
-              interfaceType: "http:search:simple"
-              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.prod.dnastack.com"
-              metadata:
-                iconName: "table_chart"
-                tableName: "search_cloud.coronavirus.files"
+                tableName: "search_cloud.coronavirus.variants_dev"
+#            3:
+#              name: "Files"
+#              description: "Public Search Service provided by DNAstack"
+#              collectionId: "0"
+#              interfaceType: "http:search:table"
+#              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.prod.dnastack.com"
+#              metadata:
+#                iconName: "table_chart"
+#                tableName: "search_cloud.coronavirus.files"
           collections:
             0:
               name: "COVID-19 Cloud"

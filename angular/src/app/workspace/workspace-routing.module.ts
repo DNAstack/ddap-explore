@@ -6,9 +6,9 @@ import { WorkspaceComponent } from './workspace/workspace.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'all' },
-  // { path: ':collectionId/:submoduleId', component: WorkspaceComponent},
   { path: 'all', component: WorkspaceListComponent },
-  { path: ':collectionId', component: WorkspaceComponent},
+  { path: ':collectionId', component: WorkspaceComponent },
+  { path: ':collectionId/:resourceType/:resourceId', component: WorkspaceComponent },
 ];
 
 @NgModule({

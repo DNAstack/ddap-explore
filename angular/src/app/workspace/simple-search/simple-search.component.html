@@ -1,0 +1,12 @@
+(SimpleSearch@{{ resource.resource.id }})
+
+<div class="component-frame">
+  <div class="component-frame-main">
+  </div>
+
+  <aside class="component-frame-aside">
+    <div *ngFor="let field of getFields()">
+      {{ field.name }}
+    </div>
+  </aside>
+</div>

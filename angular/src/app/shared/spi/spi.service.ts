@@ -6,6 +6,7 @@ import _get from 'lodash.get';
 import { Observable } from 'rxjs';
 
 import { SPICollectionListResponseModel } from './collection-list-response.model';
+import { SPICollection } from './collection.model';
 import { ResourceListResponseModel } from './resource-list-response.model';
 
 @Injectable({
@@ -19,6 +20,10 @@ export class SPIService {
 
   getCollections(): Observable<SPICollectionListResponseModel> {
     return this.http.get<SPICollectionListResponseModel>(`/api/v1beta/${this.getRealmId()}/collections`);
+  }
+
+  getCollection(id: string): Observable<SPICollection> {
+    return this.http.get<SPICollection>(`/api/v1beta/${this.getRealmId()}/collections/${id}`);
   }
 
   getResources(interfaceType: string): Observable<ResourceListResponseModel> {

@@ -39,29 +39,21 @@
       <ddap-beacon-info-bar (beaconChanged)="beaconForm = $event; loadResultTable()"
                             [hideInputs]="isStandaloneMode$ | async">
       </ddap-beacon-info-bar>
-      <div *ngIf="beaconForm?.beacon?.resource as beaconResource"
-           class="flex vertical-center search-bar">
-        <ddap-beacon-search-bar (queryChanged)="beaconQuery = $event; loadResultTable()"
-                                [interfaceType]="beaconResource.interfaces[0].type"
-                                [beaconInfo]="beaconForm.beacon.beaconInfo">
-        </ddap-beacon-search-bar>
-        <button (click)="submitQuery()"
-                data-se="submit-search-btn"
-                mat-flat-button
-                color="primary"
-                class="flex vertical-center">
-          <mat-icon>search</mat-icon>
-          Search
-        </button>
-      </div>
-
-      <div class="flex stretch">
-        <div *ngIf="loader.progress$ | async"
-             class="search-progress-backdrop">
-          <mat-spinner [value]="loader.progress$ | async"
-                       mode="indeterminate"
-                       color="accent">
-          </mat-spinner>
+      <ng-container *ngIf="!beaconForm?.beacon?.error; else errorInfo">
+        <div *ngIf="beaconForm?.beacon?.resource as beaconResource"
+             class="flex vertical-center search-bar">
+          <ddap-beacon-search-bar (queryChanged)="beaconQuery = $event; loadResultTable()"
+                                  [interfaceType]="beaconResource.interfaces[0].type"
+                                  [beaconInfo]="beaconForm.beacon.beaconInfo">
+          </ddap-beacon-search-bar>
+          <button (click)="submitQuery()"
+                  data-se="submit-search-btn"
+                  mat-flat-button
+                  color="primary"
+                  class="flex vertical-center">
+            <mat-icon>search</mat-icon>
+            Search
+          </button>
         </div>
 
         <div *ngIf="beaconQueryResponse$ | async as queryResponse"
@@ -71,7 +63,15 @@
                                            [hiddenFieldIds]="[]">
           </ddap-beacon-search-result-table>
         </div>
-      </div>
+      </ng-container>
+
+      <ng-template #errorInfo>
+        <div class="flex stretch error-placeholder">
+          <mat-icon>error_outline</mat-icon>
+          Unable to query selected beacon. Please try again or select different beacon.
+        </div>
+      </ng-template>
+
     </mat-drawer-content>
   </mat-drawer-container>
 </ddaplib-main>

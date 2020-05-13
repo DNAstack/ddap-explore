@@ -10,8 +10,14 @@
 }
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-infix {
+  display: flex;
+  align-items: center;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+
+  mat-icon {
+    margin-right: 0.5rem;
+  }
 }
 
 @media only screen and (min-width: 480px) {
@@ -26,4 +32,9 @@
   .mat-form-field:not(:last-of-type) {
     margin-right: 1rem;
   }
+}
+
+.error-message {
+  font-size: 0.8rem;
+  color: $failure-color;
 }

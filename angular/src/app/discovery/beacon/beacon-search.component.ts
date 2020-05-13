@@ -59,6 +59,9 @@ export class BeaconSearchComponent implements OnInit {
   }
 
   loadResultTable() {
+    if (this.beaconForm.beacon.error) {
+      // TODO: clean table
+    }
     if (!this.refreshBeaconResult$.getValue() && this.beaconForm && this.beaconQuery) {
       this.submitQuery();
     }
@@ -77,7 +80,7 @@ export class BeaconSearchComponent implements OnInit {
   private setUpBeaconQueryObservable() {
     this.beaconQueryResponse$ = this.refreshBeaconResult$.pipe(
       filter((params: BeaconQueryAlleleRequestModel) => {
-        return params && params.datasetIds && params.datasetIds.length > 0;
+        return params !== undefined && this.beaconForm !== undefined;
       }),
       switchMap((params: BeaconQueryAlleleRequestModel) => {
         const interfaceId = this.beaconForm.beacon.resource.interfaces[0].id;

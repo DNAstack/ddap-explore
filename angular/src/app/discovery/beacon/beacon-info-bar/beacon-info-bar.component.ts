@@ -36,7 +36,12 @@ export class BeaconInfoBarComponent implements OnInit, OnDestroy {
 
   get selectedBeaconDatasets(): BeaconDatasetModel[] {
     const selectedBeacon: BeaconInfoResourcePair = this.form.get('beacon').value;
-    return selectedBeacon.beaconInfo.datasets;
+    return selectedBeacon.beaconInfo ? selectedBeacon.beaconInfo.datasets : [];
+  }
+
+  get selectedBeaconError(): any {
+    const selectedBeacon: BeaconInfoResourcePair = this.form.get('beacon').value;
+    return selectedBeacon && selectedBeacon.error ? selectedBeacon.error : undefined;
   }
 
   ngOnInit(): void {

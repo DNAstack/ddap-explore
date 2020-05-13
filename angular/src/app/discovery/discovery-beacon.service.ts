@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ErrorHandlerService } from 'ddap-common-lib';
-import { EMPTY, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError, combineAll, flatMap, map } from 'rxjs/operators';
 
 import { BeaconInfoResourcePair, BeaconInfoResponseModel } from '../shared/apps/app-discovery/app-discovery.model';
@@ -17,8 +16,7 @@ export class DiscoveryBeaconService {
   constructor(
     private http: HttpClient,
     private resourceService: ResourceService,
-    private appDiscoveryService: AppDiscoveryService,
-    private errorHandlerService: ErrorHandlerService
+    private appDiscoveryService: AppDiscoveryService
   ) {
   }
 
@@ -40,9 +38,7 @@ export class DiscoveryBeaconService {
           return { resource, beaconInfo };
         }),
         catchError((error) => {
-          // TODO: Handle case when beacon info failed to retrieve
-          this.errorHandlerService.openSnackBarWithError(error, 'error.message');
-          return EMPTY;
+          return of({ resource, error });
         })
       );
   }

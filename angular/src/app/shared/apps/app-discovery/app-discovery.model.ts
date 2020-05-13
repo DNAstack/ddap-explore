@@ -4,7 +4,8 @@ import { ResourceModel } from '../resource.model';
 
 export interface BeaconInfoResourcePair {
   resource: ResourceModel;
-  beaconInfo: BeaconInfoResponseModel;
+  beaconInfo?: BeaconInfoResponseModel;
+  error?: KeyValuePair<any>;
 }
 
 export interface BeaconInfoResponseModel {

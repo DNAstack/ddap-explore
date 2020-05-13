@@ -7,7 +7,7 @@
 ag-grid-angular {
   display: flex;
   flex-grow: 1;
-  max-width: 100%;
+  max-width: calc(100% - 2px);
   border: 1px solid $ag-border-color;
 
   ::ng-deep .ag-root-wrapper {

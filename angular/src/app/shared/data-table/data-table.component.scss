@@ -2,17 +2,19 @@
 //@import "~ag-grid-community/dist/styles/ag-theme-material.min.css";
 @import '~ddap-common-lib/styles/modules/colors';
 //@import '~ddap-common-lib/styles/modules/material';
+@import '~ag-grid-community/dist/styles/ag-theme-balham/vars/_ag-theme-balham-vars.scss';
 
 ag-grid-angular {
   display: flex;
   flex-grow: 1;
   max-width: 100%;
+  border: 1px solid $ag-border-color;
 
   ::ng-deep .ag-root-wrapper {
     flex-grow: 1;
-  }
 
-  :host ::ng-deep &.hide-border .ag-root {
-    border: 0;
+    .ag-root {
+      border: 0;
+    }
   }
 }

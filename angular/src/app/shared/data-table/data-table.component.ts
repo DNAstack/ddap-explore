@@ -31,8 +31,6 @@ export class DataTableComponent implements OnDestroy {
   rowSelection: TableRowSelection = TableRowSelection.single;
   @Input()
   pagination = true;
-  @Input()
-  hideBorder = false;
 
   @Output()
   readonly selectedRowsChanged: EventEmitter<any | any[]> = new EventEmitter<any | any[]>();

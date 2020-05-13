@@ -1,9 +1,7 @@
 @import '~ddap-common-lib/styles/modules/colors';
-@import '~ag-grid-community/dist/styles/ag-theme-balham/vars/_ag-theme-balham-vars.scss';
 
 ddap-data-table {
   display: flex;
   flex-grow: 1;
   overflow-y: scroll;
-  border: 1px solid $ag-border-color;
 }

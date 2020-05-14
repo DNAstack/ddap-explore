@@ -18,15 +18,15 @@
       </mat-toolbar-row>
     </mat-toolbar>
 
-    <div *ngIf="getActiveResource()?.type === 'beacon'">
+    <ng-container *ngIf="getActiveResource()?.type === 'beacon'">
       <ddap-dot-loading-indicator *ngIf="!activeBeaconResource"></ddap-dot-loading-indicator>
-    </div>
-    <div *ngIf="getActiveResource()?.type === 'simple-search'">
+    </ng-container>
+    <ng-container *ngIf="getActiveResource()?.type === 'simple-search'">
       <ddap-dot-loading-indicator *ngIf="!activeSimpleSearchResource"></ddap-dot-loading-indicator>
       <ddap-simple-search [resource]="activeSimpleSearchResource"
                           *ngIf="activeSimpleSearchResource">
       </ddap-simple-search>
-    </div>
+    </ng-container>
   </div>
 
   <aside class="component-frame-aside">

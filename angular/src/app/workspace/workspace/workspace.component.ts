@@ -1,7 +1,8 @@
-import { Component, EventEmitter, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
+import { Subscription } from 'rxjs';
 
 import { SPIAppBeacon } from '../../shared/spi/app-beacon.model';
 import { SPIAppSearchSimple } from '../../shared/spi/app-search-simple.model';
@@ -14,7 +15,7 @@ import { SPIService } from '../../shared/spi/spi.service';
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.scss'],
 })
-export class WorkspaceComponent implements OnInit {
+export class WorkspaceComponent implements OnInit, OnDestroy {
 
   collection: SPICollection;
   beaconResources: SPIAppBeacon[];
@@ -22,7 +23,10 @@ export class WorkspaceComponent implements OnInit {
 
   activeBeaconResource: SPIAppBeacon;
   activeSimpleSearchResource: SPIAppSearchSimple;
+
   private initializationEvent = new EventEmitter<{ dataType: string }>();
+  private initializationEventSubscription: Subscription;
+  private routingUpdateSubscription: Subscription;
 
   constructor(private activatedRoute: ActivatedRoute,
               private router: Router,
@@ -33,12 +37,11 @@ export class WorkspaceComponent implements OnInit {
 
   ngOnInit() {
     this.initialize();
+  }
 
-    // We don't really need to use paramMap. We just need to make sure that the component needs
-    // to be reinitialized when the parameters are changed.
-    this.activatedRoute.paramMap.subscribe(paramMap => {
-      this.initializeView(this.getResourceType(), this.getResourceId());
-    });
+  ngOnDestroy() {
+    this.initializationEventSubscription.unsubscribe();
+    this.routingUpdateSubscription.unsubscribe();
   }
 
   getBaseUrl(): string {
@@ -72,13 +75,19 @@ export class WorkspaceComponent implements OnInit {
     const activeResource = this.getActiveResource();
 
     const dataTypeLoadedMap = {
-      'beacon': false,
+      // 'beacon': false, // TODO uncomment this line to enable beacon integration.
       'simple-search': false,
     };
 
-    if (activeResource) {
-      // Find the default resource and then redirect to that resource.
-      this.initializationEvent.subscribe(e => {
+    // We don't really need to use paramMap. We just need to make sure that the component needs
+    // to be reinitialized when the parameters are changed.
+    this.routingUpdateSubscription = this.activatedRoute.paramMap.subscribe(paramMap => {
+      this.initializeView(this.getResourceType(), this.getResourceId());
+    });
+
+    this.initializationEventSubscription = this.initializationEvent.subscribe(e => {
+      if (activeResource) {
+        // Find the default resource and then redirect to that resource.
         const dataType = e.dataType;
 
         if (activeResource.type !== dataType) {
@@ -86,10 +95,8 @@ export class WorkspaceComponent implements OnInit {
         }
 
         this.initializeView(dataType, activeResource.id);
-      });
-    } else {
-      // Find the default resource and then redirect to that resource.
-      this.initializationEvent.subscribe(e => {
+      } else {
+        // Find the default resource and then redirect to that resource.
         const dataType = e.dataType;
         dataTypeLoadedMap[dataType] = true;
 
@@ -100,18 +107,18 @@ export class WorkspaceComponent implements OnInit {
 
         // When all data is loaded
         if (numberOfLoadedDataTypes === Object.keys(dataTypeLoadedMap).length) {
-          if (this.beaconResources.length > 0) {
+          if ((this.beaconResources || []).length > 0) {
             const defaultResource = this.beaconResources[0];
             this.router.navigate([this.getBaseUrl(), collectionId, UIResourceType.Beacon, defaultResource.resource.id]);
-          } else if (this.simpleSearchResources.length > 0) {
+          } else if ((this.simpleSearchResources || []).length > 0) {
             const defaultResource = this.simpleSearchResources[0];
             this.router.navigate([this.getBaseUrl(), collectionId, UIResourceType.SimpleSearch, defaultResource.resource.id]);
           } else {
             throw new Error('Misconfiguration detected');
           }
         }
-      });
-    }
+      }
+    });
 
     if (!this.collection || this.collection.id !== collectionId) {
       // Get the active collection.
@@ -120,20 +127,24 @@ export class WorkspaceComponent implements OnInit {
       });
 
       // Get all beacons.
-      this.spiAppService.getBeaconResources(collectionId).subscribe(o => {
-        this.beaconResources = o.data || [];
+      if (dataTypeLoadedMap['beacon'] !== undefined) {
+        this.spiAppService.getBeaconResources(collectionId).subscribe(o => {
+          this.beaconResources = o.data || [];
 
-        const dataType = 'beacon';
-        this.initializationEvent.emit({dataType: dataType});
-      });
+          const dataType = 'beacon';
+          this.initializationEvent.emit({dataType: dataType});
+        });
+      }
 
       // Get all simple searches.
-      this.spiAppService.getSimpleSearchResources(collectionId).subscribe(o => {
-        this.simpleSearchResources = o.data || [];
+      if (dataTypeLoadedMap['simple-search'] !== undefined) {
+        this.spiAppService.getSimpleSearchResources(collectionId).subscribe(o => {
+          this.simpleSearchResources = o.data || [];
 
-        const dataType = 'simple-search';
-        this.initializationEvent.emit({dataType: dataType});
-      });
+          const dataType = 'simple-search';
+          this.initializationEvent.emit({dataType: dataType});
+        });
+      }
     }
   }
 

@@ -1,7 +1,7 @@
 <ng-container *ngFor="let dataTableModel of dataTableModels">
-  <ddap-data-table (selectedRowsChanged)="changeRowSelection($event)"
-                   [rowSelection]="tableRowSelection"
-                   [columnDefs]="dataTableModel.columnDefs"
-                   [rowData]="dataTableModel.rowData">
-  </ddap-data-table>
+    <ddap-data-table (selectedRowsChanged)="changeRowSelection($event)"
+                     [rowSelection]="tableRowSelection"
+                     [columnDefs]="dataTableModel.columnDefs"
+                     [rowData]="dataTableModel.rowData">
+    </ddap-data-table>
 </ng-container>

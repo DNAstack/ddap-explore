@@ -6,6 +6,8 @@ import _get from 'lodash.get';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { TableModel } from '../search/table.model';
+
 import { SPIAppBeaconListResponseModel } from './app-beacon-list-response.model';
 import { SimpleSearchRequest } from './app-search-simple-filter-request.model';
 import { SPIAppSearchSimpleListResponseModel } from './app-search-simple-list-response.model';
@@ -33,19 +35,22 @@ export class SPIAppService {
     return this.makeCacheableRequest<SPIAppSearchSimpleListResponseModel>('get', url);
   }
 
-  submitSimpleSearchFilter(interfaceId: string, request: SimpleSearchRequest): Observable<any> {
+  submitSimpleSearchFilter(interfaceId: string, request: SimpleSearchRequest): Observable<TableModel> {
     const url = `/api/v1beta/${this.getRealmId()}/apps/search/simple/filter?resource=${interfaceId}`;
-    return this.makeCacheableRequest<any>('post', url, request);
+    return this.http.post<TableModel>(url, request);
   }
 
   private getRealmId() {
     return _get(this.activatedRoute, 'root.firstChild.snapshot.params.realmId', this.realmStateService.getRealm());
   }
 
-  private makeCacheableRequest<T>(method: string, url: string, body?: any, cacheReusable: boolean = true): Observable<T> {
-    if (cacheReusable && this.urlToResponseMap.has(url)) {
+  private makeCacheableRequest<T>(method: string, url: string, body?: any, cacheKey?: string,
+                                  cacheReusable: boolean = true): Observable<T> {
+    cacheKey = cacheKey || url;
+
+    if (cacheReusable && this.urlToResponseMap.has(cacheKey)) {
       return new Observable<T>(observer => {
-        observer.next(this.urlToResponseMap.get(url));
+        observer.next(this.urlToResponseMap.get(cacheKey));
         observer.complete();
       });
     }
@@ -54,13 +59,7 @@ export class SPIAppService {
       case 'get':
         return this.http.get<T>(url)
           .pipe(map(response => {
-            this.urlToResponseMap.set(url, response);
-            return response;
-          }));
-      case 'post':
-        return this.http.post<T>(url, body)
-          .pipe(map(response => {
-            this.urlToResponseMap.set(url, response);
+            this.urlToResponseMap.set(cacheKey, response);
             return response;
           }));
       default:

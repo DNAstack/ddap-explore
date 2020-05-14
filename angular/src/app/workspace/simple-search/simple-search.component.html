@@ -1,7 +1,11 @@
-(SimpleSearch@{{ resource.resource.id }})
-
 <div class="component-frame">
   <div class="component-frame-main">
+    <ddap-dot-loading-indicator *ngIf="!dataTableModel; else withResult"></ddap-dot-loading-indicator>
+    <ng-template #withResult>
+      <ddap-data-table [columnDefs]="dataTableModel.columnDefs"
+                       [rowData]="dataTableModel.rowData">
+      </ddap-data-table>
+    </ng-template>
   </div>
 
   <aside class="component-frame-aside">

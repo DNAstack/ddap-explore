@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Column, ColumnApi, GridApi, NavigateToNextCellParams } from 'ag-grid-community';
+import { Subscription } from 'rxjs';
 
 import { DataTableEventsService } from './data-table-events.service';
 import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } from './data-table.model';
@@ -35,17 +36,18 @@ export class DataTableComponent implements OnDestroy {
   @Output()
   readonly selectedRowsChanged: EventEmitter<any | any[]> = new EventEmitter<any | any[]>();
 
+  private deselectRowsEventSubscription: Subscription;
   private gridApi: GridApi;
   private gridColumnApi: ColumnApi;
 
   constructor(private dataTableEventsService: DataTableEventsService) {
     this.navigateToNextCell = this.navigateToNextCell.bind(this);
     this.deselectAllRows = this.deselectAllRows.bind(this);
-    this.dataTableEventsService.deselectRowsEvents.subscribe(this.deselectAllRows);
+    this.deselectRowsEventSubscription = this.dataTableEventsService.deselectRowsEvents.subscribe(this.deselectAllRows);
   }
 
   ngOnDestroy() {
-    this.dataTableEventsService.deselectRowsEvents.unsubscribe();
+    this.deselectRowsEventSubscription.unsubscribe();
   }
 
   onGridReady(params): void {

@@ -1,5 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 
+import { DataTableModel } from '../../shared/data-table/data-table.model';
+import { TableDataTableModelParser } from '../../shared/data-table/table/table-data-table-model.parser';
+import { TableModel } from '../../shared/search/table.model';
 import { SimpleSearchRequest } from '../../shared/spi/app-search-simple-filter-request.model';
 import { SPIAppSearchSimple } from '../../shared/spi/app-search-simple.model';
 import { SPIAppService } from '../../shared/spi/spi-app.service';
@@ -14,15 +17,23 @@ import { SPIAppService } from '../../shared/spi/spi-app.service';
   templateUrl: './simple-search.component.html',
   styleUrls: ['./simple-search.component.scss'],
 })
-export class SimpleSearchComponent implements OnInit {
+export class SimpleSearchComponent implements OnInit, OnChanges {
   @Input()
   resource: SPIAppSearchSimple;
+
+  currentResponse: TableModel;
+  dataTableModel: DataTableModel;
 
   constructor(private spiAppService: SPIAppService) {
   }
 
   ngOnInit(): void {
     this.initialize();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    this.dataTableModel = null;
+    this.update();
   }
 
   getFields() {
@@ -46,7 +57,8 @@ export class SimpleSearchComponent implements OnInit {
 
     this.spiAppService.submitSimpleSearchFilter(interfaceId, filter)
       .subscribe(response => {
-        // TODO either bind this a component property or move the entire method invocation to a local service.
+        this.currentResponse = response;
+        this.dataTableModel = TableDataTableModelParser.parse(this.currentResponse);
       });
   }
 

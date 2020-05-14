@@ -13,9 +13,11 @@ export class BeaconInfoFormBuilder {
   }
 
   buildForm(beacons?: BeaconInfoResourcePair[]): FormGroup {
+    const selectedBeaconDatasets = _get(beacons, '[0].beaconInfo.datasets', []);
+    const datasetsIds = selectedBeaconDatasets ? selectedBeaconDatasets.map((dataset) => dataset.id) : [];
     return this.formBuilder.group({
       beacon: [_get(beacons, '[0]'), [Validators.required]],
-      datasets: [[_get(beacons, '[0].beaconInfo.datasets[0].id')], []],
+      datasets: [datasetsIds, []],
     });
   }
 

@@ -28,7 +28,7 @@ export class BeaconInfoBarComponent implements OnInit, OnChanges, OnDestroy {
 
   beacons: BeaconInfoResourcePair[];
   form: FormGroup;
-  formValueChangesSubscription: Subscription;
+  formValueChangesSubscriptions: Subscription[] = [];
 
   constructor(
     private beaconInfoFormBuilder: BeaconInfoFormBuilder,
@@ -58,9 +58,7 @@ export class BeaconInfoBarComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.formValueChangesSubscription) {
-      this.formValueChangesSubscription.unsubscribe();
-    }
+    this.formValueChangesSubscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   private initialize() {
@@ -85,14 +83,29 @@ export class BeaconInfoBarComponent implements OnInit, OnChanges, OnDestroy {
 
   private initForm(): void {
     this.form = this.beaconInfoFormBuilder.buildForm(this.beacons);
-    this.formValueChangesSubscription = this.form.valueChanges
+
+    this.selectAllDatasetsOnBeaconValueChange();
+    this.formValueChangesSubscriptions.push(this.form.valueChanges
       .pipe(
         debounceTime(300),
         tap(() => {
           this.beaconChanged.emit(this.form.value);
         })
       )
-      .subscribe();
+      .subscribe());
+  }
+
+  private selectAllDatasetsOnBeaconValueChange() {
+    this.formValueChangesSubscriptions.push(this.form.get('beacon').valueChanges
+      .pipe(
+        tap(() => this.selectAllDatasets())
+      )
+      .subscribe());
+  }
+
+  private selectAllDatasets(): void {
+    const datasetsIds: string[] = this.selectedBeaconDatasets.map((dataset) => dataset.id);
+    this.form.get('datasets').setValue(datasetsIds);
   }
 
 }

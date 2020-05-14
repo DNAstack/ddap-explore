@@ -34,13 +34,13 @@ mat-drawer-content {
 }
 
 .search-results {
-  overflow-y: scroll;
+  overflow: auto;
 }
 
 ddap-beacon-search-result-table {
   display: flex;
   flex-grow: 1;
-  overflow-y: scroll;
+  overflow: auto;
 }
 
 .search-progress-backdrop {

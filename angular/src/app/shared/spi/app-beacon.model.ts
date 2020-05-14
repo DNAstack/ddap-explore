@@ -1,7 +1,8 @@
-import { SPIResource } from './resource.model';
+
+import { ResourceModel } from '../apps/resource.model';
 
 export interface SPIAppBeacon {
-  resource: SPIResource;
+  resource: ResourceModel;
   id: string;
   name: string;
   apiVersion: string;

@@ -11,8 +11,6 @@ import { TableModel } from '../search/table.model';
 import { SPIAppBeaconListResponseModel } from './app-beacon-list-response.model';
 import { SimpleSearchRequest } from './app-search-simple-filter-request.model';
 import { SPIAppSearchSimpleListResponseModel } from './app-search-simple-list-response.model';
-import { SPICollectionListResponseModel } from './collection-list-response.model';
-import { ResourceListResponseModel } from './resource-list-response.model';
 
 @Injectable({
   providedIn: 'root',

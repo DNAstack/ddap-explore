@@ -4,9 +4,9 @@ import { RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
 import { Subscription } from 'rxjs';
 
+import { CollectionModel } from '../../shared/apps/collection.model';
 import { SPIAppBeacon } from '../../shared/spi/app-beacon.model';
 import { SPIAppSearchSimple } from '../../shared/spi/app-search-simple.model';
-import { SPICollection } from '../../shared/spi/collection.model';
 import { SPIAppService } from '../../shared/spi/spi-app.service';
 import { SPIService } from '../../shared/spi/spi.service';
 
@@ -17,7 +17,7 @@ import { SPIService } from '../../shared/spi/spi.service';
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
 
-  collection: SPICollection;
+  collection: CollectionModel;
   beaconResources: SPIAppBeacon[];
   simpleSearchResources: SPIAppSearchSimple[];
 
@@ -75,7 +75,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const activeResource = this.getActiveResource();
 
     const dataTypeLoadedMap = {
-      // 'beacon': false, // TODO uncomment this line to enable beacon integration.
+      'beacon': false, // TODO comment/uncomment this line to disable/enable beacon integration.
       'simple-search': false,
     };
 

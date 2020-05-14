@@ -13,6 +13,10 @@ ddap-data-table {
   overflow-y: scroll;
 }
 
+::ng-deep ag-grid-angular {
+  border: none !important;
+}
+
 ::ng-deep .ag-theme-balham .ag-root {
   border: none;
 }

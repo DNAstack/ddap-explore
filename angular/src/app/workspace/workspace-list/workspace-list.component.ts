@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
+import { CollectionModel } from '../../shared/apps/collection.model';
+import { ResourceModel } from '../../shared/apps/resource.model';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
-import { SPICollection } from '../../shared/spi/collection.model';
-import { SPIResource } from '../../shared/spi/resource.model';
 import { SPIService } from '../../shared/spi/spi.service';
 
 interface WorkspaceMetadata {
@@ -16,7 +16,7 @@ interface WorkspaceMetadata {
 
 interface SimpleSearchMetadata {
   name: string;
-  resource: SPIResource;
+  resource: ResourceModel;
   tableName: string;
 }
 
@@ -26,7 +26,7 @@ interface SimpleSearchMetadata {
   styleUrls: ['./workspace-list.component.scss'],
 })
 export class WorkspaceListComponent implements OnInit {
-  collections: SPICollection[];
+  collections: CollectionModel[];
 
   constructor(private spiService: SPIService,
               private randomImageRetriever: ImagePlaceholderRetriever) {

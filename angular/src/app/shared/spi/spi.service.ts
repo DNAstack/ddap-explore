@@ -5,9 +5,8 @@ import { RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
 import { Observable } from 'rxjs';
 
-import { SPICollectionListResponseModel } from './collection-list-response.model';
-import { SPICollection } from './collection.model';
-import { ResourceListResponseModel } from './resource-list-response.model';
+import { CollectionModel, CollectionsResponseModel } from '../apps/collection.model';
+import { ResourcesResponseModel } from '../apps/resource.model';
 
 @Injectable({
   providedIn: 'root',
@@ -18,16 +17,16 @@ export class SPIService {
               private realmStateService: RealmStateService) {
   }
 
-  getCollections(): Observable<SPICollectionListResponseModel> {
-    return this.http.get<SPICollectionListResponseModel>(`/api/v1beta/${this.getRealmId()}/collections`);
+  getCollections(): Observable<CollectionsResponseModel> {
+    return this.http.get<CollectionsResponseModel>(`/api/v1beta/${this.getRealmId()}/collections`);
   }
 
-  getCollection(id: string): Observable<SPICollection> {
-    return this.http.get<SPICollection>(`/api/v1beta/${this.getRealmId()}/collections/${id}`);
+  getCollection(id: string): Observable<CollectionModel> {
+    return this.http.get<CollectionModel>(`/api/v1beta/${this.getRealmId()}/collections/${id}`);
   }
 
-  getResources(interfaceType: string): Observable<ResourceListResponseModel> {
-    return this.http.get<ResourceListResponseModel>(`/api/v1beta/${this.getRealmId()}/resources?interface_type=${interfaceType}`);
+  getResources(interfaceType: string): Observable<ResourcesResponseModel> {
+    return this.http.get<ResourcesResponseModel>(`/api/v1beta/${this.getRealmId()}/resources?interface_type=${interfaceType}`);
   }
 
   private getRealmId() {

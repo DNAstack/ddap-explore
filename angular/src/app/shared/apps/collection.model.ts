@@ -1,3 +1,4 @@
+// FIXME Move the whole file under "spi"
 import { KeyValuePair } from '../key-value-pair.model';
 
 export interface CollectionModel {

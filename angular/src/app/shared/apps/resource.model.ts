@@ -1,3 +1,4 @@
+// FIXME Move the whole file under "spi"
 import { BeaconInterfaceType } from '../beacon/beacon-search.model';
 import { KeyValuePair } from '../key-value-pair.model';
 

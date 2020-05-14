@@ -18,8 +18,7 @@ mat-drawer-content {
 }
 
 mat-drawer {
-  min-width: 30rem;
-  max-width: 30rem;
+  width: 30rem;
 }
 
 mat-drawer-content {
@@ -83,8 +82,7 @@ ddap-beacon-search-result-table {
 
   mat-drawer {
     width: 100vw;
-    max-width: 100vw;
-    min-width: 0;
+    border: 0 !important;
   }
 }
 

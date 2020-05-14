@@ -1,14 +1,14 @@
 package com.dnastack.ddap.explore.apps.discovery.model;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -25,8 +25,8 @@ public class DiscoveryBeacon implements Cloneable {
     private String version;
     private String welcomeUrl;
     private String alternativeUrl;
-    private ZonedDateTime createDateTime;
-    private ZonedDateTime updateDateTime;
+    private String createDateTime;
+    private String updateDateTime;
     @NotNull
     private DiscoveryBeaconOrganization organization;
     @NotEmpty

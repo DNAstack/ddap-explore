@@ -9,7 +9,7 @@ import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discove
 import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
 import { SPIAppSearchSimple } from '../../shared/apps/app-simple-search/models/app-search-simple.model';
 import { CollectionModel } from '../../shared/apps/collection.model';
-import { SPIService } from '../../shared/spi/spi.service';
+import { ResourceService } from '../../shared/apps/resource.service';
 
 @Component({
   selector: 'ddap-workspace',
@@ -32,7 +32,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   constructor(private activatedRoute: ActivatedRoute,
               private router: Router,
               private realmStateService: RealmStateService,
-              private spiService: SPIService,
+              private spiService: ResourceService,
               private appDiscoveryService: AppDiscoveryService,
               private appSimpleSearchService: AppSimpleSearchService) {
   }

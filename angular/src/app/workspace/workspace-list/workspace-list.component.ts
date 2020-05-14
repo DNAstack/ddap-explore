@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 
 import { CollectionModel } from '../../shared/apps/collection.model';
 import { ResourceModel } from '../../shared/apps/resource.model';
+import { ResourceService } from '../../shared/apps/resource.service';
 import { ImagePlaceholderRetriever } from '../../shared/image-placeholder.service';
-import { SPIService } from '../../shared/spi/spi.service';
 
 interface WorkspaceMetadata {
   alias: string;
@@ -28,7 +28,7 @@ interface SimpleSearchMetadata {
 export class WorkspaceListComponent implements OnInit {
   collections: CollectionModel[];
 
-  constructor(private spiService: SPIService,
+  constructor(private spiService: ResourceService,
               private randomImageRetriever: ImagePlaceholderRetriever) {
   }
 

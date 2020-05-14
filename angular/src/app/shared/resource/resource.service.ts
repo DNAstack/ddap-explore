@@ -12,7 +12,9 @@ import IResourceResults = dam.v1.IResourceResults;
 import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
 import IResourceDescriptor = dam.v1.ResourceResults.IResourceDescriptor;
 
-// TODO: DEPRECATED, TO BE REMOVED
+/**
+ * @deprecated
+ */
 @Injectable({
   providedIn: 'root',
 })

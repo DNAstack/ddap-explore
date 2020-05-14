@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { BeaconQueryAlleleRequestModel, BeaconQueryResponseModel } from '../../beacon/beacon-search.model';
 
-import { BeaconInfoRequestModel, BeaconInfoResponseModel } from './app-discovery.model';
+import { BeaconInfoRequestModel, BeaconInfoResponseModel, BeaconResourcesResponse } from './app-discovery.model';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +14,11 @@ import { BeaconInfoRequestModel, BeaconInfoResponseModel } from './app-discovery
 export class AppDiscoveryService {
 
   constructor(private http: HttpClient) {
+  }
+
+  getBeaconResources(collectionId: string): Observable<BeaconResourcesResponse> {
+    const url = `${environment.ddapApiUrl}/${realmIdPlaceholder}/apps/discovery/beacon/resources?collection=${collectionId}`;
+    return this.http.get<BeaconResourcesResponse>(url);
   }
 
   getBeaconInfo(interfaceId: string, params?: BeaconInfoRequestModel): Observable<BeaconInfoResponseModel> {

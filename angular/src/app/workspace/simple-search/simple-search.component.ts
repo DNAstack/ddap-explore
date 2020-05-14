@@ -1,11 +1,11 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 
+import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
+import { SimpleSearchRequest } from '../../shared/apps/app-simple-search/models/app-search-simple-filter-request.model';
+import { SPIAppSearchSimple } from '../../shared/apps/app-simple-search/models/app-search-simple.model';
 import { DataTableModel } from '../../shared/data-table/data-table.model';
 import { TableDataTableModelParser } from '../../shared/data-table/table/table-data-table-model.parser';
 import { TableModel } from '../../shared/search/table.model';
-import { SimpleSearchRequest } from '../../shared/spi/app-search-simple-filter-request.model';
-import { SPIAppSearchSimple } from '../../shared/spi/app-search-simple.model';
-import { SPIAppService } from '../../shared/spi/spi-app.service';
 
 /**
  * Simple Search Component
@@ -24,7 +24,7 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
   currentResponse: TableModel;
   dataTableModel: DataTableModel;
 
-  constructor(private spiAppService: SPIAppService) {
+  constructor(private appSimpleSearchService: AppSimpleSearchService) {
   }
 
   ngOnInit(): void {
@@ -55,7 +55,7 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
       order: [],
     }; // default filter
 
-    this.spiAppService.submitSimpleSearchFilter(interfaceId, filter)
+    this.appSimpleSearchService.submitSimpleSearchFilter(interfaceId, filter)
       .subscribe(response => {
         this.currentResponse = response;
         this.dataTableModel = TableDataTableModelParser.parse(this.currentResponse);

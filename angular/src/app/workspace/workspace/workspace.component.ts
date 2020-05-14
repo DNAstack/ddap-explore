@@ -4,10 +4,11 @@ import { RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
 import { Subscription } from 'rxjs';
 
+import { AppBeacon } from '../../shared/apps/app-discovery/app-discovery.model';
+import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discovery.service';
+import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
+import { SPIAppSearchSimple } from '../../shared/apps/app-simple-search/models/app-search-simple.model';
 import { CollectionModel } from '../../shared/apps/collection.model';
-import { SPIAppBeacon } from '../../shared/spi/app-beacon.model';
-import { SPIAppSearchSimple } from '../../shared/spi/app-search-simple.model';
-import { SPIAppService } from '../../shared/spi/spi-app.service';
 import { SPIService } from '../../shared/spi/spi.service';
 
 @Component({
@@ -18,10 +19,10 @@ import { SPIService } from '../../shared/spi/spi.service';
 export class WorkspaceComponent implements OnInit, OnDestroy {
 
   collection: CollectionModel;
-  beaconResources: SPIAppBeacon[];
+  beaconResources: AppBeacon[];
   simpleSearchResources: SPIAppSearchSimple[];
 
-  activeBeaconResource: SPIAppBeacon;
+  activeBeaconResource: AppBeacon;
   activeSimpleSearchResource: SPIAppSearchSimple;
 
   private initializationEvent = new EventEmitter<{ dataType: string }>();
@@ -32,7 +33,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               private router: Router,
               private realmStateService: RealmStateService,
               private spiService: SPIService,
-              private spiAppService: SPIAppService) {
+              private appDiscoveryService: AppDiscoveryService,
+              private appSimpleSearchService: AppSimpleSearchService) {
   }
 
   ngOnInit() {
@@ -128,7 +130,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
       // Get all beacons.
       if (dataTypeLoadedMap['beacon'] !== undefined) {
-        this.spiAppService.getBeaconResources(collectionId).subscribe(o => {
+        this.appDiscoveryService.getBeaconResources(collectionId).subscribe(o => {
           this.beaconResources = o.data || [];
 
           const dataType = 'beacon';
@@ -138,7 +140,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
       // Get all simple searches.
       if (dataTypeLoadedMap['simple-search'] !== undefined) {
-        this.spiAppService.getSimpleSearchResources(collectionId).subscribe(o => {
+        this.appSimpleSearchService.getSimpleSearchResources(collectionId).subscribe(o => {
           this.simpleSearchResources = o.data || [];
 
           const dataType = 'simple-search';

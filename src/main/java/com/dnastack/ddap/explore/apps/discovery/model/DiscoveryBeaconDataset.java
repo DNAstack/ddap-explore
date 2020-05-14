@@ -1,16 +1,10 @@
 package com.dnastack.ddap.explore.apps.discovery.model;
 
-import java.time.ZonedDateTime;
-import java.util.Map;
-import javax.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotBlank;
+import java.util.Map;
 
 @EqualsAndHashCode
 @ToString
@@ -28,7 +22,7 @@ public class DiscoveryBeaconDataset {
     private String name;
     @NotBlank
     private String assemblyId;
-    private ZonedDateTime createDateTime;
+    private String createDateTime;
     private String version;
     private Long variantCount;
     private Long callCount;

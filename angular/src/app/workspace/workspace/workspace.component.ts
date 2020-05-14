@@ -140,7 +140,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
       // Get all simple searches.
       if (dataTypeLoadedMap['simple-search'] !== undefined) {
-        this.appSimpleSearchService.getSimpleSearchResources(collectionId).subscribe(o => {
+        this.appSimpleSearchService.getResources(collectionId).subscribe(o => {
           this.simpleSearchResources = o.data || [];
 
           const dataType = 'simple-search';

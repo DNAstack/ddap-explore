@@ -55,7 +55,7 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
       order: [],
     }; // default filter
 
-    this.appSimpleSearchService.submitSimpleSearchFilter(interfaceId, filter)
+    this.appSimpleSearchService.filter(interfaceId, filter)
       .subscribe(response => {
         this.currentResponse = response;
         this.dataTableModel = TableDataTableModelParser.parse(this.currentResponse);

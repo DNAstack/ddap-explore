@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { realmIdPlaceholder } from 'ddap-common-lib';
-import { Observable } from 'rxjs';
+import { Observable, Subscriber } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
@@ -19,24 +19,72 @@ export class AppSimpleSearchService {
   constructor(private http: HttpClient) {
   }
 
-  getSimpleSearchResources(collectionId: string, cacheable: boolean = true): Observable<SPIAppSearchSimpleListResponseModel> {
+  getResources(collectionId: string, cacheable: boolean = true): Observable<SPIAppSearchSimpleListResponseModel> {
     const url = `${this.baseUri}/apps/search/simple/resources?collection=${collectionId}`;
     return this.makeCacheableRequest<SPIAppSearchSimpleListResponseModel>('get', url);
   }
 
-  submitSimpleSearchFilter(interfaceId: string, request: SimpleSearchRequest): Observable<TableModel> {
+  filter(interfaceId: string, request: SimpleSearchRequest): Observable<TableModel> {
     const url = `${this.baseUri}/apps/search/simple/filter?resource=${interfaceId}`;
-    return this.http.post<TableModel>(url, request);
+    return new Observable<TableModel>(subscriber => {
+      this.http.post<TableModel>(url, request)
+        .subscribe(table => {
+          if (this.isQueryStillInProgress(table)) {
+            setTimeout(() => this.followUp(table.pagination.next_page_url, subscriber), 1000);
+          } else {
+            subscriber.next(table);
+            subscriber.complete();
+          }
+        });
+    });
   }
 
   get baseUri() {
     return `${environment.ddapApiUrl}/${realmIdPlaceholder}`;
   }
 
+  private followUp(url: string, subscriber: Subscriber<TableModel>, delay: number = 1) {
+    if (delay > 32) {
+      console.error(`The request is taking too long. No follow-up request to ${url}`);
+
+      subscriber.next({data: []});
+      subscriber.complete();
+
+      return;
+    }
+
+    console.warn(`Still haven't get the result. Making a follow-up request to ${url}`);
+
+    // FIXME We need to figure out how to make a follow-up request on a protected search service.
+    this.http.get<TableModel>(
+      url
+    ).subscribe(table => {
+      if (this.isQueryStillInProgress(table)) {
+        setTimeout(
+          () => {
+            this.followUp(
+              table.pagination.next_page_url,
+              subscriber,
+              delay * 2  // the backoff period will be increased exponentially.
+            );
+          },
+          delay * 1000 // convert to millisecond
+        );
+      } else {
+        subscriber.next(table);
+        subscriber.complete();
+      }
+    });
+  }
+
+  private isQueryStillInProgress(table: TableModel) {
+    return table.data.length === 0 && table.pagination.next_page_url;
+  }
+
   /**
    * @deprecated
    *
-   * FIXME reimplement this with Store
+   * FIXME re-implement this with Store
    */
   private makeCacheableRequest<T>(method: string, url: string, body?: any, cacheKey?: string,
                                   cacheReusable: boolean = true): Observable<T> {

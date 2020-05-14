@@ -1,7 +1,6 @@
-//@import "~ag-grid-community/dist/styles/ag-grid.min.css";
-//@import "~ag-grid-community/dist/styles/ag-theme-material.min.css";
+$ag-suppress-legacy-var-import: true;
+
 @import '~ddap-common-lib/styles/modules/colors';
-//@import '~ddap-common-lib/styles/modules/material';
 @import '~ag-grid-community/dist/styles/ag-theme-balham/vars/_ag-theme-balham-vars.scss';
 
 ag-grid-angular {

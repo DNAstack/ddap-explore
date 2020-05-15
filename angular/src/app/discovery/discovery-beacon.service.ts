@@ -33,6 +33,15 @@ export class DiscoveryBeaconService {
       );
   }
 
+  getBeaconInfoResourcePairByResourceId(resourceId: string): Observable<BeaconInfoResourcePair> {
+    return this.resourceService.getResource(resourceId)
+      .pipe(
+        flatMap((resource: ResourceModel) => {
+          return this.getBeaconInfoResourcePair(resource);
+        })
+      );
+  }
+
   private getBeaconInfoResourcePair(resource: ResourceModel): Observable<BeaconInfoResourcePair> {
     return this.appDiscoveryService.getBeaconInfo(resource.interfaces[0].id)
       .pipe(

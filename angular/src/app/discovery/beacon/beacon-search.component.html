@@ -36,6 +36,7 @@
 
     <mat-drawer-content>
       <ddap-beacon-info-bar (beaconChanged)="beaconForm = $event; loadResultTable()"
+                            [resourceId]="resourceId"
                             [hideInputs]="isStandaloneMode$ | async">
       </ddap-beacon-info-bar>
       <div *ngIf="beaconForm?.beacon?.resource as beaconResource"

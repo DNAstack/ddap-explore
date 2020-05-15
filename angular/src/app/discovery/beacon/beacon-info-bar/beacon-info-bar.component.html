@@ -2,7 +2,8 @@
       [formGroup]="form"
       novalidate
       class="flex vertical-center">
-  <mat-form-field class="beacon-info"
+  <mat-form-field *ngIf="!this.resourceId"
+                  class="beacon-info"
                   appearance="outline">
     <mat-label>Beacon</mat-label>
     <!-- [disabled] will trigger warning in console, but having the control set to disabled via FormControl

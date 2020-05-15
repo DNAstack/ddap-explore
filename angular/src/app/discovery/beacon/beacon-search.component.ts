@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { LoadingBarService } from '@ngx-loading-bar/core';
@@ -22,7 +22,8 @@ import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 })
 export class BeaconSearchComponent implements OnInit {
 
-  // TODO This component optionally requires "resourceId" for the full integration with WorkspaceComponent.
+  @Input()
+  resourceId?: string;
 
   @ViewChild('selectedRowDetailDrawer', { static: false })
   selectedRowDetailDrawer: MatDrawer;

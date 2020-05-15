@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
@@ -15,7 +15,10 @@ import { BeaconInfoFormModel } from './beacon-info-form.model';
   templateUrl: './beacon-info-bar.component.html',
   styleUrls: ['./beacon-info-bar.component.scss'],
 })
-export class BeaconInfoBarComponent implements OnInit, OnDestroy {
+export class BeaconInfoBarComponent implements OnInit, OnChanges, OnDestroy {
+
+  @Input()
+  resourceId?: string;
 
   @Input()
   hideInputs: boolean;
@@ -40,17 +43,38 @@ export class BeaconInfoBarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.discoveryBeaconService.getBeaconInfoResourcePairs()
-      .subscribe((beaconInfoResourcePairs: BeaconInfoResourcePair[]) => {
-        this.beacons = beaconInfoResourcePairs;
-        this.initForm();
-        this.beaconChanged.emit(this.form.value);
-      });
+    this.initialize();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (this.resourceId) {
+      this.initialize();
+    }
   }
 
   ngOnDestroy(): void {
     if (this.formValueChangesSubscription) {
       this.formValueChangesSubscription.unsubscribe();
+    }
+  }
+
+  private initialize() {
+    if (this.resourceId) {
+      // TODO This section will go away if we decide NOT to have Discovery Beacon as part of Workspace.
+      this.discoveryBeaconService.getBeaconInfoResourcePairByResourceId(this.resourceId)
+        .subscribe((beaconInfoResourcePair: BeaconInfoResourcePair) => {
+          this.beacons = [beaconInfoResourcePair];
+          this.initForm();
+          this.beaconChanged.emit(this.form.value);
+        });
+    } else {
+        // TODO This section will go away if we decide to have Discovery Beacon as part of Workspace.
+        this.discoveryBeaconService.getBeaconInfoResourcePairs()
+          .subscribe((beaconInfoResourcePairs: BeaconInfoResourcePair[]) => {
+            this.beacons = beaconInfoResourcePairs;
+            this.initForm();
+            this.beaconChanged.emit(this.form.value);
+        });
     }
   }
 

@@ -75,6 +75,13 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
     if (!this.dataTableModel) {
       return; // If the data table model is not defined, this means that the component hasn't been initialized.
     }
+
+    this.resource = null;
+    this.schema = null;
+    this.table = null;
+    this.filterForm = null;
+    this.dataTableModel = null;
+
     this.resetDataTable();
   }
 
@@ -91,7 +98,13 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
   }
 
   getOperationsByFieldName(fieldName: string): string[] {
-    return this.propertyTypeToAllowedOperationsMap[this.schema.properties[fieldName].type];
+    const property = this.schema.properties[fieldName];
+
+    if (!property) {
+      throw new Error(`Unknown field ${fieldName} (${Object.keys(this.schema.properties)})`);
+    }
+
+    return this.propertyTypeToAllowedOperationsMap[property.type];
   }
 
   private update() {

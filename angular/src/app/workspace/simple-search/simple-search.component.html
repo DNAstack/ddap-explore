@@ -8,7 +8,7 @@
     </ng-template>
   </div>
   <aside class="component-frame-aside">
-    <ddap-dot-loading-indicator *ngIf="!filterForm; else withFilterForm"></ddap-dot-loading-indicator>
+    <ddap-dot-loading-indicator *ngIf="!(filterForm && dataTableModel); else withFilterForm"></ddap-dot-loading-indicator>
     <ng-template #withFilterForm>
       <form [formGroup]="this.filterForm" (ngSubmit)="onFilterFormSubmit()">
         <div *ngFor="let columnDef of dataTableModel.columnDefs"

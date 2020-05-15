@@ -35,13 +35,11 @@ mat-drawer-content {
 
 .search-results {
   overflow-y: scroll;
-  flex-direction: column;
 }
 
 ddap-beacon-search-result-table {
   display: flex;
   flex-grow: 1;
-
   overflow-y: scroll;
 }
 

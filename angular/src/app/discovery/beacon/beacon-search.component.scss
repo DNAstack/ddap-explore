@@ -37,6 +37,7 @@ mat-drawer-content {
 }
 
 ddap-beacon-search-result-table {
+  height: 100%;
   display: flex;
   flex-grow: 1;
   overflow-y: auto;
@@ -65,6 +66,38 @@ ddap-beacon-search-result-table {
 
   mat-icon {
     margin-right: 0.5rem;
+  }
+}
+
+::ng-deep mat-tab-group {
+  flex-grow: 1;
+
+  .mat-tab-label {
+    mat-icon {
+      margin-right: 0.5rem;
+
+      &.match-success {
+        color: $beacon-query-result-match;
+      }
+
+      &.match-failure {
+        color: $beacon-query-result-no-match;
+      }
+    }
+  }
+
+  .mat-tab-body-wrapper {
+    height: 100%;
+  }
+}
+
+.auth-required-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-card-actions {
+    display: flex;
   }
 }
 

@@ -26,8 +26,8 @@ ddap-data-table {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 
-  ::ng-deep .mat-form-field-suffix {
-    cursor: pointer;
+  ::ng-deep .mat-form-field-infix {
+    display: flex;
   }
 }
 ::ng-deep .mat-form-field-wrapper {
@@ -42,6 +42,12 @@ ddap-data-table {
   margin-right: 0.5rem;
 }
 
-::ng-deep button.mat-menu-item.selected {
+.actions {
+  mat-icon {
+    cursor: pointer;
+  }
+}
+
+button.mat-menu-item.selected {
   color: #146be4; // FIXME: should be a variable
 }

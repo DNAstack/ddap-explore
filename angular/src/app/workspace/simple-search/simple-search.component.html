@@ -18,7 +18,17 @@
             <mat-label>{{ columnDef.headerName }}</mat-label>
             <input matInput
                    [formControlName]="columnDef.field">
-            <mat-icon matSuffix [matMenuTriggerFor]="operationsMenu">more_vert</mat-icon>
+            <div class="actions flex vertical-center">
+              <mat-icon *ngIf="filterForm.get(columnDef.field).value"
+                        (click)="filterForm.get(columnDef.field).reset()"
+                        matSuffix>
+                clear
+              </mat-icon>
+              <mat-icon [matMenuTriggerFor]="operationsMenu"
+                        matSuffix>
+                more_vert
+              </mat-icon>
+            </div>
           </mat-form-field>
           <mat-menu #operationsMenu="matMenu">
             <button *ngFor="let operation of getOperationsByFieldName(columnDef.field)"

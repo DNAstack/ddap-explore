@@ -58,4 +58,15 @@ export class BeaconSearchResultDetailComponent implements OnChanges {
     return this.geocodeService.geocodeAddress(location);
   }
 
+  getFields(dataObject: object) {
+    return Object.keys(dataObject).map(fieldName => {
+      return {
+        name: fieldName,
+        label: fieldName.replace(/_/, ' ')
+          .replace(/^\s+/, '')
+          .replace(/\s+$/, ''),
+      };
+    });
+  }
+
 }

@@ -20,7 +20,7 @@
         <div class="selected-resource-name"
              *ngIf="getResourceType() === 'simple-search'">
           <span *ngIf="activeSimpleSearchResource; else resourceTitleNotReady">
-            {{ activeSimpleSearchResource.resource.name }}
+            {{ activeSimpleSearchResource.name }}
           </span>
         </div>
 
@@ -99,9 +99,9 @@
           <li>
             <a matRipple
                routerLinkActive="active"
-               [routerLink]="[getBaseUrl(), getCollectionId(), 'simple-search', searchSimple.resource.id]">
-              <mat-icon>{{ searchSimple.resource.metadata.iconName }}</mat-icon>
-              <span class="resource-name">{{ searchSimple.resource.name }}</span>
+               [routerLink]="[getBaseUrl(), getCollectionId(), 'simple-search', searchSimple.id]">
+              <mat-icon>{{ searchSimple.metadata.iconName }}</mat-icon>
+              <span class="resource-name">{{ searchSimple.name }}</span>
             </a>
           </li>
         </ng-container>

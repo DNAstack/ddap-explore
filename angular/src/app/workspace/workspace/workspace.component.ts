@@ -9,6 +9,7 @@ import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discove
 import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
 import { SPIAppSearchSimple } from '../../shared/apps/app-simple-search/models/app-search-simple.model';
 import { CollectionModel } from '../../shared/apps/collection.model';
+import { ResourceModel } from '../../shared/apps/resource.model';
 import { ResourceService } from '../../shared/apps/resource.service';
 import { KeyValuePair } from '../../shared/key-value-pair.model';
 
@@ -22,12 +23,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   collection: CollectionModel;
   beaconResources: AppBeacon[];
-  simpleSearchResources: SPIAppSearchSimple[];
+  simpleSearchResources: ResourceModel[];
 
   activeBeaconResource: AppBeacon;
-  activeSimpleSearchResource: SPIAppSearchSimple;
-
-  dataTypeLoadedMap: KeyValuePair<boolean>;
+  activeSimpleSearchResource: ResourceModel;
 
   private initializationEvent = new EventEmitter<{ dataType: string }>();
   private initializationEventSubscription: Subscription;
@@ -154,9 +153,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       // Get all simple searches.
       if (this.isNotInitialized(this.simpleSearchResources)) {
         this.appSimpleSearchService.getResources(collectionId).subscribe(o => {
-          this.simpleSearchResources = (o.data || []).sort((a, b) => {
-            return a.resource.name < b.resource.name ? 0 : 1;
-          });
+          this.simpleSearchResources = o.data || [];
 
           const dataType = 'simple-search';
           this.initializationEvent.emit({dataType: dataType});
@@ -181,7 +178,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (!this.simpleSearchResources) {
         return;
       }
-      const matchedResources = this.simpleSearchResources.filter(simpleSearch => simpleSearch.resource.id === id);
+      const matchedResources = this.simpleSearchResources.filter(simpleSearch => simpleSearch.id === id);
       this.activeBeaconResource = null;
       this.activeSimpleSearchResource = matchedResources[0];
     } else {

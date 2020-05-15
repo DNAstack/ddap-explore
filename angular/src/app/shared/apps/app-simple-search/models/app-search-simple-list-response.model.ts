@@ -1,5 +1,5 @@
-import { SPIAppSearchSimple } from './app-search-simple.model';
+import { ResourceModel } from '../../resource.model';
 
 export interface SPIAppSearchSimpleListResponseModel {
-  data: SPIAppSearchSimple[];
+  data: ResourceModel[];
 }

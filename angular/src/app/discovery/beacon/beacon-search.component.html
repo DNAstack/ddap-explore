@@ -40,6 +40,7 @@
                             [resourceId]="resourceId"
                             [hideInputs]="isStandaloneMode$ | async">
       </ddap-beacon-info-bar>
+
       <ng-container *ngIf="!beaconForm?.beacon?.error; else errorInfo">
         <div *ngIf="beaconForm?.beacon?.resource as beaconResource"
              class="flex vertical-center search-bar">
@@ -57,12 +58,65 @@
           </button>
         </div>
 
-        <div *ngIf="beaconQueryResponse$ | async as queryResponse"
-             class="flex stretch search-results">
-          <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
-                                           [alleleResponses]="queryResponse.datasetAlleleResponses"
-                                           [hiddenFieldIds]="[]">
-          </ddap-beacon-search-result-table>
+        <div class="flex stretch">
+          <div *ngIf="beaconQueryResponse$ | async as queryResponse"
+               class="flex stretch search-results">
+
+            <!-- Auth Required -->
+            <ng-container *ngIf="queryResponse.requiresAdditionalAuth">
+              <div class="auth-required-info stretch">
+                <mat-card>
+                  <mat-card-title>Authorization Required</mat-card-title>
+                  <mat-card-content>
+                    <p>To query a selected beacon you need to authorize by clicking a button below.</p>
+                  </mat-card-content>
+                  <mat-card-actions>
+                    <div class="fill-space"></div>
+                    <a [href]="buildUrlForResourceAuthorization(queryResponse.authorizationUrlBase)"
+                       data-se="get-access-btn">
+                      <button mat-flat-button
+                              color="primary"
+                              class="uppercase">
+                        Access
+                      </button>
+                    </a>
+                  </mat-card-actions>
+                </mat-card>
+              </div>
+            </ng-container>
+
+            <!-- Auth NOT Required -->
+            <ng-container *ngIf="!queryResponse.requiresAdditionalAuth">
+              <mat-tab-group *ngIf="queryResponse.datasetAlleleResponses.length > 1; else singleDatasetResult">
+                <mat-tab *ngFor="let datasetAlleleResponse of queryResponse.datasetAlleleResponses">
+                  <ng-template mat-tab-label>
+                    <mat-icon *ngIf="!datasetAlleleResponse.exists"
+                              [matTooltip]="'no matching allele found'"
+                              class="icon icon-none match-failure">
+                    </mat-icon>
+                    <mat-icon *ngIf="datasetAlleleResponse.exists"
+                              [matTooltip]="'matching allele found'"
+                              class="match-success">
+                      done
+                    </mat-icon>
+                    <span>{{ datasetAlleleResponse.datasetId || datasetAlleleResponse['id'] }}</span>
+                  </ng-template>
+                  <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
+                                                   [datasetAlleleResponse]="datasetAlleleResponse"
+                                                   [hiddenFieldIds]="[]">
+                  </ddap-beacon-search-result-table>
+                </mat-tab>
+              </mat-tab-group>
+
+              <ng-template #singleDatasetResult>
+                <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
+                                                 [datasetAlleleResponse]="queryResponse.datasetAlleleResponses[0]"
+                                                 [hiddenFieldIds]="[]">
+                </ddap-beacon-search-result-table>
+              </ng-template>
+            </ng-container>
+
+          </div>
         </div>
       </ng-container>
 

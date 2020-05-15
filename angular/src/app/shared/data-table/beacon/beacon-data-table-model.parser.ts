@@ -6,9 +6,9 @@ import { ColumnDef, DataTableModel, RowData } from '../data-table.model';
 
 export class BeaconDataTableModelParser {
 
-  public static parse(info: AlleleResponseInfoModel): DataTableModel {
-    const columnDefs: ColumnDef[] = info.data_model ? this.parseColumnDefs(info) : [];
-    const rowData: RowData[] = info.data ? this.parseRowData(info) : [];
+  public static parse(info?: AlleleResponseInfoModel): DataTableModel {
+    const columnDefs: ColumnDef[] = info && info.data_model ? this.parseColumnDefs(info) : [];
+    const rowData: RowData[] = info && info.data ? this.parseRowData(info) : [];
 
     return {
       columnDefs,

@@ -3,6 +3,8 @@ import { ILatLong } from 'angular-maps';
 import _get from 'lodash.get';
 import { EMPTY, Observable } from 'rxjs';
 
+import { JsonSchema } from '../../../../shared/search/json-schema.model';
+
 import { GeocodeService } from './geo-location/geocode.service';
 
 @Component({
@@ -14,6 +16,9 @@ export class BeaconSearchResultDetailComponent implements OnChanges {
 
   @Input()
   selectedRowData: any;
+
+  @Input()
+  schema: JsonSchema;
 
   mapCoordinates: ILatLong;
 

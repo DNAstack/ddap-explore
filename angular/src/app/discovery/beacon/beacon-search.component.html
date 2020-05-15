@@ -29,7 +29,8 @@
             </button>
           </mat-toolbar-row>
         </mat-toolbar>
-        <ddap-beacon-search-result-detail [selectedRowData]="selectedRowData">
+        <ddap-beacon-search-result-detail [selectedRowData]="selectedRowData"
+                                          [schema]="(beaconQueryResponse$ | async)?.datasetAlleleResponses[0].info.data_model">
         </ddap-beacon-search-result-detail>
       </ng-container>
     </mat-drawer>
@@ -68,7 +69,7 @@
              class="flex stretch search-results">
           <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
                                            [alleleResponses]="queryResponse.datasetAlleleResponses"
-                                           [hiddenFieldIds]="['start', 'ref', 'alt', 'type', 'vep', 'nuc_completeness']">
+                                           [hiddenFieldIds]="[]">
           </ddap-beacon-search-result-table>
         </div>
       </div>

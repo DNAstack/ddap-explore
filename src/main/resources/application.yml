@@ -243,7 +243,7 @@ resources:
               description: "Public COVID-19 Beacon"
               collectionId: "0"
               interfaceType: "http:beacon:virus"
-              interfaceUri: "https://beacon.covid-19.dnastack.com/beacon/public"
+              interfaceUri: "https://beacon.staging.covid-19.dnastack.com/beacon/controlled"
               metadata:
                 iconName: "wifi_tethering"
             1:

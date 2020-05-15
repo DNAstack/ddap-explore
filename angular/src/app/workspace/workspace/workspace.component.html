@@ -79,8 +79,8 @@
           <li>
             <a matRipple
                routerLinkActive="active"
-               [routerLink]="[getBaseUrl(), getCollectionId(), 'beacon', beacon.resource.id]">
-              <mat-icon>{{ beacon.resource.metadata.iconName }}</mat-icon>
+               [routerLink]="[getBaseUrl(), getCollectionId(), 'beacon', beacon.id]">
+              <mat-icon>{{ beacon.metadata.iconName }}</mat-icon>
               <span class="resource-name">{{ beaconResources.length === 1 ? 'Beacon' : beacon.name }}</span>
             </a>
           </li>

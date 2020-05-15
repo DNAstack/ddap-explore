@@ -22,13 +22,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   inStandaloneMode: boolean;
 
   collection: CollectionModel;
-  beaconResources: AppBeacon[];
+  beaconResources: ResourceModel[];
   simpleSearchResources: ResourceModel[];
 
-  activeBeaconResource: AppBeacon;
+  activeBeaconResource: ResourceModel;
   activeSimpleSearchResource: ResourceModel;
 
-  private initializationEvent = new EventEmitter<{ dataType: string }>();
+  private initializationEvent = new EventEmitter<void>();
   private initializationEventSubscription: Subscription;
   private routingUpdateSubscription: Subscription;
 
@@ -105,24 +105,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
     // Observe the initialization
     this.initializationEventSubscription = this.initializationEvent.subscribe(e => {
-      const dataType = e.dataType;
-
       if (activeResource) {
-        // Find the default resource and then redirect to that resource.
-        if (activeResource.type !== dataType) {
-          return;
-        }
-
-        this.initializeView(dataType, activeResource.id);
+        this.initializeView(activeResource.type, activeResource.id);
       } else {
         // When all data is loaded
         if (this.isInitialized(this.beaconResources) && this.isInitialized(this.simpleSearchResources)) {
           if ((this.beaconResources || []).length > 0) {
             const defaultResource = this.beaconResources[0];
-            this.router.navigate([this.getBaseUrl(), collectionId, UIResourceType.Beacon, defaultResource.resource.id]);
+            this.router.navigate([this.getBaseUrl(), collectionId, UIResourceType.Beacon, defaultResource.id]);
           } else if ((this.simpleSearchResources || []).length > 0) {
             const defaultResource = this.simpleSearchResources[0];
-            this.router.navigate([this.getBaseUrl(), collectionId, UIResourceType.SimpleSearch, defaultResource.resource.id]);
+            this.router.navigate([this.getBaseUrl(), collectionId, UIResourceType.SimpleSearch, defaultResource.id]);
           } else {
             throw new Error('Misconfiguration detected');
           }
@@ -140,23 +133,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.collection = o;
       });
 
-      // Get all beacons.
-      if (this.isNotInitialized(this.beaconResources)) {
-        this.appDiscoveryService.getBeaconResources(collectionId).subscribe(o => {
-          this.beaconResources = o.data || [];
+      if (this.isNotInitialized(this.beaconResources) && this.isNotInitialized(this.simpleSearchResources)) {
+        this.resourceService.getResources({collection: collectionId}).subscribe(o => {
+          this.beaconResources = o.data.filter(r => r.interfaces[0].type.match(/^http:beacon/)) || [];
+          this.simpleSearchResources = o.data.filter(r => r.interfaces[0].type === 'http:search:table') || [];
 
-          const dataType = 'beacon';
-          this.initializationEvent.emit({dataType: dataType});
-        });
-      }
-
-      // Get all simple searches.
-      if (this.isNotInitialized(this.simpleSearchResources)) {
-        this.appSimpleSearchService.getResources(collectionId).subscribe(o => {
-          this.simpleSearchResources = o.data || [];
-
-          const dataType = 'simple-search';
-          this.initializationEvent.emit({dataType: dataType});
+          this.initializationEvent.emit();
         });
       }
     }
@@ -171,7 +153,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (!this.beaconResources) {
         return;
       }
-      const matchedResources = this.beaconResources.filter(beacon => beacon.resource.id === id);
+      const matchedResources = this.beaconResources.filter(beacon => beacon.id === id);
       this.activeBeaconResource = matchedResources[0];
       this.activeSimpleSearchResource = null;
     } else if (type === UIResourceType.SimpleSearch) {

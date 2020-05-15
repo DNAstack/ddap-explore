@@ -31,7 +31,6 @@
     </mat-toolbar>
 
     <ng-container *ngIf="getActiveResource()?.type === 'beacon'">
-      <ddap-dot-loading-indicator *ngIf="!activeBeaconResource"></ddap-dot-loading-indicator>
       <ddap-beacon-search></ddap-beacon-search>
     </ng-container>
     <ng-container *ngIf="getActiveResource()?.type === 'simple-search'">

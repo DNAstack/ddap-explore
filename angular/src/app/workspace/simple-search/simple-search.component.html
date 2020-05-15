@@ -7,25 +7,29 @@
       </ddap-data-table>
     </ng-template>
   </div>
-
   <aside class="component-frame-aside">
     <ddap-dot-loading-indicator *ngIf="!filterForm; else withFilterForm"></ddap-dot-loading-indicator>
     <ng-template #withFilterForm>
       <form [formGroup]="this.filterForm" (ngSubmit)="onFilterFormSubmit()">
-        <div *ngFor="let fieldName of getFilterFormFieldNames()">
-          <!-- FIXME Require beautification / rewrite this block -->
-          <label style="display: block;">{{ fieldName }}</label>
+        <div *ngFor="let columnDef of dataTableModel.columnDefs"
+             class="flex flex--row">
           <!-- Operation -->
-          <select [formControlName]="fieldName + fieldOpSuffix">
-            <option *ngFor="let operation of getOperationsByFieldName(fieldName)"
-                    [ngValue]="operation">
-              {{ operation }}
-            </option>
-          </select>
+          <mat-form-field appearance="outline"
+                          class="operation-inp">
+            <mat-select [formControlName]="columnDef.field + fieldOpSuffix">
+              <mat-option *ngFor="let operation of getOperationsByFieldName(columnDef.field)"
+                          [value]="operation">
+                {{ operation }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
           <!-- Value -->
-          <input type="text"
-                 [formControlName]="fieldName"
-                 style="margin-bottom: 8px;"/>
+          <mat-form-field appearance="outline"
+                          floatLabel="always">
+            <mat-label>{{ columnDef.headerName }}</mat-label>
+            <input matInput
+                   [formControlName]="columnDef.field">
+          </mat-form-field>
         </div>
         <div>
           <button type="submit"

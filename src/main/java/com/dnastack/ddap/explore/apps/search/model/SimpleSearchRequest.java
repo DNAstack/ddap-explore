@@ -20,19 +20,21 @@ public class SimpleSearchRequest {
         private Object value;
 
         public String getFilterString(){
-            Object o = value;
-            if (o instanceof String){
-                o = "'" + o + "'";
+            Object o =value;
+
+            if (operation.equals(FilterOperation.NOT_NULL) || operation.equals(FilterOperation.NULL)){
+                return operation.getOp();
             }
 
-            switch (operation){
-                case NOT_NULL:
-                    return operation.getOp();
-                case NULL:
-                    return operation.getOp();
-                default:
-                    return operation.getOp() + " " + o.toString();
+            if (operation.equals(FilterOperation.LIKE)){
+                o = "%" + o.toString() + "%";
             }
+
+            if (o instanceof String){
+                o = "'" + ((String) o).replaceAll("'","\\'") + "'";
+            }
+
+            return operation.getOp() + " " + o.toString();
         }
     }
 

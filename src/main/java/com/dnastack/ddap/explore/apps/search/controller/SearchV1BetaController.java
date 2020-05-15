@@ -23,6 +23,7 @@ import com.dnastack.ddap.explore.resource.model.Id;
 import com.dnastack.ddap.explore.resource.model.Id.CollectionId;
 import com.dnastack.ddap.explore.resource.model.Id.InterfaceId;
 import com.dnastack.ddap.explore.resource.model.PaginatedResponse;
+import com.dnastack.ddap.explore.resource.model.Resource;
 import com.dnastack.ddap.explore.resource.model.UserCredential;
 import com.dnastack.ddap.explore.resource.service.ResourceClientService;
 import com.dnastack.ddap.explore.resource.service.UserCredentialService;
@@ -172,24 +173,13 @@ public class SearchV1BetaController {
     }
 
     @GetMapping("/simple/resources")
-    public Mono<PaginatedResponse<TableInfo>> getSimpleSearchResources(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam("collection") String collectionIdString) {
+    public Mono<PaginatedResponse<Resource>> getSimpleSearchResources(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam("collection") String collectionIdString) {
         return Mono.defer(() -> {
             CollectionId collectionId = CollectionId.decodeCollectionId(collectionIdString);
             return resourceClientService
                 .listResources(realm, List.of(collectionId), List.of("http:search:table"), null);
 
-        }).flatMapMany(Flux::fromIterable)
-            .flatMap(resource -> getTable(httpRequest, session, realm, resource.getMetadata().get("tableName"), resource
-                .getInterfaces()
-                .get(0).getId())
-                .map(tableInfo -> {
-                    tableInfo.setResource(resource);
-                    return tableInfo;
-                }))
-            .reduce(new PaginatedResponse<>(new ArrayList<>()), (identity, tableInfo) -> {
-                identity.getData().add(tableInfo);
-                return identity;
-            });
+        }).map(PaginatedResponse::new);
     }
 
     @GetMapping("/table/{tableName}/info")

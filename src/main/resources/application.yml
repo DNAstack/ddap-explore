@@ -244,36 +244,34 @@ resources:
               collectionId: "0"
               interfaceType: "http:beacon:virus"
               interfaceUri: "https://beacon.covid-19.dnastack.com/beacon/public"
+              metadata:
+                iconName: "wifi_tethering"
             1:
               name: "Sequences"
               imageUrl: null
-              description: "Public Search Service provided by DNAstack"
+              description: "Sequences"
               collectionId: "0"
               interfaceType: "http:search:table"
               interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.staging.dnastack.com"
               metadata:
-                iconName: "table_chart"
-                tableName: "search_cloud.coronavirus.sequences_dev"
+                iconName: "sync_alt"
+                tableName: "coronavirus_dnastack_curated.coronavirus.sequences_dev"
             2:
               name: "Variants"
               imageUrl: null
-              description: "Public Search Service provided by DNAstack"
+              description: "Variants"
               collectionId: "0"
               interfaceType: "http:search:table"
               interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.staging.dnastack.com"
               metadata:
-                iconName: "table_chart"
-                tableName: "search_cloud.coronavirus.variants_dev"
-#            3:
-#              name: "Files"
-#              description: "Public Search Service provided by DNAstack"
-#              collectionId: "0"
-#              interfaceType: "http:search:table"
-#              interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.prod.dnastack.com"
-#              metadata:
-#                iconName: "table_chart"
-#                tableName: "search_cloud.coronavirus.files"
+                iconName: "scatter_plot"
+                tableName: "coronavirus_dnastack_curated.coronavirus.variants_dev"
+            # "Files" uses "layers" icon
+            # "Molecules uses "gesture" icon
           collections:
             0:
               name: "COVID-19 Cloud"
               description: "A Collection of Public Resources for Covid-19"
+            # 1:
+            #   name: "Sample Collection"
+            #   description: "This is for testing only."

@@ -54,6 +54,9 @@ import { DiscoveryRoutingModule } from './discovery-routing.module';
       apiKey: 'AIzaSyBzofbWCwf9myxQpZTME0TcyccBDdhSg88',
     }),
   ],
+  exports: [
+    BeaconSearchComponent,
+  ],
   providers: [
     GeocodeService,
     {

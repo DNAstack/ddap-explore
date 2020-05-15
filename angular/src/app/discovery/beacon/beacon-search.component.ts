@@ -22,6 +22,8 @@ import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 })
 export class BeaconSearchComponent implements OnInit {
 
+  // TODO This component optionally requires "resourceId" for the full integration with WorkspaceComponent.
+
   @ViewChild('selectedRowDetailDrawer', { static: false })
   selectedRowDetailDrawer: MatDrawer;
 

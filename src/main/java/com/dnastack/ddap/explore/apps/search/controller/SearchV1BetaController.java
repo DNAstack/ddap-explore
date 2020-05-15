@@ -327,7 +327,11 @@ public class SearchV1BetaController {
 
 
     @GetMapping(value = "/query/results")
-    public Mono<TableData> getSearchPage(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam("resource") String searchInterfaceId, @RequestParam(value = "next_page_token", required = false) String nextPageToken, @RequestParam(value = "previous_page_token", required = false) String previousPageToken) {
+    public Mono<TableData> getSearchPage(ServerHttpRequest httpRequest, WebSession session,
+                                         @PathVariable String realm,
+                                         @RequestParam("resource") String searchInterfaceId,
+                                         @RequestParam(value = "next_page_token", required = false) String nextPageToken,
+                                         @RequestParam(value = "previous_page_token", required = false) String previousPageToken) {
         return Mono.defer(() -> {
             InterfaceId interfaceId = Id.decodeInterfaceId(searchInterfaceId);
             if (!interfaceId.getType().startsWith("http:search")) {

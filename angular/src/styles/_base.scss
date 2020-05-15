@@ -398,6 +398,7 @@ $component-frame-aside-width: 240px;
   height: 100%;
 
   .component-frame-main {
+    position: relative;
     order: 2;
     flex: 1;
   }

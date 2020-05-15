@@ -1,70 +1,108 @@
 <div class="component-frame">
   <div class="component-frame-main">
+    <!-- View Title -->
     <mat-toolbar class="tertiary-toolbar">
       <ddap-dot-loading-indicator *ngIf="!collection"></ddap-dot-loading-indicator>
-      <mat-toolbar-row *ngIf="collection">
-        <div class="collection-name">
+      <mat-toolbar-row class="active-resource-header"
+                       *ngIf="collection">
+        <div class="collection-name"
+             *ngIf="inStandaloneMode === false">
           {{ collection.name }}
+        </div>
 
-          <span class="selected-resource-name"
-                *ngIf="activeBeaconResource">
-            {{ activeBeaconResource.name }}
+        <div class="selected-resource-name"
+             *ngIf="getResourceType() === 'beacon'">
+          <span *ngIf="activeBeaconResource; else resourceTitleNotReady">
+            {{ beaconResources.length === 1 ? 'Beacon' : activeBeaconResource.name }}
           </span>
-          <span class="selected-resource-name"
-                *ngIf="activeSimpleSearchResource">
+        </div>
+
+        <div class="selected-resource-name"
+             *ngIf="getResourceType() === 'simple-search'">
+          <span *ngIf="activeSimpleSearchResource; else resourceTitleNotReady">
             {{ activeSimpleSearchResource.resource.name }}
           </span>
         </div>
+
+        <ng-template #resourceTitleNotReady>
+          <ddap-dot-loading-indicator></ddap-dot-loading-indicator>
+        </ng-template>
       </mat-toolbar-row>
     </mat-toolbar>
 
     <ng-container *ngIf="getActiveResource()?.type === 'beacon'">
       <ddap-dot-loading-indicator *ngIf="!activeBeaconResource"></ddap-dot-loading-indicator>
+      <ddap-beacon-search></ddap-beacon-search>
     </ng-container>
     <ng-container *ngIf="getActiveResource()?.type === 'simple-search'">
-      <ddap-dot-loading-indicator *ngIf="!activeSimpleSearchResource"></ddap-dot-loading-indicator>
-      <ddap-simple-search [resource]="activeSimpleSearchResource"
-                          *ngIf="activeSimpleSearchResource">
-      </ddap-simple-search>
+      <ddap-simple-search [resourceId]="getResourceId()"></ddap-simple-search>
     </ng-container>
   </div>
 
+  <!-- Resource List -->
   <aside class="component-frame-aside">
     <mat-toolbar class="tertiary-toolbar">
       <ddap-dot-loading-indicator *ngIf="!collection"></ddap-dot-loading-indicator>
-      <mat-toolbar-row *ngIf="collection"
-                       class="back-navigator"
-                       matRipple
-                       [routerLink]="[getBaseUrl(), 'all']">
-        <mat-icon>arrow_back</mat-icon>
-        <span>Collections</span>
-      </mat-toolbar-row>
+      <ng-container *ngIf="inStandaloneMode === undefined">
+        <mat-toolbar-row>
+          <mat-icon>origin</mat-icon>
+          <span *ngIf="collection">{{ collection.name }}</span>
+        </mat-toolbar-row>
+      </ng-container>
+      <ng-container *ngIf="inStandaloneMode === true">
+        <mat-toolbar-row *ngIf="collection"
+                         class="back-navigator"
+                         matRipple
+                         [routerLink]="[getBaseUrl(), getCollectionId()]">
+          <mat-icon>cloud</mat-icon>
+          <span *ngIf="collection">{{ collection.name }}</span>
+        </mat-toolbar-row>
+      </ng-container>
+      <ng-container *ngIf="inStandaloneMode === false">
+        <mat-toolbar-row *ngIf="collection"
+                         class="back-navigator"
+                         matRipple
+                         [routerLink]="[getBaseUrl(), 'all']">
+          <mat-icon>arrow_back</mat-icon>
+          <span>Collections</span>
+        </mat-toolbar-row>
+      </ng-container>
     </mat-toolbar>
 
-    <div class="resource-list-container"
+    <ddap-dot-loading-indicator class="resource-list-container beacons"
+                                *ngIf="isNotInitialized(beaconResources)">
+    </ddap-dot-loading-indicator>
+    <div class="resource-list-container beacons"
          *ngIf="beaconResources && beaconResources.length > 0">
       <h2>Beacons</h2>
       <ul class="resource-list">
         <ng-container *ngFor="let beacon of beaconResources">
           <li>
             <a matRipple
+               routerLinkActive="active"
                [routerLink]="[getBaseUrl(), getCollectionId(), 'beacon', beacon.resource.id]">
-              {{ beacon.name }}
+              <mat-icon>{{ beacon.resource.metadata.iconName }}</mat-icon>
+              <span class="resource-name">{{ beaconResources.length === 1 ? 'Beacon' : beacon.name }}</span>
             </a>
           </li>
         </ng-container>
       </ul>
     </div>
 
-    <div class="resource-list-container"
+    <ddap-dot-loading-indicator class="resource-list-container simple-searches"
+                                *ngIf="isNotInitialized(simpleSearchResources)">
+    </ddap-dot-loading-indicator>
+    <div class="resource-list-container simple-searches"
          *ngIf="simpleSearchResources && simpleSearchResources.length > 0">
       <h2>Simple Searches</h2>
       <ul class="resource-list">
         <ng-container *ngFor="let searchSimple of simpleSearchResources">
           <li>
             <a matRipple
+               routerLinkActive="active"
                [routerLink]="[getBaseUrl(), getCollectionId(), 'simple-search', searchSimple.resource.id]">
-              {{ searchSimple.resource.name }}
+              <mat-icon>{{ searchSimple.resource.metadata.iconName }}</mat-icon>
+              <span class="resource-name">{{ searchSimple.resource.name }}</span>
             </a>
           </li>
         </ng-container>

@@ -9,8 +9,32 @@
   </div>
 
   <aside class="component-frame-aside">
-    <div *ngFor="let field of getFields()">
-      {{ field.name }}
-    </div>
+    <ddap-dot-loading-indicator *ngIf="!filterForm; else withFilterForm"></ddap-dot-loading-indicator>
+    <ng-template #withFilterForm>
+      <form [formGroup]="this.filterForm" (ngSubmit)="onFilterFormSubmit()">
+        <div *ngFor="let fieldName of getFilterFormFieldNames()">
+          <!-- FIXME Require beautification / rewrite this block -->
+          <label style="display: block;">{{ fieldName }}</label>
+          <!-- Operation -->
+          <select [formControlName]="fieldName + fieldOpSuffix">
+            <option *ngFor="let operation of getOperationsByFieldName(fieldName)"
+                    [ngValue]="operation">
+              {{ operation }}
+            </option>
+          </select>
+          <!-- Value -->
+          <input type="text"
+                 [formControlName]="fieldName"
+                 style="margin-bottom: 8px;"/>
+        </div>
+        <div>
+          <button type="submit"
+                  mat-flat-button
+                  color="primary">
+            Filter
+          </button>
+        </div>
+      </form>
+    </ng-template>
   </aside>
 </div>

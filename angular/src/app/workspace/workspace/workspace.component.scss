@@ -1,12 +1,17 @@
 @import '~ddap-common-lib/styles/modules/colors';
 
-.component-frame-aside .tertiary-toolbar {
-  mat-toolbar-row.back-navigator {
-    outline: none;
-    cursor: pointer;
+.component-frame-aside {
+  display: flex;
+  flex-direction: column;
 
-    mat-icon {
-      margin-right: 8px;
+  .tertiary-toolbar {
+    mat-toolbar-row.back-navigator {
+      outline: none;
+      cursor: pointer;
+
+      mat-icon {
+        margin-right: 8px;
+      }
     }
   }
 }
@@ -22,9 +27,19 @@
     margin: 0;
   }
 
-  & + .resource-list-container {
-    border-top: 1px solid $color-grey-light;
+  &.beacons {
+    order: 1;
   }
+
+  &.simple-searches {
+    order: 2;
+  }
+}
+
+ddap-dot-loading-indicator.resource-list-container {
+  margin: 2rem 32px;
+  zoom: 0.5;
+  opacity: 0.5;
 }
 
 .resource-list {
@@ -34,18 +49,47 @@
 
   & > li {
     a {
-      display: block;
+      display: flex;
       padding: 1rem 16px;
-      color: #000;
+      color: $color-grey;
+      font-weight: 700;
+      align-items: center;
+
+      .resource-name {
+        margin-left: 8px;
+      }
+
+      &.active {
+        color: #000;
+      }
     }
   }
 }
 
-.selected-resource-name {
+active-resource-header {
   font-weight: 400;
 
+  & > :first-child {
+    font-weight: 700;
+  }
+}
+
+.selected-resource-name {
+  span {
+    display: inline-block;
+  }
+
+  ddap-dot-loading-indicator {
+    display: inline-block;
+    zoom: 0.5;
+  }
+}
+
+.collection-name + .selected-resource-name {
   &:before {
-    content: ' / ';
+    display: inline-block;
+    content: '/';
+    margin: 0 8px;
     color: $color-grey-light;
   }
 }

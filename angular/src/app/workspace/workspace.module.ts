@@ -5,6 +5,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MaterialDesignFrameworkModule } from 'angular7-json-schema-form';
 
+import { DiscoveryModule } from '../discovery/discovery.module';
 import { SharedModule } from '../shared/shared.module';
 
 import { SimpleSearchComponent } from './simple-search/simple-search.component';
@@ -28,6 +29,8 @@ import { WorkspaceComponent } from './workspace/workspace.component';
     SharedModule,
     // Internal modules
     WorkspaceRoutingModule,
+    // Feature modules
+    DiscoveryModule,
   ],
 })
 export class WorkspaceModule {}

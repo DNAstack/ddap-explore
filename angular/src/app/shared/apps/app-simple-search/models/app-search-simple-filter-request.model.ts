@@ -8,7 +8,7 @@ export interface SearchFilterList {
 }
 
 export interface SearchFilter {
-  operation: FilterOperation;
+  operation: FilterOperation | string;
   value: any;
 }
 
@@ -17,7 +17,7 @@ export interface OrderByFilter {
   direction: OrderBy;
 }
 
-export enum FilterOperation {
+export enum FilterOperationPresentation {
   LIKE = 'LIKE',
   GT = '>',
   GTE = '>=',
@@ -27,6 +27,18 @@ export enum FilterOperation {
   EQ = '=',
   NOT_NULL = 'IS NOT NULL',
   NULL = 'IS NULL',
+}
+
+export enum FilterOperation {
+  'LIKE' = 'LIKE',
+  '>' = 'GT',
+  '>=' = 'GTE',
+  '<' = 'LT',
+  '<=' = 'LTE',
+  '!=' = 'NEQ',
+  '=' = 'EQ',
+  'IS NOT NULL' = 'NOT_NULL',
+  'IS NULL' = 'NULL',
 }
 
 export enum OrderBy {

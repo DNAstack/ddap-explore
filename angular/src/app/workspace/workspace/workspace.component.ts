@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
@@ -10,6 +10,7 @@ import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-
 import { SPIAppSearchSimple } from '../../shared/apps/app-simple-search/models/app-search-simple.model';
 import { CollectionModel } from '../../shared/apps/collection.model';
 import { ResourceService } from '../../shared/apps/resource.service';
+import { KeyValuePair } from '../../shared/key-value-pair.model';
 
 @Component({
   selector: 'ddap-workspace',
@@ -17,6 +18,7 @@ import { ResourceService } from '../../shared/apps/resource.service';
   styleUrls: ['./workspace.component.scss'],
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
+  inStandaloneMode: boolean;
 
   collection: CollectionModel;
   beaconResources: AppBeacon[];
@@ -25,6 +27,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   activeBeaconResource: AppBeacon;
   activeSimpleSearchResource: SPIAppSearchSimple;
 
+  dataTypeLoadedMap: KeyValuePair<boolean>;
+
   private initializationEvent = new EventEmitter<{ dataType: string }>();
   private initializationEventSubscription: Subscription;
   private routingUpdateSubscription: Subscription;
@@ -32,7 +36,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   constructor(private activatedRoute: ActivatedRoute,
               private router: Router,
               private realmStateService: RealmStateService,
-              private spiService: ResourceService,
+              private resourceService: ResourceService,
               private appDiscoveryService: AppDiscoveryService,
               private appSimpleSearchService: AppSimpleSearchService) {
   }
@@ -68,47 +72,52 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return resourceId && resourceType ? {id: resourceId, type: resourceType} : null;
   }
 
+  isInitialized(resourceList: object[]) {
+    return !this.isNotInitialized(resourceList);
+  }
+
+  isNotInitialized(resourceList: object[]) {
+    return resourceList === undefined;
+  }
+
   private getRealmId() {
     return _get(this.activatedRoute, 'root.firstChild.snapshot.params.realmId', this.realmStateService.getRealm());
   }
 
   private initialize() {
-    const collectionId = this.getCollectionId();
-    const activeResource = this.getActiveResource();
+    this.resourceService.getCollections().subscribe(response => {
+      this.inStandaloneMode = response.data.length === 1;
+    });
 
-    const dataTypeLoadedMap = {
-      'beacon': false, // TODO comment/uncomment this line to disable/enable beacon integration.
-      'simple-search': false,
-    };
-
-    // We don't really need to use paramMap. We just need to make sure that the component needs
-    // to be reinitialized when the parameters are changed.
+    // Observe changes in the routing parameters
+    // NOTE We don't really need to use paramMap. We just need to make sure that the component needs
+    //      to be reinitialized when the parameters are changed.
     this.routingUpdateSubscription = this.activatedRoute.paramMap.subscribe(paramMap => {
       this.initializeView(this.getResourceType(), this.getResourceId());
     });
 
+    this.initializeLayout();
+    this.initializeDefaultViewIfRequired();
+  }
+
+  private initializeDefaultViewIfRequired() {
+    const collectionId = this.getCollectionId();
+    const activeResource = this.getActiveResource();
+
+    // Observe the initialization
     this.initializationEventSubscription = this.initializationEvent.subscribe(e => {
+      const dataType = e.dataType;
+
       if (activeResource) {
         // Find the default resource and then redirect to that resource.
-        const dataType = e.dataType;
-
         if (activeResource.type !== dataType) {
           return;
         }
 
         this.initializeView(dataType, activeResource.id);
       } else {
-        // Find the default resource and then redirect to that resource.
-        const dataType = e.dataType;
-        dataTypeLoadedMap[dataType] = true;
-
-        const numberOfLoadedDataTypes = Object.values(dataTypeLoadedMap)
-          .reduce((pValue: number, currentDataTypeLoaded: boolean) => {
-            return pValue + (currentDataTypeLoaded ? 1 : 0);
-          }, 0);
-
         // When all data is loaded
-        if (numberOfLoadedDataTypes === Object.keys(dataTypeLoadedMap).length) {
+        if (this.isInitialized(this.beaconResources) && this.isInitialized(this.simpleSearchResources)) {
           if ((this.beaconResources || []).length > 0) {
             const defaultResource = this.beaconResources[0];
             this.router.navigate([this.getBaseUrl(), collectionId, UIResourceType.Beacon, defaultResource.resource.id]);
@@ -121,15 +130,19 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  private initializeLayout() {
+    const collectionId = this.getCollectionId();
 
     if (!this.collection || this.collection.id !== collectionId) {
       // Get the active collection.
-      this.spiService.getCollection(collectionId).subscribe(o => {
+      this.resourceService.getCollection(collectionId).subscribe(o => {
         this.collection = o;
       });
 
       // Get all beacons.
-      if (dataTypeLoadedMap['beacon'] !== undefined) {
+      if (this.isNotInitialized(this.beaconResources)) {
         this.appDiscoveryService.getBeaconResources(collectionId).subscribe(o => {
           this.beaconResources = o.data || [];
 
@@ -139,7 +152,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       }
 
       // Get all simple searches.
-      if (dataTypeLoadedMap['simple-search'] !== undefined) {
+      if (this.isNotInitialized(this.simpleSearchResources)) {
         this.appSimpleSearchService.getResources(collectionId).subscribe(o => {
           this.simpleSearchResources = o.data || [];
 

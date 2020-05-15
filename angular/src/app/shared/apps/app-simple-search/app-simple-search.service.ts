@@ -20,27 +20,28 @@ export class AppSimpleSearchService {
   }
 
   getResources(collectionId: string, cacheable: boolean = true): Observable<SPIAppSearchSimpleListResponseModel> {
-    const url = `${this.baseUri}/apps/search/simple/resources?collection=${collectionId}`;
-    return this.makeCacheableRequest<SPIAppSearchSimpleListResponseModel>('get', url);
+    const url = `${this.baseUri}/resources?collection=${collectionId}`;
+    return this.makeCacheableRequest<SPIAppSearchSimpleListResponseModel>(url);
   }
 
   filter(interfaceId: string, request: SimpleSearchRequest): Observable<TableModel> {
-    const url = `${this.baseUri}/apps/search/simple/filter?resource=${interfaceId}`;
+    const url = `${this.baseUri}/filter?resource=${interfaceId}`;
     return new Observable<TableModel>(subscriber => {
       this.http.post<TableModel>(url, request)
         .subscribe(table => {
-          if (this.isQueryStillInProgress(table)) {
-            setTimeout(() => this.followUp(table.pagination.next_page_url, subscriber), 1000);
-          } else {
+          // FIXME The follow-up feature constantly encounters HTTP 500 and it is unusable. Disable until we have the better solution.
+          // if (this.isQueryStillInProgress(table)) {
+          //   setTimeout(() => this.followUp(table.pagination.next_page_url, subscriber), 1000);
+          // } else {
             subscriber.next(table);
             subscriber.complete();
-          }
+          // }
         });
     });
   }
 
   get baseUri() {
-    return `${environment.ddapApiUrl}/${realmIdPlaceholder}`;
+    return `${environment.ddapApiUrl}/${realmIdPlaceholder}/apps/search/simple`;
   }
 
   private followUp(url: string, subscriber: Subscriber<TableModel>, delay: number = 1) {
@@ -57,7 +58,12 @@ export class AppSimpleSearchService {
 
     // FIXME We need to figure out how to make a follow-up request on a protected search service.
     this.http.get<TableModel>(
-      url
+      url,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
     ).subscribe(table => {
       if (this.isQueryStillInProgress(table)) {
         setTimeout(
@@ -78,7 +84,7 @@ export class AppSimpleSearchService {
   }
 
   private isQueryStillInProgress(table: TableModel) {
-    return table.data.length === 0 && table.pagination.next_page_url;
+    return (!table.data || table.data.length === 0) && table.pagination.next_page_url;
   }
 
   /**
@@ -86,8 +92,7 @@ export class AppSimpleSearchService {
    *
    * FIXME re-implement this with Store
    */
-  private makeCacheableRequest<T>(method: string, url: string, body?: any, cacheKey?: string,
-                                  cacheReusable: boolean = true): Observable<T> {
+  private makeCacheableRequest<T>(url: string, body?: any, cacheKey?: string, cacheReusable: boolean = true): Observable<T> {
     cacheKey = cacheKey || url;
 
     if (cacheReusable && this.urlToResponseMap.has(cacheKey)) {
@@ -97,15 +102,10 @@ export class AppSimpleSearchService {
       });
     }
 
-    switch (method.toLowerCase()) {
-      case 'get':
-        return this.http.get<T>(url)
-          .pipe(map(response => {
-            this.urlToResponseMap.set(cacheKey, response);
-            return response;
-          }));
-      default:
-        throw new Error(`Unknown request method ${method}`);
-    }
+    return this.http.get<T>(url)
+      .pipe(map(response => {
+        this.urlToResponseMap.set(cacheKey, response);
+        return response;
+      }));
   }
 }

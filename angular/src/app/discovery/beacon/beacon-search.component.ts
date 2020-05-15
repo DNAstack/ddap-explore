@@ -4,7 +4,7 @@ import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { ErrorHandlerService } from 'ddap-common-lib';
-import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
@@ -63,9 +63,6 @@ export class BeaconSearchComponent implements OnInit {
   }
 
   loadResultTable() {
-    if (this.beaconForm.beacon.error) {
-      // TODO: clean table
-    }
     if (!this.refreshBeaconResult$.getValue() && this.beaconForm && this.beaconQuery) {
       this.submitQuery();
     }
@@ -99,7 +96,8 @@ export class BeaconSearchComponent implements OnInit {
           .pipe(
             catchError((error) => {
               this.errorHandlerService.openSnackBarWithError(error, 'error.message');
-              return EMPTY;
+              // Returning null to tell data-table to render nothing -> cleaning up previous results
+              return of(null);
             })
           );
       })

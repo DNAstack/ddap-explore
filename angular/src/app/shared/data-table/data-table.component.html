@@ -1,3 +1,4 @@
+
 <ag-grid-angular class="ag-theme-balham"
                  (gridReady)="onGridReady($event)"
                  (rowDataChanged)="onRowDataChanged($event)"
@@ -13,10 +14,9 @@
                  [multiSortKey]="defaultTableConfig.multiSortKey"
                  [navigateToNextCell]="navigateToNextCell">
 </ag-grid-angular>
-<br>
-<div>
+<div style="align-self: flex-end;">
   <button (click)="onBtnExportDataAsCsv()" mat-stroked-button color="accent">
-    DOWNLOAD
+    Download as CVS
   </button>
 </div>
 

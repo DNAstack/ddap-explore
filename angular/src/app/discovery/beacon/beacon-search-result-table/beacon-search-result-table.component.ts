@@ -12,20 +12,18 @@ import { ColumnDef, DataTableModel, TableRowSelection } from '../../../shared/da
 export class BeaconSearchResultTableComponent implements OnChanges {
 
   @Input()
-  alleleResponses: BeaconQueryAlleleResponseModel[];
+  datasetAlleleResponse: BeaconQueryAlleleResponseModel;
   @Input()
   hiddenFieldIds: string[];
 
   @Output()
   selectedRowChanged: EventEmitter<any> = new EventEmitter<any>();
 
-  dataTableModels: DataTableModel[];
+  dataTableModel: DataTableModel;
   tableRowSelection = TableRowSelection.single;
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.dataTableModels = this.alleleResponses.map((alleleResponse: BeaconQueryAlleleResponseModel) => {
-      return BeaconDataTableModelParser.parse(alleleResponse.info);
-    }).map((dataTableModel: DataTableModel) => this.setFieldVisibility(dataTableModel));
+    this.dataTableModel = this.setFieldVisibility(BeaconDataTableModelParser.parse(this.datasetAlleleResponse.info));
   }
 
   changeRowSelection(selectedRows: any[]) {

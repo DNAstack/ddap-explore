@@ -1,3 +1,5 @@
+@import '~ddap-common-lib/styles/modules/colors';
+
 .component-frame {
   height: calc(100% - 64px);
 }
@@ -23,6 +25,10 @@ ddap-data-table {
 .mat-form-field {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+
+  ::ng-deep .mat-form-field-suffix {
+    cursor: pointer;
+  }
 }
 ::ng-deep .mat-form-field-wrapper {
   padding: 0;
@@ -34,4 +40,8 @@ ddap-data-table {
 .operation-inp {
   width: 4rem;
   margin-right: 0.5rem;
+}
+
+::ng-deep button.mat-menu-item.selected {
+  color: #146be4; // FIXME: should be a variable
 }

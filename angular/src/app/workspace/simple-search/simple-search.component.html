@@ -10,26 +10,24 @@
   <aside class="component-frame-aside">
     <ddap-dot-loading-indicator *ngIf="!(filterForm && dataTableModel); else withFilterForm"></ddap-dot-loading-indicator>
     <ng-template #withFilterForm>
-      <form [formGroup]="this.filterForm" (ngSubmit)="onFilterFormSubmit()">
+      <form [formGroup]="filterForm" (ngSubmit)="onFilterFormSubmit()">
         <div *ngFor="let columnDef of dataTableModel.columnDefs"
              class="flex flex--row">
-          <!-- Operation -->
-          <mat-form-field appearance="outline"
-                          class="operation-inp">
-            <mat-select [formControlName]="columnDef.field + fieldOpSuffix">
-              <mat-option *ngFor="let operation of getOperationsByFieldName(columnDef.field)"
-                          [value]="operation">
-                {{ operation }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <!-- Value -->
           <mat-form-field appearance="outline"
                           floatLabel="always">
             <mat-label>{{ columnDef.headerName }}</mat-label>
             <input matInput
                    [formControlName]="columnDef.field">
+            <mat-icon matSuffix [matMenuTriggerFor]="operationsMenu">more_vert</mat-icon>
           </mat-form-field>
+          <mat-menu #operationsMenu="matMenu">
+            <button *ngFor="let operation of getOperationsByFieldName(columnDef.field)"
+                    (click)="filterForm.get(columnDef.field + fieldOpSuffix).patchValue(operation)"
+                    [class.selected]="filterForm.get(columnDef.field + fieldOpSuffix).value === operation"
+                    mat-menu-item>
+              {{ operation }}
+            </button>
+          </mat-menu>
         </div>
         <div>
           <button type="submit"

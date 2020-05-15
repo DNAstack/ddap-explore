@@ -33,6 +33,7 @@ export class AppSimpleSearchService {
           // if (this.isQueryStillInProgress(table)) {
           //   setTimeout(() => this.followUp(table.pagination.next_page_url, subscriber), 1000);
           // } else {
+            this.sanatizeTableData(table);
             subscriber.next(table);
             subscriber.complete();
           // }
@@ -42,6 +43,20 @@ export class AppSimpleSearchService {
 
   get baseUri() {
     return `${environment.ddapApiUrl}/${realmIdPlaceholder}/apps/search/simple`;
+  }
+
+  private sanatizeTableData(table: TableModel) {
+    if (!table.data) {
+      return;
+    }
+
+    table.data.forEach(row => {
+      Object.keys(row).forEach(columnName => {
+        if (row[columnName] === 'null') {
+          row[columnName] = null;
+        }
+      });
+    });
   }
 
   private followUp(url: string, subscriber: Subscriber<TableModel>, delay: number = 1) {

@@ -154,7 +154,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       // Get all simple searches.
       if (this.isNotInitialized(this.simpleSearchResources)) {
         this.appSimpleSearchService.getResources(collectionId).subscribe(o => {
-          this.simpleSearchResources = o.data || [];
+          this.simpleSearchResources = (o.data || []).sort((a, b) => {
+            return a.resource.name < b.resource.name ? 0 : 1;
+          });
 
           const dataType = 'simple-search';
           this.initializationEvent.emit({dataType: dataType});

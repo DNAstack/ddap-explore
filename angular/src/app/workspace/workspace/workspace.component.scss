@@ -1,19 +1,14 @@
 @import '~ddap-common-lib/styles/modules/colors';
 
+.component-frame-main {
+  & > .tertiary-toolbar:first-child {
+    justify-content: center;
+  }
+}
+
 .component-frame-aside {
   display: flex;
   flex-direction: column;
-
-  .tertiary-toolbar {
-    mat-toolbar-row.back-navigator {
-      outline: none;
-      cursor: pointer;
-
-      mat-icon {
-        margin-right: 8px;
-      }
-    }
-  }
 }
 
 .resource-list-container {
@@ -42,54 +37,62 @@ ddap-dot-loading-indicator.resource-list-container {
   opacity: 0.5;
 }
 
-.resource-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.active-resource-header {
+  .selected-resource-name {
+    span {
+      display: inline-block;
+    }
 
-  & > li {
-    a {
-      display: flex;
-      padding: 1rem 16px;
-      color: $color-grey;
-      font-weight: 700;
-      align-items: center;
+    ddap-dot-loading-indicator {
+      display: inline-block;
+      zoom: 0.5;
+    }
+  }
 
-      .resource-name {
-        margin-left: 8px;
-      }
+  .collection-name ~ .selected-resource-name {
+    &:before {
+      display: inline-block;
+      content: '/';
+      margin: 0 8px;
+      color: $color-grey-light;
+    }
+  }
 
-      &.active {
-        color: #000;
+  .secondary-resource-menu-trigger {
+    display: none;
+  }
+}
+
+.component-frame.standalone-mode {
+  .active-resource-header {
+    .collection-name {
+      display: none;
+    }
+
+    .collection-name ~ .selected-resource-name {
+      &:before {
+        display: none;
       }
     }
   }
 }
 
-active-resource-header {
-  font-weight: 400;
-
-  & > :first-child {
-    font-weight: 700;
-  }
-}
-
-.selected-resource-name {
-  span {
-    display: inline-block;
+@media only screen and (max-width: 599px) {
+  .tertiary-toolbar {
+    //height: auto;
   }
 
-  ddap-dot-loading-indicator {
-    display: inline-block;
-    zoom: 0.5;
-  }
-}
+  .component-frame.standalone-mode {
+    .active-resource-header {
+      .collection-name {
+        display: block;
+      }
 
-.collection-name + .selected-resource-name {
-  &:before {
-    display: inline-block;
-    content: '/';
-    margin: 0 8px;
-    color: $color-grey-light;
+      .secondary-resource-menu-trigger {
+        display: block;
+        margin-left: 1rem;
+        border-left: 1px solid $color-grey-light;
+      }
+    }
   }
 }

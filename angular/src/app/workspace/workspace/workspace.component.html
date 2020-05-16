@@ -1,13 +1,44 @@
-<div class="component-frame">
+<div class="component-frame app-level {{ inStandaloneMode ? 'standalone-mode' : '' }}">
+  <!-- Active Resource View -->
   <div class="component-frame-main">
     <!-- View Title -->
     <mat-toolbar class="tertiary-toolbar">
       <ddap-dot-loading-indicator *ngIf="!collection"></ddap-dot-loading-indicator>
       <mat-toolbar-row class="active-resource-header"
                        *ngIf="collection">
-        <div class="collection-name"
-             *ngIf="inStandaloneMode === false">
+        <!--
+          Secondary resource menu
+
+          It is designed to only work in the table mode.
+        -->
+        <div class="collection-name">
           {{ collection.name }}
+        </div>
+
+        <div class="secondary-resource-menu-trigger">
+          <mat-menu #secondaryResourceMenu="matMenu">
+            <ng-container *ngFor="let resource of beaconResources">
+              <button mat-menu-item
+                      [routerLink]="[getBaseUrl(), getCollectionId(), 'beacon', resource.id]"
+                      routerLinkActive="active">
+                <mat-icon>{{ resource.metadata.iconName }}</mat-icon>
+                <span class="resource-name">{{ beaconResources.length === 1 ? 'Beacon' : resource.name }}</span>
+              </button>
+            </ng-container>
+            <ng-container *ngFor="let resource of simpleSearchResources">
+              <button mat-menu-item
+                      [routerLink]="[getBaseUrl(), getCollectionId(), 'simple-search', resource.id]"
+                      routerLinkActive="active">
+                <mat-icon>{{ resource.metadata.iconName }}</mat-icon>
+                <span class="resource-name">{{ resource.name }}</span>
+              </button>
+            </ng-container>
+          </mat-menu>
+
+          <button mat-icon-button
+                  [matMenuTriggerFor]="secondaryResourceMenu">
+            <mat-icon>keyboard_arrow_down</mat-icon>
+          </button>
         </div>
 
         <div class="selected-resource-name"
@@ -30,9 +61,12 @@
       </mat-toolbar-row>
     </mat-toolbar>
 
+    <!-- Beacon View -->
     <ng-container *ngIf="getActiveResource()?.type === 'beacon'">
       <ddap-beacon-search [resourceId]="getResourceId()"></ddap-beacon-search>
     </ng-container>
+
+    <!-- Simple Search View -->
     <ng-container *ngIf="getActiveResource()?.type === 'simple-search'">
       <ddap-simple-search [resourceId]="getResourceId()"></ddap-simple-search>
     </ng-container>
@@ -43,27 +77,33 @@
     <mat-toolbar class="tertiary-toolbar">
       <ddap-dot-loading-indicator *ngIf="!collection"></ddap-dot-loading-indicator>
       <ng-container *ngIf="inStandaloneMode === undefined">
-        <mat-toolbar-row>
+        <mat-toolbar-row class="aside-navigator nothing">
           <mat-icon>origin</mat-icon>
-          <span *ngIf="collection">{{ collection.name }}</span>
+          <span *ngIf="collection"
+                class="aside-navigator-label">
+            {{ collection.name }}
+          </span>
         </mat-toolbar-row>
       </ng-container>
       <ng-container *ngIf="inStandaloneMode === true">
         <mat-toolbar-row *ngIf="collection"
-                         class="back-navigator"
+                         class="aside-navigator reload"
                          matRipple
                          [routerLink]="[getBaseUrl(), getCollectionId()]">
           <mat-icon>cloud</mat-icon>
-          <span *ngIf="collection">{{ collection.name }}</span>
+          <span *ngIf="collection"
+                class="aside-navigator-label">
+            {{ collection.name }}
+          </span>
         </mat-toolbar-row>
       </ng-container>
       <ng-container *ngIf="inStandaloneMode === false">
         <mat-toolbar-row *ngIf="collection"
-                         class="back-navigator"
+                         class="aside-navigator back-navigator"
                          matRipple
                          [routerLink]="[getBaseUrl(), 'all']">
           <mat-icon>arrow_back</mat-icon>
-          <span>Collections</span>
+          <span class="aside-navigator-label">Collections</span>
         </mat-toolbar-row>
       </ng-container>
     </mat-toolbar>
@@ -74,18 +114,18 @@
     <div class="resource-list-container beacons"
          *ngIf="beaconResources && beaconResources.length > 0">
       <h2>Beacons</h2>
-      <ul class="resource-list">
+      <div class="menu-list resource-list">
         <ng-container *ngFor="let beacon of beaconResources">
-          <li>
-            <a matRipple
-               routerLinkActive="active"
-               [routerLink]="[getBaseUrl(), getCollectionId(), 'beacon', beacon.id]">
-              <mat-icon>{{ beacon.metadata.iconName }}</mat-icon>
-              <span class="resource-name">{{ beaconResources.length === 1 ? 'Beacon' : beacon.name }}</span>
-            </a>
-          </li>
+          <a matRipple
+             [routerLink]="[getBaseUrl(), getCollectionId(), 'beacon', beacon.id]"
+             class="menu-item with-icon resource"
+             routerLinkActive="active">
+            <mat-icon>{{ beacon.metadata.iconName }}</mat-icon>
+            <span
+              class="menu-item-label resource-name">{{ beaconResources.length === 1 ? 'Beacon' : beacon.name }}</span>
+          </a>
         </ng-container>
-      </ul>
+      </div>
     </div>
 
     <ddap-dot-loading-indicator class="resource-list-container simple-searches"
@@ -94,18 +134,17 @@
     <div class="resource-list-container simple-searches"
          *ngIf="simpleSearchResources && simpleSearchResources.length > 0">
       <h2>Simple Searches</h2>
-      <ul class="resource-list">
+      <div class="menu-list resource-list">
         <ng-container *ngFor="let searchSimple of simpleSearchResources">
-          <li>
-            <a matRipple
-               routerLinkActive="active"
-               [routerLink]="[getBaseUrl(), getCollectionId(), 'simple-search', searchSimple.id]">
-              <mat-icon>{{ searchSimple.metadata.iconName }}</mat-icon>
-              <span class="resource-name">{{ searchSimple.name }}</span>
-            </a>
-          </li>
+          <a matRipple
+             [routerLink]="[getBaseUrl(), getCollectionId(), 'simple-search', searchSimple.id]"
+             class="menu-item with-icon resource"
+             routerLinkActive="active">
+            <mat-icon>{{ searchSimple.metadata.iconName }}</mat-icon>
+            <span class="menu-item-label resource-name">{{ searchSimple.name }}</span>
+          </a>
         </ng-container>
-      </ul>
+      </div>
     </div>
   </aside>
 </div>

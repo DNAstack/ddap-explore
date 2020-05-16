@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
@@ -47,6 +47,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.initializationEventSubscription.unsubscribe();
     this.routingUpdateSubscription.unsubscribe();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onBrowserWindowResize(event) {
+    const windowObj: Window = event.currentTarget;
+    // console.log('innerWidth:', windowObj.innerWidth);
   }
 
   getBaseUrl(): string {

@@ -410,3 +410,66 @@ $component-frame-aside-width: 240px;
     border-right: 1px solid $color-grey-light;
   }
 }
+
+// For component-frame-aside
+.aside-navigator {
+  outline: none;
+  cursor: pointer;
+
+  .aside-navigator-label {
+    margin-left: 8px;
+  }
+
+  &.nothing {
+    cursor: default;
+  }
+}
+
+// For component-frame-aside
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  & > .menu-item {
+    display: flex;
+    padding: 1rem 16px;
+    color: $color-grey;
+    font-weight: 700;
+    align-items: center;
+
+    &.with-icon > .menu-item-label {
+      margin-left: 8px;
+    }
+
+    &.active {
+      color: #000;
+    }
+  }
+}
+
+// [Tablet Stage 1] At this point, we start hiding labels but still showing the sidebar.
+@media only screen and (max-width: 780px) {
+  .component-frame.app-level {
+    .component-frame-aside {
+      width: auto;
+
+      .menu-list .menu-item.with-icon .menu-item-label {
+        display: none;
+      }
+
+      .aside-navigator .aside-navigator-label {
+        display: none;
+      }
+    }
+  }
+}
+
+// [Tablet Stage 2] At this point, we hide the sidebar.
+@media only screen and (max-width: 599px) {
+  .component-frame.app-level {
+    .component-frame-aside {
+      display: none;
+    }
+  }
+}

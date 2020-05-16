@@ -255,7 +255,7 @@ resources:
               interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.staging.dnastack.com"
               metadata:
                 iconName: "sync_alt"
-                tableName: "covid_cloud.covid_cloud_staging.sequences_view"
+                tableName: "coronavirus_dnastack_curated.covid_cloud_staging.sequences_view"
             2:
               name: "Variants"
               imageUrl: null
@@ -265,7 +265,7 @@ resources:
               interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.staging.dnastack.com"
               metadata:
                 iconName: "scatter_plot"
-                tableName: "covid_cloud.covid_cloud_staging.variants_flattened_view"
+                tableName: "coronavirus_dnastack_curated.covid_cloud_staging.variants_flattened_view"
             3:
               name: "Files"
               imageUrl: null
@@ -275,7 +275,7 @@ resources:
               interfaceUri: "https://ga4gh-search-adapter-presto-covid19-public.staging.dnastack.com"
               metadata:
                 iconName: "layers"
-                tableName: "covid_cloud.covid_cloud_staging.files_view"
+                tableName: "coronavirus_dnastack_curated.covid_cloud_staging.files_view"
             # "Molecules uses "gesture" icon
           collections:
             0:

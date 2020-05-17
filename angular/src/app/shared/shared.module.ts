@@ -30,6 +30,7 @@ import { TagInputModule } from 'ngx-chips';
 import { ClipboardModule } from 'ngx-clipboard';
 
 import { AccessDeniedScreenComponent } from './access-denied-screen/access-denied-screen.component';
+import { ComponentFrameComponent } from './component-frame/component-frame.component';
 import { DataTableComponent } from './data-table/data-table.component';
 import { DotLoadingIndicatorComponent } from './dot-loading-indicator/dot-loading-indicator.component';
 import { LayoutComponent } from './layout/layout.component';
@@ -48,6 +49,7 @@ import { PaginatorComponent } from './paginator/paginator.component';
     AccessDeniedScreenComponent,
     DataTableComponent,
     DotLoadingIndicatorComponent,
+    ComponentFrameComponent,
   ],
   imports: [
     CommonModule,
@@ -128,6 +130,7 @@ import { PaginatorComponent } from './paginator/paginator.component';
     AccessDeniedScreenComponent,
     DataTableComponent,
     DotLoadingIndicatorComponent,
+    ComponentFrameComponent,
   ],
   providers: [
     ViewControllerService,

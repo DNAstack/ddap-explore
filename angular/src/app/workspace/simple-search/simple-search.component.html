@@ -1,4 +1,4 @@
-<div class="component-frame">
+<ddap-component-frame [disableMobile]="true">
   <div class="component-frame-main">
     <ddap-dot-loading-indicator *ngIf="!dataTableModel; else withResult"></ddap-dot-loading-indicator>
     <ng-template #withResult>
@@ -49,4 +49,4 @@
       </form>
     </ng-template>
   </aside>
-</div>
+</ddap-component-frame>

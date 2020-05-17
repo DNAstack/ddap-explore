@@ -70,7 +70,6 @@
   <!-- Resource List -->
   <aside class="component-frame-aside">
     <mat-toolbar class="tertiary-toolbar">
-      <ddap-dot-loading-indicator *ngIf="!collection"></ddap-dot-loading-indicator>
       <ng-container *ngIf="inStandaloneMode === undefined">
         <mat-toolbar-row class="aside-navigator nothing">
           <mat-icon>origin</mat-icon>
@@ -103,9 +102,6 @@
       </ng-container>
     </mat-toolbar>
 
-    <ddap-dot-loading-indicator class="resource-list-container beacons"
-                                *ngIf="isNotInitialized(beaconResources)">
-    </ddap-dot-loading-indicator>
     <div class="resource-list-container beacons"
          *ngIf="beaconResources && beaconResources.length > 0">
       <h2>Beacons</h2>
@@ -123,9 +119,6 @@
       </div>
     </div>
 
-    <ddap-dot-loading-indicator class="resource-list-container simple-searches"
-                                *ngIf="isNotInitialized(simpleSearchResources)">
-    </ddap-dot-loading-indicator>
     <div class="resource-list-container simple-searches"
          *ngIf="simpleSearchResources && simpleSearchResources.length > 0">
       <h2>Simple Searches</h2>

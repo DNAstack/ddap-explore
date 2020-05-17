@@ -31,21 +31,10 @@
   }
 }
 
-ddap-dot-loading-indicator.resource-list-container {
-  margin: 2rem 32px;
-  zoom: 0.5;
-  opacity: 0.5;
-}
-
 .active-resource-header {
   .selected-resource-name {
     span {
       display: inline-block;
-    }
-
-    ddap-dot-loading-indicator {
-      display: inline-block;
-      zoom: 0.5;
     }
   }
 

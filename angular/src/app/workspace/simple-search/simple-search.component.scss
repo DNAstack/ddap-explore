@@ -10,6 +10,7 @@
 .component-frame-aside {
   width: auto;
   padding: 1rem 16px;
+  min-width: 200px; // added to have width during loading
 }
 ddap-data-table {
   display: flex;
@@ -50,4 +51,16 @@ ddap-data-table {
 
 button.mat-menu-item.selected {
   color: #146be4; // FIXME: should be a variable
+}
+
+.search-progress-backdrop {
+  position: absolute;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { LoadingBarService } from '@ngx-loading-bar/core';
 
 import { AppSearchService } from '../../shared/apps/app-search/app-search.service';
 import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
@@ -64,7 +65,8 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
 
   constructor(private resourceService: ResourceService,
               private appSearchService: AppSearchService,
-              private appSimpleSearchService: AppSimpleSearchService) {
+              private appSimpleSearchService: AppSimpleSearchService,
+              public loader: LoadingBarService ) {
   }
 
   ngOnInit(): void {

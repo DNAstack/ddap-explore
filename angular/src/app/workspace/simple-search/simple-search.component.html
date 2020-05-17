@@ -1,15 +1,20 @@
 <ddap-component-frame [disableMobile]="true">
+  <div *ngIf="loader.progress$ | async"
+       class="search-progress-backdrop">
+    <mat-spinner [value]="loader.progress$ | async"
+                 mode="indeterminate"
+                 color="accent">
+    </mat-spinner>
+  </div>
   <div class="component-frame-main">
-    <ddap-dot-loading-indicator *ngIf="!dataTableModel; else withResult"></ddap-dot-loading-indicator>
-    <ng-template #withResult>
+    <ng-container *ngIf="dataTableModel">
       <ddap-data-table [columnDefs]="dataTableModel.columnDefs"
                        [rowData]="dataTableModel.rowData">
       </ddap-data-table>
-    </ng-template>
+    </ng-container>
   </div>
   <aside class="component-frame-aside">
-    <ddap-dot-loading-indicator *ngIf="!(filterForm && dataTableModel); else withFilterForm"></ddap-dot-loading-indicator>
-    <ng-template #withFilterForm>
+    <ng-container *ngIf="(filterForm && dataTableModel)">
       <form [formGroup]="filterForm" (ngSubmit)="onFilterFormSubmit()">
         <div *ngFor="let columnDef of dataTableModel.columnDefs"
              class="flex flex--row">
@@ -47,6 +52,6 @@
           </button>
         </div>
       </form>
-    </ng-template>
+    </ng-container>
   </aside>
 </ddap-component-frame>

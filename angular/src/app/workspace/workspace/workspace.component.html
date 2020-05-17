@@ -3,7 +3,6 @@
   <div class="component-frame-main">
     <!-- View Title -->
     <mat-toolbar class="tertiary-toolbar">
-      <ddap-dot-loading-indicator *ngIf="!collection"></ddap-dot-loading-indicator>
       <mat-toolbar-row class="active-resource-header"
                        *ngIf="collection">
         <!--
@@ -43,21 +42,17 @@
 
         <div class="selected-resource-name"
              *ngIf="getResourceType() === 'beacon'">
-          <span *ngIf="activeBeaconResource; else resourceTitleNotReady">
+          <span *ngIf="activeBeaconResource">
             {{ beaconResources.length === 1 ? 'Beacon' : activeBeaconResource.name }}
           </span>
         </div>
 
         <div class="selected-resource-name"
-             *ngIf="getResourceType() === 'simple-search'">
-          <span *ngIf="activeSimpleSearchResource; else resourceTitleNotReady">
+             *ngIf="getResourceType() === 'simple-search' && activeSimpleSearchResource">
+          <span>
             {{ activeSimpleSearchResource.name }}
           </span>
         </div>
-
-        <ng-template #resourceTitleNotReady>
-          <ddap-dot-loading-indicator></ddap-dot-loading-indicator>
-        </ng-template>
       </mat-toolbar-row>
     </mat-toolbar>
 

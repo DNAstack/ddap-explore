@@ -3,17 +3,18 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 import { LoadingBarService } from '@ngx-loading-bar/core';
 
 import { AppSearchService } from '../../shared/apps/app-search/app-search.service';
-import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
 import {
-  FilterOperation, FilterOperationPresentation, SearchFilterList,
-  SimpleSearchRequest
-} from '../../shared/apps/app-simple-search/models/app-search-simple-filter-request.model';
-import { SPIAppSearchSimple } from '../../shared/apps/app-simple-search/models/app-search-simple.model';
+  FilterModel,
+  FilterOperation,
+  SimpleSearchRequestModel,
+} from '../../shared/apps/app-simple-search/app-simple-search.model';
+import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
 import { ResourceModel } from '../../shared/apps/resource.model';
 import { ResourceService } from '../../shared/apps/resource.service';
 import { DataTableEventsService } from '../../shared/data-table/data-table-events.service';
 import { DataTableModel } from '../../shared/data-table/data-table.model';
 import { TableDataTableModelParser } from '../../shared/data-table/table/table-data-table-model.parser';
+import { KeyValuePair } from '../../shared/key-value-pair.model';
 import { JsonSchema } from '../../shared/search/json-schema.model';
 import { TableModel } from '../../shared/search/table.model';
 
@@ -29,6 +30,7 @@ import { TableModel } from '../../shared/search/table.model';
   providers: [DataTableEventsService],
 })
 export class SimpleSearchComponent implements OnInit, OnChanges {
+
   @Input()
   resourceId: string;
 
@@ -45,21 +47,21 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
   // NOTE See FilterOperation for all supported operations.
   propertyTypeToAllowedOperationsMap: {[propertyType: string]: string[]} = {
     string: [
-      FilterOperationPresentation.EQ,
-      FilterOperationPresentation.NEQ,
-      FilterOperationPresentation.NULL,
-      FilterOperationPresentation.NOT_NULL,
-      FilterOperationPresentation.LIKE,
+      FilterOperation.EQ,
+      FilterOperation.NEQ,
+      FilterOperation.NULL,
+      FilterOperation.NOT_NULL,
+      FilterOperation.LIKE,
     ],
     int: [
-      FilterOperationPresentation.EQ,
-      FilterOperationPresentation.NEQ,
-      FilterOperationPresentation.NULL,
-      FilterOperationPresentation.NOT_NULL,
-      FilterOperationPresentation.GT,
-      FilterOperationPresentation.GTE,
-      FilterOperationPresentation.LT,
-      FilterOperationPresentation.LTE,
+      FilterOperation.EQ,
+      FilterOperation.NEQ,
+      FilterOperation.NULL,
+      FilterOperation.NOT_NULL,
+      FilterOperation.GT,
+      FilterOperation.GTE,
+      FilterOperation.LT,
+      FilterOperation.LTE,
     ],
   };
 
@@ -114,7 +116,7 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
       return;
     }
 
-    const filter: SimpleSearchRequest = {
+    const filter: SimpleSearchRequestModel = {
       filters: this.compileFilters(),
       order: [],
     }; // default filter
@@ -126,12 +128,12 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
       });
   }
 
-  private compileFilters(): SearchFilterList {
+  private compileFilters(): KeyValuePair<FilterModel> {
     if (!this.filterForm) {
       return {};
     }
 
-    const filters: SearchFilterList = {};
+    const filters: KeyValuePair<FilterModel> = {};
     const formData = this.filterForm.getRawValue();
 
     this.getFilterFormFieldNames()
@@ -171,7 +173,7 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
             validators.push(Validators.pattern(/^\d*$/));
           }
           fields[fieldName] = new FormControl('', validators);
-          fields[fieldName + this.fieldOpSuffix] = new FormControl(FilterOperationPresentation.EQ, validators);
+          fields[fieldName + this.fieldOpSuffix] = new FormControl(FilterOperation.EQ, validators);
         }
 
         this.filterForm = new FormGroup(fields);
@@ -181,7 +183,7 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
           this.getFilterFormFieldNames().forEach(fieldName => {
             const fieldOp = data[fieldName + this.fieldOpSuffix];
             const field = this.filterForm.get(fieldName);
-            const shouldDisable = fieldOp === FilterOperationPresentation.NULL || fieldOp === FilterOperationPresentation.NOT_NULL;
+            const shouldDisable = fieldOp === FilterOperation.NULL || fieldOp === FilterOperation.NOT_NULL;
 
             if (field.enabled && shouldDisable) {
               field.disable();
@@ -212,4 +214,5 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
   private get interfaceId(): string {
     return this.resource ? this.resource.interfaces[0].id : null;
   }
+
 }

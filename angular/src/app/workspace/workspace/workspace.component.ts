@@ -4,14 +4,11 @@ import { RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
 import { Subscription } from 'rxjs';
 
-import { AppBeacon } from '../../shared/apps/app-discovery/app-discovery.model';
 import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discovery.service';
 import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
-import { SPIAppSearchSimple } from '../../shared/apps/app-simple-search/models/app-search-simple.model';
 import { CollectionModel } from '../../shared/apps/collection.model';
 import { ResourceModel } from '../../shared/apps/resource.model';
 import { ResourceService } from '../../shared/apps/resource.service';
-import { KeyValuePair } from '../../shared/key-value-pair.model';
 
 @Component({
   selector: 'ddap-workspace',

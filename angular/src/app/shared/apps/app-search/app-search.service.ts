@@ -6,7 +6,6 @@ import { map } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
 import { TableInfo } from '../../search/table-info.model';
-import { SPIAppSearchSimpleListResponseModel } from '../app-simple-search/models/app-search-simple-list-response.model';
 
 @Injectable({
   providedIn: 'root',

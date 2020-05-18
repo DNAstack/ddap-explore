@@ -7,24 +7,24 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { TableModel } from '../../search/table.model';
 
-import { SimpleSearchRequest } from './models/app-search-simple-filter-request.model';
-import { SPIAppSearchSimpleListResponseModel } from './models/app-search-simple-list-response.model';
+import { SimpleSearchRequestModel, SimpleSearchResponseModel } from './app-simple-search.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AppSimpleSearchService {
+
   private urlToResponseMap: Map<string, any> = new Map<string, any>();
 
   constructor(private http: HttpClient) {
   }
 
-  getResources(collectionId: string, cacheable: boolean = true): Observable<SPIAppSearchSimpleListResponseModel> {
+  getResources(collectionId: string, cacheable: boolean = true): Observable<SimpleSearchResponseModel> {
     const url = `${this.baseUri}/resources?collection=${collectionId}`;
-    return this.makeCacheableRequest<SPIAppSearchSimpleListResponseModel>(url);
+    return this.makeCacheableRequest<SimpleSearchResponseModel>(url);
   }
 
-  filter(interfaceId: string, request: SimpleSearchRequest): Observable<TableModel> {
+  filter(interfaceId: string, request: SimpleSearchRequestModel): Observable<TableModel> {
     const url = `${this.baseUri}/filter?resource=${interfaceId}`;
     return new Observable<TableModel>(subscriber => {
       this.http.post<TableModel>(url, request)
@@ -123,4 +123,5 @@ export class AppSimpleSearchService {
         return response;
       }));
   }
+
 }

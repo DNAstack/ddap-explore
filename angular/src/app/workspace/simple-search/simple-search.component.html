@@ -40,7 +40,7 @@
                     (click)="filterForm.get(columnDef.field + fieldOpSuffix).patchValue(operation)"
                     [class.selected]="filterForm.get(columnDef.field + fieldOpSuffix).value === operation"
                     mat-menu-item>
-              {{ operation }}
+              {{ FilterOperationLabel[operation] }}
             </button>
           </mat-menu>
         </div>

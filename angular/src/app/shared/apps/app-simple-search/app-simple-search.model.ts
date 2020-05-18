@@ -20,6 +20,11 @@ export interface OrderByFilter {
   direction: OrderBy;
 }
 
+export enum OrderBy {
+  DESC = 'DESC',
+  ASC = 'ASC',
+}
+
 export enum FilterOperation {
   'LIKE' = 'LIKE',
   'GT' = 'GT',
@@ -32,7 +37,14 @@ export enum FilterOperation {
   'NULL' = 'NULL',
 }
 
-export enum OrderBy {
-  DESC = 'DESC',
-  ASC = 'ASC',
+export enum FilterOperationLabel {
+  'LIKE' = 'like',
+  'GT' = 'greater than',
+  'GTE' = 'greater or equal to',
+  'LT' = 'less than',
+  'LTE' = 'less or equal to',
+  'NEQ' = 'not equal to',
+  'EQ' = 'equal to',
+  'NOT_NULL' = 'is not empty',
+  'NULL' = 'is empty',
 }

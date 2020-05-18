@@ -6,6 +6,7 @@ import { AppSearchService } from '../../shared/apps/app-search/app-search.servic
 import {
   FilterModel,
   FilterOperation,
+  FilterOperationLabel,
   SimpleSearchRequestModel,
 } from '../../shared/apps/app-simple-search/app-simple-search.model';
 import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
@@ -33,6 +34,8 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
 
   @Input()
   resourceId: string;
+
+  FilterOperationLabel = FilterOperationLabel;
 
   readonly fieldOpSuffix = '_op';
 

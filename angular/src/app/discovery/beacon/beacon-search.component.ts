@@ -12,6 +12,7 @@ import { AppConfigStore } from '../../shared/app-config/app-config.store';
 import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discovery.service';
 import { BeaconQueryAlleleRequestModel, BeaconQueryResponseModel } from '../../shared/beacon/beacon-search.model';
 import { DataTableEventsService } from '../../shared/data-table/data-table-events.service';
+import { QuerystringStateService } from '../../shared/querystring-state.service';
 
 import { BeaconInfoFormModel } from './beacon-info-bar/beacon-info-form.model';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
@@ -46,7 +47,8 @@ export class BeaconSearchComponent implements OnInit {
     private appDiscoveryService: AppDiscoveryService,
     private errorHandlerService: ErrorHandlerService,
     private dataTableEventsService: DataTableEventsService,
-    private helpDialog: MatDialog
+    private helpDialog: MatDialog,
+    private querystringStateService: QuerystringStateService
   ) {
   }
 
@@ -57,6 +59,8 @@ export class BeaconSearchComponent implements OnInit {
           return appConfig.inStandaloneMode;
         })
       );
+
+    this.beaconQuery = this.querystringStateService.load('beacon');
 
     this.setUpBeaconQueryObservable();
   }
@@ -72,6 +76,7 @@ export class BeaconSearchComponent implements OnInit {
   }
 
   submitQuery(): void {
+    this.querystringStateService.save('beacon', {data: this.beaconQuery});
     this.refreshBeaconResult$.next({ ...this.beaconQuery, datasetIds: this.beaconForm.datasets });
     this.resetDrawer();
   }

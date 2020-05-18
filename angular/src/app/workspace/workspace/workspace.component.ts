@@ -1,9 +1,11 @@
 import { Component, EventEmitter, HostListener, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealmStateService } from 'ddap-common-lib';
 import _get from 'lodash.get';
 import { Subscription } from 'rxjs';
 
+import { HelpDialogComponent } from '../../discovery/beacon/help-dialog/help-dialog.component';
 import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discovery.service';
 import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
 import { CollectionModel } from '../../shared/apps/collection.model';
@@ -31,10 +33,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   constructor(private activatedRoute: ActivatedRoute,
               private router: Router,
+              private dialog: MatDialog,
               private realmStateService: RealmStateService,
-              private resourceService: ResourceService,
-              private appDiscoveryService: AppDiscoveryService,
-              private appSimpleSearchService: AppSimpleSearchService) {
+              private resourceService: ResourceService) {
   }
 
   ngOnInit() {
@@ -46,10 +47,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.routingUpdateSubscription.unsubscribe();
   }
 
-  @HostListener('window:resize', ['$event'])
-  onBrowserWindowResize(event) {
-    const windowObj: Window = event.currentTarget;
-    // console.log('innerWidth:', windowObj.innerWidth);
+  openHelpDialog(): void {
+    this.dialog.open(HelpDialogComponent);
   }
 
   getBaseUrl(): string {

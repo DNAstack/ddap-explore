@@ -53,6 +53,15 @@
             {{ activeSimpleSearchResource.name }}
           </span>
         </div>
+
+        <div class="fill-space"></div>
+
+        <button *ngIf="getResourceType() === 'beacon'"
+                (click)="openHelpDialog()"
+                mat-icon-button
+                matTooltip="Help">
+          <mat-icon>help_outline</mat-icon>
+        </button>
       </mat-toolbar-row>
     </mat-toolbar>
 

@@ -15,7 +15,6 @@
 ddap-data-table {
   display: flex;
   flex-grow: 1;
-  overflow-y: scroll;
 }
 ::ng-deep ag-grid-angular {
   border: none !important;

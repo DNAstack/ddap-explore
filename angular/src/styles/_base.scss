@@ -395,15 +395,20 @@ $component-frame-aside-width: 240px;
 
 .component-frame {
   display: flex;
+  flex-direction: row;
   height: 100%;
 
   .component-frame-main {
+    display: flex;
+    flex-direction: column;
     position: relative;
     order: 2;
     flex: 1;
   }
 
   .component-frame-aside {
+    display: flex;
+    flex-direction: column;
     width: $component-frame-aside-width;
     order: 1;
     background-color: #fff;

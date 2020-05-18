@@ -1,54 +1,54 @@
-<div class="component-frame app-level {{ inStandaloneMode ? 'standalone-mode' : '' }}">
+<div [class.standalone-mode]="inStandaloneMode"
+     class="component-frame app-level">
   <!-- Active Resource View -->
   <div class="component-frame-main">
     <!-- View Title -->
     <mat-toolbar class="tertiary-toolbar">
-      <mat-toolbar-row class="active-resource-header"
-                       *ngIf="collection">
+      <mat-toolbar-row *ngIf="collection"
+                       class="active-resource-header">
         <!--
           Secondary resource menu
-
           It is designed to only work in the table mode.
         -->
         <div class="collection-name">
           {{ collection.name }}
         </div>
 
+        <!-- FIXME: @Juti is this even being used? If not please delete. -->
         <div class="secondary-resource-menu-trigger">
-          <mat-menu #secondaryResourceMenu="matMenu">
-            <ng-container *ngFor="let resource of beaconResources">
-              <button mat-menu-item
-                      [routerLink]="[getBaseUrl(), getCollectionId(), 'beacon', resource.id]"
-                      routerLinkActive="active">
-                <mat-icon>{{ resource.metadata.iconName }}</mat-icon>
-                <span class="resource-name">{{ beaconResources.length === 1 ? 'Beacon' : resource.name }}</span>
-              </button>
-            </ng-container>
-            <ng-container *ngFor="let resource of simpleSearchResources">
-              <button mat-menu-item
-                      [routerLink]="[getBaseUrl(), getCollectionId(), 'simple-search', resource.id]"
-                      routerLinkActive="active">
-                <mat-icon>{{ resource.metadata.iconName }}</mat-icon>
-                <span class="resource-name">{{ resource.name }}</span>
-              </button>
-            </ng-container>
-          </mat-menu>
-
-          <button mat-icon-button
-                  [matMenuTriggerFor]="secondaryResourceMenu">
+          <button [matMenuTriggerFor]="secondaryResourceMenu"
+                  mat-icon-button>
             <mat-icon>keyboard_arrow_down</mat-icon>
           </button>
+
+          <mat-menu #secondaryResourceMenu="matMenu">
+            <button *ngFor="let resource of beaconResources"
+                    [routerLink]="[getBaseUrl(), getCollectionId(), 'beacon', resource.id]"
+                    routerLinkActive="active"
+                    mat-menu-item>
+              <mat-icon>{{ resource.metadata.iconName }}</mat-icon>
+              <span class="resource-name">{{ beaconResources.length === 1 ? 'Beacon' : resource.name }}</span>
+            </button>
+            <button *ngFor="let resource of simpleSearchResources"
+                    [routerLink]="[getBaseUrl(), getCollectionId(), 'simple-search', resource.id]"
+                    routerLinkActive="active"
+                    mat-menu-item>
+              <mat-icon>{{ resource.metadata.iconName }}</mat-icon>
+              <span class="resource-name">{{ resource.name }}</span>
+            </button>
+          </mat-menu>
         </div>
 
-        <div class="selected-resource-name"
-             *ngIf="getResourceType() === 'beacon'">
+        <div *ngIf="getResourceType() === 'beacon'"
+             class="selected-resource-name">
           <span *ngIf="activeBeaconResource">
+            <!-- TODO: should be proper beacon name and if not possible fallback to resource name (see beacon-search component) -->
             {{ beaconResources.length === 1 ? 'Beacon' : activeBeaconResource.name }}
           </span>
         </div>
 
-        <div class="selected-resource-name"
-             *ngIf="getResourceType() === 'simple-search' && activeSimpleSearchResource">
+        <div *ngIf="getResourceType() === 'simple-search' && activeSimpleSearchResource"
+             class="selected-resource-name">
           <span>
             {{ activeSimpleSearchResource.name }}
           </span>

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { LoadingBarService } from '@ngx-loading-bar/core';
 
@@ -16,6 +16,7 @@ import { DataTableEventsService } from '../../shared/data-table/data-table-event
 import { DataTableModel } from '../../shared/data-table/data-table.model';
 import { TableDataTableModelParser } from '../../shared/data-table/table/table-data-table-model.parser';
 import { KeyValuePair } from '../../shared/key-value-pair.model';
+import { QuerystringStateService } from '../../shared/querystring-state.service';
 import { JsonSchema } from '../../shared/search/json-schema.model';
 import { TableModel } from '../../shared/search/table.model';
 
@@ -30,7 +31,7 @@ import { TableModel } from '../../shared/search/table.model';
   styleUrls: ['./simple-search.component.scss'],
   providers: [DataTableEventsService],
 })
-export class SimpleSearchComponent implements OnInit, OnChanges {
+export class SimpleSearchComponent implements OnChanges {
 
   @Input()
   resourceId: string;
@@ -42,9 +43,7 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
   resource: ResourceModel;
   schema: JsonSchema;
   table: TableModel;
-
   filterForm: FormGroup;
-
   dataTableModel: DataTableModel;
 
   // NOTE See FilterOperation for all supported operations.
@@ -71,18 +70,11 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
   constructor(private resourceService: ResourceService,
               private appSearchService: AppSearchService,
               private appSimpleSearchService: AppSimpleSearchService,
+              private querystringStateService: QuerystringStateService,
               public loader: LoadingBarService ) {
   }
 
-  ngOnInit(): void {
-    this.initialize();
-  }
-
   ngOnChanges(changes: SimpleChanges) {
-    if (!this.dataTableModel) {
-      return; // If the data table model is not defined, this means that the component hasn't been initialized.
-    }
-
     this.resource = null;
     this.schema = null;
     this.table = null;
@@ -94,7 +86,10 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
 
   onFilterFormSubmit() {
     // TODO form validation
-    this.update();
+    this.update({
+      filters: this.compileFilters(),
+      order: [],
+    });
   }
 
   getFilterFormFieldNames(): string[] {
@@ -114,15 +109,15 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
     return this.propertyTypeToAllowedOperationsMap[property.type];
   }
 
-  private update() {
+  private update(filter: SimpleSearchRequestModel) {
     if (!this.interfaceId) {
       return;
     }
 
-    const filter: SimpleSearchRequestModel = {
-      filters: this.compileFilters(),
-      order: [],
-    }; // default filter
+    // TODO The "order" has been temporarily disregarded when the page is initialized
+    //      from the last known state. We will need to handle that in the future when
+    //      "order" is used.
+    this.querystringStateService.save('filter', {data: filter});
 
     this.appSimpleSearchService.filter(this.interfaceId, filter)
       .subscribe(response => {
@@ -143,13 +138,18 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
       .forEach(fieldName => {
         let fieldValue = formData[fieldName];
         const fieldOp = FilterOperation[formData[fieldName + this.fieldOpSuffix]];
+        const allowNullValue = (fieldOp === FilterOperation.NULL || fieldOp === FilterOperation.NOT_NULL);
 
-        if (!fieldValue) {
-          return; // skip this field
+        if (!allowNullValue && !fieldValue) {
+          return; // skip this field, except "IS NULL" and "IS NOT NULL" operations.
+        }
+
+        if (allowNullValue) {
+          fieldValue = null;
         }
 
         if (this.schema.properties[fieldName].type === 'int') {
-          fieldValue = parseInt(fieldValue, 10);
+          fieldValue = fieldValue ? parseInt(fieldValue, 10) : 0;
         }
 
         filters[fieldName] = {
@@ -166,16 +166,23 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
       .subscribe(response => {
         this.schema = response.data_model;
 
+        // Restore from the query string.
+        const startupRequest: SimpleSearchRequestModel = this.querystringStateService.load('filter') || {filters: {}};
+
         // Initialize the filter form.
         const fields: {[key: string]: AbstractControl} = {};
 
         for (const fieldName in this.schema.properties) {
           const property = this.schema.properties[fieldName];
           const validators = [];
+
           if (property.type === 'int') {
             validators.push(Validators.pattern(/^\d*$/));
           }
-          fields[fieldName] = new FormControl('', validators);
+
+          const defaultValue = startupRequest.filters[fieldName] ? startupRequest.filters[fieldName].value : '';
+
+          fields[fieldName] = new FormControl(defaultValue, validators);
           fields[fieldName + this.fieldOpSuffix] = new FormControl(FilterOperation.EQ, validators);
         }
 
@@ -210,7 +217,7 @@ export class SimpleSearchComponent implements OnInit, OnChanges {
         this.resource = resource;
 
         this.retrieveTableInfo();
-        this.update();
+        this.update(this.querystringStateService.load('filter'));
       });
   }
 

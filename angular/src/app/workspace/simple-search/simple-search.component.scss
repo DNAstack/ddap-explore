@@ -3,25 +3,30 @@
 .component-frame {
   height: calc(100% - 64px);
 }
+
 .component-frame-main {
   display: flex;
   flex-direction: column;
 }
+
 .component-frame-aside {
   width: auto;
-  padding: 1rem 16px;
   min-width: 200px; // added to have width during loading
 }
+
 ddap-data-table {
   display: flex;
   flex-grow: 1;
 }
+
 :host ::ng-deep ag-grid-angular {
   border: none !important;
 }
+
 :host ::ng-deep .ag-theme-balham .ag-root {
   border: none;
 }
+
 .mat-form-field {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -30,13 +35,16 @@ ddap-data-table {
     display: flex;
   }
 }
+
 ::ng-deep .mat-form-field-wrapper {
   padding: 0;
 }
+
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-infix {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
+
 .operation-inp {
   width: 4rem;
   margin-right: 0.5rem;
@@ -46,6 +54,19 @@ ddap-data-table {
   mat-icon {
     cursor: pointer;
   }
+}
+
+form {
+  overflow-y: scroll;
+  padding: 1rem 16px;
+}
+
+.submit-container {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid $color-grey-light;
+  padding: 1rem;
+  align-items: center;
 }
 
 button.mat-menu-item.selected {

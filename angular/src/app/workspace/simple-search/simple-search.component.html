@@ -15,7 +15,7 @@
   </div>
   <aside class="component-frame-aside">
     <ng-container *ngIf="(filterForm && dataTableModel)">
-      <form [formGroup]="filterForm" (ngSubmit)="onFilterFormSubmit()">
+      <form [formGroup]="filterForm">
         <div *ngFor="let columnDef of dataTableModel.columnDefs"
              class="flex flex--row">
           <mat-form-field appearance="outline"
@@ -44,14 +44,14 @@
             </button>
           </mat-menu>
         </div>
-        <div>
-          <button type="submit"
-                  mat-flat-button
-                  color="primary">
-            Filter
-          </button>
-        </div>
       </form>
+      <div class="submit-container">
+        <button (click)="onFilterFormSubmit()"
+                mat-flat-button
+                color="primary">
+          Search
+        </button>
+      </div>
     </ng-container>
   </aside>
 </ddap-component-frame>

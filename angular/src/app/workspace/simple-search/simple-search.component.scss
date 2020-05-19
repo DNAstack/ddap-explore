@@ -16,10 +16,10 @@ ddap-data-table {
   display: flex;
   flex-grow: 1;
 }
-::ng-deep ag-grid-angular {
+:host ::ng-deep ag-grid-angular {
   border: none !important;
 }
-::ng-deep .ag-theme-balham .ag-root {
+:host ::ng-deep .ag-theme-balham .ag-root {
   border: none;
 }
 .mat-form-field {

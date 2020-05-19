@@ -81,7 +81,7 @@ public class SearchV1BetaController {
 
 
     @PostMapping("/simple/filter")
-    public Mono<TableData> simpleSearchQuery(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam("resource") String interfaceIdString, @RequestBody SimpleSearchRequest simpleSearchRequest) {
+    public Mono<TableData> simpleSearchQuery(ServerHttpRequest httpRequest, WebSession session, @PathVariable String realm, @RequestParam("resource") String interfaceIdString, @RequestBody(required = false) SimpleSearchRequest simpleSearchRequest) {
         return Mono.defer(() -> {
             InterfaceId interfaceId = InterfaceId.decodeInterfaceId(interfaceIdString);
             if (!interfaceId.getType().equals("http:search:table")) {
@@ -126,46 +126,49 @@ public class SearchV1BetaController {
 
     private String formulateSimpleSearchQuery(String tableName, SimpleSearchRequest simpleSearchRequest) {
 
+
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT\n")
             .append(" *\n")
             .append("FROM ").append(tableName);
 
-        if (simpleSearchRequest.getFilters() != null && !simpleSearchRequest.getFilters().isEmpty()) {
-            builder.append("\nWHERE");
-            boolean first = true;
-            for (Map.Entry<String, SearchFilter> entry : simpleSearchRequest.getFilters().entrySet()) {
-                String key = entry.getKey();
-                SearchFilter filter = entry.getValue();
+        if (simpleSearchRequest != null) {
+            if (simpleSearchRequest.getFilters() != null && !simpleSearchRequest.getFilters().isEmpty()) {
+                builder.append("\nWHERE");
+                boolean first = true;
+                for (Map.Entry<String, SearchFilter> entry : simpleSearchRequest.getFilters().entrySet()) {
+                    String key = entry.getKey();
+                    SearchFilter filter = entry.getValue();
 
-                if (filter == null || filter.getOperation() == null){
-                    throw new FilterException("Illegal Search filter, an operation must be defined");
-                }
+                    if (filter == null || filter.getOperation() == null) {
+                        throw new FilterException("Illegal Search filter, an operation must be defined");
+                    }
 
-                builder.append("\n  ");
-                if (!first) {
-                    builder.append("AND ");
-                } else {
-                    first = false;
+                    builder.append("\n  ");
+                    if (!first) {
+                        builder.append("AND ");
+                    } else {
+                        first = false;
+                    }
+                    builder.append(key).append(" ").append(filter.getFilterString());
                 }
-                builder.append(key).append(" ").append(filter.getFilterString());
             }
-        }
 
-        if (simpleSearchRequest.getOrder() != null && !simpleSearchRequest.getOrder().isEmpty()) {
-            builder.append("\nORDER BY");
-            boolean first = true;
-            for (OrderByFilter orderByFilter : simpleSearchRequest.getOrder()) {
-                if (orderByFilter.getField() == null || orderByFilter.getDirection() == null){
-                    throw new FilterException("Illegal order clause, must define a field and a direction");
+            if (simpleSearchRequest.getOrder() != null && !simpleSearchRequest.getOrder().isEmpty()) {
+                builder.append("\nORDER BY");
+                boolean first = true;
+                for (OrderByFilter orderByFilter : simpleSearchRequest.getOrder()) {
+                    if (orderByFilter.getField() == null || orderByFilter.getDirection() == null) {
+                        throw new FilterException("Illegal order clause, must define a field and a direction");
+                    }
+                    if (first) {
+                        first = false;
+                    } else {
+                        builder.append(",");
+                    }
+                    builder.append(" ").append(orderByFilter.getField()).append(" ")
+                        .append(orderByFilter.getDirection().name());
                 }
-                if (first) {
-                    first = false;
-                } else {
-                    builder.append(",");
-                }
-                builder.append(" ").append(orderByFilter.getField()).append(" ")
-                    .append(orderByFilter.getDirection().name());
             }
         }
 
@@ -318,10 +321,10 @@ public class SearchV1BetaController {
 
     @GetMapping(value = "/query/results")
     public Mono<TableData> getSearchPage(ServerHttpRequest httpRequest, WebSession session,
-                                         @PathVariable String realm,
-                                         @RequestParam("resource") String searchInterfaceId,
-                                         @RequestParam(value = "next_page_token", required = false) String nextPageToken,
-                                         @RequestParam(value = "previous_page_token", required = false) String previousPageToken) {
+        @PathVariable String realm,
+        @RequestParam("resource") String searchInterfaceId,
+        @RequestParam(value = "next_page_token", required = false) String nextPageToken,
+        @RequestParam(value = "previous_page_token", required = false) String previousPageToken) {
         return Mono.defer(() -> {
             InterfaceId interfaceId = Id.decodeInterfaceId(searchInterfaceId);
             if (!interfaceId.getType().startsWith("http:search")) {

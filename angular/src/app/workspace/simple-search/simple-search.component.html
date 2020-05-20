@@ -45,13 +45,15 @@
           </mat-menu>
         </div>
       </form>
-      <div class="submit-container">
-        <button (click)="onFilterFormSubmit()"
-                mat-flat-button
-                color="primary">
-          Search
-        </button>
-      </div>
+      <mat-toolbar class="tertiary-toolbar submit-container">
+        <mat-toolbar-row>
+          <button (click)="onFilterFormSubmit()"
+                  mat-flat-button
+                  color="primary">
+            Search
+          </button>
+        </mat-toolbar-row>
+      </mat-toolbar>
     </ng-container>
   </aside>
 </ddap-component-frame>

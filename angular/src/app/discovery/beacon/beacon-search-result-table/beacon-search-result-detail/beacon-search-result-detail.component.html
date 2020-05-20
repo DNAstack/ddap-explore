@@ -1,5 +1,5 @@
 <div class="details-panel">
-  <ng-container *ngIf="selectedRowData.Location && mapCoordinates">
+  <ng-container *ngIf="mapCoordinates;">
     <ddap-geo-location [title]="selectedRowData.source"
                        [latitude]="mapCoordinates.latitude"
                        [longitude]="mapCoordinates.longitude">

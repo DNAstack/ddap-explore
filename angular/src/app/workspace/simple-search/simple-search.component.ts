@@ -86,10 +86,7 @@ export class SimpleSearchComponent implements OnChanges {
 
   onFilterFormSubmit() {
     // TODO form validation
-    this.update({
-      filters: this.compileFilters(),
-      order: [],
-    });
+    this.update(this.defaultFilter());
   }
 
   getFilterFormFieldNames(): string[] {
@@ -109,10 +106,19 @@ export class SimpleSearchComponent implements OnChanges {
     return this.propertyTypeToAllowedOperationsMap[property.type];
   }
 
+  private defaultFilter(): SimpleSearchRequestModel {
+    return {
+      filters: this.compileFilters(),
+      order: [],
+    };
+  }
+
   private update(filter: SimpleSearchRequestModel) {
     if (!this.interfaceId) {
       return;
     }
+
+    filter = filter || this.defaultFilter();
 
     // TODO The "order" has been temporarily disregarded when the page is initialized
     //      from the last known state. We will need to handle that in the future when

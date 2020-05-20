@@ -17,3 +17,23 @@ ag-grid-angular {
     }
   }
 }
+.data-table-grid {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 0rem 1rem 1rem;
+
+}
+
+.data-table-section {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+}
+.download-toolbar {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid $color-grey-light;
+}
+

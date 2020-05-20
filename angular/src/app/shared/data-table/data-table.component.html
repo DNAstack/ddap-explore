@@ -1,3 +1,5 @@
+<div class="data-table-section">
+<div class="data-table-grid">
 <ag-grid-angular class="ag-theme-balham"
                  (gridReady)="onGridReady($event)"
                  (rowDataChanged)="onRowDataChanged($event)"
@@ -13,3 +15,13 @@
                  [multiSortKey]="defaultTableConfig.multiSortKey"
                  [navigateToNextCell]="navigateToNextCell">
 </ag-grid-angular>
+</div>
+  <mat-toolbar class="tertiary-toolbar ">
+    <mat-toolbar-row class="active-resource-header download-toolbar">
+      <p>{{ rowData.length }} results </p>
+      <button  mat-icon-button (click)="exportDataAsCsv()" matTooltip="Download as CSV">
+        <mat-icon>save_alt</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+</div>

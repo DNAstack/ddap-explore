@@ -24,22 +24,21 @@ mat-drawer {
 mat-drawer-content {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
 }
 
 .search-bar {
   flex-wrap: wrap;
-  padding-bottom: 1rem;
+  padding: 1rem;
 }
 
 .search-results {
-  overflow-y: scroll;
+
 }
 
 ddap-beacon-search-result-table {
   display: flex;
   flex-grow: 1;
-  overflow-y: scroll;
+
 }
 
 .search-progress-backdrop {

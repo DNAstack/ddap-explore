@@ -112,6 +112,13 @@ export class DataTableComponent implements OnDestroy {
     this.gridApi.deselectAll();
   }
 
+  exportDataAsCsv() {
+    this.gridApi.exportDataAsCsv({
+      allColumns: true,
+    });
+  }
+
+
   private autoSizeColumns(): void {
     if (!this.gridColumnApi) {
       return;

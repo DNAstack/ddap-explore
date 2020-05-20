@@ -17,7 +17,6 @@ export class BeaconSearchResultDetailComponent implements OnChanges {
 
   @Input()
   selectedRowData: any;
-
   @Input()
   schema: JsonSchema;
 
@@ -31,6 +30,7 @@ export class BeaconSearchResultDetailComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    this.mapCoordinates = null; // Required to help change detector to detect change
     this.buildMapCoordinates()
       .subscribe((coordinates: ILatLong) => {
         this.mapCoordinates = coordinates;

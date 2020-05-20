@@ -15,45 +15,47 @@
   </div>
   <aside class="component-frame-aside">
     <ng-container *ngIf="(filterForm && dataTableModel)">
-      <form [formGroup]="filterForm">
-        <div *ngFor="let columnDef of dataTableModel.columnDefs"
-             class="flex flex--row">
-          <mat-form-field appearance="outline"
-                          floatLabel="always">
-            <mat-label>{{ columnDef.headerName }}</mat-label>
-            <input matInput
-                   [formControlName]="columnDef.field">
-            <div class="actions flex vertical-center">
-              <mat-icon *ngIf="filterForm.get(columnDef.field).value"
-                        (click)="filterForm.get(columnDef.field).reset()"
-                        matSuffix>
-                clear
-              </mat-icon>
-              <mat-icon [matMenuTriggerFor]="operationsMenu"
-                        matSuffix>
-                more_vert
-              </mat-icon>
-            </div>
-          </mat-form-field>
-          <mat-menu #operationsMenu="matMenu">
-            <button *ngFor="let operation of getOperationsByFieldName(columnDef.field)"
-                    (click)="filterForm.get(columnDef.field + fieldOpSuffix).patchValue(operation)"
-                    [class.selected]="filterForm.get(columnDef.field + fieldOpSuffix).value === operation"
-                    mat-menu-item>
-              {{ FilterOperationLabel[operation] }}
-            </button>
-          </mat-menu>
+      <form [formGroup]="filterForm" (ngSubmit)="onFilterFormSubmit()">
+        <div class="inputs-container">
+          <div *ngFor="let columnDef of dataTableModel.columnDefs"
+               class="flex flex--row">
+            <mat-form-field appearance="outline"
+                            floatLabel="always">
+              <mat-label>{{ columnDef.headerName }}</mat-label>
+              <input matInput
+                     [formControlName]="columnDef.field">
+              <div class="actions flex vertical-center">
+                <mat-icon *ngIf="filterForm.get(columnDef.field).value"
+                          (click)="filterForm.get(columnDef.field).reset()"
+                          matSuffix>
+                  clear
+                </mat-icon>
+                <mat-icon [matMenuTriggerFor]="operationsMenu"
+                          matSuffix>
+                  more_vert
+                </mat-icon>
+              </div>
+            </mat-form-field>
+            <mat-menu #operationsMenu="matMenu">
+              <button *ngFor="let operation of getOperationsByFieldName(columnDef.field)"
+                      (click)="filterForm.get(columnDef.field + fieldOpSuffix).patchValue(operation)"
+                      [class.selected]="filterForm.get(columnDef.field + fieldOpSuffix).value === operation"
+                      mat-menu-item>
+                {{ FilterOperationLabel[operation] }}
+              </button>
+            </mat-menu>
+          </div>
         </div>
+        <mat-toolbar class="tertiary-toolbar submit-toolbar">
+          <mat-toolbar-row>
+            <button type="submit"
+                    mat-flat-button
+                    color="primary">
+              Search
+            </button>
+          </mat-toolbar-row>
+        </mat-toolbar>
       </form>
-      <mat-toolbar class="tertiary-toolbar submit-container">
-        <mat-toolbar-row>
-          <button (click)="onFilterFormSubmit()"
-                  mat-flat-button
-                  color="primary">
-            Search
-          </button>
-        </mat-toolbar-row>
-      </mat-toolbar>
     </ng-container>
   </aside>
 </ddap-component-frame>

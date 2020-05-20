@@ -57,13 +57,13 @@ ddap-data-table {
 }
 
 form {
-  max-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
 
   .inputs-container {
     flex: 1;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: 1rem 16px;
   }
 

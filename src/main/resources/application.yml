@@ -222,5 +222,5 @@ resources:
               interfaceUri: https://beacon.staging.covid-19.dnastack.com/beacon/public
           collections:
             0:
-              name: Covid Resources
-              description: A collection of Public Resources for dealing with Covid
+              name: Covid Cloud
+              description: A Collection of Public Resources for Covid-19

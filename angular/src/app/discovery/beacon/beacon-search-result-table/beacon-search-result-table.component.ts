@@ -14,7 +14,7 @@ export class BeaconSearchResultTableComponent implements OnChanges {
   @Input()
   datasetAlleleResponse: BeaconQueryAlleleResponseModel;
   @Input()
-  hiddenFieldIds: string[];
+  hiddenFieldIds?: string[] = [];
 
   @Output()
   selectedRowChanged: EventEmitter<any> = new EventEmitter<any>();

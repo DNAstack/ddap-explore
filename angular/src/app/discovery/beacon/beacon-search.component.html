@@ -102,16 +102,14 @@
                     <span>{{ datasetAlleleResponse.datasetId || datasetAlleleResponse['id'] }}</span>
                   </ng-template>
                   <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
-                                                   [datasetAlleleResponse]="datasetAlleleResponse"
-                                                   [hiddenFieldIds]="[]">
+                                                   [datasetAlleleResponse]="datasetAlleleResponse">
                   </ddap-beacon-search-result-table>
                 </mat-tab>
               </mat-tab-group>
 
               <ng-template #singleDatasetResult>
                 <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
-                                                 [datasetAlleleResponse]="queryResponse.datasetAlleleResponses[0]"
-                                                 [hiddenFieldIds]="[]">
+                                                 [datasetAlleleResponse]="queryResponse.datasetAlleleResponses[0]">
                 </ddap-beacon-search-result-table>
               </ng-template>
             </ng-container>

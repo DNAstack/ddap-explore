@@ -12,7 +12,6 @@ import {
 import { AppSimpleSearchService } from '../../shared/apps/app-simple-search/app-simple-search.service';
 import { ResourceModel } from '../../shared/apps/resource.model';
 import { ResourceService } from '../../shared/apps/resource.service';
-import { DataTableEventsService } from '../../shared/data-table/data-table-events.service';
 import { DataTableModel } from '../../shared/data-table/data-table.model';
 import { TableDataTableModelParser } from '../../shared/data-table/table/table-data-table-model.parser';
 import { KeyValuePair } from '../../shared/key-value-pair.model';
@@ -29,7 +28,6 @@ import { TableModel } from '../../shared/search/table.model';
   selector: 'ddap-simple-search',
   templateUrl: './simple-search.component.html',
   styleUrls: ['./simple-search.component.scss'],
-  providers: [DataTableEventsService],
 })
 export class SimpleSearchComponent implements OnChanges {
 

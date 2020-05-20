@@ -14,7 +14,6 @@
   <mat-drawer-container [autosize]="true"
                         [hasBackdrop]="false">
     <mat-drawer #selectedRowDetailDrawer
-                [opened]="selectedRowData"
                 [mode]="'side'"
                 position="end">
       <ng-container *ngIf="selectedRowData">
@@ -22,7 +21,7 @@
           <mat-toolbar-row>
             <div>Details</div>
             <span class="fill-space"></span>
-            <button (click)="closeDetail()"
+            <button (click)="selectedRowDetailDrawer.close()"
                     matTooltip="Hide Details"
                     mat-icon-button>
               <mat-icon>close</mat-icon>
@@ -101,14 +100,14 @@
                     </mat-icon>
                     <span>{{ datasetAlleleResponse.datasetId || datasetAlleleResponse['id'] }}</span>
                   </ng-template>
-                  <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
+                  <ddap-beacon-search-result-table (selectedRowChanged)="onSelectedRowChanged($event)"
                                                    [datasetAlleleResponse]="datasetAlleleResponse">
                   </ddap-beacon-search-result-table>
                 </mat-tab>
               </mat-tab-group>
 
               <ng-template #singleDatasetResult>
-                <ddap-beacon-search-result-table (selectedRowChanged)="selectedRowData = $event"
+                <ddap-beacon-search-result-table (selectedRowChanged)="onSelectedRowChanged($event)"
                                                  [datasetAlleleResponse]="queryResponse.datasetAlleleResponses[0]">
                 </ddap-beacon-search-result-table>
               </ng-template>

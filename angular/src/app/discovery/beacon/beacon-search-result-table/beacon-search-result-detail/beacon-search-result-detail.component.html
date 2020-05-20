@@ -7,11 +7,10 @@
     <br/>
   </ng-container>
 
-  <ng-container *ngFor="let field of getFields(selectedRowData)">
-    <ddap-table-cell-data [title]="field.label"
-                          [value]="selectedRowData[field.name]"></ddap-table-cell-data>
+  <ng-container *ngFor="let field of selectedRowData | keyvalue">
+    <ddap-table-cell-data [title]="startCase(field.key)"
+                          [value]="field.value">
+    </ddap-table-cell-data>
     <br/>
-
   </ng-container>
-
 </div>

@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { ILatLong } from 'angular-maps';
 import _get from 'lodash.get';
+import _startcase from 'lodash.startcase';
 import { EMPTY, Observable } from 'rxjs';
 
 import { JsonSchema } from '../../../../shared/search/json-schema.model';
@@ -20,6 +21,7 @@ export class BeaconSearchResultDetailComponent implements OnChanges {
   @Input()
   schema: JsonSchema;
 
+  startCase: Function = _startcase;
   mapCoordinates: ILatLong;
 
   constructor(
@@ -38,17 +40,6 @@ export class BeaconSearchResultDetailComponent implements OnChanges {
       });
   }
 
-  buildNextStrainUrl(source?): string {
-    if (!source) {
-      return;
-    }
-    const tokens = source.split('/');
-    if (tokens.length < 3) {
-      return;
-    }
-    return `https://nextstrain.org/ncov?s=${tokens[1]}/${tokens[2]}/${tokens[3]}`;
-  }
-
   buildMapCoordinates(): Observable<ILatLong> {
     const location: string = _get(this.selectedRowData, 'Location');
 
@@ -56,17 +47,6 @@ export class BeaconSearchResultDetailComponent implements OnChanges {
       return EMPTY;
     }
     return this.geocodeService.geocodeAddress(location);
-  }
-
-  getFields(dataObject: object) {
-    return Object.keys(dataObject).map(fieldName => {
-      return {
-        name: fieldName,
-        label: fieldName.replace(/_/, ' ')
-          .replace(/^\s+/, '')
-          .replace(/\s+$/, ''),
-      };
-    });
   }
 
 }

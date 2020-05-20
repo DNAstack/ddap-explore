@@ -38,7 +38,7 @@ export enum FilterOperation {
 }
 
 export enum FilterOperationLabel {
-  'LIKE' = 'like',
+  'LIKE' = 'contains',
   'GT' = 'greater than',
   'GTE' = 'greater or equal to',
   'LT' = 'less than',

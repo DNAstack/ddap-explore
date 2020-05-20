@@ -6,6 +6,7 @@ input[disabled],
 ::ng-deep .dnastack .mat-input-element:disabled,
 ::ng-deep .dnastack .mat-form-field-type-mat-native-select.mat-form-field-disabled .mat-form-field-infix::after {
   color: black;
+  -webkit-text-fill-color: black;
 }
 
 ::ng-deep .mat-form-field-appearance-outline.mat-form-field-disabled .mat-form-field-label,

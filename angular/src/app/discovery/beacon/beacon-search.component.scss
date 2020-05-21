@@ -139,3 +139,11 @@ ddap-beacon-search-result-table {
     }
   }
 }
+
+
+.tertiary-toolbar {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  z-index: 25001;
+}

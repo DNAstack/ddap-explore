@@ -1,15 +1,25 @@
-<ag-grid-angular class="ag-theme-balham"
-                 (gridReady)="onGridReady($event)"
-                 (rowDataChanged)="onRowDataChanged($event)"
-                 (selectionChanged)="onSelectionChanged($event)"
-                 (cellClicked)="onSelectionChanged($event)"
-                 [columnDefs]="columnDefs"
-                 [rowData]="rowData"
-                 [defaultColDef]="defaultColumnDef"
-                 [pagination]="pagination"
-                 [rowSelection]="rowSelection"
-                 [suppressCellSelection]="defaultTableConfig.suppressCellSelection"
-                 [enableCellTextSelection]="defaultTableConfig.enableCellTextSelection"
-                 [multiSortKey]="defaultTableConfig.multiSortKey"
-                 [navigateToNextCell]="navigateToNextCell">
-</ag-grid-angular>
+<div class="data-table-section">
+  <ag-grid-angular class="ag-theme-balham"
+                   (gridReady)="onGridReady($event)"
+                   (rowDataChanged)="onRowDataChanged($event)"
+                   (selectionChanged)="onSelectionChanged($event)"
+                   (cellClicked)="onSelectionChanged($event)"
+                   [columnDefs]="columnDefs"
+                   [rowData]="rowData"
+                   [defaultColDef]="defaultColumnDef"
+                   [pagination]="pagination"
+                   [rowSelection]="rowSelection"
+                   [suppressCellSelection]="defaultTableConfig.suppressCellSelection"
+                   [enableCellTextSelection]="defaultTableConfig.enableCellTextSelection"
+                   [multiSortKey]="defaultTableConfig.multiSortKey"
+                   [navigateToNextCell]="navigateToNextCell">
+  </ag-grid-angular>
+  <mat-toolbar class="tertiary-toolbar ">
+    <mat-toolbar-row class="active-resource-header download-toolbar">
+      <p>{{ rowData.length }} results </p>
+      <button  mat-icon-button (click)="exportDataAsCsv()" matTooltip="Download as CSV">
+        <mat-icon>save_alt</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+</div>

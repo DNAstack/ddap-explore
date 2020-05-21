@@ -22,6 +22,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { AgGridModule } from 'ag-grid-angular';
@@ -76,6 +77,7 @@ import { PaginatorComponent } from './paginator/paginator.component';
     MatSelectModule,
     MatSnackBarModule,
     MatTableModule,
+    MatToolbarModule,
     MatTooltipModule,
     MatSlideToggleModule,
     MatTabsModule,

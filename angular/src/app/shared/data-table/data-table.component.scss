@@ -6,6 +6,7 @@ $ag-suppress-legacy-var-import: true;
 ag-grid-angular {
   display: flex;
   flex-grow: 1;
+  margin: 0rem 1rem 1rem;
   max-width: calc(100% - 2px);
   border: 1px solid $ag-border-color;
 
@@ -16,4 +17,16 @@ ag-grid-angular {
       border: 0;
     }
   }
+}
+
+.data-table-section {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+}
+.download-toolbar {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid $color-grey-light;
 }

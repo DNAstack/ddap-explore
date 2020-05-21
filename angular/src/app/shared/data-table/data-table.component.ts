@@ -99,6 +99,12 @@ export class DataTableComponent {
     }
   }
 
+  exportDataAsCsv() {
+    this.gridApi.exportDataAsCsv({
+      allColumns: true,
+    });
+  }
+
   private autoSizeColumns(): void {
     if (!this.gridColumnApi) {
       return;

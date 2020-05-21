@@ -16,7 +16,7 @@
   </ag-grid-angular>
   <mat-toolbar class="tertiary-toolbar download-toolbar">
     <mat-toolbar-row>
-      <p>{{ rowData.length }} results </p>
+      <div>{{ rowData.length }} results </div>
       <button  mat-icon-button (click)="exportDataAsCsv()" matTooltip="Download as CSV">
         <mat-icon>save_alt</mat-icon>
       </button>

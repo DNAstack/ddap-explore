@@ -34,9 +34,6 @@ From the `angular/` directory run `npm run build:prod` for a production build, o
 All requests to `/dam/**` are passed to the Data AccessModel Manager (DAM) component,
 with backend credentials (clientId and clientSecret) added in by the gateway.
 
-Similarly, all requests to `/identity/**` are passed to the Identity Concentrator with
-its own respective clientId and clientSecret.
-
 The gateway configuration is controlled by the following environment variables
 (default values shown):
 
@@ -44,10 +41,6 @@ The gateway configuration is controlled by the following environment variables
 DAMS_1_BASE_URL=http://localhost:3000/
 DAMS_1_CLIENT_ID=local-dev-client-id
 DAMS_1_CLIENT_SECRET=local-dev-client-secret
-
-IDP_BASE_URL=http://localhost:3000/
-IDP_CLIENT_ID=local-dev-client-id
-IDP_CLIENT_SECRET=local-dev-client-secret
 ```
 
 ### Building the API Gateway

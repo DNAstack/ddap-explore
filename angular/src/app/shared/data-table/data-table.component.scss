@@ -7,7 +7,7 @@ ag-grid-angular {
   display: flex;
   flex-grow: 1;
   height: 100%;
-  margin: 0rem 1rem 1rem;
+  margin: 1rem;
   max-width: calc(100% - 2px);
   border: 1px solid $ag-border-color;
 
@@ -27,8 +27,13 @@ ag-grid-angular {
   overflow-y: auto;
 
 }
+
 .download-toolbar {
-  display: flex;
-  justify-content: space-between;
   border-top: 1px solid $color-grey-light;
+  border-bottom: none;
+
+  mat-toolbar-row {
+    display: flex;
+    justify-content: space-between;
+  }
 }

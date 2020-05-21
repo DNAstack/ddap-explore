@@ -14,8 +14,8 @@
                    [multiSortKey]="defaultTableConfig.multiSortKey"
                    [navigateToNextCell]="navigateToNextCell">
   </ag-grid-angular>
-  <mat-toolbar class="tertiary-toolbar ">
-    <mat-toolbar-row class="active-resource-header download-toolbar">
+  <mat-toolbar class="tertiary-toolbar download-toolbar">
+    <mat-toolbar-row>
       <p>{{ rowData.length }} results </p>
       <button  mat-icon-button (click)="exportDataAsCsv()" matTooltip="Download as CSV">
         <mat-icon>save_alt</mat-icon>

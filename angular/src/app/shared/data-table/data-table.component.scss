@@ -6,6 +6,7 @@ $ag-suppress-legacy-var-import: true;
 ag-grid-angular {
   display: flex;
   flex-grow: 1;
+  height: 100%;
   margin: 0rem 1rem 1rem;
   max-width: calc(100% - 2px);
   border: 1px solid $ag-border-color;

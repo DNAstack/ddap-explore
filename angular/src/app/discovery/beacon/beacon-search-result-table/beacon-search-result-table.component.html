@@ -1,5 +1,6 @@
 <ddap-data-table (selectedRowsChanged)="changeRowSelection($event)"
                  [rowSelection]="tableRowSelection"
                  [columnDefs]="dataTableModel.columnDefs"
+                 [defaultColumnDef]="defaultColumnDef"
                  [rowData]="dataTableModel.rowData">
 </ddap-data-table>

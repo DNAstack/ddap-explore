@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Column, ColumnApi, GridApi, NavigateToNextCellParams } from 'ag-grid-community';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Column, ColumnApi, GridApi, ICellRendererParams, NavigateToNextCellParams } from 'ag-grid-community';
 
 import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } from './data-table.model';
 
@@ -8,7 +8,7 @@ import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } 
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
 })
-export class DataTableComponent {
+export class DataTableComponent implements OnChanges {
 
   @Input()
   columnDefs: ColumnDef[];
@@ -30,6 +30,8 @@ export class DataTableComponent {
   rowSelection: TableRowSelection = TableRowSelection.single;
   @Input()
   pagination = true;
+  @Input()
+  tableName?: string;
 
   @Output()
   readonly selectedRowsChanged: EventEmitter<any | any[]> = new EventEmitter<any | any[]>();
@@ -39,6 +41,11 @@ export class DataTableComponent {
 
   constructor() {
     this.navigateToNextCell = this.navigateToNextCell.bind(this);
+    this.cellRenderer = this.cellRenderer.bind(this);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.columnDefs.forEach(c => c.cellRenderer = this.cellRenderer);
   }
 
   onGridReady(params): void {
@@ -103,6 +110,22 @@ export class DataTableComponent {
     this.gridApi.exportDataAsCsv({
       allColumns: true,
     });
+  }
+
+  cellRenderer(params: ICellRendererParams): HTMLElement {
+    const container = document.createElement('span');
+    container.setAttribute('data-se', `${this.tableName || 'data-table'}-${params.colDef.field}-${params.rowIndex}`);
+
+    if (params.value) {
+      const matchResult = params.value.match('https://');
+      if (matchResult && matchResult.index === 0) {
+        container.innerHTML = `<a href="${params.value}">${params.value}</a>`;
+      } else {
+        container.innerHTML = params.value;
+      }
+    }
+
+    return container;
   }
 
   private autoSizeColumns(): void {

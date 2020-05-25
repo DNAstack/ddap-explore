@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -20,6 +20,13 @@ import { HelpDialogComponent } from './help-dialog/help-dialog.component';
   styleUrls: ['./beacon-search.component.scss'],
 })
 export class BeaconSearchComponent implements OnInit {
+
+  @Input()
+  showHeader = true;
+  @Input()
+  resourceId?: string;
+  @Input()
+  tableName?: string;
 
   @ViewChild('selectedRowDetailDrawer', { static: false })
   selectedRowDetailDrawer: MatDrawer;

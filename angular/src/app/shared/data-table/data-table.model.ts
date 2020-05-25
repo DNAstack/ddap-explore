@@ -12,6 +12,7 @@ export interface ColumnDef {
   sortable?: boolean;
   filter?: boolean;
   hide?: boolean;
+  cellRenderer?: any;
 }
 
 export interface DefaultColumnDef {

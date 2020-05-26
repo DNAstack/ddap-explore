@@ -1,6 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { ICellRendererParams } from 'ag-grid-community';
+
+const urlPattern = '(https?:\\/\\/)?([\\w\\-])+\\.{1}([a-zA-Z]{2,63})([\\/\\w-]*)*\\/?\\??([^#\\n\\r]*)?#?([^\\n\\r]*)';
 
 @Component({
   selector: 'ddap-cell-renderer',
@@ -18,7 +20,11 @@ export class CellRendererComponent implements ICellRendererAngularComp {
   }
 
   isValueURL(): boolean {
-    return this.params && this.params.value && this.params.value.indexOf('https://') === 0;
+    if (!this.params || !this.params.value) {
+      return false;
+    }
+    const matchResult = this.params.value.match(urlPattern);
+    return matchResult && matchResult.index === 0;
   }
 
   refresh(params: ICellRendererParams): boolean {

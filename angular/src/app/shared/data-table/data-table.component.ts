@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Column, ColumnApi, GridApi, ICellRendererParams, NavigateToNextCellParams } from 'ag-grid-community';
+import { Column, ColumnApi, GridApi, NavigateToNextCellParams } from 'ag-grid-community';
 
 import { CellRendererComponent } from './cell-renderer/cell-renderer.component';
 import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } from './data-table.model';

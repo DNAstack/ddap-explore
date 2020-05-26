@@ -34,13 +34,11 @@ public class ExpandedAccessibleViewItem {
         return URI.create(accessBtn.getAttribute("href"));
     }
 
-    public void assertHasAccessToken() {
-        new WebDriverWait(driver, 5)
-            .until(ExpectedConditions.visibilityOfElementLocated(DdapBy.se("access_token")));
-        WebElement accessTokenInput = driver.findElement(DdapBy.se("access_token"));
-        WebPageScroller.scrollTo(driver, accessTokenInput);
-        String accessToken = accessTokenInput.getAttribute("value");
-        assertThat(accessToken, not(isEmptyString()));
+    public void assertHasCredentials(By credentialsSelector) {
+        WebElement credentialsInput = new WebDriverWait(driver, 5)
+            .until(ExpectedConditions.visibilityOfElementLocated(credentialsSelector));
+        WebPageScroller.scrollTo(driver, credentialsInput);
+        assertThat(credentialsInput.getAttribute("value"), not(isEmptyString()));
     }
 
     public void fillFieldFromDropdown(By fieldSelector, String fieldValue) {

@@ -33,14 +33,39 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
         ddapPage = doBrowserLogin(REALM, USER_WITH_ACCESS, AnyDdapPage::new);
     }
 
+    @Data
+    public static class ResourceTestConfig {
+        private String resourceName;
+        private String viewName;
+    }
+
+    @Data
+    public static class DataExploreTestConfig implements ConfigModel {
+        private boolean enabled = true;
+        private String viewWithDownloadLink;
+        private ResourceTestConfig beacon;
+        private ResourceTestConfig s3;
+
+        @Override
+        public void validateConfig() {
+            if (enabled) {
+                assertThat(viewWithDownloadLink, Matchers.notNullValue());
+                assertThat(beacon.resourceName, Matchers.notNullValue());
+                assertThat(s3.resourceName, Matchers.notNullValue());
+                assertThat(beacon.viewName, Matchers.notNullValue());
+                assertThat(s3.viewName, Matchers.notNullValue());
+            }
+        }
+    }
+
     @Test
     public void testRequestAccessForBeaconDiscoveryExpectSuccess() throws IOException, InterruptedException {
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage detailPage = dataListPage
-            .findDataByName(testConfig.getResourceName())
+            .findDataByName(testConfig.beacon.getResourceName())
             .goToDetails();
 
-        ExpandedAccessibleViewItem discoveryView = detailPage.expandViewItem(testConfig.getDiscoveryView());
+        ExpandedAccessibleViewItem discoveryView = detailPage.expandViewItem(testConfig.beacon.getViewName());
         discoveryView.fillFieldWithFirstValueFromDropdown(DdapBy.se("inp-interfaceType"));
         URI authorizeUrl = discoveryView.requestAccess();
         detailPage = loginStrategy
@@ -51,8 +76,8 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
                after it is clicked!
          */
         Thread.sleep(2000);
-        discoveryView = detailPage.expandViewItem(testConfig.getDiscoveryView());
-        discoveryView.assertHasAccessToken();
+        discoveryView = detailPage.expandViewItem(testConfig.beacon.getViewName());
+        discoveryView.assertHasCredentials(DdapBy.se("access_token"));
     }
 
     @Test(expected = PolicyRequirementFailedException.class)
@@ -62,7 +87,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
 
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage detailPage = dataListPage
-            .findDataByName(testConfig.getResourceName())
+            .findDataByName(testConfig.beacon.getResourceName())
             .goToDetails();
 
         ExpandedAccessibleViewItem discoveryView = detailPage.expandViewItem(testConfig.getViewWithDownloadLink());
@@ -74,7 +99,7 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
     public void shouldFindWorkingDownloadLink() throws IOException {
         DataListPage dataListPage = ddapPage.getNavBar().goToData();
         DataDetailPage detailPage = dataListPage
-            .findDataByName(testConfig.getResourceName())
+            .findDataByName(testConfig.beacon.getResourceName())
             .goToDetails();
 
         ExpandedAccessibleViewItem fullFileReadView = detailPage.expandViewItem(testConfig.getViewWithDownloadLink());
@@ -93,21 +118,27 @@ public class DataExploreAccessE2eTest extends AbstractFrontendE2eTest {
             .contentType("application/zip");
     }
 
-    @Data
-    public static class DataExploreTestConfig implements ConfigModel {
-        private boolean enabled = true;
-        private String resourceName;
-        private String discoveryView;
-        private String viewWithDownloadLink;
+    @Test
+    public void testRequestAccessForAmazonS3ExpectSuccess() throws IOException, InterruptedException {
+        DataListPage dataListPage = ddapPage.getNavBar().goToData();
+        DataDetailPage detailPage = dataListPage
+            .findDataByName(testConfig.s3.getResourceName())
+            .goToDetails();
 
-        @Override
-        public void validateConfig() {
-            if (enabled) {
-                assertThat(resourceName, Matchers.notNullValue());
-                assertThat(discoveryView, Matchers.notNullValue());
-                assertThat(viewWithDownloadLink, Matchers.notNullValue());
-            }
-        }
+        ExpandedAccessibleViewItem discoveryView = detailPage.expandViewItem(testConfig.s3.getViewName());
+        discoveryView.fillFieldFromDropdown(DdapBy.se("inp-interfaceType"), "http:aws:s3");
+        URI authorizeUrl = discoveryView.requestAccess();
+        detailPage = loginStrategy
+            .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, DataDetailPage::new);
+
+        /*
+         FIXME DISCO-2743 something that loads on this page causes the expansion panel to collapse
+               after it is clicked!
+         */
+        Thread.sleep(2000);
+        discoveryView = detailPage.expandViewItem(testConfig.s3.getViewName());
+        discoveryView.assertHasCredentials(DdapBy.se("access_key_id"));
+        discoveryView.assertHasCredentials(DdapBy.se("secret"));
     }
 
 }

@@ -86,7 +86,7 @@
             <!-- Auth NOT Required -->
             <ng-container *ngIf="!queryResponse.requiresAdditionalAuth">
               <mat-tab-group *ngIf="queryResponse.datasetAlleleResponses.length > 1; else singleDatasetResult">
-                <mat-tab *ngFor="let datasetAlleleResponse of queryResponse.datasetAlleleResponses">
+                <mat-tab *ngFor="let datasetAlleleResponse of queryResponse.datasetAlleleResponses; let datasetIndex = index">
                   <ng-template mat-tab-label>
                     <mat-icon *ngIf="!datasetAlleleResponse.exists"
                               [matTooltip]="'no matching allele found'"
@@ -101,16 +101,16 @@
                   </ng-template>
                   <ddap-beacon-search-result-table (selectedRowChanged)="onSelectedRowChanged($event)"
                                                    [datasetAlleleResponse]="datasetAlleleResponse"
-                                                   [tableName]="tableName">
+                                                   [tableName]="(tableName || '') + datasetIndex">
                   </ddap-beacon-search-result-table>
                 </mat-tab>
               </mat-tab-group>
 
               <ng-template #singleDatasetResult>
-                <ddap-beacon-search-result-table (selectedRowChanged)="onSelectedRowChanged($event)"
-                                                 [datasetAlleleResponse]="queryResponse.datasetAlleleResponses[0]"
-                                                 [tableName]="tableName">
-                </ddap-beacon-search-result-table>
+                  <ddap-beacon-search-result-table (selectedRowChanged)="onSelectedRowChanged($event)"
+                                                   [datasetAlleleResponse]="queryResponse.datasetAlleleResponses[0]"
+                                                   [tableName]="tableName">
+                  </ddap-beacon-search-result-table>
               </ng-template>
             </ng-container>
 

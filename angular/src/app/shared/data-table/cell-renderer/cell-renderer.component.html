@@ -1,5 +1,5 @@
 <span [attr.data-se]="generateDataSE()">
-  <a *ngIf="isValueURL()" [href]="params.value">{{params.value}}</a>
+  <a *ngIf="isValueURL(); else nonLinkValue" [href]="params.value">{{params.value}}</a>
 
-  <ng-container *ngIf="!isValueURL()">{{params.value}}</ng-container>
+  <ng-template #nonLinkValue>{{params.value}}</ng-template>
 </span>

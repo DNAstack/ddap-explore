@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Column, ColumnApi, GridApi, ICellRendererParams, NavigateToNextCellParams } from 'ag-grid-community';
 
+import { CellRendererComponent } from './cell-renderer/cell-renderer.component';
 import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } from './data-table.model';
 
 @Component({
@@ -31,7 +32,7 @@ export class DataTableComponent implements OnChanges {
   @Input()
   pagination = true;
   @Input()
-  tableName?: string;
+  tableName = 'data-table';
 
   @Output()
   readonly selectedRowsChanged: EventEmitter<any | any[]> = new EventEmitter<any | any[]>();
@@ -41,11 +42,13 @@ export class DataTableComponent implements OnChanges {
 
   constructor() {
     this.navigateToNextCell = this.navigateToNextCell.bind(this);
-    this.cellRenderer = this.cellRenderer.bind(this);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.columnDefs.forEach(c => c.cellRenderer = this.cellRenderer);
+    this.columnDefs.forEach((colDef: ColumnDef) => {
+      colDef.cellRendererFramework = CellRendererComponent;
+      colDef.cellRendererParams = { tableName: this.tableName };
+    });
   }
 
   onGridReady(params): void {
@@ -110,22 +113,6 @@ export class DataTableComponent implements OnChanges {
     this.gridApi.exportDataAsCsv({
       allColumns: true,
     });
-  }
-
-  cellRenderer(params: ICellRendererParams): HTMLElement {
-    const container = document.createElement('span');
-    container.setAttribute('data-se', `${this.tableName || 'data-table'}-${params.colDef.field}-${params.rowIndex}`);
-
-    if (params.value) {
-      const matchResult = params.value.match('https://');
-      if (matchResult && matchResult.index === 0) {
-        container.innerHTML = `<a href="${params.value}">${params.value}</a>`;
-      } else {
-        container.innerHTML = params.value;
-      }
-    }
-
-    return container;
   }
 
   private autoSizeColumns(): void {

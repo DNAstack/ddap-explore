@@ -31,6 +31,7 @@ import { TagInputModule } from 'ngx-chips';
 import { ClipboardModule } from 'ngx-clipboard';
 
 import { AccessDeniedScreenComponent } from './access-denied-screen/access-denied-screen.component';
+import { CellRendererComponent } from './data-table/cell-renderer/cell-renderer.component';
 import { DataTableComponent } from './data-table/data-table.component';
 import { DotLoadingIndicatorComponent } from './dot-loading-indicator/dot-loading-indicator.component';
 import { LayoutComponent } from './layout/layout.component';
@@ -48,6 +49,7 @@ import { PaginatorComponent } from './paginator/paginator.component';
     MarkdownPipe,
     AccessDeniedScreenComponent,
     DataTableComponent,
+    CellRendererComponent,
     DotLoadingIndicatorComponent,
   ],
   imports: [
@@ -133,6 +135,9 @@ import { PaginatorComponent } from './paginator/paginator.component';
   ],
   providers: [
     ViewControllerService,
+  ],
+  entryComponents: [
+    CellRendererComponent,
   ],
 })
 export class SharedModule {

@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 import { BeaconQueryAlleleResponseModel } from '../../../shared/beacon/beacon-search.model';
-import { BeaconDataTableModelParser } from '../../../shared/data-table/beacon/beacon-data-table-model.parser';
 import {
   ColumnDef,
   DataTableModel,
   DefaultColumnDef,
   TableRowSelection
 } from '../../../shared/data-table/data-table.model';
+import { DataTableModelParser } from '../../../shared/data-table/table/data-table-model.parser';
 
 @Component({
   selector: 'ddap-beacon-search-result-table',
@@ -33,7 +33,7 @@ export class BeaconSearchResultTableComponent implements OnChanges {
   };
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.dataTableModel = this.setFieldVisibility(BeaconDataTableModelParser.parse(this.datasetAlleleResponse.info));
+    this.dataTableModel = this.setFieldVisibility(DataTableModelParser.parse(this.datasetAlleleResponse.info));
   }
 
   changeRowSelection(selectedRows: any[]) {

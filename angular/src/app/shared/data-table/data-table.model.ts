@@ -14,6 +14,7 @@ export interface ColumnDef {
   hide?: boolean;
   cellRendererFramework?: any;
   cellRendererParams?: any;
+  headerClass?: string;
 }
 
 export interface DefaultColumnDef {

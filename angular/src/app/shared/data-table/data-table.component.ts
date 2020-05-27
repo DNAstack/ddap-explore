@@ -55,14 +55,16 @@ export class DataTableComponent implements OnChanges {
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
 
-    this.autoSizeColumns();
+    setTimeout(() => {this.autoSizeColumns(); }, 500);
+    // this.autoSizeColumns();
   }
 
   onRowDataChanged(params): void {
     if (!this.gridColumnApi) {
       return;
     }
-    this.autoSizeColumns();
+    setTimeout(() => {this.autoSizeColumns(); }, 500);
+    // this.autoSizeColumns();
   }
 
   onSelectionChanged(params): void {

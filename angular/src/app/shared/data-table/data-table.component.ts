@@ -48,7 +48,7 @@ export class DataTableComponent implements OnChanges {
     this.columnDefs.forEach((colDef: ColumnDef) => {
       colDef.cellRendererFramework = CellRendererComponent;
       colDef.cellRendererParams = { tableName: this.tableName };
-      colDef.headerClass = `${colDef.field}_col_header`;
+      colDef.headerClass = `${this.tableName}-${colDef.field}-col-header`;
     });
   }
 

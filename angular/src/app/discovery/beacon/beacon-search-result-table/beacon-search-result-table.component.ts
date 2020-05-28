@@ -26,6 +26,7 @@ export class BeaconSearchResultTableComponent implements OnChanges {
   @Output()
   selectedRowChanged: EventEmitter<any> = new EventEmitter<any>();
 
+  clientSidePagination = false;
   dataTableModel: DataTableModel;
   tableRowSelection = TableRowSelection.single;
   defaultColumnDef: DefaultColumnDef = {

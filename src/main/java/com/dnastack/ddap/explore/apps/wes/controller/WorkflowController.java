@@ -88,7 +88,7 @@ public class WorkflowController {
                                                             @RequestParam String accessToken,
                                                             @RequestBody WorkflowExecutionRunRequestModel runRequest) {
         final Mono<Map<String, String>> resolvedByDrsUri =
-                Flux.fromStream(runRequest.getTokensJson()
+                Flux.fromStream(runRequest.getCredentials()
                                           .keySet()
                                           .stream()
                                           .filter(drsService::isDrsUri))
@@ -123,7 +123,7 @@ public class WorkflowController {
     private WorkflowExecutionRunRequestModel resolveDrsUris(WorkflowExecutionRunRequestModel original, Map<String, String> drsUriMap) {
         final WorkflowExecutionRunRequestModel transformed = new WorkflowExecutionRunRequestModel();
 
-        final Map<String, String> transformedTokensJson = original.getTokensJson()
+        final Map<String, WorkflowExecutionRunRequestModel.CredentialsModel> transformedTokensJson = original.getCredentials()
                                                                   .entrySet()
                                                                   .stream()
                                                                   .map(tokenMapping -> Map.entry(drsUriMap.getOrDefault(tokenMapping.getKey(), tokenMapping.getKey()), tokenMapping.getValue()))
@@ -135,7 +135,7 @@ public class WorkflowController {
                                                                    .map(entry -> Map.entry(entry.getKey(), transformInput(entry.getValue(), drsUriMap)))
                                                                    .collect(toMap(Entry::getKey, Entry::getValue));
 
-        transformed.setTokensJson(transformedTokensJson);
+        transformed.setCredentials(transformedTokensJson);
         transformed.setInputsJson(transformedInputJson);
         transformed.setWdl(original.getWdl());
 
@@ -171,7 +171,6 @@ public class WorkflowController {
                          .forEach(e -> {
                              copy.set(e.getKey(), e.getValue());
                          });
-
             return copy;
         } else {
             return node;

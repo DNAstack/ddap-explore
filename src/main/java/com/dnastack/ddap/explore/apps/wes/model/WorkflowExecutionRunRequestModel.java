@@ -15,7 +15,14 @@ import java.util.Map;
 public class WorkflowExecutionRunRequestModel {
 
     private String wdl;
+    private Map<String, CredentialsModel> credentials;
     private Map<String, JsonNode> inputsJson;
-    private Map<String, String> tokensJson;
+
+    @Data
+    public static class CredentialsModel {
+        private String accessKeyId;
+        private String accessToken;
+        private String sessionToken;
+    }
 
 }

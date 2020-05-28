@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { dam } from '../shared/proto/dam-service';
 
-import { WorkflowExecution } from './workflow-execution-form/workflow-execution-step/workflow-execution.model';
+import { WorkflowExecutionModel } from './workflow-execution-form/workflow-execution-step/workflow-execution.model';
 import { SimplifiedWesResourceViews, WesResourceViews, WorkflowRunsResponse } from './workflow.model';
 
 @Injectable({
@@ -38,7 +38,7 @@ export class WorkflowService {
       );
   }
 
-  public runWorkflow(damId: string, viewId: String, model: WorkflowExecution, wesAccessToken: string): Observable<any> {
+  public runWorkflow(damId: string, viewId: String, model: WorkflowExecutionModel, wesAccessToken: string): Observable<any> {
     if (!wesAccessToken) {
       throw new Error('Undefined Access Token');
     }

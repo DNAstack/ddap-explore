@@ -5,13 +5,14 @@ import { flatten } from 'ddap-common-lib';
 import _cloneDeep from 'lodash.clonedeep';
 import _get from 'lodash.get';
 
+import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
+import { KeyValuePair } from '../../../shared/key-value-pair.model';
 import { dam } from '../../../shared/proto/dam-service';
 import { ResourceService } from '../../../shared/resource/resource.service';
 import { WorkflowService } from '../../workflows.service';
 import { WorkflowsStateService } from '../workflows-state.service';
 
-import { WorkflowExecution } from './workflow-execution.model';
-import IResourceAccess = dam.v1.ResourceResults.IResourceAccess;
+import { CredentialsModel, WorkflowExecutionModel } from './workflow-execution.model';
 
 @Component({
   selector: 'ddap-workflow-execution-step',
@@ -37,7 +38,7 @@ export class WorkflowExecutionStepComponent {
               private workflowsStateService: WorkflowsStateService) {
   }
 
-  getWorkflowExecutionModels(): WorkflowExecution[] {
+  getWorkflowExecutionModels(): WorkflowExecutionModel[] {
     if (!this.selectedRows) {
       return [];  // Default value
     }
@@ -51,14 +52,13 @@ export class WorkflowExecutionStepComponent {
       });
   }
 
-  createWorkflowExecutionModel(inputs: any): WorkflowExecution {
+  createWorkflowExecutionModel(inputs: any): WorkflowExecutionModel {
     const wdl = this.form.get('wdl').value;
-    const tokens = this.getTokensModel();
 
     return {
       wdl,
+      credentials: this.getCredentialsModel(),
       inputsJson: inputs,
-      tokensJson: tokens,
     };
   }
 
@@ -75,10 +75,10 @@ export class WorkflowExecutionStepComponent {
     });
   }
 
-  private getTokensModel(): object {
-    const tokensModel = {};
+  private getCredentialsModel(): KeyValuePair<CredentialsModel> {
+    const credentialsModel: KeyValuePair<CredentialsModel> = {};
     if (!this.resourceAccesses || !this.selectedRows || !this.selectedColumns) {
-      return tokensModel;
+      return credentialsModel;
     }
 
     const columnData: string[] = this.extractColumnData(this.selectedColumns);
@@ -91,15 +91,24 @@ export class WorkflowExecutionStepComponent {
         damIdResourcePathPairs.forEach((damIdResourcePathPair) => {
           const resourcePath = damIdResourcePathPair.split(';')[1];
           const resourceAccess = this.resourceService.lookupResourceTokenFromAccessMap(this.resourceAccesses, resourcePath);
-          accessTokens.push({ file: extractedColumnData, token: resourceAccess.credentials['access_token'] });
+          accessTokens.push({
+            file: extractedColumnData,
+            accessKeyId: _get(resourceAccess, 'credentials.access_key_id'),
+            accessToken: _get(resourceAccess, 'credentials.access_token', _get(resourceAccess, 'credentials.secret')),
+            sessionToken: _get(resourceAccess, 'credentials.session_token'),
+          });
         });
       }
     });
 
     accessTokens.forEach((token)  => {
-      tokensModel[token.file] = token.token;
+      credentialsModel[token.file] = {
+        accessKeyId: token.accessKeyId,
+        accessToken: token.accessToken,
+        sessionToken: token.sessionToken,
+      };
     });
-    return tokensModel;
+    return credentialsModel;
   }
 
   private extractColumnData(columnNames: string[]): string[] {

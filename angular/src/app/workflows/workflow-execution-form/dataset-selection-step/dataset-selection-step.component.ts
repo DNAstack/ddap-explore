@@ -99,7 +99,11 @@ export class DatasetSelectionStepComponent implements OnInit {
     const fileColumns: string[] = columns.filter((column) => {
       return samples.some((sample) => {
         const value = sample[column];
-        return value && (value.startsWith('gs://') || value.startsWith('http://') || value.startsWith('https://'));
+        return value && (
+          value.startsWith('gs://')
+          || value.startsWith('s3://')
+          || value.startsWith('http://')
+          || value.startsWith('https://'));
       });
     });
     if (fileColumns.length > 0) {

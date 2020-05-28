@@ -144,8 +144,8 @@ public class WesService {
                 .header(CONTENT_DISPOSITION, "form-data; name=\"workflow_params\"; filename=\"inputs.json\"");
         builder.part("workflow_attachment", runRequest.getWdl(), MediaType.TEXT_PLAIN)
                 .header(CONTENT_DISPOSITION, "form-data; name=\"workflow_attachment\"; filename=\"workflow.wdl\"");
-        builder.part("workflow_attachment", runRequest.getTokensJson(), MediaType.APPLICATION_JSON_UTF8)
-                .header(CONTENT_DISPOSITION, "form-data; name=\"workflow_attachment\"; filename=\"tokens.json\"");
+        builder.part("workflow_attachment", runRequest.getCredentials(), MediaType.APPLICATION_JSON_UTF8)
+                .header(CONTENT_DISPOSITION, "form-data; name=\"workflow_attachment\"; filename=\"credentials.json\"");
         return builder.build();
     }
 

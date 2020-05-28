@@ -89,12 +89,12 @@ export class ResourceService {
     return this.validateResourceTokenAsOf(resourceToken, Math.floor((new Date()).getTime() / 1000));
   }
 
-  validateResourceTokenAsOf(resourceToken: IResourceAccess, referenceUnixTimestampInSecond: number): boolean {
-    if (!resourceToken || !resourceToken.credentials['access_token']) {
+  validateResourceTokenAsOf(resourceAccess: IResourceAccess, referenceUnixTimestampInSecond: number): boolean {
+    if (!resourceAccess || !_get(resourceAccess, 'credentials.access_token', _get(resourceAccess, 'credentials.secret'))) {
       return false;
     }
     try {
-      const claims = JSON.parse(atob(resourceToken.credentials['access_token'].split('.')[1]));
+      const claims = JSON.parse(atob(resourceAccess.credentials['access_token'].split('.')[1]));
       return claims.exp > referenceUnixTimestampInSecond;
     } catch (e) {
       // Returning true for non-jwt access tokens

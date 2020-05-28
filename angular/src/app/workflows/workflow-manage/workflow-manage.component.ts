@@ -22,7 +22,7 @@ import {
 import { WdlSelectionStepComponent } from '../workflow-execution-form/wdl-selection-step/wdl-selection-step.component';
 import { WesServerSelectionStepComponent } from '../workflow-execution-form/wes-server-selection-step/wes-server-selection-step.component';
 import { WorkflowExecutionStepComponent } from '../workflow-execution-form/workflow-execution-step/workflow-execution-step.component';
-import { WorkflowExecution } from '../workflow-execution-form/workflow-execution-step/workflow-execution.model';
+import { WorkflowExecutionModel } from '../workflow-execution-form/workflow-execution-step/workflow-execution.model';
 import { WorkflowFormBuilder } from '../workflow-execution-form/workflow-form-builder.service';
 import { WorkflowsStateService } from '../workflow-execution-form/workflows-state.service';
 import { WorkflowService } from '../workflows.service';
@@ -174,7 +174,7 @@ export class WorkflowManageComponent implements OnInit, OnDestroy {
     const wesAccessToken = this.resourceService
       .lookupResourceTokenFromAccessMap(this.resourceAccesses, wesResourcePath)
       .credentials['access_token'];
-    const executions: WorkflowExecution[] = this.executionStep.getWorkflowExecutionModels();
+    const executions: WorkflowExecutionModel[] = this.executionStep.getWorkflowExecutionModels();
 
     // When no rows have been selected, the execution list from the execution step will be empty. In this case, we will
     // generate the execution based on the workflow form data instead.

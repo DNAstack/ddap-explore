@@ -35,7 +35,7 @@ RUN ./mvnw -B -o package -DskipTests=true
 
 # This stage uses a pre-packaged Selenium Docker image.
 # It is assembling the runnable test container and packaging all its Maven dependencies
-FROM selenium/standalone-chrome:3.141.59-zirconium
+FROM selenium/standalone-chrome:3.141.59-xenon
 
 ARG APP_NAME
 ARG APP_VERSION
@@ -46,6 +46,7 @@ ADD target/mvnw /
 
 # include all the files assembled for us by the build-docker-e2e-image script
 USER root
+RUN apt-get update && apt-get install -y openjdk-11-jre
 #RUN mkdir -p /tmp/build
 #COPY --from=0 /build/ /tmp/build
 #RUN chown -R seluser:seluser /tmp/build \

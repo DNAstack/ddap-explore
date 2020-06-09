@@ -1,7 +1,6 @@
-import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Column, ColumnApi, GridApi, NavigateToNextCellParams } from 'ag-grid-community';
 
-import { DataTableEventsService } from './data-table-events.service';
 import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } from './data-table.model';
 
 @Component({
@@ -9,7 +8,7 @@ import { ColumnDef, DefaultColumnDef, RowData, TableConfig, TableRowSelection } 
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
 })
-export class DataTableComponent implements OnDestroy {
+export class DataTableComponent {
 
   @Input()
   columnDefs: ColumnDef[];
@@ -38,14 +37,8 @@ export class DataTableComponent implements OnDestroy {
   private gridApi: GridApi;
   private gridColumnApi: ColumnApi;
 
-  constructor(private dataTableEventsService: DataTableEventsService) {
+  constructor() {
     this.navigateToNextCell = this.navigateToNextCell.bind(this);
-    this.deselectAllRows = this.deselectAllRows.bind(this);
-    this.dataTableEventsService.deselectRowsEvents.subscribe(this.deselectAllRows);
-  }
-
-  ngOnDestroy() {
-    this.dataTableEventsService.deselectRowsEvents.unsubscribe();
   }
 
   onGridReady(params): void {
@@ -104,10 +97,6 @@ export class DataTableComponent implements OnDestroy {
       default:
         throw new Error('this will never happen');
     }
-  }
-
-  deselectAllRows(): void {
-    this.gridApi.deselectAll();
   }
 
   private autoSizeColumns(): void {

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingBarService } from '@ngx-loading-bar/core';
-import { ViewControllerService } from 'ddap-common-lib';
+import { RealmActionType, ViewControllerService } from 'ddap-common-lib';
 import { Observable } from 'rxjs';
 
 import { IdentityService } from '../../identity/identity.service';
@@ -24,11 +24,11 @@ export class LayoutComponent implements OnInit {
   realm: string;
   appConfig: AppConfigModel = null;
   FrontendFeature = FrontendFeature;
-
   userIsAuthorized: boolean = null;  // "null" means undecided or on-demand.
-
   dataAccessManagersInfo$: Observable<DamsInfo>;
   identityConcentratorInfo$: Observable<any>;
+
+  readonly RealmActionType = RealmActionType;
 
   constructor(public loader: LoadingBarService,
               public router: Router,

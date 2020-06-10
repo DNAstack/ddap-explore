@@ -10,7 +10,7 @@
   <ddaplib-main-header [siteName]="appConfig.ui.title"
     [logoUrl]="appConfig.ui.logoUrl"
     [isSandbox]="appConfig.enabledFeatures.includes(FrontendFeature.realmInput)"
-    [realmActions]="['edit']"
+                       [realmActions]="[RealmActionType.edit]"
     (realmChangeAcknowledge)="onAcknowledge($event)">
     <ddaplib-menu-apps [accessibleApps]="viewController.getAccessibleApps()"
       [realmId]="viewController.getRealmId()"

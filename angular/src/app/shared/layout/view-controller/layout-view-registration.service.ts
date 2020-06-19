@@ -23,16 +23,6 @@ export class LayoutViewRegistrationService {
         isSidebarEnabled: true,
       })
       .registerModule({
-        key: 'data-explorer',
-        name: 'Explorer',
-        iconName: 'navigation',
-        routerLink: 'data/explorer',
-        parentKey: 'data',
-        isApp: false,
-        isExperimental: true,
-        expFlag: 'demo',
-      })
-      .registerModule({
         key: 'data-collections',
         name: 'Collections',
         iconName: 'collections_bookmark',
@@ -49,33 +39,6 @@ export class LayoutViewRegistrationService {
         isApp: false,
         isExperimental: true,
         expFlag: 'saved',
-      });
-
-    this.viewController
-      .registerModule({
-        key: 'beacon',
-        name: 'Beacon',
-        iconName: 'wifi_tethering',
-        requiredFeatureFlags: [FrontendApp.beacon],
-        routerLink: 'beacon',
-        isApp: true,
-        isSidebarEnabled: true,
-      })
-      .registerModule({
-        key: 'network',
-        name: 'Network',
-        iconName: 'public',
-        routerLink: 'beacon/network',
-        parentKey: 'beacon',
-        isApp: false,
-      })
-      .registerModule({
-        key: 'search',
-        name: 'Search',
-        iconName: 'search',
-        routerLink: 'beacon/search',
-        parentKey: 'beacon',
-        isApp: false,
       });
 
     this.viewController

@@ -108,13 +108,17 @@
               </mat-tab-group>
 
               <ng-template #singleDatasetResult>
+                <ng-container *ngIf="queryResponse.datasetAlleleResponses.length > 0; else noDatasetResult">
                   <ddap-beacon-search-result-table (selectedRowChanged)="onSelectedRowChanged($event)"
                                                    [datasetAlleleResponse]="queryResponse.datasetAlleleResponses[0]"
                                                    [tableName]="tableName">
                   </ddap-beacon-search-result-table>
+                </ng-container>
               </ng-template>
             </ng-container>
-
+            <ng-template #noDatasetResult>
+              <div class="flex stretch error-placeholder">No results found</div>
+            </ng-template>
           </div>
         </div>
       </ng-container>

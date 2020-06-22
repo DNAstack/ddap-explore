@@ -97,6 +97,12 @@ export class BeaconSearchComponent implements OnInit {
         const interfaceId = this.beaconForm.beacon.resource.interfaces[0].id;
         return this.appDiscoveryService.queryBeacon(interfaceId, params)
           .pipe(
+            map(response => {
+              if (!response['datasetAlleleResponses']) {
+                response['datasetAlleleResponses'] = [];
+              }
+              return response;
+            }),
             catchError((error) => {
               this.errorHandlerService.openSnackBarWithError(error, 'error.message');
               // Returning null to tell data-table to render nothing -> cleaning up previous results

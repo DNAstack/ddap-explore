@@ -4,6 +4,8 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.PositiveOrZero;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 @Data
@@ -33,6 +35,7 @@ public class DiscoveryBeaconApiAlleleRequest {
     @PositiveOrZero
     private Long endMax;
     private DiscoveryBeaconApiIncludeDatasetResponseType includeDatasetResponses;
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     private List<String> datasetIds;
 
 }

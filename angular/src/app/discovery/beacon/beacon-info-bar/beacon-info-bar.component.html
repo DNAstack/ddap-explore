@@ -12,6 +12,7 @@
     <!-- [disabled] will trigger warning in console, but having the control set to disabled via FormControl
          won't trigger initial value change   -->
     <mat-select [disabled]="beacons.length < 2"
+                data-se="beacon"
                 formControlName="beacon">
       <mat-option *ngFor="let beacon of beacons"
                   [value]="beacon"

@@ -1,5 +1,5 @@
 <ddaplib-header>
-  <h2>Beacon</h2>
+  <h2 data-se="page-title">Beacon</h2>
   <span class="fill-space"></span>
   <div>
     <button (click)="openHelpDialog()"
@@ -85,7 +85,8 @@
 
             <!-- Auth NOT Required -->
             <ng-container *ngIf="!queryResponse.requiresAdditionalAuth">
-              <mat-tab-group *ngIf="queryResponse.datasetAlleleResponses.length > 1; else singleDatasetResult">
+              <mat-tab-group *ngIf="queryResponse.datasetAlleleResponses &&
+              queryResponse.datasetAlleleResponses.length > 1; else singleDatasetResult">
                 <mat-tab *ngFor="let datasetAlleleResponse of queryResponse.datasetAlleleResponses; let datasetIndex = index">
                   <ng-template mat-tab-label>
                     <mat-icon *ngIf="!datasetAlleleResponse.exists"

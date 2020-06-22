@@ -114,6 +114,11 @@ public class NavBar {
         driver.findElement(DdapBy.se(appSelector)).click();
     }
 
+    public DiscoveryPage goToDiscovery() {
+        goToApp("product-app-menu-discovery");
+        return new DiscoveryPage(driver);
+    }
+
     public WorkflowManagePage goToRun() {
         driver.findElement(workflowLink().getSelector()).click();
         return new WorkflowManagePage(driver);

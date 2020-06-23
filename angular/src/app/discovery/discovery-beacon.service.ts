@@ -24,7 +24,7 @@ export class DiscoveryBeaconService {
     return this.resourceService.getResources({ interface_type: 'http:beacon' })
       .pipe(
         map((resourcesResponse: ResourcesResponseModel) => resourcesResponse.data),
-        flatMap((resources: ResourceModel[]) => {
+        flatMap((resources: ResourceModel[] = []) => {
           return resources.map((resource: ResourceModel) => this.getBeaconInfoResourcePair(resource));
         }),
         combineAll()

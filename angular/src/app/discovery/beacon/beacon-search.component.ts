@@ -37,6 +37,7 @@ export class BeaconSearchComponent implements OnInit, OnDestroy {
   beaconQueryResponse$: Observable<BeaconQueryResponseModel>;
   isStandaloneMode$: Observable<boolean>;
   selectedRowData: any;
+  noRowsTemplate: string;
 
   private readonly refreshBeaconResult$ = new BehaviorSubject<BeaconQueryAlleleRequestModel>(undefined);
 
@@ -108,6 +109,9 @@ export class BeaconSearchComponent implements OnInit, OnDestroy {
         return this.appDiscoveryService.queryBeacon(interfaceId, params)
           .pipe(
             map(response => {
+              this.noRowsTemplate = response.exists
+                ? '<span>Variant found</span>'
+                : '<span>Variant not found</span>';
               if (!response['datasetAlleleResponses']) {
                 response['datasetAlleleResponses'] = [];
               }

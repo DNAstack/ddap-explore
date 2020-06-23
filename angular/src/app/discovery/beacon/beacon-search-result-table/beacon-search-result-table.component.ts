@@ -22,6 +22,8 @@ export class BeaconSearchResultTableComponent implements OnChanges {
   hiddenFieldIds?: string[] = [];
   @Input()
   tableName?: string;
+  @Input()
+  noRowsTemplate: string;
 
   @Output()
   selectedRowChanged: EventEmitter<any> = new EventEmitter<any>();

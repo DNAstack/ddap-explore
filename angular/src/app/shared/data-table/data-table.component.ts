@@ -33,6 +33,8 @@ export class DataTableComponent implements OnChanges {
   pagination = true;
   @Input()
   tableName = 'data-table';
+  @Input()
+  noRowsTemplate = `<span>No rows to show</span>`;
 
   @Output()
   readonly selectedRowsChanged: EventEmitter<any | any[]> = new EventEmitter<any | any[]>();

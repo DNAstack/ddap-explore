@@ -10,6 +10,7 @@ import {
   BeaconInterfaceType,
   BeaconQueryAlleleRequestModel,
 } from '../../../shared/beacon/beacon-search.model';
+import { BeaconQueryStateService } from '../beacon-query-state.service';
 
 import { BeaconSearchFormBuilder } from './beacon-search-form-builder.service';
 
@@ -32,7 +33,8 @@ export class BeaconSearchBarComponent implements OnChanges, OnDestroy {
   form: FormGroup;
   formValueChangesSubscription: Subscription;
 
-  constructor(private beaconSearchFormBuilder: BeaconSearchFormBuilder) {
+  constructor(private beaconSearchFormBuilder: BeaconSearchFormBuilder,
+              private beaconQueryStateService: BeaconQueryStateService) {
   }
 
   get isVirusInterface(): boolean {
@@ -44,7 +46,8 @@ export class BeaconSearchBarComponent implements OnChanges, OnDestroy {
       this.formValueChangesSubscription.unsubscribe();
     }
 
-    const sampleRequest: BeaconQueryAlleleRequestModel = _get(this.beaconInfo, 'sampleAlleleRequests[0]');
+    const beaconquery = this.beaconQueryStateService.loadQueryState();
+    const sampleRequest: BeaconQueryAlleleRequestModel = beaconquery || _get(this.beaconInfo, 'sampleAlleleRequests[0]');
     this.initForm(sampleRequest);
     this.queryChanged.emit(this.form.value);
   }

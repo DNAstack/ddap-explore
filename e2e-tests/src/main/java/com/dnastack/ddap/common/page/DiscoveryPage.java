@@ -47,6 +47,7 @@ public class DiscoveryPage extends AnyDdapPage {
     public void fillField(By fieldSelector, String fieldValue) {
         WebElement formInput = new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.elementToBeClickable(fieldSelector));
+        formInput.clear();
         formInput.sendKeys(fieldValue);
     }
 

@@ -6,6 +6,7 @@ import { debounceTime, tap } from 'rxjs/operators';
 import { BeaconDatasetModel, BeaconInfoResourcePair } from '../../../shared/apps/app-discovery/app-discovery.model';
 import { ResourceService } from '../../../shared/apps/resource.service';
 import { DiscoveryBeaconService } from '../../discovery-beacon.service';
+import { BeaconQueryStateService } from '../beacon-query-state.service';
 
 import { BeaconInfoFormBuilder } from './beacon-info-form-builder.service';
 import { BeaconInfoFormModel } from './beacon-info-form.model';
@@ -30,7 +31,8 @@ export class BeaconInfoBarComponent implements OnInit, OnDestroy {
   constructor(
     private beaconInfoFormBuilder: BeaconInfoFormBuilder,
     private resourceService: ResourceService,
-    private discoveryBeaconService: DiscoveryBeaconService
+    private discoveryBeaconService: DiscoveryBeaconService,
+    private beaconQueryStateService: BeaconQueryStateService
   ) {
   }
 
@@ -48,7 +50,7 @@ export class BeaconInfoBarComponent implements OnInit, OnDestroy {
     this.discoveryBeaconService.getBeaconInfoResourcePairs()
       .subscribe((beaconInfoResourcePairs: BeaconInfoResourcePair[]) => {
         this.beacons = beaconInfoResourcePairs;
-        this.initForm();
+        this.initForm(this.beaconQueryStateService.getValueFromQuery('beaconId'));
         this.beaconChanged.emit(this.form.value);
       });
   }
@@ -57,9 +59,8 @@ export class BeaconInfoBarComponent implements OnInit, OnDestroy {
     this.formValueChangesSubscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
-  private initForm(): void {
-    this.form = this.beaconInfoFormBuilder.buildForm(this.beacons);
-
+  private initForm(beaconId: string = ''): void {
+    this.form = this.beaconInfoFormBuilder.buildForm(beaconId, this.beacons);
     this.selectAllDatasetsOnBeaconValueChange();
     this.formValueChangesSubscriptions.push(this.form.valueChanges
       .pipe(

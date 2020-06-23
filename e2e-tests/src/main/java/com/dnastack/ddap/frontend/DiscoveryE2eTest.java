@@ -19,6 +19,7 @@ import java.net.URI;
 
 import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
 public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
@@ -64,8 +65,11 @@ public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
         driver.findElement(DdapBy.se("submit-search-btn")).click();
         // query response would give an authUrl if authorization is required
         requestAccessIfRequired();
-
-        // FIXME verify tabs with icons
+        ddapPage.waitForInflightRequests();
+        String[] datasetIds = driver.findElement(DdapBy.se("datasets")).getText().split(",");
+        assertThat("Number of tabs is equal to number of datasetIds selected",
+                driver.findElements(By.className("mat-tab-label")).size(),
+                equalTo(datasetIds.length));
 
         // FIXME deselect datasets and check results
 
@@ -77,7 +81,7 @@ public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
                 .until(ExpectedConditions.attributeContains(DdapBy.se("get-access-btn"),
                         "href", "?resource"));
         URI authorizeUrl = URI.create(accessBtn.getAttribute("href"));
-        DiscoveryPage discoveryPage = loginStrategy
+        loginStrategy
                 .authorizeForResources(driver, USER_WITH_ACCESS, REALM, authorizeUrl, DiscoveryPage::new);
     }
 

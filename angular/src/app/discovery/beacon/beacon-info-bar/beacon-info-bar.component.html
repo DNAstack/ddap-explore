@@ -28,7 +28,8 @@
          won't trigger initial value change   -->
     <mat-select [disabled]="selectedBeaconDatasets.length < 2"
                 formControlName="datasets"
-                multiple>
+                multiple
+                data-se="datasets">
       <mat-option *ngFor="let dataset of selectedBeaconDatasets"
                   [value]="dataset.id"
                   [matTooltip]="dataset.name">

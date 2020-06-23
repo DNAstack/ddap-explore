@@ -83,7 +83,8 @@ public class ReactiveDiscoveryBeaconClient {
             .queryParam("referenceName", beaconRequest.getReferenceName())
             .queryParam("start", beaconRequest.getStart())
             .queryParam("referenceBases", beaconRequest.getReferenceBases())
-            .queryParam("alternateBases", beaconRequest.getAlternateBases());
+            .queryParam("alternateBases", beaconRequest.getAlternateBases())
+            .queryParam("includeDatasetResponses", "ALL");
 
         if (beaconRequest.getDatasetIds() != null && !beaconRequest.getDatasetIds().isEmpty()) {
             beaconRequest.getDatasetIds().forEach((dataset) -> {

@@ -12,11 +12,20 @@ export class BeaconInfoFormBuilder {
   constructor(private formBuilder: FormBuilder) {
   }
 
-  buildForm(beacons?: BeaconInfoResourcePair[]): FormGroup {
-    const selectedBeaconDatasets = _get(beacons, '[0].beaconInfo.datasets', []);
+  buildForm(beaconId: string, beacons?: BeaconInfoResourcePair[]): FormGroup {
+    let selectedBeaconDatasets;
+    let selectedBeacon;
+    if (beaconId && beaconId.length) {
+      selectedBeacon = beacons.find(beacon => beacon.resource.interfaces[0].id === beaconId);
+      selectedBeaconDatasets = selectedBeacon
+                                ? selectedBeacon.beaconInfo.datasets
+                                : _get(beacons, '[0].beaconInfo.datasets', []);
+    } else {
+      selectedBeaconDatasets = _get(beacons, '[0].beaconInfo.datasets', []);
+    }
     const datasetsIds = selectedBeaconDatasets ? selectedBeaconDatasets.map((dataset) => dataset.id) : [];
     return this.formBuilder.group({
-      beacon: [_get(beacons, '[0]'), [Validators.required]],
+      beacon: [selectedBeacon || _get(beacons, '[0]'), [Validators.required]],
       datasets: [datasetsIds, []],
     });
   }

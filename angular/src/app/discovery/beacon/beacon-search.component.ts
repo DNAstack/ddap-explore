@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -12,6 +12,7 @@ import { AppDiscoveryService } from '../../shared/apps/app-discovery/app-discove
 import { BeaconQueryAlleleRequestModel, BeaconQueryResponseModel } from '../../shared/beacon/beacon-search.model';
 
 import { BeaconInfoFormModel } from './beacon-info-bar/beacon-info-form.model';
+import { BeaconQueryStateService } from './beacon-query-state.service';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 
 @Component({
@@ -19,7 +20,7 @@ import { HelpDialogComponent } from './help-dialog/help-dialog.component';
   templateUrl: './beacon-search.component.html',
   styleUrls: ['./beacon-search.component.scss'],
 })
-export class BeaconSearchComponent implements OnInit {
+export class BeaconSearchComponent implements OnInit, OnDestroy {
 
   @Input()
   showHeader = true;
@@ -46,7 +47,8 @@ export class BeaconSearchComponent implements OnInit {
     private appConfigStore: AppConfigStore,
     private appDiscoveryService: AppDiscoveryService,
     private errorHandlerService: ErrorHandlerService,
-    private helpDialog: MatDialog
+    private helpDialog: MatDialog,
+    private beaconQueryStateService: BeaconQueryStateService
   ) {
   }
 
@@ -72,6 +74,10 @@ export class BeaconSearchComponent implements OnInit {
   }
 
   submitQuery(): void {
+    this.beaconQueryStateService.saveQueryState({
+      beaconId: this.beaconForm.beacon.resource.interfaces[0].id,
+      ...this.beaconQuery,
+    });
     this.refreshBeaconResult$.next({ ...this.beaconQuery, datasetIds: this.beaconForm.datasets });
     this.resetDrawer();
   }
@@ -86,6 +92,10 @@ export class BeaconSearchComponent implements OnInit {
   onSelectedRowChanged($event: any): void {
     this.selectedRowData = $event;
     this.selectedRowDetailDrawer.open();
+  }
+
+  ngOnDestroy(): void {
+    this.beaconQueryStateService.removeQuery();
   }
 
   private setUpBeaconQueryObservable() {

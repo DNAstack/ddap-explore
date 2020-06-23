@@ -91,11 +91,13 @@
                   <ng-template mat-tab-label>
                     <mat-icon *ngIf="!datasetAlleleResponse.exists"
                               [matTooltip]="'no matching allele found'"
-                              class="icon icon-none match-failure">
+                              class="icon icon-none match-failure"
+                              data-se="matching-not-found">
                     </mat-icon>
                     <mat-icon *ngIf="datasetAlleleResponse.exists"
                               [matTooltip]="'matching allele found'"
-                              class="match-success">
+                              class="match-success"
+                              ata-se="matching-found">
                       done
                     </mat-icon>
                     <span>{{ datasetAlleleResponse.datasetId || datasetAlleleResponse['id'] }}</span>

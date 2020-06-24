@@ -16,6 +16,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 
 import static com.dnastack.ddap.common.TestingPersona.USER_WITH_ACCESS;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,7 +29,7 @@ public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
 
     @BeforeClass
     public static void oneTimeSetup() {
-        testConfig = EnvUtil.optionalEnvConfig("E2E_DISCOVERY_CONFIG",
+        testConfig = EnvUtil.optionalEnvConfig("E2E_TEST_DISCOVERY_CONFIG",
                 new DiscoveryTestConfig(),
                 DiscoveryTestConfig.class);
         Assume.assumeTrue("Discovery feature is disabled for this deployment, and will not be tested",
@@ -40,10 +41,14 @@ public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
     public void queryBeacon() {
         DiscoveryPage discoveryPage = ddapPage.getNavBar().goToDiscovery();
         ddapPage.waitForInflightRequests();
-        discoveryPage.fillFieldFromDropdown(DdapBy.se("beacon"), "Covid-19 Viral Genome");
-        discoveryPage.fillField(DdapBy.se("start-inp"), "25417");
-        discoveryPage.fillField(DdapBy.se("reference-bases-inp"), "C");
-        discoveryPage.fillField(DdapBy.se("alternate-bases-inp"), "A");
+        discoveryPage.fillFieldFromDropdown(DdapBy.se("beacon"),
+                testConfig.singleDatasetBeacon.getBeaconName());
+        discoveryPage.fillField(DdapBy.se("start-inp"),
+                testConfig.singleDatasetBeacon.getStart());
+        discoveryPage.fillField(DdapBy.se("reference-bases-inp"),
+                testConfig.singleDatasetBeacon.getReferenceBases());
+        discoveryPage.fillField(DdapBy.se("alternate-bases-inp"),
+                testConfig.singleDatasetBeacon.getAlternateBases());
         driver.findElement(DdapBy.se("submit-search-btn")).click();
         ddapPage.waitForInflightRequests();
 
@@ -55,14 +60,21 @@ public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
     @Test
     public void queryMultipleDatasets() throws IOException {
         DiscoveryPage discoveryPage = ddapPage.getNavBar().goToDiscovery();
-        discoveryPage.fillFieldFromDropdown(DdapBy.se("beacon"), "Cafe Variome Beacon");
-        discoveryPage.fillFieldFromDropdown(DdapBy.se("assembly-id-inp"), "GRCh37");
-        discoveryPage.fillField(DdapBy.se("reference-name-inp"), "1");
-        discoveryPage.fillField(DdapBy.se("start-inp"), "25417");
-        discoveryPage.fillField(DdapBy.se("reference-bases-inp"), "C");
-        discoveryPage.fillField(DdapBy.se("alternate-bases-inp"), "A");
+        discoveryPage.fillFieldFromDropdown(DdapBy.se("beacon"),
+                testConfig.multipleDatasetBeacon.getBeaconName());
+        discoveryPage.fillFieldFromDropdown(DdapBy.se("assembly-id-inp"),
+                testConfig.multipleDatasetBeacon.getAssemblyId());
+        discoveryPage.fillField(DdapBy.se("reference-name-inp"),
+                testConfig.multipleDatasetBeacon.getReferenceName());
+        discoveryPage.fillField(DdapBy.se("start-inp"),
+                testConfig.multipleDatasetBeacon.getStart());
+        discoveryPage.fillField(DdapBy.se("reference-bases-inp"),
+                testConfig.multipleDatasetBeacon.getReferenceBases());
+        discoveryPage.fillField(DdapBy.se("alternate-bases-inp"),
+                testConfig.multipleDatasetBeacon.getAlternateBases());
 
         driver.findElement(DdapBy.se("submit-search-btn")).click();
+        ddapPage.waitForInflightRequests();
         // query response would give an authUrl if authorization is required
         requestAccessIfRequired();
         ddapPage.waitForInflightRequests();
@@ -76,6 +88,8 @@ public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
     }
 
     private void requestAccessIfRequired() throws IOException {
+        // refreshing to populate beacon-search-bar correctly with assemblyId
+        driver.navigate().refresh();
         WebElement accessBtn = driver.findElement(DdapBy.se("get-access-btn"));
         new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.attributeContains(DdapBy.se("get-access-btn"),
@@ -89,9 +103,24 @@ public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
     public static class DiscoveryTestConfig implements ConfigModel {
         private boolean enabled;
 
+
+        private Beacon singleDatasetBeacon;
+        private Beacon multipleDatasetBeacon;
+
+
         @Override
         public void validateConfig() {
 
+        }
+
+        @Data
+        private class Beacon {
+            private String beaconName;
+            private String assemblyId;
+            private String referenceName;
+            private String start;
+            private String referenceBases;
+            private String alternateBases;
         }
     }
 }

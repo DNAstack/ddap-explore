@@ -106,10 +106,10 @@ public class NavBar {
     }
 
     public void goToApp(String appSelector) {
-        new WebDriverWait(driver, 5)
+        new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.elementToBeClickable(DdapBy.se("product-app-menu")));
         driver.findElement(DdapBy.se("product-app-menu")).click();
-        new WebDriverWait(driver, 5)
+        new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.elementToBeClickable(DdapBy.se(appSelector)));
         driver.findElement(DdapBy.se(appSelector)).click();
     }

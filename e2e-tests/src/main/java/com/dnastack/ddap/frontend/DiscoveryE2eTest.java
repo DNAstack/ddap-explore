@@ -60,6 +60,7 @@ public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
     @Test
     public void queryMultipleDatasets() throws IOException {
         DiscoveryPage discoveryPage = ddapPage.getNavBar().goToDiscovery();
+        ddapPage.waitForInflightRequests();
         discoveryPage.fillFieldFromDropdown(DdapBy.se("beacon"),
                 testConfig.multipleDatasetBeacon.getBeaconName());
         discoveryPage.fillFieldFromDropdown(DdapBy.se("assembly-id-inp"),
@@ -83,13 +84,13 @@ public class DiscoveryE2eTest extends AbstractFrontendE2eTest {
                 driver.findElements(By.className("mat-tab-label")).size(),
                 equalTo(datasetIds.length));
 
-        // FIXME deselect datasets and check results
+        assertThat("Variants are present for the beacon query",
+                driver.findElements(DdapBy.se("matching-found")).size(),
+                equalTo(datasetIds.length));
 
     }
 
     private void requestAccessIfRequired() throws IOException {
-        // refreshing to populate beacon-search-bar correctly with assemblyId
-        driver.navigate().refresh();
         WebElement accessBtn = driver.findElement(DdapBy.se("get-access-btn"));
         new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.attributeContains(DdapBy.se("get-access-btn"),

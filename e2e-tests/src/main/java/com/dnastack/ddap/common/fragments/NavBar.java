@@ -3,10 +3,7 @@ package com.dnastack.ddap.common.fragments;
 import com.dnastack.ddap.common.page.*;
 import com.dnastack.ddap.common.util.DdapBy;
 import lombok.Value;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -112,6 +109,8 @@ public class NavBar {
         new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.elementToBeClickable(DdapBy.se(appSelector)));
         driver.findElement(DdapBy.se(appSelector)).click();
+        new WebDriverWait(driver, 10)
+                .until(ExpectedConditions.invisibilityOfElementLocated(By.className("cdk-overlay-backdrop")));
     }
 
     public DiscoveryPage goToDiscovery() {

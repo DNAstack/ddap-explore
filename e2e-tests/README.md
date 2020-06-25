@@ -210,3 +210,12 @@ For all configuration values please see: [DamConfig](src/main/java/com/dnastack/
 E2E_LOGIN_STRATEGY=com.dnastack.ddap.common.setup.DamConfigStrategy
 E2E_DAM_CONFIG='{....}'
 ```
+
+### Troubleshooting guide
+
+1. `ElementClickInterceptedException`
+
+    - Sometimes the app menu does not get closed properly and it intercepts clicks that are performed in the selenium 
+    test. *Restarting the journey test usually works*.
+    - Otherwise, add a check to see if the overlay is not displayed anymore. [Example](https://github.com/DNAstack/ddap-explore/blob/1a1f011706eb5291418e67afe6bfd2a40fb4d082/e2e-tests/src/main/java/com/dnastack/ddap/common/fragments/NavBar.java#L112).
+

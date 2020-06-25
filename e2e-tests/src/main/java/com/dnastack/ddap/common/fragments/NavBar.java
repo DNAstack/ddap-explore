@@ -83,7 +83,8 @@ public class NavBar {
                 .until(ExpectedConditions.elementToBeClickable(DdapBy.se("product-app-menu-data")));
         driver.findElement(DdapBy.se("product-app-menu-data")).click();
         driver.findElement(dataLink().getSelector()).click();
-
+        new WebDriverWait(driver, 10)
+                .until(ExpectedConditions.invisibilityOfElementLocated(By.className("cdk-overlay-backdrop")));
         return new DataListPage(driver);
     }
 

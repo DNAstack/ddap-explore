@@ -2,6 +2,7 @@ package com.dnastack.ddap.common.fragments;
 
 import com.dnastack.ddap.common.page.*;
 import com.dnastack.ddap.common.util.DdapBy;
+import com.dnastack.ddap.common.util.WebPageScroller;
 import lombok.Value;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -76,12 +77,15 @@ public class NavBar {
     }
 
     public DataListPage goToData() {
-        new WebDriverWait(driver, 5)
+        WebElement productAppMenuBtn  = new WebDriverWait(driver, 5)
                 .until(ExpectedConditions.elementToBeClickable(DdapBy.se("product-app-menu")));
-        driver.findElement(DdapBy.se("product-app-menu")).click();
-        new WebDriverWait(driver, 5)
-                .until(ExpectedConditions.elementToBeClickable(DdapBy.se("product-app-menu-data")));
-        driver.findElement(DdapBy.se("product-app-menu-data")).click();
+        WebPageScroller.scrollTo(driver, productAppMenuBtn);
+        productAppMenuBtn.click();
+        WebElement appMenuContent = driver.findElement(By.cssSelector(".mat-menu-content"));
+        WebElement dataBtn = new WebDriverWait(driver, 5)
+                .until(ExpectedConditions.elementToBeClickable(appMenuContent.findElement(DdapBy.se("product-app-menu-data"))));
+        WebPageScroller.scrollTo(driver, dataBtn);
+        dataBtn.click();
         driver.findElement(dataLink().getSelector()).click();
         new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.invisibilityOfElementLocated(By.className("cdk-overlay-backdrop")));
@@ -104,12 +108,15 @@ public class NavBar {
     }
 
     public void goToApp(String appSelector) {
-        new WebDriverWait(driver, 10)
+        WebElement productAppMenuBtn = new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.elementToBeClickable(DdapBy.se("product-app-menu")));
-        driver.findElement(DdapBy.se("product-app-menu")).click();
-        new WebDriverWait(driver, 10)
-                .until(ExpectedConditions.elementToBeClickable(DdapBy.se(appSelector)));
-        driver.findElement(DdapBy.se(appSelector)).click();
+        WebPageScroller.scrollTo(driver, productAppMenuBtn);
+        productAppMenuBtn.click();
+        WebElement appMenuContent = driver.findElement(By.cssSelector(".mat-menu-content"));
+        WebElement appSelectorEl = new WebDriverWait(driver, 10)
+                .until(ExpectedConditions.elementToBeClickable(appMenuContent.findElement(DdapBy.se(appSelector))));
+        WebPageScroller.scrollTo(driver, appSelectorEl);
+        appSelectorEl.click();
         new WebDriverWait(driver, 10)
                 .until(ExpectedConditions.invisibilityOfElementLocated(By.className("cdk-overlay-backdrop")));
     }

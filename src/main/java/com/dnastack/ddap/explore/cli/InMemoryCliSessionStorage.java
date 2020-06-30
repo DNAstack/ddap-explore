@@ -1,5 +1,6 @@
 package com.dnastack.ddap.explore.cli;
 
+import com.dnastack.ddap.explore.resource.model.UserCredential;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,8 +25,8 @@ public class InMemoryCliSessionStorage {
     @Data
     public static class AuthorizeStatus {
         private String resource;
-        private List<HttpCookie> cartCookies;
         private Instant expiresIn;
+        private UserCredential userCredential;
     }
 
 }

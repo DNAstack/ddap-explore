@@ -65,8 +65,9 @@ public class DiscoveryController {
                 BeaconAccess beaconAccess = new BeaconAccess();
                 beaconAccess.setAccessInterface(accessInterface);
                 if (accessInterface.isAuthRequired()) {
+                    String privateKey = userCredentialService.requirePrivateKeyInCookie(httpRequest);
                     Optional<UserCredential> credential = userCredentialService
-                        .getAndDecryptCredentialsForResourceInterface(httpRequest, session, beaconId);
+                        .getAndDecryptCredentialsForResourceInterface(privateKey, session, beaconId);
                     if (!credential.isPresent()) {
                         URI authorizeUriBase = URI.create(XForwardUtil
                             .getExternalPath(httpRequest, String

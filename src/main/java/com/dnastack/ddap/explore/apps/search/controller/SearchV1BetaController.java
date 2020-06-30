@@ -270,8 +270,9 @@ public class SearchV1BetaController {
     private String getAccessTokenForInterface(ServerHttpRequest httpRequest, WebSession session, String realm, AccessInterface accessInterface) {
         String accessToken = null;
         if (accessInterface.isAuthRequired()) {
+            String privateKey = userCredentialService.requirePrivateKeyInCookie(httpRequest);
             Optional<UserCredential> userCredentialOptional = userCredentialService
-                .getAndDecryptCredentialsForResourceInterface(httpRequest, session, Id
+                .getAndDecryptCredentialsForResourceInterface(privateKey, session, Id
                     .decodeInterfaceId(accessInterface.getId()));
             if (userCredentialOptional.isEmpty()) {
                 return null;
@@ -410,8 +411,9 @@ public class SearchV1BetaController {
                         return Mono.error(new SearchAuthorizationException(connectorAccessInterface));
                     }
 
+                    String privateKey = userCredentialService.requirePrivateKeyInCookie(serverHttpRequest);
                     Optional<UserCredential> optionalCredential = userCredentialService
-                        .getAndDecryptCredentialsForResourceInterface(serverHttpRequest, webSession, Id
+                        .getAndDecryptCredentialsForResourceInterface(privateKey, webSession, Id
                             .decodeInterfaceId(connectorAccessInterface.getId()));
                     return optionalCredential.map(credential -> {
                         additionalCredentials.put(searchAuthRequest.getKey(), credential.getAccessToken());

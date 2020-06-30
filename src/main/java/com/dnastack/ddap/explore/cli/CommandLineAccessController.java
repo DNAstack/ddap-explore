@@ -4,14 +4,15 @@ import com.dnastack.ddap.common.config.DamProperties;
 import com.dnastack.ddap.common.security.PlainTextNotDecryptableException;
 import com.dnastack.ddap.common.security.UserTokenCookiePackager;
 import com.dnastack.ddap.explore.dam.client.DamClientFactory;
-import com.dnastack.ddap.explore.security.CartTokenCookieName;
+import com.dnastack.ddap.explore.resource.model.UserCredential;
+import com.dnastack.ddap.explore.resource.service.UserCredentialService;
 import dam.v1.DamService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -33,64 +34,55 @@ public class CommandLineAccessController {
     private final UserTokenCookiePackager userTokenCookiePackager;
     private final Map<String, DamProperties> dams;
     private final DamClientFactory damClientFactory;
+    private final UserCredentialService userCredentialService;
 
     @Autowired
     public CommandLineAccessController(UserTokenCookiePackager userTokenCookiePackager,
                                        Map<String, DamProperties> dams,
-                                       DamClientFactory damClientFactory) {
+                                       DamClientFactory damClientFactory,
+                                       UserCredentialService userCredentialService) {
         this.userTokenCookiePackager = userTokenCookiePackager;
         this.dams = dams;
         this.damClientFactory = damClientFactory;
+        this.userCredentialService = userCredentialService;
     }
 
     @GetMapping(path = "/callback")
     public Mono<Void> authorizeCallback(
         ServerHttpRequest request,
+        WebSession session,
         @PathVariable("realm") String realm,
         @PathVariable("cliSessionId") String cliSessionId,
-        @RequestParam("resource") String damIdResourcePair
+        @RequestParam("resource") String interfaceId
     ) {
-        List<HttpCookie> cartCookies = request.getCookies()
-            .values()
-            .stream()
-            .flatMap(Collection::stream)
-            .filter((cookie) -> cookie.getName().startsWith("cart_"))
-            .collect(Collectors.toList());
-
-        AuthorizeStatus status = new AuthorizeStatus(damIdResourcePair, cartCookies, Instant.now().plusSeconds(300));
-        InMemoryCliSessionStorage.cartCookies.putIfAbsent(cliSessionId, status);
-
+        String privateKey = userCredentialService.requirePrivateKeyInCookie(request);
+        List<UserCredential> existingCredentials = userCredentialService
+                .getAndDecryptCredentials(privateKey, session, List.of(interfaceId));
+        if(existingCredentials.size() > 0) {
+            AuthorizeStatus status = new AuthorizeStatus(interfaceId,
+                    Instant.now().plusSeconds(300),
+                    existingCredentials.get(0));
+            InMemoryCliSessionStorage.cartCookies.putIfAbsent(cliSessionId, status);
+        }
         return Mono.empty();
     }
 
     @GetMapping(path = "/status", produces = "application/json")
-    public Mono<DamService.ResourceResults> authorizeStatus(
+    public Mono<UserCredential> authorizeStatus(
         @PathVariable("realm") String realm,
         @PathVariable("cliSessionId") String cliSessionId,
-        @RequestParam("resource") String damIdResourcePair
+        @RequestParam("resource") String interfaceId
     ) throws PlainTextNotDecryptableException {
         if (!InMemoryCliSessionStorage.cartCookies.containsKey(cliSessionId)) {
             return Mono.empty();
         }
 
         AuthorizeStatus status = InMemoryCliSessionStorage.cartCookies.get(cliSessionId);
-        if (!status.getResource().equals(damIdResourcePair)) {
+        if (!status.getResource().equals(interfaceId)) {
             return Mono.empty();
         }
 
-        URI resource = getResourceFrom(realm, damIdResourcePair);
-        CartTokenCookieName cartCookieName = new CartTokenCookieName(Set.of(resource));
-        Optional<HttpCookie> cartCookie = status.getCartCookies()
-            .stream()
-            .filter((cookie) -> cookie.getName().equals(cartCookieName.cookieName()))
-            .findFirst();
-        if (cartCookie.isEmpty()) {
-            return Mono.error(CartTokenNotFoundInStorageException::new);
-        }
-
-        String damId = damIdResourcePair.split(";")[0];
-        String plainTextCartCookie = userTokenCookiePackager.decodeToken(cartCookie.get().getValue());
-        return damClientFactory.getDamClient(damId).checkoutCart(plainTextCartCookie);
+        return Mono.just(status.getUserCredential());
     }
 
     /**

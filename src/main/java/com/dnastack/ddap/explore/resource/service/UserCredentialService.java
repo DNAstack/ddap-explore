@@ -46,9 +46,9 @@ public class UserCredentialService {
         return userIdentifier;
     }
 
-    public Optional<UserCredential> getAndDecryptCredentialsForResourceInterface(ServerHttpRequest request, WebSession session, InterfaceId resourceId) {
+    public Optional<UserCredential> getAndDecryptCredentialsForResourceInterface(String privateKey, WebSession session, InterfaceId resourceId) {
         return getCredentialsForResourceInterface(session, resourceId)
-            .map(userCredential -> decryptCredentials(request, userCredential));
+            .map(userCredential -> decryptCredentials(privateKey, userCredential));
     }
 
     public Optional<UserCredential> getCredentialsForResourceInterface(WebSession session, InterfaceId resourceId) {
@@ -61,23 +61,22 @@ public class UserCredentialService {
             .getCredentialsForResources(getUserIdentifier(session), interfaceIds));
     }
 
-    public List<UserCredential> getAndDecryptCredentials(ServerHttpRequest request, WebSession session, List<String> interfaceIds) {
+    public List<UserCredential> getAndDecryptCredentials(String privateKey, WebSession session, List<String> interfaceIds) {
         return jdbi.withExtension(UserCredentialDao.class, dao -> dao
             .getCredentialsForResources(getUserIdentifier(session), interfaceIds))
-            .stream().map(userCredential -> decryptCredentials(request, userCredential))
+            .stream().map(userCredential -> decryptCredentials(privateKey, userCredential))
             .collect(Collectors.toList());
     }
 
 
-    private UserCredential decryptCredentials(ServerHttpRequest request, UserCredential userCredential) {
-        String privateKey = requirePrivateKeyInCookie(request);
+    private UserCredential decryptCredentials(String privateKey, UserCredential userCredential) {
         String decryptedCredentials = SessionEncryptionUtils
             .decryptData(privateKey, userCredential.getEncryptedCredentials());
         userCredential.setCredentials(parseCredentialString(decryptedCredentials));
         return userCredential;
     }
 
-    private String requirePrivateKeyInCookie(ServerHttpRequest request) {
+    public String requirePrivateKeyInCookie(ServerHttpRequest request) {
         HttpCookie privateKey = request.getCookies().getFirst(SessionEncryptionUtils.COOKIE_NAME);
         if (privateKey == null || privateKey.getValue() == null) {
             throw new IllegalArgumentException(

@@ -50,8 +50,9 @@ public class ExploreAppController {
         return Mono.defer(() -> {
             final Duration enforceTtl = parseDuration(minimumTtl);
             final ExploreTokenResponse tokenResponse = new ExploreTokenResponse();
+            String privateKey = userCredentialService.requirePrivateKeyInCookie(httpRequest);
             List<UserCredential> existingCredentials = userCredentialService
-                .getAndDecryptCredentials(httpRequest, session, interfaceIds);
+                .getAndDecryptCredentials(privateKey, session, interfaceIds);
             List<String> potentiallyReauthenticate = new ArrayList<>();
             interfaceIds.forEach(id -> {
                 Optional<UserCredential> existingOpt = existingCredentials.stream()

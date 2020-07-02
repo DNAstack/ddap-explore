@@ -24,7 +24,7 @@
         <protoc.version>3.7.0.2</protoc.version>
         <protobuf.version>3.7.1</protobuf.version>
         <jwt.version>0.10.5</jwt.version>
-        <ddap-cli.version>1.0-26-g036784b</ddap-cli.version>
+        <ddap-cli.version>1.0-27-g290144d</ddap-cli.version>
         <ddap-common.version>0.0.1-41-g051d0ee</ddap-common.version>
         <jdbi.version>3.12.1</jdbi.version>
         <version.nimbus>8.6</version.nimbus>

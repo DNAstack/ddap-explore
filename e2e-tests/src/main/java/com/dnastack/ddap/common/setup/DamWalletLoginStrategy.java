@@ -158,8 +158,8 @@ public class DamWalletLoginStrategy implements LoginStrategy {
     }
 
     private URI walletLogin(HttpClient httpClient, LoginInfo loginInfo) throws IOException {
-        final HttpGet request = new HttpGet(format("%s/login/token?token=%s", walletConfig.getWalletUrl(), loginInfo
-            .getPersonalAccessToken()));
+        final HttpGet request = new HttpGet(format("%s/login/token?token=%s&email=%s", walletConfig.getWalletUrl(), loginInfo
+            .getPersonalAccessToken(), loginInfo.getEmail()));
 
         final HttpClientContext context = new HttpClientContext();
         final HttpResponse response = httpClient.execute(request, context);

@@ -42,7 +42,7 @@
     "dayjs": "^1.8.16",
     "ddap-common-lib": "0.0.19-95-gf611a67",
     "hammerjs": "^2.0.8",
-    "highlight.js": "^9.15.10",
+    "highlight.js": "^10.1.2",
     "jsoneditor": "^7.5.0",
     "linkifyjs": "latest",
     "lodash.clonedeep": "^4.5.0",
